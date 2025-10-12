@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-900 text-white;
+  }
+}
+
+@layer components {
+  .dartboard-button {
+    @apply bg-dartboard-red hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full transition-colors duration-200;
+  }
+  
+  .dartboard-button:disabled {
+    @apply bg-gray-600 cursor-not-allowed;
+  }
+  
+  .score-input {
+    @apply bg-gray-800 border-2 border-gray-600 rounded-lg px-4 py-3 text-center text-2xl font-bold text-white focus:border-dartboard-red focus:outline-none transition-colors duration-200;
+  }
+  
+  .score-input.invalid {
+    @apply border-red-500 bg-red-900/20;
+  }
+  
+  .player-card {
+    @apply bg-gray-800 rounded-xl p-3 border-2 transition-all duration-300;
+  }
+  
+  .player-card.active {
+    @apply border-dartboard-red shadow-lg shadow-red-500/20;
+  }
+  
+  .player-card.inactive {
+    @apply border-gray-600;
+  }
+}
