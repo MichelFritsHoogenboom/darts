@@ -15,18 +15,22 @@
         </div>
         <div class="grid grid-cols-2 gap-4 text-sm">
           <div class="bg-gray-700 rounded-lg p-2">
-            <div class="font-bold text-dartboard-red">{{ player1.name }}</div>
-            <div v-if="props.matchConfig.type === 'sets'">
-              Sets: {{ player1.setsWon }}/{{ props.matchConfig.setsToWin }}
+            <div class="font-bold text-dartboard-red">
+              {{ currentLegState.player1.name }}
             </div>
-            <div>Legs: {{ player1.legsWon }}</div>
+            <div v-if="props.matchConfig.type === 'sets'">
+              Sets: {{ player1SetsWon }}/{{ props.matchConfig.setsToWin }}
+            </div>
+            <div>Current Set Legs: {{ currentSet.legsWon.player1 }}</div>
           </div>
           <div class="bg-gray-700 rounded-lg p-2">
-            <div class="font-bold text-dartboard-red">{{ player2.name }}</div>
-            <div v-if="props.matchConfig.type === 'sets'">
-              Sets: {{ player2.setsWon }}/{{ props.matchConfig.setsToWin }}
+            <div class="font-bold text-dartboard-red">
+              {{ currentLegState.player2.name }}
             </div>
-            <div>Legs: {{ player2.legsWon }}</div>
+            <div v-if="props.matchConfig.type === 'sets'">
+              Sets: {{ player2SetsWon }}/{{ props.matchConfig.setsToWin }}
+            </div>
+            <div>Current Set Legs: {{ currentSet.legsWon.player2 }}</div>
           </div>
         </div>
       </div>
@@ -37,9 +41,11 @@
           :class="['player-card', currentPlayer === 1 ? 'active' : 'inactive']"
         >
           <div class="text-center">
-            <h3 class="text-xl font-bold mb-1">{{ player1.name }}</h3>
+            <h3 class="text-xl font-bold mb-1">
+              {{ currentLegState.player1.name }}
+            </h3>
             <div class="text-4xl font-bold text-dartboard-red mb-2">
-              {{ player1.score }}
+              {{ currentLegState.player1.score }}
             </div>
             <div class="text-xs text-gray-400">
               Current Turn: {{ currentPlayer === 1 ? "Yes" : "No" }}
@@ -51,9 +57,11 @@
           :class="['player-card', currentPlayer === 2 ? 'active' : 'inactive']"
         >
           <div class="text-center">
-            <h3 class="text-xl font-bold mb-1">{{ player2.name }}</h3>
+            <h3 class="text-xl font-bold mb-1">
+              {{ currentLegState.player2.name }}
+            </h3>
             <div class="text-4xl font-bold text-dartboard-red mb-2">
-              {{ player2.score }}
+              {{ currentLegState.player2.score }}
             </div>
             <div class="text-xs text-gray-400">
               Current Turn: {{ currentPlayer === 2 ? "Yes" : "No" }}
@@ -65,7 +73,11 @@
       <!-- Score Input -->
       <div class="bg-gray-800 rounded-xl p-4">
         <h3 class="text-xl font-bold text-center mb-3">
-          {{ currentPlayer === 1 ? player1.name : player2.name }}'s Turn
+          {{
+            currentPlayer === 1
+              ? currentLegState.player1.name
+              : currentLegState.player2.name
+          }}'s Turn
         </h3>
         <div class="max-w-md mx-auto">
           <input
@@ -137,38 +149,25 @@
       </div>
 
       <!-- Checkout Suggestions -->
-      <div
-        v-if="checkoutStatus.isCheckout && !gameOver"
-        class="bg-gradient-to-r from-green-900 to-green-800 rounded-xl p-3 border-2 border-green-600"
-      >
-        <h3 class="text-lg font-bold text-center mb-2 text-green-100">
-          🎯 Checkout for
-          {{ currentPlayer === 1 ? player1.name : player2.name }} ({{
-            currentPlayerScore
-          }})
-        </h3>
-        <div class="grid grid-cols-3 gap-2">
-          <div
-            v-for="(suggestion, index) in checkoutStatus.suggestions"
-            :key="index"
-            class="bg-green-700 rounded-lg px-2 py-2 text-center"
-          >
-            <span class="text-green-100 font-mono text-sm">{{
-              suggestion
-            }}</span>
-          </div>
-        </div>
-      </div>
+      <CheckoutSuggestions
+        v-if="!gameOver"
+        :player-name="
+          currentPlayer === 1
+            ? currentLegState.player1.name
+            : currentLegState.player2.name
+        "
+        :score="currentPlayerScore"
+      />
 
       <!-- Score History -->
       <div class="grid md:grid-cols-2 gap-4">
         <div class="bg-gray-800 rounded-xl p-3">
           <h4 class="text-lg font-bold mb-2 text-center">
-            {{ player1.name }}'s Scores
+            {{ currentLegState.player1.name }}'s Scores
           </h4>
           <div class="space-y-1 max-h-32 overflow-y-auto">
             <div
-              v-for="(score, index) in player1.scores"
+              v-for="(score, index) in currentLegState.player1.scores"
               :key="`p1-${index}`"
               class="flex justify-between items-center bg-gray-700 rounded px-2 py-1"
             >
@@ -176,7 +175,7 @@
               <span class="font-bold text-sm">{{ score }}</span>
             </div>
             <div
-              v-if="player1.scores.length === 0"
+              v-if="currentLegState.player1.scores.length === 0"
               class="text-center text-gray-500 py-2 text-sm"
             >
               No scores yet
@@ -186,11 +185,11 @@
 
         <div class="bg-gray-800 rounded-xl p-3">
           <h4 class="text-lg font-bold mb-2 text-center">
-            {{ player2.name }}'s Scores
+            {{ currentLegState.player2.name }}'s Scores
           </h4>
           <div class="space-y-1 max-h-32 overflow-y-auto">
             <div
-              v-for="(score, index) in player2.scores"
+              v-for="(score, index) in currentLegState.player2.scores"
               :key="`p2-${index}`"
               class="flex justify-between items-center bg-gray-700 rounded px-2 py-1"
             >
@@ -198,7 +197,7 @@
               <span class="font-bold text-sm">{{ score }}</span>
             </div>
             <div
-              v-if="player2.scores.length === 0"
+              v-if="currentLegState.player2.scores.length === 0"
               class="text-center text-gray-500 py-2 text-sm"
             >
               No scores yet
@@ -226,21 +225,37 @@
             <div class="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <div class="font-bold text-dartboard-red">
-                  {{ player1.name }}
+                  {{ currentLegState.player1.name }}
                 </div>
                 <div v-if="props.matchConfig.type === 'sets'">
-                  Sets: {{ player1.setsWon }}/{{ props.matchConfig.setsToWin }}
+                  Sets: {{ player1SetsWon }}/{{ props.matchConfig.setsToWin }}
                 </div>
-                <div>Legs: {{ player1.legsWon }}</div>
+                <div>
+                  Total Legs Won:
+                  {{
+                    match.sets.reduce(
+                      (total, set) => total + set.legsWon.player1,
+                      0
+                    )
+                  }}
+                </div>
               </div>
               <div>
                 <div class="font-bold text-dartboard-red">
-                  {{ player2.name }}
+                  {{ currentLegState.player2.name }}
                 </div>
                 <div v-if="props.matchConfig.type === 'sets'">
-                  Sets: {{ player2.setsWon }}/{{ props.matchConfig.setsToWin }}
+                  Sets: {{ player2SetsWon }}/{{ props.matchConfig.setsToWin }}
                 </div>
-                <div>Legs: {{ player2.legsWon }}</div>
+                <div>
+                  Total Legs Won:
+                  {{
+                    match.sets.reduce(
+                      (total, set) => total + set.legsWon.player2,
+                      0
+                    )
+                  }}
+                </div>
               </div>
             </div>
           </div>
@@ -254,7 +269,13 @@
 
 <script setup>
 import { ref, computed, nextTick, watch, onMounted } from "vue";
-import { isAchievableScore, getCheckoutStatus } from "~/utils/dartScoring.js";
+import { isAchievableScore } from "~/utils/dartScoring.js";
+import {
+  getLegsNeededToWinSet,
+  hasWonSet,
+  hasWonMatch,
+} from "~/utils/matchLogic.js";
+import CheckoutSuggestions from "~/components/CheckoutSuggestions.vue";
 
 // Props
 const props = defineProps({
@@ -294,23 +315,33 @@ const matchOver = ref(false);
 const legStartPlayer = ref(1); // Who starts each leg
 const legWinNotification = ref("");
 
-// Players
-const player1 = ref({
-  name: props.player1Name,
-  score: 501,
-  scores: [],
-  setsWon: 0,
-  legsWon: 0,
-  currentSetLegs: 0,
+// Match data structure
+const match = ref({
+  sets: [
+    {
+      setNumber: 1,
+      legs: [],
+      legsWon: { player1: 0, player2: 0 },
+      setWinner: null,
+    },
+  ],
+  currentSet: 1,
+  currentLeg: 1,
+  legStartPlayer: 1,
 });
 
-const player2 = ref({
-  name: props.player2Name,
-  score: 501,
-  scores: [],
-  setsWon: 0,
-  legsWon: 0,
-  currentSetLegs: 0,
+// Current leg state
+const currentLegState = ref({
+  player1: {
+    name: props.player1Name,
+    score: 501,
+    scores: [],
+  },
+  player2: {
+    name: props.player2Name,
+    score: 501,
+    scores: [],
+  },
 });
 
 // Game history for undo functionality
@@ -328,11 +359,25 @@ const isValidScore = computed(() => {
 });
 
 const currentPlayerScore = computed(() => {
-  return currentPlayer.value === 1 ? player1.value.score : player2.value.score;
+  return currentPlayer.value === 1
+    ? currentLegState.value.player1.score
+    : currentLegState.value.player2.score;
 });
 
-const checkoutStatus = computed(() => {
-  return getCheckoutStatus(currentPlayerScore.value);
+// Get current set
+const currentSet = computed(() => {
+  return match.value.sets.find(
+    (set) => set.setNumber === match.value.currentSet
+  );
+});
+
+// Get total sets won by each player
+const player1SetsWon = computed(() => {
+  return match.value.sets.filter((set) => set.setWinner === "player1").length;
+});
+
+const player2SetsWon = computed(() => {
+  return match.value.sets.filter((set) => set.setWinner === "player2").length;
 });
 
 const canUndo = computed(() => {
@@ -342,14 +387,14 @@ const canUndo = computed(() => {
 const winner = computed(() => {
   if (matchOver.value) {
     if (props.matchConfig.type === "sets") {
-      return player1.value.setsWon >= props.matchConfig.setsToWin
-        ? player1.value
-        : player2.value;
+      return player1SetsWon.value >= props.matchConfig.setsToWin
+        ? currentLegState.value.player1
+        : currentLegState.value.player2;
     } else {
       const legsNeeded = Math.ceil(props.matchConfig.numberOfLegs / 2);
-      return player1.value.legsWon >= legsNeeded
-        ? player1.value
-        : player2.value;
+      return player1SetsWon.value >= legsNeeded
+        ? currentLegState.value.player1
+        : currentLegState.value.player2;
     }
   }
   return null;
@@ -363,30 +408,35 @@ const initializeGame = () => {
   matchOver.value = false;
   scoreValidationMessage.value = "";
   gameHistory.value = [];
-
-  // Reset match state
-  currentSet.value = 1;
-  currentLeg.value = 1;
-  legStartPlayer.value = 1; // Player 1 always starts the first leg
   legWinNotification.value = "";
 
-  // Reset player data
-  player1.value = {
-    name: props.player1Name,
-    score: 501,
-    scores: [],
-    setsWon: 0,
-    legsWon: 0,
-    currentSetLegs: 0,
+  // Reset match data structure
+  match.value = {
+    sets: [
+      {
+        setNumber: 1,
+        legs: [],
+        legsWon: { player1: 0, player2: 0 },
+        setWinner: null,
+      },
+    ],
+    currentSet: 1,
+    currentLeg: 1,
+    legStartPlayer: 1,
   };
 
-  player2.value = {
-    name: props.player2Name,
-    score: 501,
-    scores: [],
-    setsWon: 0,
-    legsWon: 0,
-    currentSetLegs: 0,
+  // Reset current leg state
+  currentLegState.value = {
+    player1: {
+      name: props.player1Name,
+      score: 501,
+      scores: [],
+    },
+    player2: {
+      name: props.player2Name,
+      score: 501,
+      scores: [],
+    },
   };
 
   // Focus on score input
@@ -399,7 +449,10 @@ const submitScore = () => {
   if (!isValidScore.value) return;
 
   const score = parseInt(currentScore.value);
-  const player = currentPlayer.value === 1 ? player1.value : player2.value;
+  const player =
+    currentPlayer.value === 1
+      ? currentLegState.value.player1
+      : currentLegState.value.player2;
 
   // Check if score would go below 0
   if (player.score - score < 0) {
@@ -526,54 +579,82 @@ const undoLastTurn = () => {
 };
 
 const handleLegWin = () => {
-  const winner = currentPlayer.value === 1 ? player1.value : player2.value;
-  const loser = currentPlayer.value === 1 ? player2.value : player1.value;
+  const winnerPlayer = currentPlayer.value === 1 ? "player1" : "player2";
+  const winnerName =
+    currentPlayer.value === 1
+      ? currentLegState.value.player1.name
+      : currentLegState.value.player2.name;
 
   // Show leg win notification
-  legWinNotification.value = `${winner.name} wins the leg!`;
+  legWinNotification.value = `${winnerName} wins the leg!`;
 
-  // Award the leg to the winner
-  winner.legsWon++;
-  winner.currentSetLegs++;
+  // Add leg to current set
+  const currentSetData = currentSet.value;
+  currentSetData.legs.push({
+    legNumber: match.value.currentLeg,
+    winner: winnerPlayer,
+    scores: {
+      player1: [...currentLegState.value.player1.scores],
+      player2: [...currentLegState.value.player2.scores],
+    },
+  });
+
+  // Update legs won in current set
+  currentSetData.legsWon[winnerPlayer]++;
 
   // Check if this completes a set (for sets matches)
   if (props.matchConfig.type === "sets") {
-    const legsNeeded = Math.ceil(props.matchConfig.legsPerSet / 2);
+    const legsNeeded = getLegsNeededToWinSet(
+      props.matchConfig.winCondition,
+      props.matchConfig.legsPerSet
+    );
 
-    if (winner.currentSetLegs >= legsNeeded) {
+    if (currentSetData.legsWon[winnerPlayer] >= legsNeeded) {
       // Winner wins the set
-      winner.setsWon++;
-      winner.currentSetLegs = 0;
-      loser.currentSetLegs = 0;
+      currentSetData.setWinner = winnerPlayer;
 
       // Check if match is over
-      if (winner.setsWon >= props.matchConfig.setsToWin) {
+      const totalSetsWon = match.value.sets.filter(
+        (set) => set.setWinner === winnerPlayer
+      ).length;
+      if (totalSetsWon >= props.matchConfig.setsToWin) {
         matchOver.value = true;
         gameOver.value = true;
         return;
       }
 
-      // Start new set - alternate who starts each set
-      currentSet.value++;
-      currentLeg.value = 1;
-      legStartPlayer.value = legStartPlayer.value === 1 ? 2 : 1;
+      // Start new set
+      match.value.currentSet++;
+      match.value.currentLeg = 1;
+      match.value.legStartPlayer = match.value.legStartPlayer === 1 ? 2 : 1;
+
+      // Add new set
+      match.value.sets.push({
+        setNumber: match.value.currentSet,
+        legs: [],
+        legsWon: { player1: 0, player2: 0 },
+        setWinner: null,
+      });
     } else {
       // Continue current set
-      currentLeg.value++;
-      // Alternate who starts each leg within a set
-      legStartPlayer.value = legStartPlayer.value === 1 ? 2 : 1;
+      match.value.currentLeg++;
+      match.value.legStartPlayer = match.value.legStartPlayer === 1 ? 2 : 1;
     }
   } else {
     // Legs match - check if match is over
-    if (winner.legsWon >= Math.ceil(props.matchConfig.numberOfLegs / 2)) {
+    const totalLegsWon = match.value.sets.reduce(
+      (total, set) => total + set.legsWon[winnerPlayer],
+      0
+    );
+    if (totalLegsWon >= Math.ceil(props.matchConfig.numberOfLegs / 2)) {
       matchOver.value = true;
       gameOver.value = true;
       return;
     }
 
-    // Continue to next leg - alternate who starts
-    currentLeg.value++;
-    legStartPlayer.value = legStartPlayer.value === 1 ? 2 : 1;
+    // Continue to next leg
+    match.value.currentLeg++;
+    match.value.legStartPlayer = match.value.legStartPlayer === 1 ? 2 : 1;
   }
 
   // Clear notification after 3 seconds
@@ -586,11 +667,11 @@ const handleLegWin = () => {
 };
 
 const resetLegScores = () => {
-  player1.value.score = 501;
-  player1.value.scores = [];
-  player2.value.score = 501;
-  player2.value.scores = [];
-  currentPlayer.value = legStartPlayer.value; // Start with the correct player
+  currentLegState.value.player1.score = 501;
+  currentLegState.value.player1.scores = [];
+  currentLegState.value.player2.score = 501;
+  currentLegState.value.player2.scores = [];
+  currentPlayer.value = match.value.legStartPlayer; // Start with the correct player
   currentScore.value = "";
   scoreValidationMessage.value = "";
 

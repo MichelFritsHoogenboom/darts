@@ -34,6 +34,7 @@ const player2Name = ref(route.query.player2 || "Player 2");
 // Match configuration
 const matchConfig = ref({
   type: route.query.type || "legs",
+  winCondition: route.query.winCondition || "best-of",
   legsPerSet: parseInt(route.query.legsPerSet) || 3,
   setsToWin: parseInt(route.query.setsToWin) || 2,
   numberOfLegs: parseInt(route.query.numberOfLegs) || 5,

@@ -77,7 +77,19 @@
             <div v-if="matchType === 'sets'" class="space-y-4">
               <div>
                 <label class="block text-sm font-medium text-gray-300 mb-2">
-                  Legs per Set (max 5)
+                  Win Condition
+                </label>
+                <select
+                  v-model="winCondition"
+                  class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-dartboard-red focus:outline-none"
+                >
+                  <option value="best-of">Best of X legs</option>
+                  <option value="first-to">First to X legs</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">
+                  Legs per Set (max 7)
                 </label>
                 <select
                   v-model="legsPerSet"
@@ -88,6 +100,8 @@
                   <option value="3">3 legs</option>
                   <option value="4">4 legs</option>
                   <option value="5">5 legs</option>
+                  <option value="6">6 legs</option>
+                  <option value="7">7 legs</option>
                 </select>
               </div>
               <div>
@@ -180,6 +194,7 @@ const player1Input = ref(null);
 
 // Match configuration
 const matchType = ref("sets");
+const winCondition = ref("best-of");
 const legsPerSet = ref(3);
 const setsToWin = ref(2);
 const numberOfLegs = ref(5);
@@ -202,6 +217,7 @@ const startGame = () => {
     type: matchType.value,
     ...(matchType.value === "sets"
       ? {
+          winCondition: winCondition.value,
           legsPerSet: String(legsPerSet.value),
           setsToWin: String(setsToWin.value),
         }
