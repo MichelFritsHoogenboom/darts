@@ -1,21 +1,43 @@
 import type { Stats } from "./stats";
+import { v4 as uuid } from "uuid";
 
 export interface Player {
-  id: number;
+  id: string;
   createdAt: Date;
   updatedAt: Date;
   firstName: string;
-  lastName: string;
-  city: string;
-  country: string;
-  birthDate: Date;
-  typeOfDarts: string;
-  dartsWeightInGrams: number;
-  flightColor: string;
-  allTimeStats: Stats;
+  lastName?: string;
+  alias?: string;
+  avatar?: Blob;
+  city?: string;
+  country?: string;
+  birthDate?: Date;
+  typeOfDarts?: string;
+  dartsWeightInGrams?: number;
+  flightColor?: string;
+  allTimeStats?: Stats;
 }
 
 export interface PlayerStats {
-  id: number;
+  id: string;
   stats: Stats;
+}
+
+export function createPlayer(overrides: Partial<Player> = {}): Player {
+  return {
+    id: uuid(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    firstName: "",
+    lastName: "",
+    alias: "",
+    city: "",
+    country: "",
+    birthDate: undefined,
+    typeOfDarts: "",
+    dartsWeightInGrams: undefined,
+    flightColor: "",
+
+    ...overrides,
+  };
 }

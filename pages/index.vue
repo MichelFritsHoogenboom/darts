@@ -4,16 +4,14 @@
   >
     <div class="container mx-auto px-4 py-8">
       <header class="text-center mb-8">
-        <h1 class="text-5xl font-bold text-white mb-2">🎯 Darts Game</h1>
-        <p class="text-xl text-gray-300">501 - First to Zero Wins!</p>
+        <h1 class="text-5xl font-bold text-white mb-2">ADL Darts Game</h1>
       </header>
 
       <div class="max-w-md mx-auto">
         <div class="bg-gray-800 rounded-xl p-8 text-center">
           <h2 class="text-2xl font-bold mb-6">Welcome to Darts!</h2>
           <p class="text-gray-300 mb-8">
-            Set up your players and start a game of 501 darts. First player to
-            reach exactly zero wins!
+            Set up your players and start a game of darts.
           </p>
 
           <button

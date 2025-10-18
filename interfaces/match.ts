@@ -1,7 +1,9 @@
+import { v4 as uuid } from "uuid";
 import type { Leg } from "./leg";
 import type { PlayerStats } from "./player";
 import type { Set } from "./set";
 import type { x01MatchConfig } from "./x01MatchConfig";
+import { defaultX01MatchConfig } from "./x01MatchConfig";
 
 export const GAME_TYPES = {
   x01: "x01",
@@ -9,13 +11,28 @@ export const GAME_TYPES = {
   halveIt: "halve-it",
 };
 
+export type GameType = (typeof GAME_TYPES)[keyof typeof GAME_TYPES];
+
 export interface Match {
-  id: number;
+  id: string;
   createdAt: Date;
   updatedAt: Date;
-  gameType: keyof typeof GAME_TYPES;
+  gameType: GameType;
   matchConfig: x01MatchConfig;
-  players: Array<Player>;
+  players: Array<PlayerStats>;
   game: Array<Leg | Set>;
-  winner: number;
+  winner?: number;
+}
+
+export function createMatch(overrides: Partial<Match> = {}): Match {
+  return {
+    id: uuid(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    gameType: GAME_TYPES.x01,
+    matchConfig: defaultX01MatchConfig,
+    players: [],
+    game: [],
+    ...overrides,
+  };
 }

@@ -27,13 +27,29 @@ export const LEGS_TO_WIN_MATCH_OPTIONS = Object.fromEntries(
   Array.from({ length: 20 }, (_, i) => [i + 1, i + 1])
 );
 
+// Clean type definitions
+export type X01GameType = (typeof X01_GAMETYPES)[keyof typeof X01_GAMETYPES];
+export type X01GamePlayedIn =
+  (typeof X01_GAME_PLAYED_IN)[keyof typeof X01_GAME_PLAYED_IN];
+export type X01GameWinDefinition =
+  (typeof GAME_WIN_DEFINITION)[keyof typeof GAME_WIN_DEFINITION];
+
 export interface x01MatchConfig {
-  gameType: keyof typeof X01_GAMETYPES;
-  gamePlayedIn: keyof typeof X01_GAME_PLAYED_IN;
-  gameWinDefinition: keyof typeof GAME_WIN_DEFINITION;
+  gameType: X01GameType;
+  gamePlayedIn: X01GamePlayedIn;
+  gameWinDefinition: X01GameWinDefinition;
   tiebreak: boolean;
   startingPlayer: number;
+  legsToWinParent: number;
   setsToWin?: number;
-  legsToWinSet?: number;
-  legsToWinMatch?: number;
 }
+
+export const defaultX01MatchConfig: x01MatchConfig = {
+  gameType: X01_GAMETYPES[501],
+  gamePlayedIn: X01_GAME_PLAYED_IN.sets,
+  gameWinDefinition: GAME_WIN_DEFINITION.firstTo,
+  tiebreak: false,
+  startingPlayer: 1,
+  setsToWin: 2,
+  legsToWinParent: 3,
+};
