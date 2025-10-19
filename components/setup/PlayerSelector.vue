@@ -15,21 +15,20 @@
     <!-- Player Selection -->
     <div v-if="!loading && !error" class="space-y-6">
       <!-- Available Players Selection -->
-      <div class="flex gap-4 items-end">
+      <div class="flex gap-4 items-stretch">
         <div class="flex-1">
           <FormSelect
             v-model="selectedPlayerId"
             :options="availablePlayers"
-            placeholder="Select a player to add"
             variant="dark"
           >
-            <template #label>Available Players</template>
           </FormSelect>
         </div>
         <FormButton
           @click="addPlayerToMatch"
           :disabled="!selectedPlayerId"
           variant="primary"
+          size="md"
         >
           Select Player
         </FormButton>
@@ -95,7 +94,7 @@ const selectedPlayerId = ref<string>("");
 // Computed property for available players (excluding already selected ones)
 const availablePlayers = computed(() => {
   const selectedIds = props.selectedPlayers.map((p) => p.id);
-  return props.availablePlayers
+  const players = props.availablePlayers
     .filter((player) => !selectedIds.includes(player.id))
     .map((player) => ({
       value: player.id,
@@ -103,6 +102,9 @@ const availablePlayers = computed(() => {
         player.alias ? ` (${player.alias})` : ""
       }`.trim(),
     }));
+
+  // Add placeholder option at the beginning
+  return [{ value: "", label: "Select a player to add" }, ...players];
 });
 
 const addPlayerToMatch = () => {
