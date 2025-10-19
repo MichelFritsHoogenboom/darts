@@ -7,59 +7,20 @@
         <h1 class="text-4xl font-bold text-white mb-2">Game Configuration</h1>
       </header>
 
-      <div class="max-w-2xl mx-auto">
-        <div class="bg-gray-800 rounded-xl p-8 mb-6">
-          <h2 class="text-2xl font-bold text-center mb-6">Players</h2>
+      <SetupPlayerSelector
+        :available-players="players"
+        :selected-players="match.players"
+        :loading="loading"
+        :error="error"
+        @add-player="showPlayerForm = true"
+        @select-player="addPlayerToMatch"
+        @remove-player="removePlayerFromMatch"
+      />
 
-          <!-- Players List -->
-          <div v-if="players.length > 0" class="mb-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div
-                v-for="player in players"
-                :key="player.id"
-                class="bg-gray-700 rounded-lg p-4"
-              >
-                <div class="flex justify-between items-start">
-                  <div>
-                    <h4 class="text-white font-medium">
-                      {{ player.firstName }} {{ player.lastName || "" }}
-                    </h4>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Error State -->
-            <div v-if="error" class="text-center text-red-400 mt-4">
-              Error: {{ error }}
-            </div>
-          </div>
-          <!-- Loading State -->
-          <div v-if="loading" class="text-center text-gray-400 mt-4">
-            Loading players...
-          </div>
-          <!-- Add Player Button -->
-          <div class="flex justify-center">
-            <FormButton @click="showPlayerForm = true" variant="primary">
-              Add Player
-            </FormButton>
-          </div>
-          <SetupX01MatchSetup v-model="match.matchConfig" />
-          <div class="bg-gray-800 rounded-xl">
-            <!-- Start Game Button -->
-            <div class="flex justify-center">
-              <FormButton
-                @click="startGame"
-                :disabled="!canStartGame"
-                size="lg"
-              >
-                Start Game
-              </FormButton>
-            </div>
-          </div>
-        </div>
-      </div>
-
+      <SetupX01MatchSetup v-model="match.matchConfig" />
+      <FormButton @click="startGame" :disabled="!canStartGame"
+        >Start Game</FormButton
+      >
       <!-- Player Form Modal -->
       <UiModal v-model="showPlayerForm">
         <template #title>Add New Player</template>
@@ -74,7 +35,7 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive, onMounted } from "vue";
+import { ref, computed, reactive, onBeforeMount } from "vue";
 import { createMatch } from "~/interfaces/match";
 import { usePlayers } from "~/composables/usePlayers";
 
@@ -88,18 +49,17 @@ const { players, loading, error, savePlayer, loadPlayers } = usePlayers();
 
 // Reactive data
 const match = reactive(createMatch());
-const player1Name = ref("");
-const player2Name = ref("");
+
 const showPlayerForm = ref(false);
 
 // Load players on mount
-onMounted(async () => {
+onBeforeMount(async () => {
   await loadPlayers();
 });
 
 // Computed
 const canStartGame = computed(() => {
-  return player1Name.value.trim() && player2Name.value.trim();
+  return match.players.length > 1;
 });
 
 // Methods
@@ -110,9 +70,8 @@ const startGame = () => {
   navigateTo({
     path: "/game",
     query: {
-      player1: player1Name.value.trim(),
-      player2: player2Name.value.trim(),
       matchConfig: JSON.stringify(match.matchConfig),
+      players: JSON.stringify(match.players),
     },
   });
 };
@@ -130,6 +89,21 @@ const handlePlayerSubmit = async (playerData) => {
   } catch (err) {
     console.error("Failed to save player:", err);
     // You could show a toast notification here
+  }
+};
+
+// Player selection methods
+const addPlayerToMatch = (playerId) => {
+  const player = players.value.find((p) => p.id === playerId);
+  if (player && !match.players.find((p) => p.id === playerId)) {
+    match.players.push(player);
+  }
+};
+
+const removePlayerFromMatch = (playerId) => {
+  const index = match.players.findIndex((p) => p.id === playerId);
+  if (index > -1) {
+    match.players.splice(index, 1);
   }
 };
 </script>
