@@ -1,16 +1,28 @@
 <template>
   <form @submit.prevent="handleSubmit" class="space-y-6">
     <!-- Basic Information -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div
+      class="grid grid-cols-1 gap-6"
+      :class="{
+        'md:grid-cols-1': !showAllFields,
+        'md:grid-cols-2': showAllFields,
+      }"
+    >
       <FormInput
         v-model="formData.firstName"
         placeholder="Enter first name"
         :required="true"
+        variant="light"
       >
         <template #label>First Name</template>
       </FormInput>
 
-      <FormInput v-model="formData.lastName" placeholder="Enter last name">
+      <FormInput
+        v-if="showAllFields"
+        v-model="formData.lastName"
+        placeholder="Enter last name"
+        variant="light"
+      >
         <template #label>Last Name</template>
       </FormInput>
     </div>
@@ -20,8 +32,9 @@
       <FormButton
         v-if="!showAllFields"
         type="button"
-        variant="outline"
+        variant="lightOutline"
         @click="showAllFields = true"
+        size="md"
       >
         Add all info
       </FormButton>
@@ -29,23 +42,35 @@
 
     <!-- Optional fields - shown when showAllFields is true -->
     <div v-if="showAllFields" class="space-y-6">
-      <FormInput v-model="formData.alias" placeholder="Enter player alias">
+      <FormInput
+        v-model="formData.alias"
+        placeholder="Enter player alias"
+        variant="light"
+      >
         <template #label>Alias/Nickname</template>
       </FormInput>
 
       <!-- Location -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <FormInput v-model="formData.city" placeholder="Enter city">
+        <FormInput
+          v-model="formData.city"
+          placeholder="Enter city"
+          variant="light"
+        >
           <template #label>City</template>
         </FormInput>
 
-        <FormInput v-model="formData.country" placeholder="Enter country">
+        <FormInput
+          v-model="formData.country"
+          placeholder="Enter country"
+          variant="light"
+        >
           <template #label>Country</template>
         </FormInput>
       </div>
 
       <!-- Birth Date -->
-      <FormInput v-model="formData.birthDate" type="date">
+      <FormInput v-model="formData.birthDate" type="date" variant="light">
         <template #label>Birth Date</template>
       </FormInput>
 
@@ -54,6 +79,7 @@
         <FormInput
           v-model="formData.typeOfDarts"
           placeholder="e.g., Steel tip, Soft tip"
+          variant="light"
         >
           <template #label>Type of Darts</template>
         </FormInput>
@@ -62,6 +88,7 @@
           v-model="formData.dartsWeightInGrams"
           type="number"
           placeholder="e.g., 22"
+          variant="light"
         >
           <template #label>Dart Weight (grams)</template>
         </FormInput>
@@ -70,6 +97,7 @@
       <FormInput
         v-model="formData.flightColor"
         placeholder="e.g., Red, Blue, Green"
+        variant="light"
       >
         <template #label>Flight Color</template>
       </FormInput>
@@ -84,7 +112,7 @@
       <FormButton
         v-if="updatePlayer"
         type="button"
-        variant="primary"
+        variant="light"
         @click="handleCancel"
         size="lg"
       >
@@ -95,7 +123,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, toRaw } from "vue";
 import { createPlayer } from "../../interfaces/player";
 
 const props = defineProps({
@@ -120,7 +148,7 @@ const isFormValid = computed(() => {
 const handleSubmit = () => {
   if (!isFormValid.value) return;
 
-  emit("submit", formData);
+  emit("submit", toRaw(formData.value));
 };
 
 // Handle cancel

@@ -10,53 +10,92 @@
       <div class="max-w-2xl mx-auto">
         <div class="bg-gray-800 rounded-xl p-8 mb-6">
           <h2 class="text-2xl font-bold text-center mb-6">Players</h2>
-          <div class="flex justify-center">
-            <button
-              @click="showPlayerForm = true"
-              class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-dartboard-red hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dartboard-red"
-            >
-              Add Player
-            </button>
+
+          <!-- Players List -->
+          <div v-if="players.length > 0" class="mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div
+                v-for="player in players"
+                :key="player.id"
+                class="bg-gray-700 rounded-lg p-4"
+              >
+                <div class="flex justify-between items-start">
+                  <div>
+                    <h4 class="text-white font-medium">
+                      {{ player.firstName }} {{ player.lastName || "" }}
+                    </h4>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Error State -->
+            <div v-if="error" class="text-center text-red-400 mt-4">
+              Error: {{ error }}
+            </div>
           </div>
-        </div>
-        <SetupX01MatchSetup v-model="match.matchConfig" />
-        <div class="bg-gray-800 rounded-xl">
-          <!-- Start Game Button -->
+          <!-- Loading State -->
+          <div v-if="loading" class="text-center text-gray-400 mt-4">
+            Loading players...
+          </div>
+          <!-- Add Player Button -->
           <div class="flex justify-center">
-            <FormButton @click="startGame" :disabled="!canStartGame" size="lg">
-              Start Game
+            <FormButton @click="showPlayerForm = true" variant="primary">
+              Add Player
             </FormButton>
+          </div>
+          <SetupX01MatchSetup v-model="match.matchConfig" />
+          <div class="bg-gray-800 rounded-xl">
+            <!-- Start Game Button -->
+            <div class="flex justify-center">
+              <FormButton
+                @click="startGame"
+                :disabled="!canStartGame"
+                size="lg"
+              >
+                Start Game
+              </FormButton>
+            </div>
           </div>
         </div>
       </div>
+
+      <!-- Player Form Modal -->
+      <UiModal v-model="showPlayerForm">
+        <template #title>Add New Player</template>
+
+        <FormPlayerForm
+          @submit="handlePlayerSubmit"
+          @cancel="showPlayerForm = false"
+        ></FormPlayerForm>
+      </UiModal>
     </div>
-
-    <!-- Player Form Modal -->
-    <UiModal v-model="showPlayerForm">
-      <template #title>Add New Player</template>
-
-      <FormPlayerForm
-        @submit="handlePlayerSubmit"
-        @cancel="showPlayerForm = false"
-      />
-    </UiModal>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, reactive } from "vue";
+import { ref, computed, reactive, onMounted } from "vue";
 import { createMatch } from "~/interfaces/match";
+import { usePlayers } from "~/composables/usePlayers";
 
 // Page meta
 definePageMeta({
   layout: false,
 });
 
+// Use players composable
+const { players, loading, error, savePlayer, loadPlayers } = usePlayers();
+
 // Reactive data
 const match = reactive(createMatch());
 const player1Name = ref("");
 const player2Name = ref("");
 const showPlayerForm = ref(false);
+
+// Load players on mount
+onMounted(async () => {
+  await loadPlayers();
+});
 
 // Computed
 const canStartGame = computed(() => {
@@ -83,9 +122,14 @@ const goBack = () => {
 };
 
 // Handle player form submission
-const handlePlayerSubmit = (playerData) => {
-  console.log("Player submitted:", playerData);
-  showPlayerForm.value = false;
-  // TODO: Add player to your player management system
+const handlePlayerSubmit = async (playerData) => {
+  try {
+    await savePlayer(playerData);
+    showPlayerForm.value = false;
+    console.log("Player saved successfully:", playerData);
+  } catch (err) {
+    console.error("Failed to save player:", err);
+    // You could show a toast notification here
+  }
 };
 </script>

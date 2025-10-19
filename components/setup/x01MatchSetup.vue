@@ -63,6 +63,7 @@ const legsToWinMatchOptions = Object.entries(LEGS_TO_WIN_MATCH_OPTIONS).map(
   })
 );
 </script>
+
 <template>
   <div class="bg-gray-800 rounded-xl p-8">
     <!-- Game Type Selection -->

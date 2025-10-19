@@ -24,8 +24,16 @@ export interface PlayerStats {
 }
 
 export function createPlayer(overrides: Partial<Player> = {}): Player {
+  const playerId = uuid();
+  console.log(
+    "createPlayer - generated id:",
+    playerId,
+    "type:",
+    typeof playerId
+  );
+
   return {
-    id: uuid(),
+    id: playerId,
     createdAt: new Date(),
     updatedAt: new Date(),
     firstName: "",
