@@ -10,6 +10,14 @@ export async function initializeDatabase() {
     // Open the database (this will create it if it doesn't exist)
     await db.open();
 
+    // Request persistent storage
+    if ("storage" in navigator && "persist" in navigator.storage) {
+      const isPersistent = await navigator.storage.persist();
+      console.log(
+        `Database persistence: ${isPersistent ? "Granted" : "Denied"}`
+      );
+    }
+
     console.log("Database initialized successfully");
     return db;
   } catch (error) {

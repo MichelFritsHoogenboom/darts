@@ -20,7 +20,7 @@ export interface Player {
 
 export interface PlayerStats {
   id: string;
-  stats: Stats;
+  stats?: Stats;
 }
 
 export function createPlayer(overrides: Partial<Player> = {}): Player {

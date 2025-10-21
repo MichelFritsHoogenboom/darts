@@ -8,8 +8,8 @@
       </header>
 
       <SetupPlayerSelector
-        :available-players="players"
-        :selected-players="match.players"
+        :available-players="players as Player[]"
+        :selected-players="match.players as Player[]"
         :loading="loading"
         :error="error"
         @add-player="showPlayerForm = true"
@@ -34,10 +34,9 @@
   </div>
 </template>
 
-<script setup>
-import { ref, computed, reactive, onBeforeMount } from "vue";
-import { createMatch } from "~/interfaces/match";
-import { usePlayers } from "~/composables/usePlayers";
+<script setup lang="ts">
+import { createMatch } from "../interfaces/match";
+import type { Player } from "../interfaces/player";
 
 // Page meta
 definePageMeta({
@@ -47,10 +46,13 @@ definePageMeta({
 // Use players composable
 const { players, loading, error, savePlayer, loadPlayers } = usePlayers();
 
+// Use matches composable
+const { saveMatch } = useMatches();
+
 // Reactive data
 const match = reactive(createMatch());
-
 const showPlayerForm = ref(false);
+const addedPlayers = ref<Player[]>([]);
 
 // Load players on mount
 onBeforeMount(async () => {
@@ -63,17 +65,19 @@ const canStartGame = computed(() => {
 });
 
 // Methods
-const startGame = () => {
+const startGame = async () => {
   if (!canStartGame.value) return;
 
-  // Navigate to game with match configuration
-  navigateTo({
-    path: "/game",
-    query: {
-      matchConfig: JSON.stringify(match.matchConfig),
-      players: JSON.stringify(match.players),
-    },
-  });
+  try {
+    // Save match to database
+    const savedMatch = await saveMatch(toRaw(match));
+
+    // Navigate to match page with match ID
+    navigateTo(`/match/${savedMatch.id}`);
+  } catch (err) {
+    console.error("Failed to save match:", err);
+    // You could show a toast notification here
+  }
 };
 
 const goBack = () => {
@@ -81,7 +85,7 @@ const goBack = () => {
 };
 
 // Handle player form submission
-const handlePlayerSubmit = async (playerData) => {
+const handlePlayerSubmit = async (playerData: Player) => {
   try {
     await savePlayer(playerData);
     showPlayerForm.value = false;
@@ -93,14 +97,14 @@ const handlePlayerSubmit = async (playerData) => {
 };
 
 // Player selection methods
-const addPlayerToMatch = (playerId) => {
+const addPlayerToMatch = (playerId: string) => {
   const player = players.value.find((p) => p.id === playerId);
   if (player && !match.players.find((p) => p.id === playerId)) {
-    match.players.push(player);
+    match.players.push({ id: playerId, stats: undefined });
   }
 };
 
-const removePlayerFromMatch = (playerId) => {
+const removePlayerFromMatch = (playerId: string) => {
   const index = match.players.findIndex((p) => p.id === playerId);
   if (index > -1) {
     match.players.splice(index, 1);

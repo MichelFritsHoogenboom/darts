@@ -39,7 +39,6 @@ export interface x01MatchConfig {
   gamePlayedIn: X01GamePlayedIn;
   gameWinDefinition: X01GameWinDefinition;
   tiebreak: boolean;
-  startingPlayer: number;
   legsToWinParent: number;
   setsToWin?: number;
 }
@@ -49,7 +48,6 @@ export const defaultX01MatchConfig: x01MatchConfig = {
   gamePlayedIn: X01_GAME_PLAYED_IN.sets,
   gameWinDefinition: GAME_WIN_DEFINITION.firstTo,
   tiebreak: false,
-  startingPlayer: 1,
   setsToWin: 2,
   legsToWinParent: 3,
 };

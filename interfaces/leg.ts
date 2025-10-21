@@ -1,8 +1,9 @@
-import type { GAME_TYPES } from "./match";
+import { v4 as uuid } from "uuid";
 
+import type { X01GameType } from "./x01MatchConfig";
 export interface SingleDartScore {
-  id: number;
-  scoreId: number;
+  id: string;
+  scoreId: string;
   createdAt: Date;
   updatedAt: Date;
   score: number;
@@ -12,9 +13,9 @@ export interface SingleDartScore {
 }
 
 export interface Score {
-  id: number;
-  playerId: number;
-  playerLegId: number;
+  id: string;
+  playerId: string;
+  playerLegId: string;
   createdAt: Date;
   updatedAt: Date;
   totalScore: number;
@@ -24,24 +25,79 @@ export interface Score {
 }
 
 export interface PlayerLeg {
-  id: number;
-  legId: number;
+  id: string;
+  legId: string;
   createdAt: Date;
   updatedAt: Date;
-  playerId: number;
+  playerId: string;
   scores: Array<Score>;
-  average: number;
+  average?: number;
   checkout?: number;
 }
 
 export interface Leg {
-  id: number;
-  matchId?: number;
-  setId?: number;
+  id: string;
+  matchId: string;
+  setId?: string;
   createdAt: Date;
   updatedAt: Date;
-  gameType: keyof typeof GAME_TYPES;
+  gameType: X01GameType;
   players: Array<PlayerLeg>;
-  startingPlayer: number;
-  winner: number;
+  startingPlayer: string;
+  winner?: string;
+}
+
+export function createSingleDartScore(overrides: {
+  scoreId: string;
+  score: number;
+}): SingleDartScore {
+  return {
+    id: uuid(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    ...overrides,
+  };
+}
+
+export function createScore(overrides: {
+  playerId: string;
+  playerLegId: string;
+  totalScore: number;
+}): Score {
+  return {
+    id: uuid(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    ...overrides,
+  };
+}
+
+export function createPlayerLeg(overrides: {
+  legId: string;
+  playerId: string;
+}): PlayerLeg {
+  return {
+    id: uuid(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    scores: [],
+    ...overrides,
+  };
+}
+
+export function createLeg(
+  overrides: Partial<Leg> & {
+    matchId: string;
+    setId?: string;
+    gameType: X01GameType;
+    players: Array<PlayerLeg>;
+    startingPlayer: string;
+  }
+): Leg {
+  return {
+    id: uuid(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    ...overrides,
+  };
 }

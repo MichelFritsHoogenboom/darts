@@ -267,183 +267,129 @@
   </div>
 </template>
 
-<script setup>
-import { ref, computed, nextTick, watch, onMounted } from "vue";
+<script setup lang="ts">
+import { v4 as uuid } from "uuid";
+import type { Match } from "~/interfaces/match";
+import type { Set } from "~/interfaces/set";
+import type { Leg } from "~/interfaces/leg";
+import type { PlayerStats } from "~/interfaces/player";
+
+import { X01_GAME_PLAYED_IN } from "~/interfaces/x01MatchConfig";
 import { isAchievableScore } from "~/utils/dartScoring.js";
-import {
-  getLegsNeededToWinSet,
-  hasWonSet,
-  hasWonMatch,
-} from "~/utils/matchLogic.js";
-import CheckoutSuggestions from "~/components/CheckoutSuggestions.vue";
+import { createSet } from "~/interfaces/set";
+import { createLeg } from "~/interfaces/leg";
+import { createPlayerLeg } from "~/interfaces/leg";
+import CheckoutSuggestions from "~/components/games/x01/CheckoutSuggestions.vue";
 
-// Props
-const props = defineProps({
-  player1Name: {
-    type: String,
-    required: true,
-  },
-  player2Name: {
-    type: String,
-    required: true,
-  },
-  matchConfig: {
-    type: Object,
-    required: true,
-    default: () => ({
-      type: "legs",
-      numberOfLegs: 5,
-      legsPerSet: 3,
-      setsToWin: 2,
-    }),
-  },
-});
+const { match } = defineProps<{ match: Match }>();
+const currentSet = ref<Set | null>(null);
+const currentLeg = ref<Leg | null>(null);
+const currentScore = ref<number | null>(null);
+const scoreValidationMessage = ref<string>("");
 
-// Emits
-const emit = defineEmits(["game-reset"]);
+const createNewSet = () => {
+  currentSet.value = createSet({
+  matchId: match.id,
+  players: match.players,
+  startingPlayer: match.players[0].id,
+ });
 
-// Game state
-const currentPlayer = ref(1);
-const currentScore = ref("");
-const gameOver = ref(false);
-const scoreValidationMessage = ref("");
+}
 
-// Match state
-const currentSet = ref(1);
-const currentLeg = ref(1);
-const matchOver = ref(false);
-const legStartPlayer = ref(1); // Who starts each leg
-const legWinNotification = ref("");
+const createPlayerLegs = (players: PlayerStats[], legId: string) => {
+  return players.map((player: PlayerStats) => createPlayerLeg({
+    legId: legId,
+    playerId: player.id,
+  }));
+}
 
-// Match data structure
-const match = ref({
-  sets: [
-    {
-      setNumber: 1,
-      legs: [],
-      legsWon: { player1: 0, player2: 0 },
-      setWinner: null,
-    },
-  ],
-  currentSet: 1,
-  currentLeg: 1,
-  legStartPlayer: 1,
-});
+const createNewleg = (startingPlayer: string = match.players[0].id) => {
 
-// Current leg state
-const currentLegState = ref({
-  player1: {
-    name: props.player1Name,
-    score: 501,
-    scores: [],
-  },
-  player2: {
-    name: props.player2Name,
-    score: 501,
-    scores: [],
-  },
-});
+  const legId = uuid();
 
-// Game history for undo functionality
-const gameHistory = ref([]);
+  const legSettings = {
+    id: legId,
+    matchId: match.id,
+    gameType: match.matchConfig.gameType,
+    players: createPlayerLegs(match.players, legId),
+    startingPlayer: startingPlayer,
+    ...(currentSet.value && { setId: currentSet.value.id })
+  };
 
-// Refs
-const scoreInput = ref(null);
+  currentLeg.value = createLeg(legSettings);
 
-// Computed
-const isValidScore = computed(() => {
-  const score = parseInt(currentScore.value);
-  return (
-    score >= 0 && score <= 180 && !isNaN(score) && isAchievableScore(score)
-  );
-});
+}
 
-const currentPlayerScore = computed(() => {
-  return currentPlayer.value === 1
-    ? currentLegState.value.player1.score
-    : currentLegState.value.player2.score;
-});
+if (match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets) {
+  createNewSet()
+   createNewleg()
 
-// Get current set
-const currentSet = computed(() => {
-  return match.value.sets.find(
-    (set) => set.setNumber === match.value.currentSet
-  );
-});
-
-// Get total sets won by each player
-const player1SetsWon = computed(() => {
-  return match.value.sets.filter((set) => set.setWinner === "player1").length;
-});
-
-const player2SetsWon = computed(() => {
-  return match.value.sets.filter((set) => set.setWinner === "player2").length;
-});
-
-const canUndo = computed(() => {
-  return gameHistory.value.length > 0 && !gameOver.value;
-});
-
-const winner = computed(() => {
-  if (matchOver.value) {
-    if (props.matchConfig.type === "sets") {
-      return player1SetsWon.value >= props.matchConfig.setsToWin
-        ? currentLegState.value.player1
-        : currentLegState.value.player2;
-    } else {
-      const legsNeeded = Math.ceil(props.matchConfig.numberOfLegs / 2);
-      return player1SetsWon.value >= legsNeeded
-        ? currentLegState.value.player1
-        : currentLegState.value.player2;
-    }
+  if (currentSet.value && currentLeg.value) {
+    currentSet.value.legs.push(currentLeg.value);
   }
-  return null;
-});
+}
+  // Refs
+  const scoreInput = ref(null);
 
-// Methods
-const initializeGame = () => {
-  currentPlayer.value = 1;
-  currentScore.value = "";
-  gameOver.value = false;
-  matchOver.value = false;
-  scoreValidationMessage.value = "";
-  gameHistory.value = [];
-  legWinNotification.value = "";
+  // Computed
+  const isValidScore = computed(() => {
+    const score = currentScore.value ?? 0;
+    if (isNaN(score)) {
+      scoreValidationMessage.value = "";
+      return false;
+    }
 
-  // Reset match data structure
-  match.value = {
-    sets: [
-      {
-        setNumber: 1,
-        legs: [],
-        legsWon: { player1: 0, player2: 0 },
-        setWinner: null,
-      },
-    ],
-    currentSet: 1,
-    currentLeg: 1,
-    legStartPlayer: 1,
-  };
+    if (score > 180) {
+      scoreValidationMessage.value = "Maximum score is 180. Did you mistype?";
+      return false;
+    } else if (score < 0) {
+      scoreValidationMessage.value = "Score cannot be negative.";
+      return false;
+    } else if (!isAchievableScore(score)) {
+      scoreValidationMessage.value = `Score ${score} is not achievable with 3 darts.`;
+      return false;
+    } else {
+      scoreValidationMessage.value = "";
+      return true;
+    }
+  });
 
-  // Reset current leg state
-  currentLegState.value = {
-    player1: {
-      name: props.player1Name,
-      score: 501,
-      scores: [],
-    },
-    player2: {
-      name: props.player2Name,
-      score: 501,
-      scores: [],
-    },
-  };
+  const currentPlayerScore = computed(() => {
+    return currentPlayer.value === 1
+      ? currentLegState.value.player1.score
+      : currentLegState.value.player2.score;
+  });
+
+
+
+
+  const canUndo = computed(() => {
+    return gameHistory.value.length > 0 && !gameOver.value;
+  });
+
+  const winner = computed(() => {
+    if (matchOver.value) {
+      if (props.matchConfig.type === "sets") {
+        return player1SetsWon.value >= props.matchConfig.setsToWin
+          ? currentLegState.value.player1
+          : currentLegState.value.player2;
+      } else {
+        const legsNeeded = Math.ceil(props.matchConfig.numberOfLegs / 2);
+        return player1SetsWon.value >= legsNeeded
+          ? currentLegState.value.player1
+          : currentLegState.value.player2;
+      }
+    }
+    return null;
+  });
+
+  // Methods
 
   // Focus on score input
   nextTick(() => {
     scoreInput.value?.focus();
   });
-};
+}
 
 const submitScore = () => {
   if (!isValidScore.value) return;
@@ -482,9 +428,7 @@ const submitScore = () => {
     return;
   }
 
-  // Switch players
-  currentPlayer.value = currentPlayer.value === 1 ? 2 : 1;
-  currentScore.value = "";
+
 
   // Focus on score input for next player
   nextTick(() => {
@@ -492,23 +436,6 @@ const submitScore = () => {
   });
 };
 
-const validateScore = () => {
-  const score = parseInt(currentScore.value);
-  if (isNaN(score)) {
-    scoreValidationMessage.value = "";
-    return;
-  }
-
-  if (score > 180) {
-    scoreValidationMessage.value = "Maximum score is 180. Did you mistype?";
-  } else if (score < 0) {
-    scoreValidationMessage.value = "Score cannot be negative.";
-  } else if (!isAchievableScore(score)) {
-    scoreValidationMessage.value = `Score ${score} is not achievable with 3 darts.`;
-  } else {
-    scoreValidationMessage.value = "";
-  }
-};
 
 const saveGameState = () => {
   const state = {

@@ -1,15 +1,18 @@
-import Dexie, { Table } from "dexie";
+import Dexie from "dexie";
 import type { Player } from "../interfaces/player";
+import type { Match } from "../interfaces/match";
 
 export class DartsDatabase extends Dexie {
   // Define tables
-  players!: Table<Player>;
+  players!: Dexie.Table<Player>;
+  matches!: Dexie.Table<Match>;
 
   constructor() {
     super("DartsDatabase");
 
     this.version(1).stores({
       players: "id, firstName, lastName, alias, createdAt, updatedAt",
+      matches: "id, gameType, players, matchConfig, createdAt, updatedAt",
     });
   }
 }

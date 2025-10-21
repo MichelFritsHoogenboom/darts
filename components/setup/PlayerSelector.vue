@@ -39,8 +39,8 @@
         <h3 class="text-lg font-semibold text-white mb-4">Selected Players</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div
-            v-for="player in selectedPlayers"
-            :key="player.id"
+            v-for="player in selectedPlayersFullData"
+            :key="player?.id"
             class="bg-gray-700 rounded-lg p-4 flex justify-between items-center"
           >
             <div>
@@ -74,14 +74,20 @@
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import type { Player } from "../../interfaces/player";
+import type { Player, PlayerStats } from "../../interfaces/player";
 
 const props = defineProps<{
   availablePlayers: Player[];
-  selectedPlayers: Player[];
+  selectedPlayers: PlayerStats[];
   loading: boolean;
   error: string | null;
 }>();
+
+const selectedPlayersFullData = computed(() => {
+  return props.selectedPlayers
+    .map((p) => props.availablePlayers.find((player) => player.id === p.id))
+    .filter((player): player is Player => player !== undefined);
+});
 
 const emit = defineEmits<{
   "add-player": [];
