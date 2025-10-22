@@ -21,7 +21,7 @@ export interface Match {
   matchConfig: x01MatchConfig;
   players: Array<PlayerStats>;
   game: Array<Leg | Set>;
-  winner?: number;
+  winner?: string;
 }
 
 export function createMatch(overrides: Partial<Match> = {}): Match {

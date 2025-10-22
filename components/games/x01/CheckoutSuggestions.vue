@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="checkoutStatus.isCheckout && "
+    v-if="checkoutStatus.isCheckout"
     class="bg-gradient-to-r from-green-900 to-green-800 rounded-xl p-3 border-2 border-green-600"
   >
     <h3 class="text-lg font-bold text-center mb-2 text-green-100">
@@ -23,19 +23,13 @@ import { computed } from "vue";
 import { getCheckoutStatus } from "~/utils/dartScoring.js";
 
 // Props
-const props = defineProps({
-  playerName: {
-    type: String,
-    required: true,
-  },
-  score: {
-    type: Number,
-    required: true,
-  },
+const { playerName, score } = defineProps({
+  playerName: String,
+  score: Number,
 });
 
 // Computed
 const checkoutStatus = computed(() => {
-  return getCheckoutStatus(props.score);
+  return getCheckoutStatus(score);
 });
 </script>

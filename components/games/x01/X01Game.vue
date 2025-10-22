@@ -5,66 +5,61 @@
       <!-- Match Status -->
       <div class="bg-gray-800 rounded-xl p-4 text-center">
         <div class="text-lg font-bold text-white mb-2">
-          <span v-if="props.matchConfig.type === 'sets'">
-            Set {{ currentSet }} - Leg {{ currentLeg }} of
-            {{ props.matchConfig.legsPerSet }}
+          <span
+            v-if="match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets"
+          >
+            Set {{ match.game.length }} - Leg
+            {{ (match.game[match.game.length - 1] as Set).legs.length + 1 }}
           </span>
           <span v-else>
-            Leg {{ currentLeg }} of {{ props.matchConfig.numberOfLegs }}
+            Leg
+            {{ match.game.length + 1 }} of
+            {{ match.matchConfig.legsToWinParent }}
           </span>
         </div>
-        <div class="grid grid-cols-2 gap-4 text-sm">
-          <div class="bg-gray-700 rounded-lg p-2">
+        <div :class="`grid grid-cols-${match.players.length} gap-4 text-sm`">
+          <div
+            class="bg-gray-700 rounded-lg p-2"
+            v-for="player in match.players"
+            :key="player.id"
+          >
             <div class="font-bold text-dartboard-red">
-              {{ currentLegState.player1.name }}
+              {{ getPlayerName(player.id) }}
             </div>
-            <div v-if="props.matchConfig.type === 'sets'">
-              Sets: {{ player1SetsWon }}/{{ props.matchConfig.setsToWin }}
+            <div
+              v-if="match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets"
+            >
+              Sets: {{ getPlayerWinnerCountOf(player.id, match.game) }}/{{
+                match.matchConfig.setsToWin
+              }}
             </div>
-            <div>Current Set Legs: {{ currentSet.legsWon.player1 }}</div>
-          </div>
-          <div class="bg-gray-700 rounded-lg p-2">
-            <div class="font-bold text-dartboard-red">
-              {{ currentLegState.player2.name }}
+            <div>
+              Current Set Legs:
+              {{ getPlayerWinnerCountOf(player.id, currentSet?.legs || []) }}
             </div>
-            <div v-if="props.matchConfig.type === 'sets'">
-              Sets: {{ player2SetsWon }}/{{ props.matchConfig.setsToWin }}
-            </div>
-            <div>Current Set Legs: {{ currentSet.legsWon.player2 }}</div>
           </div>
         </div>
       </div>
 
       <!-- Current Scores -->
-      <div class="grid md:grid-cols-2 gap-4">
+      <div :class="`grid grid-cols-${match.players.length} gap-4`">
         <div
-          :class="['player-card', currentPlayer === 1 ? 'active' : 'inactive']"
+          v-for="player in match.players"
+          :key="player.id"
+          :class="[
+            'player-card',
+            currentPlayer === player.id ? 'active' : 'inactive',
+          ]"
         >
           <div class="text-center">
             <h3 class="text-xl font-bold mb-1">
-              {{ currentLegState.player1.name }}
+              {{ getPlayerName(player.id) }}
             </h3>
             <div class="text-4xl font-bold text-dartboard-red mb-2">
-              {{ currentLegState.player1.score }}
+              {{ realTimePlayerScore(player.id) }}
             </div>
             <div class="text-xs text-gray-400">
-              Current Turn: {{ currentPlayer === 1 ? "Yes" : "No" }}
-            </div>
-          </div>
-        </div>
-
-        <div
-          :class="['player-card', currentPlayer === 2 ? 'active' : 'inactive']"
-        >
-          <div class="text-center">
-            <h3 class="text-xl font-bold mb-1">
-              {{ currentLegState.player2.name }}
-            </h3>
-            <div class="text-4xl font-bold text-dartboard-red mb-2">
-              {{ currentLegState.player2.score }}
-            </div>
-            <div class="text-xs text-gray-400">
-              Current Turn: {{ currentPlayer === 2 ? "Yes" : "No" }}
+              Current Turn: {{ currentPlayer === player.id ? "Yes" : "No" }}
             </div>
           </div>
         </div>
@@ -73,11 +68,7 @@
       <!-- Score Input -->
       <div class="bg-gray-800 rounded-xl p-4">
         <h3 class="text-xl font-bold text-center mb-3">
-          {{
-            currentPlayer === 1
-              ? currentLegState.player1.name
-              : currentLegState.player2.name
-          }}'s Turn
+          {{ getPlayerName(currentPlayer) }}'s Turn
         </h3>
         <div class="max-w-md mx-auto">
           <input
@@ -144,60 +135,38 @@
         class="bg-gradient-to-r from-yellow-900 to-yellow-800 rounded-xl p-3 border-2 border-yellow-600 text-center"
       >
         <div class="text-yellow-100 font-bold text-lg">
-          🎯 {{ legWinNotification }}
+          🎯 {{ getPlayerName(currentPlayer) }} wins the leg!
         </div>
       </div>
 
       <!-- Checkout Suggestions -->
       <CheckoutSuggestions
-        v-if="!gameOver"
-        :player-name="
-          currentPlayer === 1
-            ? currentLegState.player1.name
-            : currentLegState.player2.name
-        "
-        :score="currentPlayerScore"
+        v-if="!match.winner"
+        :player-name="getPlayerName(currentPlayer)"
+        :score="realTimePlayerScore(currentPlayer)"
       />
 
       <!-- Score History -->
-      <div class="grid md:grid-cols-2 gap-4">
-        <div class="bg-gray-800 rounded-xl p-3">
+      <div :class="`grid grid-cols-${match.players.length} gap-4`">
+        <div
+          v-for="player in match.players"
+          :key="player.id"
+          class="bg-gray-800 rounded-xl p-3"
+        >
           <h4 class="text-lg font-bold mb-2 text-center">
-            {{ currentLegState.player1.name }}'s Scores
+            {{ getPlayerName(player.id) }}'s Scores
           </h4>
           <div class="space-y-1 max-h-32 overflow-y-auto">
             <div
-              v-for="(score, index) in currentLegState.player1.scores"
+              v-for="(score, index) in playerLegScores(player.id)"
               :key="`p1-${index}`"
               class="flex justify-between items-center bg-gray-700 rounded px-2 py-1"
             >
               <span class="text-xs text-gray-400">{{ index + 1 }}</span>
-              <span class="font-bold text-sm">{{ score }}</span>
+              <span class="font-bold text-sm">{{ score.totalScore }}</span>
             </div>
             <div
-              v-if="currentLegState.player1.scores.length === 0"
-              class="text-center text-gray-500 py-2 text-sm"
-            >
-              No scores yet
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-gray-800 rounded-xl p-3">
-          <h4 class="text-lg font-bold mb-2 text-center">
-            {{ currentLegState.player2.name }}'s Scores
-          </h4>
-          <div class="space-y-1 max-h-32 overflow-y-auto">
-            <div
-              v-for="(score, index) in currentLegState.player2.scores"
-              :key="`p2-${index}`"
-              class="flex justify-between items-center bg-gray-700 rounded px-2 py-1"
-            >
-              <span class="text-xs text-gray-400">{{ index + 1 }}</span>
-              <span class="font-bold text-sm">{{ score }}</span>
-            </div>
-            <div
-              v-if="currentLegState.player2.scores.length === 0"
+              v-if="playerLegScores(player.id).length === 0"
               class="text-center text-gray-500 py-2 text-sm"
             >
               No scores yet
@@ -208,7 +177,7 @@
 
       <!-- Game Over Modal -->
       <div
-        v-if="gameOver"
+        v-if="match.winner"
         class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
       >
         <div class="bg-gray-800 rounded-xl p-8 max-w-md mx-auto text-center">
@@ -216,52 +185,41 @@
             🎉 Match Over!
           </h2>
           <p class="text-xl mb-4">
-            <span class="font-bold">{{ winner.name }}</span> wins!
+            <span class="font-bold">{{ getPlayerName(match.winner) }}</span>
+            wins!
           </p>
 
           <!-- Match Summary -->
           <div class="bg-gray-700 rounded-lg p-4 mb-6">
             <h3 class="text-lg font-bold mb-2">Final Score</h3>
-            <div class="grid grid-cols-2 gap-4 text-sm">
-              <div>
+            <div
+              :class="`grid grid-cols-${match.players.length} gap-4 text-sm`"
+            >
+              <div v-for="player in match.players" :key="player.id">
                 <div class="font-bold text-dartboard-red">
-                  {{ currentLegState.player1.name }}
+                  {{ getPlayerName(player.id) }}
                 </div>
-                <div v-if="props.matchConfig.type === 'sets'">
-                  Sets: {{ player1SetsWon }}/{{ props.matchConfig.setsToWin }}
-                </div>
-                <div>
-                  Total Legs Won:
-                  {{
-                    match.sets.reduce(
-                      (total, set) => total + set.legsWon.player1,
-                      0
-                    )
+                <div
+                  v-if="
+                    match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets
+                  "
+                >
+                  Sets: {{ getPlayerWinnerCountOf(player.id, match.game) }}/{{
+                    match.matchConfig.setsToWin
                   }}
                 </div>
-              </div>
-              <div>
-                <div class="font-bold text-dartboard-red">
-                  {{ currentLegState.player2.name }}
-                </div>
-                <div v-if="props.matchConfig.type === 'sets'">
-                  Sets: {{ player2SetsWon }}/{{ props.matchConfig.setsToWin }}
-                </div>
-                <div>
-                  Total Legs Won:
-                  {{
-                    match.sets.reduce(
-                      (total, set) => total + set.legsWon.player2,
-                      0
-                    )
+                <div v-else>
+                  Legs:
+                  {{ getPlayerWinnerCountOf(player.id, match.game) }}/{{
+                    match.matchConfig.legsToWinParent
                   }}
                 </div>
               </div>
             </div>
           </div>
-
-          <button @click="resetGame" class="dartboard-button">New Match</button>
         </div>
+
+        <button @click="resetGame" class="dartboard-button">New Match</button>
       </div>
     </div>
   </div>
@@ -271,40 +229,44 @@
 import { v4 as uuid } from "uuid";
 import type { Match } from "~/interfaces/match";
 import type { Set } from "~/interfaces/set";
-import type { Leg } from "~/interfaces/leg";
+import type { Leg, Score } from "~/interfaces/leg";
 import type { PlayerStats } from "~/interfaces/player";
 
 import { X01_GAME_PLAYED_IN } from "~/interfaces/x01MatchConfig";
 import { isAchievableScore } from "~/utils/dartScoring.js";
 import { createSet } from "~/interfaces/set";
 import { createLeg } from "~/interfaces/leg";
+import { createScore } from "~/interfaces/leg";
 import { createPlayerLeg } from "~/interfaces/leg";
 import CheckoutSuggestions from "~/components/games/x01/CheckoutSuggestions.vue";
 
 const { match } = defineProps<{ match: Match }>();
-const currentSet = ref<Set | null>(null);
-const currentLeg = ref<Leg | null>(null);
-const currentScore = ref<number | null>(null);
-const scoreValidationMessage = ref<string>("");
+const { getPlayer } = usePlayers();
 
-const createNewSet = () => {
-  currentSet.value = createSet({
-  matchId: match.id,
-  players: match.players,
-  startingPlayer: match.players[0].id,
- });
+const emit = defineEmits<{
+  "game-reset": [];
+}>();
 
-}
+const createNewSet = (startingPlayer: string = match.players[0].id) => {
+  const set = createSet({
+    matchId: match.id,
+    players: match.players,
+    startingPlayer: startingPlayer,
+  });
+
+  return set;
+};
 
 const createPlayerLegs = (players: PlayerStats[], legId: string) => {
-  return players.map((player: PlayerStats) => createPlayerLeg({
-    legId: legId,
-    playerId: player.id,
-  }));
-}
+  return players.map((player: PlayerStats) =>
+    createPlayerLeg({
+      legId: legId,
+      playerId: player.id,
+    })
+  );
+};
 
 const createNewleg = (startingPlayer: string = match.players[0].id) => {
-
   const legId = uuid();
 
   const legSettings = {
@@ -313,318 +275,172 @@ const createNewleg = (startingPlayer: string = match.players[0].id) => {
     gameType: match.matchConfig.gameType,
     players: createPlayerLegs(match.players, legId),
     startingPlayer: startingPlayer,
-    ...(currentSet.value && { setId: currentSet.value.id })
+    ...(currentSet.value && { setId: currentSet.value.id }),
   };
 
-  currentLeg.value = createLeg(legSettings);
+  return createLeg(legSettings);
+};
+// Refs
+const scoreInput = useTemplateRef("scoreInput");
 
-}
+const playerNames = ref<Record<string, string>>({});
+// Game state refs
+const currentSet = ref<Set | null>(
+  match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets
+    ? createNewSet()
+    : null
+);
+const currentLeg = ref<Leg>(createNewleg());
+const currentScore = ref<number>(0);
+const currentPlayer = ref<string>(match.players[0].id);
+const scoreValidationMessage = ref<string>("");
+const legWinNotification = ref<boolean>(false);
 
-if (match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets) {
-  createNewSet()
-   createNewleg()
+match.game.push(currentSet.value ? currentSet.value : currentLeg.value);
 
-  if (currentSet.value && currentLeg.value) {
-    currentSet.value.legs.push(currentLeg.value);
+const realTimePlayerScore = computed(() => {
+  return (playerId: string) => {
+    const scores = currentLeg.value.players.find(
+      (player) => player.playerId === playerId
+    )?.scores;
+    const totalScoreThrown =
+      scores?.reduce((total, score) => total + score.totalScore, 0) || 0;
+
+    return currentLeg.value.gameType - totalScoreThrown;
+  };
+});
+
+const getPlayerWinnerCountOf = computed(() => {
+  return (playerId: string, entity: Array<Set | Leg>) => {
+    return entity?.filter((entity) => entity.winner === playerId).length || 0;
+  };
+});
+
+const playerLegScores = computed(() => {
+  return (playerId: string) => {
+    return (
+      currentLeg.value.players.find((player) => player.playerId === playerId)
+        ?.scores || []
+    );
+  };
+});
+
+const getPlayerName = (playerId: string) => {
+  return playerNames.value[playerId] || "Loading...";
+};
+
+// Load player names
+onMounted(async () => {
+  for (const player of match.players) {
+    const playerData = await getPlayer(player.id);
+    playerNames.value[player.id] =
+      playerData?.firstName + " " + playerData?.lastName || "Unknown";
   }
-}
-  // Refs
-  const scoreInput = ref(null);
+});
 
-  // Computed
-  const isValidScore = computed(() => {
-    const score = currentScore.value ?? 0;
-    if (isNaN(score)) {
-      scoreValidationMessage.value = "";
-      return false;
-    }
+// Computed
+const isValidScore = computed(() => {
+  const score = currentScore.value ?? 0;
+  if (isNaN(score)) {
+    scoreValidationMessage.value = "";
+    return false;
+  }
+  if (score > 180) {
+    scoreValidationMessage.value = "Maximum score is 180. Did you mistype?";
+    return false;
+  } else if (score < 0) {
+    scoreValidationMessage.value = "Score cannot be negative.";
+    return false;
+  } else if (!isAchievableScore(score)) {
+    scoreValidationMessage.value = `Score ${score} is not achievable with 3 darts.`;
+    return false;
+  } else {
+    scoreValidationMessage.value = "";
+    return true;
+  }
+});
 
-    if (score > 180) {
-      scoreValidationMessage.value = "Maximum score is 180. Did you mistype?";
-      return false;
-    } else if (score < 0) {
-      scoreValidationMessage.value = "Score cannot be negative.";
-      return false;
-    } else if (!isAchievableScore(score)) {
-      scoreValidationMessage.value = `Score ${score} is not achievable with 3 darts.`;
-      return false;
-    } else {
-      scoreValidationMessage.value = "";
-      return true;
-    }
-  });
-
-  const currentPlayerScore = computed(() => {
-    return currentPlayer.value === 1
-      ? currentLegState.value.player1.score
-      : currentLegState.value.player2.score;
-  });
-
-
-
-
-  const canUndo = computed(() => {
-    return gameHistory.value.length > 0 && !gameOver.value;
-  });
-
-  const winner = computed(() => {
-    if (matchOver.value) {
-      if (props.matchConfig.type === "sets") {
-        return player1SetsWon.value >= props.matchConfig.setsToWin
-          ? currentLegState.value.player1
-          : currentLegState.value.player2;
-      } else {
-        const legsNeeded = Math.ceil(props.matchConfig.numberOfLegs / 2);
-        return player1SetsWon.value >= legsNeeded
-          ? currentLegState.value.player1
-          : currentLegState.value.player2;
-      }
-    }
-    return null;
-  });
-
-  // Methods
-
-  // Focus on score input
-  nextTick(() => {
-    scoreInput.value?.focus();
-  });
-}
+const validateScore = () => {
+  // Trigger validation by accessing the computed property
+  isValidScore.value;
+};
 
 const submitScore = () => {
   if (!isValidScore.value) return;
 
-  const score = parseInt(currentScore.value);
-  const player =
-    currentPlayer.value === 1
-      ? currentLegState.value.player1
-      : currentLegState.value.player2;
+  const score = currentScore.value;
 
   // Check if score would go below 0
-  if (player.score - score < 0) {
+  if (realTimePlayerScore.value(currentPlayer.value) - score < 0) {
     alert("Score cannot go below zero!");
     return;
   }
 
   // Check if score would result in 1 (bust)
-  if (player.score - score === 1) {
+  if (realTimePlayerScore.value(currentPlayer.value) - score === 1) {
     alert("Bust! Cannot finish on 1. Score not counted.");
     return;
   }
 
-  // Save current state to history before making changes
-  saveGameState();
-
-  // Update player score
-  player.score -= score;
-  player.scores.push(score);
+  currentLeg.value.players
+    .find((player) => player.playerId === currentPlayer.value)
+    ?.scores.push(
+      createScore({
+        playerId: currentPlayer.value,
+        playerLegId: currentLeg.value.id,
+        totalScore: score,
+      })
+    );
 
   // Clear validation message
   scoreValidationMessage.value = "";
 
   // Check for win condition
-  if (player.score === 0) {
-    handleLegWin();
+  if (realTimePlayerScore.value(currentPlayer.value) === 0) {
+    legWinNotification.value = true;
     return;
   }
 
-
+  // Switch to next player
+  const currentIndex = match.players.findIndex(
+    (player) => player.id === currentPlayer.value
+  );
+  const nextIndex = (currentIndex + 1) % match.players.length;
+  currentPlayer.value = match.players[nextIndex].id;
 
   // Focus on score input for next player
   nextTick(() => {
+    currentScore.value = 0;
     scoreInput.value?.focus();
   });
 };
 
+const canUndo = computed(() => {
+  // If match has more than 1 game entity, can undo
+  if (match.game.length > 1) return true;
 
-const saveGameState = () => {
-  const state = {
-    player1: {
-      name: player1.value.name,
-      score: player1.value.score,
-      scores: [...player1.value.scores],
-      setsWon: player1.value.setsWon,
-      legsWon: player1.value.legsWon,
-      currentSetLegs: player1.value.currentSetLegs,
-    },
-    player2: {
-      name: player2.value.name,
-      score: player2.value.score,
-      scores: [...player2.value.scores],
-      setsWon: player2.value.setsWon,
-      legsWon: player2.value.legsWon,
-      currentSetLegs: player2.value.currentSetLegs,
-    },
-    currentPlayer: currentPlayer.value,
-    gameOver: gameOver.value,
-    matchOver: matchOver.value,
-    currentSet: currentSet.value,
-    currentLeg: currentLeg.value,
-    legStartPlayer: legStartPlayer.value,
-    legWinNotification: legWinNotification.value,
-  };
-  gameHistory.value.push(state);
-};
+  // If only 1 game entity, check if it's a set with multiple legs
+  if (match.game.length === 1) {
+    const gameEntity = match.game[0];
+    if (gameEntity && "legs" in gameEntity) {
+      // It's a set - check if it has more than 1 leg
+      if (gameEntity.legs.length > 1) return true;
+    }
+  }
+
+  // If no set or set has only 1 leg, check if current leg has any scores
+  const hasScores = currentLeg.value.players.some(
+    (player) => player.scores && player.scores.length > 0
+  );
+
+  return hasScores;
+});
 
 const undoLastTurn = () => {
-  if (!canUndo.value) return;
-
-  const lastState = gameHistory.value.pop();
-  if (lastState) {
-    // Restore player data
-    player1.value.name = lastState.player1.name;
-    player1.value.score = lastState.player1.score;
-    player1.value.scores = lastState.player1.scores;
-    player1.value.setsWon = lastState.player1.setsWon;
-    player1.value.legsWon = lastState.player1.legsWon;
-    player1.value.currentSetLegs = lastState.player1.currentSetLegs;
-
-    player2.value.name = lastState.player2.name;
-    player2.value.score = lastState.player2.score;
-    player2.value.scores = lastState.player2.scores;
-    player2.value.setsWon = lastState.player2.setsWon;
-    player2.value.legsWon = lastState.player2.legsWon;
-    player2.value.currentSetLegs = lastState.player2.currentSetLegs;
-
-    // Restore game state
-    currentPlayer.value = lastState.currentPlayer;
-    gameOver.value = lastState.gameOver;
-    matchOver.value = lastState.matchOver;
-    currentSet.value = lastState.currentSet;
-    currentLeg.value = lastState.currentLeg;
-    legStartPlayer.value = lastState.legStartPlayer;
-    legWinNotification.value = lastState.legWinNotification;
-
-    currentScore.value = "";
-    scoreValidationMessage.value = "";
-
-    // Focus on score input
-    nextTick(() => {
-      scoreInput.value?.focus();
-    });
-  }
-};
-
-const handleLegWin = () => {
-  const winnerPlayer = currentPlayer.value === 1 ? "player1" : "player2";
-  const winnerName =
-    currentPlayer.value === 1
-      ? currentLegState.value.player1.name
-      : currentLegState.value.player2.name;
-
-  // Show leg win notification
-  legWinNotification.value = `${winnerName} wins the leg!`;
-
-  // Add leg to current set
-  const currentSetData = currentSet.value;
-  currentSetData.legs.push({
-    legNumber: match.value.currentLeg,
-    winner: winnerPlayer,
-    scores: {
-      player1: [...currentLegState.value.player1.scores],
-      player2: [...currentLegState.value.player2.scores],
-    },
-  });
-
-  // Update legs won in current set
-  currentSetData.legsWon[winnerPlayer]++;
-
-  // Check if this completes a set (for sets matches)
-  if (props.matchConfig.type === "sets") {
-    const legsNeeded = getLegsNeededToWinSet(
-      props.matchConfig.winCondition,
-      props.matchConfig.legsPerSet
-    );
-
-    if (currentSetData.legsWon[winnerPlayer] >= legsNeeded) {
-      // Winner wins the set
-      currentSetData.setWinner = winnerPlayer;
-
-      // Check if match is over
-      const totalSetsWon = match.value.sets.filter(
-        (set) => set.setWinner === winnerPlayer
-      ).length;
-      if (totalSetsWon >= props.matchConfig.setsToWin) {
-        matchOver.value = true;
-        gameOver.value = true;
-        return;
-      }
-
-      // Start new set
-      match.value.currentSet++;
-      match.value.currentLeg = 1;
-      match.value.legStartPlayer = match.value.legStartPlayer === 1 ? 2 : 1;
-
-      // Add new set
-      match.value.sets.push({
-        setNumber: match.value.currentSet,
-        legs: [],
-        legsWon: { player1: 0, player2: 0 },
-        setWinner: null,
-      });
-    } else {
-      // Continue current set
-      match.value.currentLeg++;
-      match.value.legStartPlayer = match.value.legStartPlayer === 1 ? 2 : 1;
-    }
-  } else {
-    // Legs match - check if match is over
-    const totalLegsWon = match.value.sets.reduce(
-      (total, set) => total + set.legsWon[winnerPlayer],
-      0
-    );
-    if (totalLegsWon >= Math.ceil(props.matchConfig.numberOfLegs / 2)) {
-      matchOver.value = true;
-      gameOver.value = true;
-      return;
-    }
-
-    // Continue to next leg
-    match.value.currentLeg++;
-    match.value.legStartPlayer = match.value.legStartPlayer === 1 ? 2 : 1;
-  }
-
-  // Clear notification after 3 seconds
-  setTimeout(() => {
-    legWinNotification.value = "";
-  }, 3000);
-
-  // Reset scores for next leg
-  resetLegScores();
-};
-
-const resetLegScores = () => {
-  currentLegState.value.player1.score = 501;
-  currentLegState.value.player1.scores = [];
-  currentLegState.value.player2.score = 501;
-  currentLegState.value.player2.scores = [];
-  currentPlayer.value = match.value.legStartPlayer; // Start with the correct player
-  currentScore.value = "";
-  scoreValidationMessage.value = "";
-
-  // Focus on score input
-  nextTick(() => {
-    scoreInput.value?.focus();
-  });
+  alert("Undo last turn hasnt been built yet!");
 };
 
 const resetGame = () => {
   emit("game-reset");
 };
-
-// Initialize game when component mounts
-onMounted(() => {
-  initializeGame();
-});
-
-// Watch for game over
-watch(gameOver, (newValue) => {
-  if (newValue) {
-    // Auto-focus on play again button after a short delay
-    setTimeout(() => {
-      const playAgainBtn = document.querySelector(".dartboard-button");
-      playAgainBtn?.focus();
-    }, 100);
-  }
-});
 </script>

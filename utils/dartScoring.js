@@ -21,6 +21,7 @@ const ALL_DART_SCORES = [...new Set([...SINGLE_SCORES, ...DOUBLE_SCORES, ...TRIP
 // Generate all possible 3-dart combinations
 function generateAllPossibleScores() {
   const possibleScores = new Set();
+  possibleScores.add(0);
   
   // Single dart
   ALL_DART_SCORES.forEach(score => {
