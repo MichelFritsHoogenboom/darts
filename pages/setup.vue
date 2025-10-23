@@ -52,7 +52,6 @@ const { saveMatch } = useMatches();
 // Reactive data
 const match = reactive(createMatch());
 const showPlayerForm = ref(false);
-const addedPlayers = ref<Player[]>([]);
 
 // Load players on mount
 onBeforeMount(async () => {
@@ -89,7 +88,6 @@ const handlePlayerSubmit = async (playerData: Player) => {
   try {
     await savePlayer(playerData);
     showPlayerForm.value = false;
-    console.log("Player saved successfully:", playerData);
   } catch (err) {
     console.error("Failed to save player:", err);
     // You could show a toast notification here

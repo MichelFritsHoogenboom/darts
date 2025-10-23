@@ -1,4 +1,8 @@
 import { v4 as uuid } from "uuid";
+import { LegService } from "~/database/LegService";
+import { PlayerLegService } from "~/database/PlayerLegService";
+import { ScoreService } from "~/database/ScoreService";
+import { SingleDartScoreService } from "~/database/SingleDartScoreService";
 
 import type { X01GameType } from "./x01MatchConfig";
 export interface SingleDartScore {
@@ -47,45 +51,72 @@ export interface Leg {
   winner?: string;
 }
 
-export function createSingleDartScore(overrides: {
+export async function createSingleDartScore(overrides: {
   scoreId: string;
   score: number;
-}): SingleDartScore {
-  return {
+}): Promise<SingleDartScore> {
+  const singleDartScore = {
     id: uuid(),
     createdAt: new Date(),
     updatedAt: new Date(),
     ...overrides,
   };
+
+  // Save to database
+  try {
+    await SingleDartScoreService.upsert(singleDartScore);
+  } catch (error) {
+    console.error("Failed to save single dart score to database:", error);
+  }
+
+  return singleDartScore;
 }
 
-export function createScore(overrides: {
+export async function createScore(overrides: {
   playerId: string;
   playerLegId: string;
   totalScore: number;
-}): Score {
-  return {
+}): Promise<Score> {
+  const score = {
     id: uuid(),
     createdAt: new Date(),
     updatedAt: new Date(),
     ...overrides,
   };
+
+  // Save to database
+  try {
+    await ScoreService.upsert(score);
+  } catch (error) {
+    console.error("Failed to save score to database:", error);
+  }
+
+  return score;
 }
 
-export function createPlayerLeg(overrides: {
+export async function createPlayerLeg(overrides: {
   legId: string;
   playerId: string;
-}): PlayerLeg {
-  return {
+}): Promise<PlayerLeg> {
+  const playerLeg = {
     id: uuid(),
     createdAt: new Date(),
     updatedAt: new Date(),
     scores: [],
     ...overrides,
   };
+
+  // Save to database
+  try {
+    await PlayerLegService.upsert(playerLeg);
+  } catch (error) {
+    console.error("Failed to save player leg to database:", error);
+  }
+
+  return playerLeg;
 }
 
-export function createLeg(
+export async function createLeg(
   overrides: Partial<Leg> & {
     matchId: string;
     setId?: string;
@@ -93,11 +124,20 @@ export function createLeg(
     players: Array<PlayerLeg>;
     startingPlayer: string;
   }
-): Leg {
-  return {
+): Promise<Leg> {
+  const leg = {
     id: uuid(),
     createdAt: new Date(),
     updatedAt: new Date(),
     ...overrides,
   };
+
+  // Save to database
+  try {
+    await LegService.upsert(leg);
+  } catch (error) {
+    console.error("Failed to save leg to database:", error);
+  }
+
+  return leg;
 }

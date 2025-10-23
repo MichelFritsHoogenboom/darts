@@ -2,6 +2,8 @@ import { ref, readonly } from "vue";
 import { MatchService } from "../database/MatchService";
 import type { Match } from "../interfaces/match";
 
+const matchService = new MatchService();
+
 export function useMatches() {
   const matches = ref<Match[]>([]);
   const loading = ref(false);
@@ -11,7 +13,7 @@ export function useMatches() {
     try {
       loading.value = true;
       error.value = null;
-      matches.value = await MatchService.getAllMatches();
+      matches.value = await matchService.getAll();
     } catch (err) {
       error.value =
         err instanceof Error ? err.message : "Failed to load matches";
@@ -25,7 +27,7 @@ export function useMatches() {
     try {
       loading.value = true;
       error.value = null;
-      const savedMatch = await MatchService.upsertMatch(match);
+      const savedMatch = await matchService.upsert(match);
 
       // Update local state
       const index = matches.value.findIndex((m) => m.id === match.id);
@@ -49,7 +51,7 @@ export function useMatches() {
     try {
       loading.value = true;
       error.value = null;
-      return await MatchService.getMatch(id);
+      return await matchService.get(id);
     } catch (err) {
       error.value = err instanceof Error ? err.message : "Failed to get match";
       console.error("Failed to get match:", err);
@@ -63,7 +65,7 @@ export function useMatches() {
     try {
       loading.value = true;
       error.value = null;
-      await MatchService.deleteMatch(id);
+      await matchService.delete(id);
 
       // Remove from local state
       const index = matches.value.findIndex((m) => m.id === id);
@@ -84,7 +86,7 @@ export function useMatches() {
     try {
       loading.value = true;
       error.value = null;
-      return await MatchService.searchMatches(searchTerm);
+      return await matchService.search(searchTerm, ["gameType"]);
     } catch (err) {
       error.value =
         err instanceof Error ? err.message : "Failed to search matches";
@@ -99,7 +101,7 @@ export function useMatches() {
     try {
       loading.value = true;
       error.value = null;
-      return await MatchService.getMatchesForPlayer(playerId);
+      return await matchService.getMatchesForPlayer(playerId);
     } catch (err) {
       error.value =
         err instanceof Error ? err.message : "Failed to get matches for player";

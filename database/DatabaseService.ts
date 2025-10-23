@@ -24,14 +24,6 @@ export class DatabaseService {
     T extends { id: string; createdAt: Date; updatedAt: Date }
   >(table: any, data: T): Promise<T> {
     await this.ensureDatabase();
-    console.log("data", data);
-    // Debug logging
-    console.log(
-      "DatabaseService.upsert - data.id:",
-      data.id,
-      "type:",
-      typeof data.id
-    );
 
     if (!data.id || typeof data.id !== "string") {
       throw new Error(

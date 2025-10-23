@@ -1,70 +1,37 @@
-import { DatabaseService } from "./DatabaseService";
+import { BaseService } from "./BaseService";
 import type { Match } from "../interfaces/match";
+import type { PlayerStats } from "../interfaces/player";
 
 /**
  * Match-specific database operations
  */
-export class MatchService {
-  /**
-   * Add or update a match
-   */
-  static async upsertMatch(match: Match): Promise<Match> {
-    const db = await DatabaseService.ensureDatabase();
-    return await DatabaseService.upsert<Match>(db.matches, match);
-  }
-
-  /**
-   * Get a match by ID
-   */
-  static async getMatch(id: string): Promise<Match | undefined> {
-    const db = await DatabaseService.ensureDatabase();
-    return await DatabaseService.getById<Match>(db.matches, id);
-  }
-
-  /**
-   * Get all matches
-   */
-  static async getAllMatches(): Promise<Match[]> {
-    const db = await DatabaseService.ensureDatabase();
-    return await DatabaseService.getAll<Match>(db.matches);
-  }
-
-  /**
-   * Delete a match by ID
-   */
-  static async deleteMatch(id: string): Promise<void> {
-    const db = await DatabaseService.ensureDatabase();
-    await DatabaseService.deleteById(db.matches, id);
+export class MatchService extends BaseService<Match> {
+  protected getTableName(): string {
+    return "matches";
   }
 
   /**
    * Search matches by player names or game type
    */
-  static async searchMatches(searchTerm: string): Promise<Match[]> {
-    const db = await DatabaseService.ensureDatabase();
-    return await DatabaseService.search<Match>(db.matches, searchTerm, [
-      "gameType",
-      "players.firstName",
-      "players.lastName",
-    ]);
+  async searchMatches(searchTerm: string): Promise<Match[]> {
+    return await this.search(searchTerm, ["gameType"]);
   }
 
   /**
    * Check if a match exists by ID
    */
-  static async matchExists(id: string): Promise<boolean> {
-    const match = await this.getMatch(id);
+  async matchExists(id: string): Promise<boolean> {
+    const match = await this.get(id);
     return !!match;
   }
 
   /**
    * Get matches for a specific player
    */
-  static async getMatchesForPlayer(playerId: string): Promise<Match[]> {
-    const db = await DatabaseService.ensureDatabase();
-    const allMatches = await DatabaseService.getAll<Match>(db.matches);
-    return allMatches.filter((match) =>
-      match.players.some((player) => player.id === playerId)
+  async getMatchesForPlayer(playerId: string): Promise<Match[]> {
+    const allMatches = await this.getAll();
+    return allMatches.filter((match: Match) =>
+      match.players.some((player: PlayerStats) => player.id === playerId)
     );
   }
 }

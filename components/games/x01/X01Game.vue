@@ -162,7 +162,8 @@
               :key="`p1-${index}`"
               class="flex justify-between items-center bg-gray-700 rounded px-2 py-1"
             >
-              <span class="text-xs text-gray-400">{{ index + 1 }}</span>
+              <span class="text-xs text-gray-400">{{ (index + 1) * 3 }}</span>
+              //
               <span class="font-bold text-sm">{{ score.totalScore }}</span>
             </div>
             <div
@@ -287,7 +288,7 @@ const playerNames = ref<Record<string, string>>({});
 // Game state refs
 const currentSet = ref<Set | null>(
   match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets
-    ? createNewSet()
+    ? await createNewSet()
     : null
 );
 const currentLeg = ref<Leg>(createNewleg());
@@ -407,6 +408,12 @@ const submitScore = () => {
   );
   const nextIndex = (currentIndex + 1) % match.players.length;
   currentPlayer.value = match.players[nextIndex].id;
+
+  // Check for win condition
+  if (realTimePlayerScore.value(currentPlayer.value) === 0) {
+    legWinNotification.value = true;
+    return;
+  }
 
   // Focus on score input for next player
   nextTick(() => {

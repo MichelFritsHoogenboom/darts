@@ -2,6 +2,8 @@ import { ref, computed, readonly } from "vue";
 import { PlayerService } from "../database/PlayerService";
 import type { Player } from "../interfaces/player";
 
+const playerService = new PlayerService();
+
 /**
  * Composable for player management
  */
@@ -17,7 +19,7 @@ export function usePlayers() {
     try {
       loading.value = true;
       error.value = null;
-      players.value = await PlayerService.getAllPlayers();
+      players.value = await playerService.getAll();
     } catch (err) {
       error.value =
         err instanceof Error ? err.message : "Failed to load players";
@@ -34,7 +36,7 @@ export function usePlayers() {
     try {
       loading.value = true;
       error.value = null;
-      const savedPlayer = await PlayerService.upsertPlayer(player);
+      const savedPlayer = await playerService.upsert(player);
 
       // Update local players array
       const existingIndex = players.value.findIndex(
@@ -64,7 +66,7 @@ export function usePlayers() {
     try {
       loading.value = true;
       error.value = null;
-      await PlayerService.deletePlayer(id);
+      await playerService.delete(id);
 
       // Remove from local players array
       players.value = players.value.filter((p) => p.id !== id);
@@ -85,7 +87,11 @@ export function usePlayers() {
     try {
       loading.value = true;
       error.value = null;
-      return await PlayerService.searchPlayers(searchTerm);
+      return await playerService.search(searchTerm, [
+        "firstName",
+        "lastName",
+        "alias",
+      ]);
     } catch (err) {
       error.value =
         err instanceof Error ? err.message : "Failed to search players";
@@ -103,7 +109,7 @@ export function usePlayers() {
     try {
       loading.value = true;
       error.value = null;
-      return await PlayerService.getPlayer(id);
+      return await playerService.get(id);
     } catch (err) {
       error.value = err instanceof Error ? err.message : "Failed to get player";
       console.error("Error getting player:", err);
