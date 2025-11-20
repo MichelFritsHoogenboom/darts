@@ -1,3 +1,53 @@
+<script setup lang="ts">
+import { ref, computed, toRaw } from "vue";
+import { createPlayer } from "../../interfaces/player";
+
+const props = defineProps({
+  updatePlayer: {
+    type: String,
+    default: null,
+  },
+});
+
+const emit = defineEmits(["submit", "cancel"]);
+
+// Form data
+const formData = ref(createPlayer());
+const showAllFields = ref(false);
+
+// Computed property for birthDate to convert between Date and string (for date input)
+const birthDateString = computed({
+  get: () => {
+    if (!formData.value.birthDate) return "";
+    // Convert Date to YYYY-MM-DD format for date input
+    return formData.value.birthDate.toISOString().split("T")[0];
+  },
+  set: (value: string) => {
+    if (!value) {
+      formData.value.birthDate = undefined;
+    } else {
+      formData.value.birthDate = new Date(value);
+    }
+  },
+});
+
+// Form validation
+const isFormValid = computed(() => {
+  return formData.value.firstName.trim().length > 0;
+});
+
+// Handle form submission
+const handleSubmit = () => {
+  if (!isFormValid.value) return;
+
+  emit("submit", toRaw(formData.value));
+};
+
+// Handle cancel
+const handleCancel = () => {
+  emit("cancel");
+};
+</script>
 <template>
   <form @submit.prevent="handleSubmit" class="space-y-6">
     <!-- Basic Information -->
@@ -70,7 +120,7 @@
       </div>
 
       <!-- Birth Date -->
-      <FormInput v-model="formData.birthDate" type="date" variant="light">
+      <FormInput v-model="birthDateString" type="date" variant="light">
         <template #label>Birth Date</template>
       </FormInput>
 
@@ -121,38 +171,3 @@
     </div>
   </form>
 </template>
-
-<script setup lang="ts">
-import { ref, computed, toRaw } from "vue";
-import { createPlayer } from "../../interfaces/player";
-
-const props = defineProps({
-  updatePlayer: {
-    type: String,
-    default: null,
-  },
-});
-
-const emit = defineEmits(["submit", "cancel"]);
-
-// Form data
-const formData = ref(createPlayer());
-const showAllFields = ref(false);
-
-// Form validation
-const isFormValid = computed(() => {
-  return formData.value.firstName.trim().length > 0;
-});
-
-// Handle form submission
-const handleSubmit = () => {
-  if (!isFormValid.value) return;
-
-  emit("submit", toRaw(formData.value));
-};
-
-// Handle cancel
-const handleCancel = () => {
-  emit("cancel");
-};
-</script>

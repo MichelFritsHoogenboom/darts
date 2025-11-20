@@ -1,3 +1,49 @@
+<script setup lang="ts">
+import { useToggle } from "@vueuse/core";
+import { watch } from "vue";
+
+interface Props {
+  modelValue: boolean;
+}
+
+interface Emits {
+  (e: "update:modelValue", value: boolean): void;
+}
+
+const props = defineProps<Props>();
+const emit = defineEmits<Emits>();
+
+const [isOpen, toggle] = useToggle(props.modelValue);
+
+// Watch for external changes to modelValue
+watch(
+  () => props.modelValue,
+  (newValue) => {
+    isOpen.value = newValue;
+  }
+);
+
+// Watch for internal changes and emit
+watch(isOpen, (newValue) => {
+  emit("update:modelValue", newValue);
+});
+
+const close = () => {
+  isOpen.value = false;
+};
+
+const open = () => {
+  isOpen.value = true;
+};
+
+// Expose methods for parent components
+defineExpose({
+  open,
+  close,
+  toggle,
+});
+</script>
+
 <template>
   <Transition
     enter-active-class="transition duration-300 ease-out"
@@ -70,49 +116,3 @@
     </div>
   </Transition>
 </template>
-
-<script setup lang="ts">
-import { useToggle } from "@vueuse/core";
-import { watch } from "vue";
-
-interface Props {
-  modelValue: boolean;
-}
-
-interface Emits {
-  (e: "update:modelValue", value: boolean): void;
-}
-
-const props = defineProps<Props>();
-const emit = defineEmits<Emits>();
-
-const [isOpen, toggle] = useToggle(props.modelValue);
-
-// Watch for external changes to modelValue
-watch(
-  () => props.modelValue,
-  (newValue) => {
-    isOpen.value = newValue;
-  }
-);
-
-// Watch for internal changes and emit
-watch(isOpen, (newValue) => {
-  emit("update:modelValue", newValue);
-});
-
-const close = () => {
-  isOpen.value = false;
-};
-
-const open = () => {
-  isOpen.value = true;
-};
-
-// Expose methods for parent components
-defineExpose({
-  open,
-  close,
-  toggle,
-});
-</script>

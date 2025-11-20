@@ -1,3 +1,56 @@
+<script setup lang="ts">
+import { ref, computed } from "vue";
+import type { Player, PlayerStats } from "../../interfaces/player";
+
+const props = defineProps<{
+  availablePlayers: Player[];
+  selectedPlayers: PlayerStats[];
+  loading: boolean;
+  error: string | null;
+}>();
+
+const selectedPlayersFullData = computed(() => {
+  return props.selectedPlayers
+    .map((p) => props.availablePlayers.find((player) => player.id === p.id))
+    .filter((player): player is Player => player !== undefined);
+});
+
+const emit = defineEmits<{
+  "add-player": [];
+  "select-player": [playerId: string];
+  "remove-player": [playerId: string];
+}>();
+
+const selectedPlayerId = ref<string>("");
+
+// Computed property for available players (excluding already selected ones)
+const availablePlayers = computed(() => {
+  const selectedIds = props.selectedPlayers.map((p) => p.id);
+  const players = props.availablePlayers
+    .filter((player) => !selectedIds.includes(player.id))
+    .map((player) => ({
+      value: player.id,
+      label: `${player.firstName} ${player.lastName || ""}${
+        player.alias ? ` (${player.alias})` : ""
+      }`.trim(),
+    }));
+
+  // Add placeholder option at the beginning
+  return [{ value: "", label: "Select a player to add" }, ...players];
+});
+
+const addPlayerToMatch = () => {
+  if (selectedPlayerId.value) {
+    emit("select-player", selectedPlayerId.value);
+    selectedPlayerId.value = ""; // Reset selection
+  }
+};
+
+const removePlayerFromMatch = (playerId: string) => {
+  emit("remove-player", playerId);
+};
+</script>
+
 <template>
   <div class="bg-gray-800 rounded-xl p-8 mb-6">
     <h2 class="text-2xl font-bold text-center mb-6">Players</h2>
@@ -71,56 +124,3 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { ref, computed } from "vue";
-import type { Player, PlayerStats } from "../../interfaces/player";
-
-const props = defineProps<{
-  availablePlayers: Player[];
-  selectedPlayers: PlayerStats[];
-  loading: boolean;
-  error: string | null;
-}>();
-
-const selectedPlayersFullData = computed(() => {
-  return props.selectedPlayers
-    .map((p) => props.availablePlayers.find((player) => player.id === p.id))
-    .filter((player): player is Player => player !== undefined);
-});
-
-const emit = defineEmits<{
-  "add-player": [];
-  "select-player": [playerId: string];
-  "remove-player": [playerId: string];
-}>();
-
-const selectedPlayerId = ref<string>("");
-
-// Computed property for available players (excluding already selected ones)
-const availablePlayers = computed(() => {
-  const selectedIds = props.selectedPlayers.map((p) => p.id);
-  const players = props.availablePlayers
-    .filter((player) => !selectedIds.includes(player.id))
-    .map((player) => ({
-      value: player.id,
-      label: `${player.firstName} ${player.lastName || ""}${
-        player.alias ? ` (${player.alias})` : ""
-      }`.trim(),
-    }));
-
-  // Add placeholder option at the beginning
-  return [{ value: "", label: "Select a player to add" }, ...players];
-});
-
-const addPlayerToMatch = () => {
-  if (selectedPlayerId.value) {
-    emit("select-player", selectedPlayerId.value);
-    selectedPlayerId.value = ""; // Reset selection
-  }
-};
-
-const removePlayerFromMatch = (playerId: string) => {
-  emit("remove-player", playerId);
-};
-</script>

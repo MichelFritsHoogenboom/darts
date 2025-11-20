@@ -1,33 +1,22 @@
-<template>
-  <button
-    :type="type"
-    :disabled="disabled"
-    :class="buttonClasses"
-    @click="$emit('click', $event)"
-  >
-    <slot />
-  </button>
-</template>
-
 <script setup lang="ts">
 import { computed } from "vue";
 
-const props = defineProps({
-  type: {
-    type: String,
-    default: "button",
-  },
-  variant: {
-    type: String,
-    default: "primary",
-  },
-  size: {
-    type: String,
-    default: "md",
-  },
-  disabled: Boolean,
-  fullWidth: Boolean,
-});
+type ButtonVariant =
+  | "primary"
+  | "secondary"
+  | "outline"
+  | "ghost"
+  | "light"
+  | "lightOutline";
+type ButtonSize = "sm" | "md" | "lg" | "xl";
+
+const props = defineProps<{
+  type?: "button" | "submit" | "reset";
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  disabled?: boolean;
+  fullWidth?: boolean;
+}>();
 
 defineEmits(["click"]);
 
@@ -35,7 +24,7 @@ const buttonClasses = computed(() => {
   const baseClasses =
     "font-bold rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800";
 
-  const variantClasses = {
+  const variantClasses: Record<ButtonVariant, string> = {
     primary:
       "bg-dartboard-red hover:bg-red-600 text-white focus:ring-dartboard-red",
     secondary: "bg-gray-600 hover:bg-gray-500 text-white focus:ring-gray-500",
@@ -48,7 +37,7 @@ const buttonClasses = computed(() => {
       "border-2 border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-gray-500",
   };
 
-  const sizeClasses = {
+  const sizeClasses: Record<ButtonSize, string> = {
     sm: "px-3 py-2 text-sm",
     md: "px-4 py-2 text-base",
     lg: "px-6 py-3 text-lg",
@@ -63,8 +52,8 @@ const buttonClasses = computed(() => {
 
   return [
     baseClasses,
-    variantClasses[props.variant],
-    sizeClasses[props.size],
+    props.variant ? variantClasses[props.variant] : variantClasses.primary,
+    props.size ? sizeClasses[props.size] : sizeClasses.md,
     disabledClasses,
     widthClasses,
   ]
@@ -72,3 +61,14 @@ const buttonClasses = computed(() => {
     .join(" ");
 });
 </script>
+
+<template>
+  <button
+    :type="type"
+    :disabled="disabled"
+    :class="buttonClasses"
+    @click="$emit('click', $event)"
+  >
+    <slot />
+  </button>
+</template>

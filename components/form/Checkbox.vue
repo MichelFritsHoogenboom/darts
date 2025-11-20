@@ -1,8 +1,20 @@
+<script setup lang="ts">
+defineProps({
+  modelValue: Boolean,
+  disabled: Boolean,
+  required: Boolean,
+});
+
+defineEmits(["update:modelValue"]);
+</script>
+
 <template>
   <label class="flex items-center cursor-pointer">
     <input
       :checked="modelValue"
-      @change="$emit('update:modelValue', $event.target.checked)"
+      @change="
+        $emit('update:modelValue', ($event.target as HTMLInputElement).checked)
+      "
       :disabled="disabled"
       :required="required"
       type="checkbox"
@@ -13,13 +25,3 @@
     </span>
   </label>
 </template>
-
-<script setup lang="ts">
-defineProps({
-  modelValue: Boolean,
-  disabled: Boolean,
-  required: Boolean,
-});
-
-defineEmits(["update:modelValue"]);
-</script>

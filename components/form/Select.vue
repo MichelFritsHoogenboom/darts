@@ -1,29 +1,3 @@
-<template>
-  <div>
-    <label
-      v-if="$slots.label"
-      class="block text-sm font-medium text-gray-300 mb-2"
-    >
-      <slot name="label" />
-    </label>
-    <select
-      :value="modelValue"
-      @input="handleInput"
-      :disabled="disabled"
-      class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-dartboard-red focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-    >
-      <option
-        v-for="option in options"
-        :key="option.value"
-        :value="option.value"
-        :selected="option.value === modelValue"
-      >
-        {{ option.label }}
-      </option>
-    </select>
-  </div>
-</template>
-
 <script setup lang="ts" generic="T extends string | number">
 interface SelectOption<T extends string | number = string | number> {
   value: T;
@@ -54,3 +28,29 @@ const handleInput = (event: Event) => {
   emit("update:modelValue", value);
 };
 </script>
+
+<template>
+  <div>
+    <label
+      v-if="$slots.label"
+      class="block text-sm font-medium text-gray-300 mb-2"
+    >
+      <slot name="label" />
+    </label>
+    <select
+      :value="modelValue"
+      @input="handleInput"
+      :disabled="disabled"
+      class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-dartboard-red focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+    >
+      <option
+        v-for="option in options"
+        :key="option.value"
+        :value="option.value"
+        :selected="option.value === modelValue"
+      >
+        {{ option.label }}
+      </option>
+    </select>
+  </div>
+</template>

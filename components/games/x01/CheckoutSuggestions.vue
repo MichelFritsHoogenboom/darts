@@ -1,3 +1,18 @@
+<script setup lang="ts">
+import { computed } from "vue";
+import { getCheckoutStatus } from "~/utils/dartScoring.js";
+
+// Props
+const { playerName, score } = defineProps({
+  playerName: String,
+  score: Number,
+});
+
+// Computed
+const checkoutStatus = computed(() => {
+  return getCheckoutStatus(score);
+});
+</script>
 <template>
   <div
     v-if="checkoutStatus.isCheckout"
@@ -17,19 +32,3 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { computed } from "vue";
-import { getCheckoutStatus } from "~/utils/dartScoring.js";
-
-// Props
-const { playerName, score } = defineProps({
-  playerName: String,
-  score: Number,
-});
-
-// Computed
-const checkoutStatus = computed(() => {
-  return getCheckoutStatus(score);
-});
-</script>
