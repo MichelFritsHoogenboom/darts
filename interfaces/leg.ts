@@ -3,7 +3,11 @@ import { LegService } from "~/database/LegService";
 import { PlayerLegService } from "~/database/PlayerLegService";
 import { ScoreService } from "~/database/ScoreService";
 import { SingleDartScoreService } from "~/database/SingleDartScoreService";
-
+import { toRaw } from "vue";
+const legService = new LegService();
+const playerLegService = new PlayerLegService();
+const scoreService = new ScoreService();
+const singleDartScoreService = new SingleDartScoreService();
 import type { X01GameType } from "./x01MatchConfig";
 export interface SingleDartScore {
   id: string;
@@ -64,7 +68,7 @@ export async function createSingleDartScore(overrides: {
 
   // Save to database
   try {
-    await SingleDartScoreService.upsert(singleDartScore);
+    await singleDartScoreService.upsert(singleDartScore);
   } catch (error) {
     console.error("Failed to save single dart score to database:", error);
   }
@@ -86,7 +90,7 @@ export async function createScore(overrides: {
 
   // Save to database
   try {
-    await ScoreService.upsert(score);
+    await scoreService.upsert(score);
   } catch (error) {
     console.error("Failed to save score to database:", error);
   }
@@ -108,7 +112,7 @@ export async function createPlayerLeg(overrides: {
 
   // Save to database
   try {
-    await PlayerLegService.upsert(playerLeg);
+    await playerLegService.upsert(playerLeg);
   } catch (error) {
     console.error("Failed to save player leg to database:", error);
   }
@@ -134,7 +138,7 @@ export async function createLeg(
 
   // Save to database
   try {
-    await LegService.upsert(leg);
+    await legService.upsert(toRaw(leg));
   } catch (error) {
     console.error("Failed to save leg to database:", error);
   }

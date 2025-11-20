@@ -1,6 +1,7 @@
-import { ref, readonly } from "vue";
+import { ref, readonly, toRaw } from "vue";
 import { SetService } from "~/database/SetService";
 import type { Set } from "~/interfaces/set";
+import type { Match } from "~/interfaces/match";
 
 const setService = new SetService();
 
@@ -26,7 +27,8 @@ export const useSets = () => {
     loading.value = true;
     error.value = null;
     try {
-      const savedSet = await setService.upsert(set);
+      // Convert reactive proxy to plain object for IndexedDB
+      const savedSet = await setService.upsert(toRaw(set));
       // Update local state
       const index = sets.value.findIndex((s) => s.id === set.id);
       if (index >= 0) {
@@ -76,6 +78,13 @@ export const useSets = () => {
     }
   };
 
+  const entityGamesWonByPlayer = (
+    entity: Set | Match,
+    playerId: string
+  ): number => {
+    return entity.game.filter((game) => game.winner === playerId).length;
+  };
+
   return {
     sets: readonly(sets),
     loading: readonly(loading),
@@ -84,5 +93,6 @@ export const useSets = () => {
     saveSet,
     deleteSet,
     getSetsForMatch,
+    entityGamesWonByPlayer,
   };
 };

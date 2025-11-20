@@ -9,7 +9,7 @@
             v-if="match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets"
           >
             Set {{ match.game.length }} - Leg
-            {{ (match.game[match.game.length - 1] as Set).legs.length + 1 }}
+            {{ (match.game[match.game.length - 1] as Set).game.length }}
           </span>
           <span v-else>
             Leg
@@ -35,7 +35,8 @@
             </div>
             <div>
               Current Set Legs:
-              {{ getPlayerWinnerCountOf(player.id, currentSet?.legs || []) }}
+              {{ getPlayerWinnerCountOf(player.id, currentSet?.game || []) }}/
+              {{ match.matchConfig.legsToWinParent }}
             </div>
           </div>
         </div>
@@ -163,7 +164,7 @@
               class="flex justify-between items-center bg-gray-700 rounded px-2 py-1"
             >
               <span class="text-xs text-gray-400">{{ (index + 1) * 3 }}</span>
-              //
+
               <span class="font-bold text-sm">{{ score.totalScore }}</span>
             </div>
             <div
@@ -239,47 +240,51 @@ import { createSet } from "~/interfaces/set";
 import { createLeg } from "~/interfaces/leg";
 import { createScore } from "~/interfaces/leg";
 import { createPlayerLeg } from "~/interfaces/leg";
+
 import CheckoutSuggestions from "~/components/games/x01/CheckoutSuggestions.vue";
 
 const { match } = defineProps<{ match: Match }>();
 const { getPlayer } = usePlayers();
-
+const { entityGamesWonByPlayer, saveSet } = useSets();
+const { saveLeg } = useLegs();
 const emit = defineEmits<{
   "game-reset": [];
 }>();
 
-const createNewSet = (startingPlayer: string = match.players[0].id) => {
+const createNewSet = async (startingPlayer: string = match.players[0].id) => {
   const set = createSet({
     matchId: match.id,
-    players: match.players,
+    players: toRaw(match.players),
     startingPlayer: startingPlayer,
   });
 
   return set;
 };
 
-const createPlayerLegs = (players: PlayerStats[], legId: string) => {
-  return players.map((player: PlayerStats) =>
-    createPlayerLeg({
-      legId: legId,
-      playerId: player.id,
-    })
+const createPlayerLegs = async (players: PlayerStats[], legId: string) => {
+  return await Promise.all(
+    players.map((player: PlayerStats) =>
+      createPlayerLeg({
+        legId: legId,
+        playerId: player.id,
+      })
+    )
   );
 };
 
-const createNewleg = (startingPlayer: string = match.players[0].id) => {
+const createNewleg = async (startingPlayer: string = match.players[0].id) => {
   const legId = uuid();
 
   const legSettings = {
     id: legId,
     matchId: match.id,
     gameType: match.matchConfig.gameType,
-    players: createPlayerLegs(match.players, legId),
+    players: await createPlayerLegs(match.players, legId),
     startingPlayer: startingPlayer,
     ...(currentSet.value && { setId: currentSet.value.id }),
   };
 
-  return createLeg(legSettings);
+  return await createLeg(legSettings);
 };
 // Refs
 const scoreInput = useTemplateRef("scoreInput");
@@ -291,13 +296,16 @@ const currentSet = ref<Set | null>(
     ? await createNewSet()
     : null
 );
-const currentLeg = ref<Leg>(createNewleg());
+const currentLeg = ref<Leg>(await createNewleg());
 const currentScore = ref<number>(0);
 const currentPlayer = ref<string>(match.players[0].id);
 const scoreValidationMessage = ref<string>("");
 const legWinNotification = ref<boolean>(false);
 
 match.game.push(currentSet.value ? currentSet.value : currentLeg.value);
+if (currentSet.value) {
+  currentSet.value.game.push(currentLeg.value);
+}
 
 const realTimePlayerScore = computed(() => {
   return (playerId: string) => {
@@ -366,7 +374,67 @@ const validateScore = () => {
   isValidScore.value;
 };
 
-const submitScore = () => {
+const handleMatchWin = async () => {
+  match.winner = currentPlayer.value;
+  alert("Match won by " + getPlayerName(currentPlayer.value) + "!");
+};
+
+const handleSetWin = async () => {
+  console.log("handleSetWin");
+  if (!currentSet.value) {
+    return;
+  }
+  currentSet.value.winner = currentPlayer.value;
+  await saveSet(currentSet.value);
+
+  const setsWon = entityGamesWonByPlayer(match, currentPlayer.value);
+
+  if (setsWon === match.matchConfig.setsToWin) {
+    await handleMatchWin();
+  } else {
+    const newSet = await createNewSet(
+      getNextPlayerId(currentSet.value.startingPlayer)
+    );
+    const newLeg = await createNewleg(newSet.startingPlayer);
+    match.game.push(newSet);
+    newSet.game.push(newLeg);
+    currentSet.value = newSet;
+    currentLeg.value = newLeg;
+    currentPlayer.value = newLeg.startingPlayer;
+    resetScore();
+  }
+};
+
+const handleLegWin = async () => {
+  currentLeg.value.winner = currentPlayer.value;
+  await saveLeg(currentLeg.value);
+  const legsWon = entityGamesWonByPlayer(
+    currentSet.value ?? match,
+    currentPlayer.value
+  );
+
+  if (legsWon === match.matchConfig.legsToWinParent) {
+    if (currentSet.value) {
+      await handleSetWin();
+    } else {
+      await handleMatchWin();
+    }
+  } else {
+    const newLeg = await createNewleg(
+      getNextPlayerId(currentLeg.value.startingPlayer)
+    );
+    if (currentSet.value) {
+      currentSet.value.game.push(newLeg);
+    } else {
+      match.game.push(newLeg);
+    }
+    currentLeg.value = newLeg;
+    currentPlayer.value = newLeg.startingPlayer;
+    resetScore();
+  }
+};
+
+const submitScore = async () => {
   if (!isValidScore.value) return;
 
   const score = currentScore.value;
@@ -386,7 +454,7 @@ const submitScore = () => {
   currentLeg.value.players
     .find((player) => player.playerId === currentPlayer.value)
     ?.scores.push(
-      createScore({
+      await createScore({
         playerId: currentPlayer.value,
         playerLegId: currentLeg.value.id,
         totalScore: score,
@@ -398,28 +466,34 @@ const submitScore = () => {
 
   // Check for win condition
   if (realTimePlayerScore.value(currentPlayer.value) === 0) {
-    legWinNotification.value = true;
+    await handleLegWin();
     return;
   }
 
-  // Switch to next player
-  const currentIndex = match.players.findIndex(
-    (player) => player.id === currentPlayer.value
-  );
-  const nextIndex = (currentIndex + 1) % match.players.length;
-  currentPlayer.value = match.players[nextIndex].id;
-
-  // Check for win condition
-  if (realTimePlayerScore.value(currentPlayer.value) === 0) {
-    legWinNotification.value = true;
-    return;
-  }
-
+  setNextPlayer();
   // Focus on score input for next player
   nextTick(() => {
-    currentScore.value = 0;
-    scoreInput.value?.focus();
+    resetScore();
   });
+};
+
+const resetScore = () => {
+  currentScore.value = 0;
+  scoreInput.value?.focus();
+};
+
+const getNextPlayerId = (playerId: string) => {
+  const currentIndex = match.players.findIndex(
+    (player) => player.id === playerId
+  );
+  const nextIndex = (currentIndex + 1) % match.players.length;
+  return match.players[nextIndex].id;
+};
+
+const setNextPlayer = (playerid: string = currentPlayer.value) => {
+  // Switch to next player
+  const nextPlayerIndex = getNextPlayerId(playerid);
+  currentPlayer.value = nextPlayerIndex;
 };
 
 const canUndo = computed(() => {
@@ -429,9 +503,9 @@ const canUndo = computed(() => {
   // If only 1 game entity, check if it's a set with multiple legs
   if (match.game.length === 1) {
     const gameEntity = match.game[0];
-    if (gameEntity && "legs" in gameEntity) {
+    if (gameEntity && "game" in gameEntity) {
       // It's a set - check if it has more than 1 leg
-      if (gameEntity.legs.length > 1) return true;
+      if (gameEntity.game.length > 1) return true;
     }
   }
 

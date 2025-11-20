@@ -1,4 +1,4 @@
-import { ref, readonly } from "vue";
+import { ref, readonly, toRaw } from "vue";
 import { LegService } from "~/database/LegService";
 import type { Leg } from "~/interfaces/leg";
 
@@ -26,7 +26,8 @@ export const useLegs = () => {
     loading.value = true;
     error.value = null;
     try {
-      const savedLeg = await legService.upsert(leg);
+      // Convert reactive proxy to plain object for IndexedDB
+      const savedLeg = await legService.upsert(toRaw(leg));
       // Update local state
       const index = legs.value.findIndex((l) => l.id === leg.id);
       if (index >= 0) {

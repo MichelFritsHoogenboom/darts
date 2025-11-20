@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import {
   X01_GAMETYPES,
   X01_GAME_PLAYED_IN,
