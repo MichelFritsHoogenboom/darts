@@ -1,7 +1,7 @@
 import { ref, readonly, toRaw } from "vue";
 import { SetService } from "~/database/SetService";
 import type { Set } from "~/interfaces/set";
-import type { Match } from "~/interfaces/match";
+import type { Leg } from "~/interfaces/leg";
 
 const setService = new SetService();
 
@@ -79,10 +79,12 @@ export const useSets = () => {
   };
 
   const entityGamesWonByPlayer = (
-    entity: Set | Match,
+    entity: Set[] | Leg[],
     playerId: string
   ): number => {
-    return entity.game.filter((game) => game.winner === playerId).length;
+    const f = entity.filter((game) => game.winner === playerId).length;
+
+    return f;
   };
 
   return {

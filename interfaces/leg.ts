@@ -3,7 +3,6 @@ import { LegService } from "~/database/LegService";
 import { PlayerLegService } from "~/database/PlayerLegService";
 import { ScoreService } from "~/database/ScoreService";
 import { SingleDartScoreService } from "~/database/SingleDartScoreService";
-import { toRaw } from "vue";
 const legService = new LegService();
 const playerLegService = new PlayerLegService();
 const scoreService = new ScoreService();
@@ -38,7 +37,7 @@ export interface PlayerLeg {
   createdAt: Date;
   updatedAt: Date;
   playerId: string;
-  scores: Array<Score>;
+  scores: Array<string>; // Score IDs
   average?: number;
   checkout?: number;
 }
@@ -50,7 +49,7 @@ export interface Leg {
   createdAt: Date;
   updatedAt: Date;
   gameType: X01GameType;
-  players: Array<PlayerLeg>;
+  players: Array<string>; // PlayerLeg IDs
   startingPlayer: string;
   winner?: string;
 }
@@ -125,7 +124,7 @@ export async function createLeg(
     matchId: string;
     setId?: string;
     gameType: X01GameType;
-    players: Array<PlayerLeg>;
+    players: Array<string>; // PlayerLeg IDs
     startingPlayer: string;
   }
 ): Promise<Leg> {
@@ -138,7 +137,7 @@ export async function createLeg(
 
   // Save to database
   try {
-    await legService.upsert(toRaw(leg));
+    await legService.upsert(leg);
   } catch (error) {
     console.error("Failed to save leg to database:", error);
   }

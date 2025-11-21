@@ -9,7 +9,7 @@
 
       <SetupPlayerSelector
         :available-players="players as Player[]"
-        :selected-players="match.players as Player[]"
+        :selected-players="match.players as string[]"
         :loading="loading"
         :error="error"
         @add-player="showPlayerForm = true"
@@ -97,13 +97,13 @@ const handlePlayerSubmit = async (playerData: Player) => {
 // Player selection methods
 const addPlayerToMatch = (playerId: string) => {
   const player = players.value.find((p) => p.id === playerId);
-  if (player && !match.players.find((p) => p.id === playerId)) {
-    match.players.push({ id: playerId, stats: undefined });
+  if (player && !match.players.find((id) => id === playerId)) {
+    match.players.push(playerId);
   }
 };
 
 const removePlayerFromMatch = (playerId: string) => {
-  const index = match.players.findIndex((p) => p.id === playerId);
+  const index = match.players.findIndex((id) => id === playerId);
   if (index > -1) {
     match.players.splice(index, 1);
   }

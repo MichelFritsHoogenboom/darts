@@ -2,8 +2,7 @@
 import { v4 as uuid } from "uuid";
 import type { Match } from "~/interfaces/match";
 import type { Set } from "~/interfaces/set";
-import type { Leg, Score } from "~/interfaces/leg";
-import type { PlayerStats } from "~/interfaces/player";
+import type { Leg, PlayerLeg, Score } from "~/interfaces/leg";
 
 import { X01_GAME_PLAYED_IN } from "~/interfaces/x01MatchConfig";
 import { isAchievableScore } from "~/utils/dartScoring.js";
@@ -15,14 +14,19 @@ import { createPlayerLeg } from "~/interfaces/leg";
 import CheckoutSuggestions from "~/components/games/x01/CheckoutSuggestions.vue";
 
 const { match } = defineProps<{ match: Match }>();
-const { getPlayer } = usePlayers();
-const { entityGamesWonByPlayer, saveSet } = useSets();
-const { saveLeg } = useLegs();
+const { entityGamesWonByPlayer, saveSet, getSetsForMatch } = useSets();
+const { saveLeg, getLegsForSet, getLegsForMatch } = useLegs();
+const { getPlayerLegsForLeg, savePlayerLeg } = usePlayerLegs();
+const { saveMatch } = useMatches();
+const { players, loadPlayers } = usePlayers();
+const { getScoresForPlayerLeg } = useScores();
 const emit = defineEmits<{
   "game-reset": [];
 }>();
 
-const createNewSet = async (startingPlayer: string = match.players[0].id) => {
+await loadPlayers(match.players);
+
+const createNewSet = async (startingPlayer: string = match.players[0]) => {
   const set = createSet({
     matchId: match.id,
     players: toRaw(match.players),
@@ -32,18 +36,18 @@ const createNewSet = async (startingPlayer: string = match.players[0].id) => {
   return set;
 };
 
-const createPlayerLegs = async (players: PlayerStats[], legId: string) => {
+const createPlayerLegs = async (players: string[], legId: string) => {
   return await Promise.all(
-    players.map((player: PlayerStats) =>
+    players.map((playerId) =>
       createPlayerLeg({
         legId: legId,
-        playerId: player.id,
-      })
+        playerId: playerId,
+      }).then((playerLeg) => playerLeg.id)
     )
   );
 };
 
-const createNewleg = async (startingPlayer: string = match.players[0].id) => {
+const createNewleg = async (startingPlayer: string = match.players[0]) => {
   const legId = uuid();
 
   const legSettings = {
@@ -60,29 +64,117 @@ const createNewleg = async (startingPlayer: string = match.players[0].id) => {
 // Refs
 const scoreInput = useTemplateRef("scoreInput");
 
-const playerNames = ref<Record<string, string>>({});
 // Game state refs
 const currentSet = ref<Set | null>(
   match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets
     ? await createNewSet()
     : null
 );
+const currentSetGame = ref<Leg[]>([]);
 const currentLeg = ref<Leg>(await createNewleg());
+const currentPlayerLegs = ref<PlayerLeg[]>([]);
+const currentPlayerLegScores = ref<Record<string, Score[]>>({});
+const matchGame = ref<Set[] | Leg[]>([]);
+
+// Function to load match game (sets or legs) and current set game
+const loadMatchGame = async () => {
+  if (match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets) {
+    matchGame.value = await getSetsForMatch(match.id);
+    // Also reload current set's legs if there's a current set
+    if (currentSet.value) {
+      currentSetGame.value = await getLegsForSet(currentSet.value.id);
+    }
+  } else {
+    matchGame.value = await getLegsForMatch(match.id);
+  }
+};
+
+// Load legs for current set when it changes
+watch(
+  () => currentSet.value,
+  async (set) => {
+    if (set) {
+      currentSetGame.value = await getLegsForSet(set.id);
+    } else {
+      currentSetGame.value = [];
+    }
+  },
+  { immediate: true, deep: true }
+);
+
+// Load player legs when current leg changes
+watch(
+  () => currentLeg.value?.id,
+  async (legId) => {
+    if (legId) {
+      currentPlayerLegs.value = await getPlayerLegsForLeg(legId);
+    }
+  },
+  { immediate: true }
+);
+
+// Load scores for each player leg and group by playerId
+watch(
+  () => currentPlayerLegs.value,
+  async (playerLegs) => {
+    if (!playerLegs || playerLegs.length === 0) {
+      currentPlayerLegScores.value = {};
+      return;
+    }
+
+    // Load all scores for all player legs in parallel
+    const scoresByPlayerId: Record<string, Score[]> = {};
+    await Promise.all(
+      playerLegs.map(async (playerLeg) => {
+        const scores = await getScoresForPlayerLeg(playerLeg.id);
+        scoresByPlayerId[playerLeg.playerId] = scores;
+      })
+    );
+
+    currentPlayerLegScores.value = scoresByPlayerId;
+  },
+  { immediate: true, deep: true }
+);
+
+// Load sets for match when in sets mode
+watch(
+  () => match.game,
+  async () => {
+    await loadMatchGame();
+  },
+  { immediate: true, deep: true }
+);
+
+// Computed function to get player leg by playerId
+const getCurrentPlayerLeg = computed(() => {
+  return (playerId: string): PlayerLeg | undefined => {
+    return currentPlayerLegs.value.find((pl) => pl.playerId === playerId);
+  };
+});
+
 const currentScore = ref<number>(0);
-const currentPlayer = ref<string>(match.players[0].id);
+
+// Initialize with first player ID from match (before players are loaded)
+const currentPlayerId = ref<string>(match.players[0] as string);
+const currentPlayer = computed(() => {
+  // Always return a player - fallback to first player if current not found
+  return (
+    players.value.find((player) => player.id === currentPlayerId.value) ||
+    players.value[0]
+  );
+});
 const scoreValidationMessage = ref<string>("");
 const legWinNotification = ref<boolean>(false);
 
-match.game.push(currentSet.value ? currentSet.value : currentLeg.value);
+// Push IDs to match.game (which stores IDs)
+match.game.push(currentSet.value ? currentSet.value.id : currentLeg.value.id);
 if (currentSet.value) {
-  currentSet.value.game.push(currentLeg.value);
+  currentSet.value.game.push(currentLeg.value.id);
 }
 
 const realTimePlayerScore = computed(() => {
   return (playerId: string) => {
-    const scores = currentLeg.value.players.find(
-      (player) => player.playerId === playerId
-    )?.scores;
+    const scores = currentPlayerLegScores.value[playerId];
     const totalScoreThrown =
       scores?.reduce((total, score) => total + score.totalScore, 0) || 0;
 
@@ -96,26 +188,9 @@ const getPlayerWinnerCountOf = computed(() => {
   };
 });
 
-const playerLegScores = computed(() => {
-  return (playerId: string) => {
-    return (
-      currentLeg.value.players.find((player) => player.playerId === playerId)
-        ?.scores || []
-    );
-  };
-});
-
-const getPlayerName = (playerId: string) => {
-  return playerNames.value[playerId] || "Loading...";
-};
-
-// Load player names
-onMounted(async () => {
-  for (const player of match.players) {
-    const playerData = await getPlayer(player.id);
-    playerNames.value[player.id] =
-      playerData?.firstName + " " + playerData?.lastName || "Unknown";
-  }
+// Computed to get the correct legs array for display
+const legsToDisplay = computed(() => {
+  return currentSet.value ? currentSetGame.value : matchGame.value;
 });
 
 // Computed
@@ -146,19 +221,25 @@ const validateScore = () => {
 };
 
 const handleMatchWin = async () => {
-  match.winner = currentPlayer.value;
-  alert("Match won by " + getPlayerName(currentPlayer.value) + "!");
+  match.winner = currentPlayerId.value;
+  await saveMatch(match);
 };
 
 const handleSetWin = async () => {
-  console.log("handleSetWin");
   if (!currentSet.value) {
     return;
   }
-  currentSet.value.winner = currentPlayer.value;
+  currentSet.value.winner = currentPlayerId.value;
   await saveSet(currentSet.value);
 
-  const setsWon = entityGamesWonByPlayer(match, currentPlayer.value);
+  // Reload current set's legs to get updated winner info
+
+  matchGame.value = await getSetsForMatch(match.id);
+
+  const setsWon = entityGamesWonByPlayer(
+    matchGame.value,
+    currentPlayerId.value
+  );
 
   if (setsWon === match.matchConfig.setsToWin) {
     await handleMatchWin();
@@ -166,22 +247,27 @@ const handleSetWin = async () => {
     const newSet = await createNewSet(
       getNextPlayerId(currentSet.value.startingPlayer)
     );
-    const newLeg = await createNewleg(newSet.startingPlayer);
-    match.game.push(newSet);
-    newSet.game.push(newLeg);
     currentSet.value = newSet;
+    const newLeg = await createNewleg(newSet.startingPlayer);
+    match.game.push(newSet.id);
+    currentSet.value.game.push(newLeg.id);
+
     currentLeg.value = newLeg;
-    currentPlayer.value = newLeg.startingPlayer;
+    currentPlayerId.value = newLeg.startingPlayer;
     resetScore();
   }
 };
 
 const handleLegWin = async () => {
-  currentLeg.value.winner = currentPlayer.value;
+  currentLeg.value.winner = currentPlayerId.value;
   await saveLeg(currentLeg.value);
+
+  // Reload current legs to get updated winner info
+  await loadMatchGame();
+
   const legsWon = entityGamesWonByPlayer(
-    currentSet.value ?? match,
-    currentPlayer.value
+    currentSet.value ? currentSetGame.value : matchGame.value,
+    currentPlayerId.value
   );
 
   if (legsWon === match.matchConfig.legsToWinParent) {
@@ -195,12 +281,12 @@ const handleLegWin = async () => {
       getNextPlayerId(currentLeg.value.startingPlayer)
     );
     if (currentSet.value) {
-      currentSet.value.game.push(newLeg);
+      currentSet.value.game.push(newLeg.id);
     } else {
-      match.game.push(newLeg);
+      match.game.push(newLeg.id);
     }
     currentLeg.value = newLeg;
-    currentPlayer.value = newLeg.startingPlayer;
+    currentPlayerId.value = newLeg.startingPlayer;
     resetScore();
   }
 };
@@ -211,32 +297,34 @@ const submitScore = async () => {
   const score = currentScore.value;
 
   // Check if score would go below 0
-  if (realTimePlayerScore.value(currentPlayer.value) - score < 0) {
+  if (realTimePlayerScore.value(currentPlayerId.value) - score < 0) {
     alert("Score cannot go below zero!");
     return;
   }
 
   // Check if score would result in 1 (bust)
-  if (realTimePlayerScore.value(currentPlayer.value) - score === 1) {
+  if (realTimePlayerScore.value(currentPlayerId.value) - score === 1) {
     alert("Bust! Cannot finish on 1. Score not counted.");
     return;
   }
 
-  currentLeg.value.players
-    .find((player) => player.playerId === currentPlayer.value)
-    ?.scores.push(
-      await createScore({
-        playerId: currentPlayer.value,
-        playerLegId: currentLeg.value.id,
-        totalScore: score,
-      })
-    );
+  const playerLeg = getCurrentPlayerLeg.value(currentPlayerId.value);
+  if (!playerLeg) return;
+
+  const createdScore = await createScore({
+    playerId: currentPlayerId.value,
+    playerLegId: playerLeg.id,
+    totalScore: score,
+  });
+
+  playerLeg.scores.push(createdScore.id);
+  await savePlayerLeg(playerLeg);
 
   // Clear validation message
   scoreValidationMessage.value = "";
 
   // Check for win condition
-  if (realTimePlayerScore.value(currentPlayer.value) === 0) {
+  if (realTimePlayerScore.value(currentPlayerId.value) === 0) {
     await handleLegWin();
     return;
   }
@@ -254,38 +342,21 @@ const resetScore = () => {
 };
 
 const getNextPlayerId = (playerId: string) => {
-  const currentIndex = match.players.findIndex(
+  const currentIndex = players.value.findIndex(
     (player) => player.id === playerId
   );
-  const nextIndex = (currentIndex + 1) % match.players.length;
-  return match.players[nextIndex].id;
+  const nextIndex = (currentIndex + 1) % players.value.length;
+  return players.value[nextIndex].id;
 };
 
-const setNextPlayer = (playerid: string = currentPlayer.value) => {
+const setNextPlayer = (playerid: string = currentPlayerId.value) => {
   // Switch to next player
   const nextPlayerIndex = getNextPlayerId(playerid);
-  currentPlayer.value = nextPlayerIndex;
+  currentPlayerId.value = nextPlayerIndex;
 };
 
 const canUndo = computed(() => {
-  // If match has more than 1 game entity, can undo
-  if (match.game.length > 1) return true;
-
-  // If only 1 game entity, check if it's a set with multiple legs
-  if (match.game.length === 1) {
-    const gameEntity = match.game[0];
-    if (gameEntity && "game" in gameEntity) {
-      // It's a set - check if it has more than 1 leg
-      if (gameEntity.game.length > 1) return true;
-    }
-  }
-
-  // If no set or set has only 1 leg, check if current leg has any scores
-  const hasScores = currentLeg.value.players.some(
-    (player) => player.scores && player.scores.length > 0
-  );
-
-  return hasScores;
+  return false;
 });
 
 const undoLastTurn = () => {
@@ -307,34 +378,34 @@ const resetGame = () => {
           <span
             v-if="match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets"
           >
-            Set {{ match.game.length }} - Leg
-            {{ (match.game[match.game.length - 1] as Set).game.length }}
+            Set {{ matchGame.length }} - Leg
+            {{ currentSetGame.length }}
           </span>
           <span v-else>
             Leg
-            {{ match.game.length + 1 }} of
+            {{ matchGame.length }} of
             {{ match.matchConfig.legsToWinParent }}
           </span>
         </div>
-        <div :class="`grid grid-cols-${match.players.length} gap-4 text-sm`">
+        <div :class="`grid grid-cols-${players.length} gap-4 text-sm`">
           <div
             class="bg-gray-700 rounded-lg p-2"
-            v-for="player in match.players"
+            v-for="player in players"
             :key="player.id"
           >
             <div class="font-bold text-dartboard-red">
-              {{ getPlayerName(player.id) }}
+              {{ getPlayerDisplayName(player) }}
             </div>
             <div
               v-if="match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets"
             >
-              Sets: {{ getPlayerWinnerCountOf(player.id, match.game) }}/{{
+              Sets: {{ getPlayerWinnerCountOf(player.id, matchGame) }}/{{
                 match.matchConfig.setsToWin
               }}
             </div>
             <div>
-              Current Set Legs:
-              {{ getPlayerWinnerCountOf(player.id, currentSet?.game || []) }}/
+              Legs:
+              {{ getPlayerWinnerCountOf(player.id, legsToDisplay) }}/
               {{ match.matchConfig.legsToWinParent }}
             </div>
           </div>
@@ -342,24 +413,24 @@ const resetGame = () => {
       </div>
 
       <!-- Current Scores -->
-      <div :class="`grid grid-cols-${match.players.length} gap-4`">
+      <div :class="`grid grid-cols-${players.length} gap-4`">
         <div
-          v-for="player in match.players"
+          v-for="player in players"
           :key="player.id"
           :class="[
             'player-card',
-            currentPlayer === player.id ? 'active' : 'inactive',
+            currentPlayerId === player.id ? 'active' : 'inactive',
           ]"
         >
           <div class="text-center">
             <h3 class="text-xl font-bold mb-1">
-              {{ getPlayerName(player.id) }}
+              {{ getPlayerDisplayName(player) }}
             </h3>
             <div class="text-4xl font-bold text-dartboard-red mb-2">
               {{ realTimePlayerScore(player.id) }}
             </div>
             <div class="text-xs text-gray-400">
-              Current Turn: {{ currentPlayer === player.id ? "Yes" : "No" }}
+              Current Turn: {{ currentPlayerId === player.id ? "Yes" : "No" }}
             </div>
           </div>
         </div>
@@ -368,7 +439,7 @@ const resetGame = () => {
       <!-- Score Input -->
       <div class="bg-gray-800 rounded-xl p-4">
         <h3 class="text-xl font-bold text-center mb-3">
-          {{ getPlayerName(currentPlayer) }}'s Turn
+          {{ getPlayerDisplayName(currentPlayer) }}'s Turn
         </h3>
         <div class="max-w-md mx-auto">
           <input
@@ -435,30 +506,30 @@ const resetGame = () => {
         class="bg-gradient-to-r from-yellow-900 to-yellow-800 rounded-xl p-3 border-2 border-yellow-600 text-center"
       >
         <div class="text-yellow-100 font-bold text-lg">
-          🎯 {{ getPlayerName(currentPlayer) }} wins the leg!
+          x🎯 {{ getPlayerDisplayName(currentPlayer) }} wins the leg!
         </div>
       </div>
 
       <!-- Checkout Suggestions -->
       <CheckoutSuggestions
         v-if="!match.winner"
-        :player-name="getPlayerName(currentPlayer)"
-        :score="realTimePlayerScore(currentPlayer)"
+        :player-name="getPlayerDisplayName(currentPlayer)"
+        :score="realTimePlayerScore(currentPlayerId)"
       />
 
       <!-- Score History -->
-      <div :class="`grid grid-cols-${match.players.length} gap-4`">
+      <div :class="`grid grid-cols-${players.length} gap-4`">
         <div
-          v-for="player in match.players"
+          v-for="player in players"
           :key="player.id"
           class="bg-gray-800 rounded-xl p-3"
         >
           <h4 class="text-lg font-bold mb-2 text-center">
-            {{ getPlayerName(player.id) }}'s Scores
+            {{ getPlayerDisplayName(player) }}'s Scores
           </h4>
           <div class="space-y-1 max-h-32 overflow-y-auto">
             <div
-              v-for="(score, index) in playerLegScores(player.id)"
+              v-for="(score, index) in currentPlayerLegScores[player.id] || []"
               :key="`p1-${index}`"
               class="flex justify-between items-center bg-gray-700 rounded px-2 py-1"
             >
@@ -467,7 +538,7 @@ const resetGame = () => {
               <span class="font-bold text-sm">{{ score.totalScore }}</span>
             </div>
             <div
-              v-if="playerLegScores(player.id).length === 0"
+              v-if="(currentPlayerLegScores[player.id] || []).length === 0"
               class="text-center text-gray-500 py-2 text-sm"
             >
               No scores yet
@@ -486,32 +557,32 @@ const resetGame = () => {
             🎉 Match Over!
           </h2>
           <p class="text-xl mb-4">
-            <span class="font-bold">{{ getPlayerName(match.winner) }}</span>
+            <span class="font-bold">{{
+              getPlayerDisplayName(currentPlayer)
+            }}</span>
             wins!
           </p>
 
           <!-- Match Summary -->
           <div class="bg-gray-700 rounded-lg p-4 mb-6">
             <h3 class="text-lg font-bold mb-2">Final Score</h3>
-            <div
-              :class="`grid grid-cols-${match.players.length} gap-4 text-sm`"
-            >
-              <div v-for="player in match.players" :key="player.id">
+            <div :class="`grid grid-cols-${players.length} gap-4 text-sm`">
+              <div v-for="player in players" :key="player.id">
                 <div class="font-bold text-dartboard-red">
-                  {{ getPlayerName(player.id) }}
+                  {{ getPlayerDisplayName(player) }}
                 </div>
                 <div
                   v-if="
                     match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets
                   "
                 >
-                  Sets: {{ getPlayerWinnerCountOf(player.id, match.game) }}/{{
+                  Sets: {{ getPlayerWinnerCountOf(player.id, matchGame) }}/{{
                     match.matchConfig.setsToWin
                   }}
                 </div>
                 <div v-else>
                   Legs:
-                  {{ getPlayerWinnerCountOf(player.id, match.game) }}/{{
+                  {{ getPlayerWinnerCountOf(player.id, matchGame) }}/{{
                     match.matchConfig.legsToWinParent
                   }}
                 </div>

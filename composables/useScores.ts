@@ -26,8 +26,9 @@ export const useScores = () => {
   const saveScore = async (score: Score): Promise<Score | null> => {
     loading.value = true;
     error.value = null;
+
     try {
-      const savedScore = await scoreService.upsert(score);
+      const savedScore = await scoreService.upsert(toRaw(score));
       // Update local state
       const index = scores.value.findIndex((s) => s.id === score.id);
       if (index >= 0) {
@@ -71,6 +72,7 @@ export const useScores = () => {
       const playerLegScores = await scoreService.getScoresForPlayerLeg(
         playerLegId
       );
+
       return playerLegScores;
     } catch (err) {
       error.value =

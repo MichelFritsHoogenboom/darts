@@ -1,7 +1,4 @@
 import { v4 as uuid } from "uuid";
-import type { Leg } from "./leg";
-import type { PlayerStats } from "./player";
-import type { Set } from "./set";
 import type { x01MatchConfig } from "./x01MatchConfig";
 import { defaultX01MatchConfig } from "./x01MatchConfig";
 
@@ -19,8 +16,8 @@ export interface Match {
   updatedAt: Date;
   gameType: GameType;
   matchConfig: x01MatchConfig;
-  players: Array<PlayerStats>;
-  game: Array<Leg | Set>;
+  players: Array<string>; // PlayerStats IDs
+  game: Array<string>; // Leg or Set IDs
   winner?: string;
 }
 

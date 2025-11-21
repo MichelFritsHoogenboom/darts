@@ -13,13 +13,21 @@ export function usePlayers() {
   const error = ref<string | null>(null);
 
   /**
-   * Load all players from IndexedDB
+   * Load all or selected player objects from IndexedDB
    */
-  const loadPlayers = async () => {
+  const loadPlayers = async (playerIds: string[] = []) => {
     try {
       loading.value = true;
       error.value = null;
-      players.value = await playerService.getAll();
+
+      const loadedPlayers: Player[] =
+        playerIds.length > 0
+          ? (await Promise.all(playerIds.map((id) => getPlayer(id)))).filter(
+              (player): player is Player => player !== undefined
+            )
+          : await playerService.getAll();
+
+      players.value = loadedPlayers;
     } catch (err) {
       error.value =
         err instanceof Error ? err.message : "Failed to load players";

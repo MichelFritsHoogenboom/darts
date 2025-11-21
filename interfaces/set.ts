@@ -2,7 +2,6 @@ import { v4 as uuid } from "uuid";
 import { SetService } from "~/database/SetService";
 import { toRaw } from "vue";
 import type { Leg } from "./leg";
-import type { PlayerStats } from "./player";
 
 const setService = new SetService();
 
@@ -11,16 +10,16 @@ export interface Set {
   matchId: string;
   createdAt: Date;
   updatedAt: Date;
-  players: Array<PlayerStats>;
+  players: Array<string>; // PlayerStats IDs
   startingPlayer: string;
-  game: Array<Leg>;
+  game: Array<string>; // Leg IDs
   winner?: string;
 }
 
 export async function createSet(
   overrides: Partial<Set> & {
     matchId: string;
-    players: Array<PlayerStats>;
+    players: Array<string>; // PlayerStats IDs
     startingPlayer: string;
   }
 ): Promise<Set> {

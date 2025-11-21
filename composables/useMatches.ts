@@ -27,7 +27,7 @@ export function useMatches() {
     try {
       loading.value = true;
       error.value = null;
-      const savedMatch = await matchService.upsert(match);
+      const savedMatch = await matchService.upsert(toRaw(match));
 
       // Update local state
       const index = matches.value.findIndex((m) => m.id === match.id);

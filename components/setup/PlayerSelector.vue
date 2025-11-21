@@ -4,14 +4,14 @@ import type { Player, PlayerStats } from "../../interfaces/player";
 
 const props = defineProps<{
   availablePlayers: Player[];
-  selectedPlayers: PlayerStats[];
+  selectedPlayers: string[];
   loading: boolean;
   error: string | null;
 }>();
 
 const selectedPlayersFullData = computed(() => {
   return props.selectedPlayers
-    .map((p) => props.availablePlayers.find((player) => player.id === p.id))
+    .map((id) => props.availablePlayers.find((player) => player.id === id))
     .filter((player): player is Player => player !== undefined);
 });
 
@@ -25,7 +25,7 @@ const selectedPlayerId = ref<string>("");
 
 // Computed property for available players (excluding already selected ones)
 const availablePlayers = computed(() => {
-  const selectedIds = props.selectedPlayers.map((p) => p.id);
+  const selectedIds = props.selectedPlayers.map((id) => id);
   const players = props.availablePlayers
     .filter((player) => !selectedIds.includes(player.id))
     .map((player) => ({
@@ -98,7 +98,7 @@ const removePlayerFromMatch = (playerId: string) => {
           >
             <div>
               <h4 class="text-white font-medium">
-                {{ player.firstName }} {{ player.lastName || "" }}
+                {{ getPlayerFullName(player) }}
               </h4>
               <p v-if="player.alias" class="text-gray-400 text-sm">
                 "{{ player.alias }}"

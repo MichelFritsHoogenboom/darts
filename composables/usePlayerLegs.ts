@@ -27,8 +27,9 @@ export const usePlayerLegs = () => {
   ): Promise<PlayerLeg | null> => {
     loading.value = true;
     error.value = null;
+
     try {
-      const savedPlayerLeg = await playerLegService.upsert(playerLeg);
+      const savedPlayerLeg = await playerLegService.upsert(toRaw(playerLeg));
       // Update local state
       const index = playerLegs.value.findIndex((pl) => pl.id === playerLeg.id);
       if (index >= 0) {
@@ -40,7 +41,7 @@ export const usePlayerLegs = () => {
     } catch (err) {
       error.value =
         err instanceof Error ? err.message : "Failed to save player leg";
-      console.error("Error saving player leg:", err);
+      console.error("Error saving player leg:", err, playerLeg);
       return null;
     } finally {
       loading.value = false;
