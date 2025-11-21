@@ -152,7 +152,7 @@ const getCurrentPlayerLeg = computed(() => {
   };
 });
 
-const currentScore = ref<number>(0);
+const currentScore = ref<number>();
 
 // Initialize with first player ID from match (before players are loaded)
 const currentPlayerId = ref<string>(match.players[0] as string);
@@ -337,9 +337,14 @@ const submitScore = async () => {
 };
 
 const resetScore = () => {
-  currentScore.value = 0;
+  currentScore.value = undefined;
   scoreInput.value?.focus();
 };
+
+// Focus score input on page load
+onMounted(() => {
+  scoreInput.value?.focus();
+});
 
 const getNextPlayerId = (playerId: string) => {
   const currentIndex = players.value.findIndex(
