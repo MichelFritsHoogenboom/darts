@@ -1,93 +1,52 @@
 <script setup lang="ts">
-import { v4 as uuid } from "uuid";
 import type { Match } from "~/interfaces/match";
-import type { Set } from "~/interfaces/set";
-import type { Leg, PlayerLeg, Score } from "~/interfaces/leg";
+
+import type { Score } from "~/interfaces/leg";
 
 import { X01_GAME_PLAYED_IN } from "~/interfaces/x01MatchConfig";
-import { isAchievableScore } from "~/utils/dartScoring.js";
-import { createSet } from "~/interfaces/set";
-import { createLeg } from "~/interfaces/leg";
-import { createScore } from "~/interfaces/leg";
-import { createPlayerLeg } from "~/interfaces/leg";
 
 import CheckoutSuggestions from "~/components/games/x01/CheckoutSuggestions.vue";
 
 const { match } = defineProps<{ match: Match }>();
-const { entityGamesWonByPlayer, saveSet, getSetsForMatch } = useSets();
-const { saveLeg, getLegsForSet, getLegsForMatch } = useLegs();
-const { getPlayerLegsForLeg, savePlayerLeg } = usePlayerLegs();
-const { saveMatch } = useMatches();
-const { players, loadPlayers } = usePlayers();
-const { getScoresForPlayerLeg } = useScores();
+
 const emit = defineEmits<{
   "game-reset": [];
 }>();
 
-await loadPlayers(match.players);
+// Get game state first
+const gameState = useGame(match);
+const {
+  currentScore,
+  scoreValidationMessage,
+  currentPlayerId,
+  currentPlayer,
+  players,
+  canUndo,
+  undoLastTurn,
+} = gameState;
 
-const createNewSet = async (startingPlayer: string = match.players[0]) => {
-  const set = createSet({
-    matchId: match.id,
-    players: toRaw(match.players),
-    startingPlayer: startingPlayer,
-  });
-
-  return set;
-};
-
-const createPlayerLegs = async (players: string[], legId: string) => {
-  return await Promise.all(
-    players.map((playerId) =>
-      createPlayerLeg({
-        legId: legId,
-        playerId: playerId,
-      }).then((playerLeg) => playerLeg.id)
-    )
-  );
-};
-
-const createNewleg = async (startingPlayer: string = match.players[0]) => {
-  const legId = uuid();
-
-  const legSettings = {
-    id: legId,
-    matchId: match.id,
-    gameType: match.matchConfig.gameType,
-    players: await createPlayerLegs(match.players, legId),
-    startingPlayer: startingPlayer,
-    ...(currentSet.value && { setId: currentSet.value.id }),
-  };
-
-  return await createLeg(legSettings);
-};
-// Refs
-const scoreInput = useTemplateRef("scoreInput");
+// Pass game state to useX01Game
+const {
+  currentSet,
+  currentSetGame,
+  currentLeg,
+  currentPlayerLegs,
+  currentPlayerLegScores,
+  matchGame,
+  initializeMatch,
+  isValidScore,
+  realTimePlayerScore,
+  loadMatchGame,
+  getPlayerWinnerCountOf,
+  legsToDisplay,
+  validateScore,
+  submitScore,
+} = useX01Game(match, gameState);
+const { getLegsForSet } = useLegs();
+const { getPlayerLegsForLeg } = usePlayerLegs();
+const { getScoresForPlayerLeg } = useScores();
 
 // Game state refs
-const currentSet = ref<Set | null>(
-  match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets
-    ? await createNewSet()
-    : null
-);
-const currentSetGame = ref<Leg[]>([]);
-const currentLeg = ref<Leg>(await createNewleg());
-const currentPlayerLegs = ref<PlayerLeg[]>([]);
-const currentPlayerLegScores = ref<Record<string, Score[]>>({});
-const matchGame = ref<Set[] | Leg[]>([]);
-
-// Function to load match game (sets or legs) and current set game
-const loadMatchGame = async () => {
-  if (match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets) {
-    matchGame.value = await getSetsForMatch(match.id);
-    // Also reload current set's legs if there's a current set
-    if (currentSet.value) {
-      currentSetGame.value = await getLegsForSet(currentSet.value.id);
-    }
-  } else {
-    matchGame.value = await getLegsForMatch(match.id);
-  }
-};
 
 // Load legs for current set when it changes
 watch(
@@ -145,232 +104,11 @@ watch(
   { immediate: true, deep: true }
 );
 
-// Computed function to get player leg by playerId
-const getCurrentPlayerLeg = computed(() => {
-  return (playerId: string): PlayerLeg | undefined => {
-    return currentPlayerLegs.value.find((pl) => pl.playerId === playerId);
-  };
-});
-
-const currentScore = ref<number>();
-
-// Initialize with first player ID from match (before players are loaded)
-const currentPlayerId = ref<string>(match.players[0] as string);
-const currentPlayer = computed(() => {
-  // Always return a player - fallback to first player if current not found
-  return (
-    players.value.find((player) => player.id === currentPlayerId.value) ||
-    players.value[0]
-  );
-});
-const scoreValidationMessage = ref<string>("");
 const legWinNotification = ref<boolean>(false);
-
-// Push IDs to match.game (which stores IDs)
-match.game.push(currentSet.value ? currentSet.value.id : currentLeg.value.id);
-if (currentSet.value) {
-  currentSet.value.game.push(currentLeg.value.id);
-}
-
-const realTimePlayerScore = computed(() => {
-  return (playerId: string) => {
-    const scores = currentPlayerLegScores.value[playerId];
-    const totalScoreThrown =
-      scores?.reduce((total, score) => total + score.totalScore, 0) || 0;
-
-    return currentLeg.value.gameType - totalScoreThrown;
-  };
-});
-
-const getPlayerWinnerCountOf = computed(() => {
-  return (playerId: string, entity: Array<Set | Leg>) => {
-    return entity?.filter((entity) => entity.winner === playerId).length || 0;
-  };
-});
-
-// Computed to get the correct legs array for display
-const legsToDisplay = computed(() => {
-  return currentSet.value ? currentSetGame.value : matchGame.value;
-});
-
-// Computed
-const isValidScore = computed(() => {
-  const score = currentScore.value ?? 0;
-  if (isNaN(score)) {
-    scoreValidationMessage.value = "";
-    return false;
-  }
-  if (score > 180) {
-    scoreValidationMessage.value = "Maximum score is 180. Did you mistype?";
-    return false;
-  } else if (score < 0) {
-    scoreValidationMessage.value = "Score cannot be negative.";
-    return false;
-  } else if (!isAchievableScore(score)) {
-    scoreValidationMessage.value = `Score ${score} is not achievable with 3 darts.`;
-    return false;
-  } else {
-    scoreValidationMessage.value = "";
-    return true;
-  }
-});
-
-const validateScore = () => {
-  // Trigger validation by accessing the computed property
-  isValidScore.value;
-};
-
-const handleMatchWin = async () => {
-  match.winner = currentPlayerId.value;
-  await saveMatch(match);
-};
-
-const handleSetWin = async () => {
-  if (!currentSet.value) {
-    return;
-  }
-  currentSet.value.winner = currentPlayerId.value;
-  await saveSet(currentSet.value);
-
-  // Reload current set's legs to get updated winner info
-
-  matchGame.value = await getSetsForMatch(match.id);
-
-  const setsWon = entityGamesWonByPlayer(
-    matchGame.value,
-    currentPlayerId.value
-  );
-
-  if (setsWon === match.matchConfig.setsToWin) {
-    await handleMatchWin();
-  } else {
-    const newSet = await createNewSet(
-      getNextPlayerId(currentSet.value.startingPlayer)
-    );
-    currentSet.value = newSet;
-    const newLeg = await createNewleg(newSet.startingPlayer);
-    match.game.push(newSet.id);
-    currentSet.value.game.push(newLeg.id);
-
-    currentLeg.value = newLeg;
-    currentPlayerId.value = newLeg.startingPlayer;
-    resetScore();
-  }
-};
-
-const handleLegWin = async () => {
-  currentLeg.value.winner = currentPlayerId.value;
-  await saveLeg(currentLeg.value);
-
-  // Reload current legs to get updated winner info
-  await loadMatchGame();
-
-  const legsWon = entityGamesWonByPlayer(
-    currentSet.value ? currentSetGame.value : matchGame.value,
-    currentPlayerId.value
-  );
-
-  if (legsWon === match.matchConfig.legsToWinParent) {
-    if (currentSet.value) {
-      await handleSetWin();
-    } else {
-      await handleMatchWin();
-    }
-  } else {
-    const newLeg = await createNewleg(
-      getNextPlayerId(currentLeg.value.startingPlayer)
-    );
-    if (currentSet.value) {
-      currentSet.value.game.push(newLeg.id);
-    } else {
-      match.game.push(newLeg.id);
-    }
-    currentLeg.value = newLeg;
-    currentPlayerId.value = newLeg.startingPlayer;
-    resetScore();
-  }
-};
-
-const submitScore = async () => {
-  if (!isValidScore.value) return;
-
-  const score = currentScore.value;
-
-  // Check if score would go below 0
-  if (realTimePlayerScore.value(currentPlayerId.value) - score < 0) {
-    alert("Score cannot go below zero!");
-    return;
-  }
-
-  // Check if score would result in 1 (bust)
-  if (realTimePlayerScore.value(currentPlayerId.value) - score === 1) {
-    alert("Bust! Cannot finish on 1. Score not counted.");
-    return;
-  }
-
-  const playerLeg = getCurrentPlayerLeg.value(currentPlayerId.value);
-  if (!playerLeg) return;
-
-  const createdScore = await createScore({
-    playerId: currentPlayerId.value,
-    playerLegId: playerLeg.id,
-    totalScore: score,
-  });
-
-  playerLeg.scores.push(createdScore.id);
-  await savePlayerLeg(playerLeg);
-
-  // Clear validation message
-  scoreValidationMessage.value = "";
-
-  // Check for win condition
-  if (realTimePlayerScore.value(currentPlayerId.value) === 0) {
-    await handleLegWin();
-    return;
-  }
-
-  setNextPlayer();
-  // Focus on score input for next player
-  nextTick(() => {
-    resetScore();
-  });
-};
-
-const resetScore = () => {
-  currentScore.value = undefined;
-  scoreInput.value?.focus();
-};
-
-// Focus score input on page load
-onMounted(() => {
-  scoreInput.value?.focus();
-});
-
-const getNextPlayerId = (playerId: string) => {
-  const currentIndex = players.value.findIndex(
-    (player) => player.id === playerId
-  );
-  const nextIndex = (currentIndex + 1) % players.value.length;
-  return players.value[nextIndex].id;
-};
-
-const setNextPlayer = (playerid: string = currentPlayerId.value) => {
-  // Switch to next player
-  const nextPlayerIndex = getNextPlayerId(playerid);
-  currentPlayerId.value = nextPlayerIndex;
-};
-
-const canUndo = computed(() => {
-  return false;
-});
-
-const undoLastTurn = () => {
-  alert("Undo last turn hasnt been built yet!");
-};
-
 const resetGame = () => {
   emit("game-reset");
 };
+initializeMatch();
 </script>
 
 <template>
