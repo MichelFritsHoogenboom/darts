@@ -10,9 +10,9 @@ export interface Set {
   matchId: string;
   createdAt: Date;
   updatedAt: Date;
-  players: Array<string>; // PlayerStats IDs
+  players: string[] | ReadonlyArray<string>; // PlayerStats IDs - accepts both mutable and readonly
   startingPlayer: string;
-  game: Array<string>; // Leg IDs
+  game: string[] | ReadonlyArray<string>; // Leg IDs - accepts both mutable and readonly
   winner?: string;
 }
 

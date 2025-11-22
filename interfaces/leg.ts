@@ -37,7 +37,7 @@ export interface PlayerLeg {
   createdAt: Date;
   updatedAt: Date;
   playerId: string;
-  scores: Array<string>; // Score IDs
+  scores: string[] | ReadonlyArray<string>; // Score IDs - accepts both mutable and readonly
   average?: number;
   checkout?: number;
 }
@@ -49,7 +49,7 @@ export interface Leg {
   createdAt: Date;
   updatedAt: Date;
   gameType: X01GameType;
-  players: Array<string>; // PlayerLeg IDs
+  players: string[] | ReadonlyArray<string>; // PlayerLeg IDs - accepts both mutable and readonly
   startingPlayer: string;
   winner?: string;
 }

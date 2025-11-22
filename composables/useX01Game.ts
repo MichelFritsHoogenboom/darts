@@ -243,6 +243,7 @@ export const useX01Game = (
 
   const submitScore = async () => {
     if (!isValidScore.value) return;
+
     const score = currentScore.value;
 
     if (!score) {
