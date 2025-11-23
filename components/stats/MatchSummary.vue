@@ -1,6 +1,10 @@
 <script lang="ts" setup>
 import type { Match } from "~/interfaces/match";
+import type { Set } from "~/interfaces/set";
+import type { Leg, PlayerLeg, Score } from "~/interfaces/leg";
 import { X01_GAME_PLAYED_IN } from "~/interfaces/x01MatchConfig";
+import LegSummary from "./LegSummary.vue";
+import SetSummary from "./SetSummary.vue";
 
 const { match } = defineProps<{
   match: Match;
@@ -14,29 +18,118 @@ const { getPlayerWinnerCountOf, matchGame, loadMatchGame } = useX01Game(
   gameState
 );
 
-// Load match game data when component mounts
-onBeforeMount(async () => {
+const { getLegsForSet } = useLegs();
+const { getPlayerLegsForLeg } = usePlayerLegs();
+const { getScoresForPlayerLeg } = useScores();
+
+// Store loaded leg data with scores, organized by set (if sets mode)
+const setsWithLegs = ref<
+  Array<{
+    set: Set;
+    legsWithScores: Array<{
+      leg: Leg;
+      playerLegs: PlayerLeg[];
+      scoresByPlayer: Record<string, Score[]>;
+    }>;
+  }>
+>([]);
+
+// Store loaded leg data for direct legs mode
+const legsWithScores = ref<
+  Array<{
+    leg: Leg;
+    playerLegs: PlayerLeg[];
+    scoresByPlayer: Record<string, Score[]>;
+  }>
+>([]);
+
+// Helper function to load a leg with its playerLegs and scores
+const loadLegWithScores = async (
+  leg: Leg
+): Promise<{
+  leg: Leg;
+  playerLegs: PlayerLeg[];
+  scoresByPlayer: Record<string, Score[]>;
+}> => {
+  const playerLegs = await getPlayerLegsForLeg(leg.id);
+
+  // Load scores for each playerLeg
+  const scoresByPlayer: Record<string, Score[]> = {};
+  await Promise.all(
+    playerLegs.map(async (playerLeg) => {
+      const scores = await getScoresForPlayerLeg(playerLeg.id);
+      scoresByPlayer[playerLeg.playerId] = scores;
+    })
+  );
+
+  return {
+    leg,
+    playerLegs,
+    scoresByPlayer,
+  };
+};
+
+// Load all legs and their scores, organized by set if in sets mode
+const loadLegsData = async () => {
   await loadMatchGame();
+
+  if (match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets) {
+    // Sets mode: organize legs by set
+    const sets = matchGame.value as Set[];
+    const setsData = await Promise.all(
+      sets.map(async (set) => {
+        const setLegs = await getLegsForSet(set.id);
+        const legsData = await Promise.all(
+          setLegs.map((leg) => loadLegWithScores(leg))
+        );
+
+        return {
+          set,
+          legsWithScores: legsData,
+        };
+      })
+    );
+
+    setsWithLegs.value = setsData;
+  } else {
+    // Direct legs mode
+    const allLegs = matchGame.value as Leg[];
+    const legsData = await Promise.all(
+      allLegs.map((leg) => loadLegWithScores(leg))
+    );
+
+    legsWithScores.value = legsData;
+  }
+};
+
+// Load data when component mounts
+onBeforeMount(async () => {
+  await loadLegsData();
 });
 </script>
 
 <template>
   <div class="bg-gray-700 rounded-lg p-4 mb-6">
-    <h3 class="text-lg font-bold mb-2">
-      {{ match.matchConfig.gameType }}
-      {{ match.matchConfig.gameWinDefinition }}
-      <template
-        v-if="match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets"
-      >
-        {{ match.matchConfig.setsToWin }}
-      </template>
-      <template v-else>
-        {{ match.matchConfig.legsToWinParent }}
-      </template>
+    <h3 class="text-lg font-bold mb-2 flex justify-between items-center">
+      <span>
+        {{ match.matchConfig.gameType }}
+        {{ match.matchConfig.gameWinDefinition }}
+        <template
+          v-if="match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets"
+        >
+          {{ match.matchConfig.setsToWin }}
+        </template>
+        <template v-else>
+          {{ match.matchConfig.legsToWinParent }}
+        </template>
 
-      {{ match.matchConfig.gamePlayedIn }}
+        {{ match.matchConfig.gamePlayedIn }}
+      </span>
+      <span class="text-sm">
+        {{ match.updatedAt.toLocaleString() }}
+      </span>
     </h3>
-    <div :class="`grid grid-cols-${players.length} gap-4 text-sm`">
+    <div :class="`grid grid-cols-${players.length} gap-4 text-sm mb-4`">
       <div v-for="player in players" :key="player.id">
         <div class="font-bold text-dartboard-red">
           {{ getPlayerDisplayName(player) }}
@@ -45,10 +138,31 @@ onBeforeMount(async () => {
           Sets: {{ getPlayerWinnerCountOf(player.id, matchGame) }}
         </div>
         <div v-else>
-          Legs:
-          {{ getPlayerWinnerCountOf(player.id, matchGame) }}
+          Legs: {{ getPlayerWinnerCountOf(player.id, matchGame) }}
         </div>
       </div>
     </div>
+
+    <!-- Display sets with their legs when in sets mode -->
+    <SetSummary
+      v-if="match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets"
+      v-for="(setData, setIndex) in setsWithLegs"
+      :key="setData.set.id"
+      :set="setData.set"
+      :set-index="setIndex"
+      :players="[...players]"
+      :legs-with-scores="setData.legsWithScores"
+    />
+
+    <!-- Display legs directly when in legs mode -->
+    <LegSummary
+      v-else
+      v-for="legData in legsWithScores"
+      :key="legData.leg.id"
+      :leg="legData.leg"
+      :players="[...players]"
+      :player-legs="legData.playerLegs"
+      :scores-by-player="legData.scoresByPlayer"
+    />
   </div>
 </template>

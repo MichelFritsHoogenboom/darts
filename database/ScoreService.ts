@@ -6,13 +6,35 @@ export class ScoreService extends BaseService<Score> {
     return "scores";
   }
 
+  /**
+   * Sort scores by createdAt to ensure chronological order
+   */
+  private sortScoresByCreatedAt(scores: Score[]): Score[] {
+    return scores.sort((a: Score, b: Score) => {
+      const dateA =
+        a.createdAt instanceof Date
+          ? a.createdAt.getTime()
+          : new Date(a.createdAt).getTime();
+      const dateB =
+        b.createdAt instanceof Date
+          ? b.createdAt.getTime()
+          : new Date(b.createdAt).getTime();
+      return dateA - dateB;
+    });
+  }
+
   async getScoresForPlayerLeg(playerLegId: string): Promise<Score[]> {
     const table = await this.getTable();
-    return await table.where("playerLegId").equals(playerLegId).toArray();
+    const scores = await table
+      .where("playerLegId")
+      .equals(playerLegId)
+      .toArray();
+    return this.sortScoresByCreatedAt(scores);
   }
 
   async getScoresForPlayer(playerId: string): Promise<Score[]> {
     const table = await this.getTable();
-    return await table.where("playerId").equals(playerId).toArray();
+    const scores = await table.where("playerId").equals(playerId).toArray();
+    return this.sortScoresByCreatedAt(scores);
   }
 }

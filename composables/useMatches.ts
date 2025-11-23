@@ -112,6 +112,10 @@ export function useMatches() {
     }
   };
 
+  const loadLastFinishedMatches = async (limit: number = 10) => {
+    matches.value = await matchService.getLastFinishedMatches(limit);
+  };
+
   return {
     matches: readonly(matches),
     loading: readonly(loading),
@@ -122,5 +126,6 @@ export function useMatches() {
     deleteMatch,
     searchMatches,
     getMatchesForPlayer,
+    loadLastFinishedMatches,
   };
 }

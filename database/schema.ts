@@ -17,6 +17,7 @@ export class DartsDatabase extends Dexie {
   constructor() {
     super("DartsDatabase");
 
+    // Version 1: Initial schema
     this.version(1).stores({
       players: "id, firstName, lastName, alias, createdAt, updatedAt",
       matches: "id, gameType, players, matchConfig, createdAt, updatedAt",
@@ -27,6 +28,28 @@ export class DartsDatabase extends Dexie {
       singleDartScores:
         "id, scoreId, playerId, score, createdAt, updatedAt, doubleHit, isSetDart, isMatchDart",
     });
+
+    // Version 2: Added multi-entry indexes for array fields (players)
+    this.version(2)
+      .stores({
+        players: "id, firstName, lastName, alias, createdAt, updatedAt",
+        matches:
+          "id, gameType, players, *players, matchConfig, createdAt, updatedAt, winner",
+        sets: "id, matchId, legs, createdAt, updatedAt, players, *players, winner",
+        legs: "id, matchId, setId, gameType, players, *players, startingPlayer, winner, createdAt, updatedAt",
+        playerLegs:
+          "id, legId, playerId, scores, average, createdAt, updatedAt",
+        scores: "id, playerLegId, playerId, totalScore, createdAt, updatedAt",
+        singleDartScores:
+          "id, scoreId, playerId, score, createdAt, updatedAt, doubleHit, isSetDart, isMatchDart",
+      })
+      .upgrade(async (tx) => {
+        // Migration logic: Dexie will automatically rebuild indexes
+        // No data transformation needed - just re-indexing
+        console.log(
+          "Migrating database to version 2: Adding multi-entry indexes for players arrays"
+        );
+      });
   }
 }
 
