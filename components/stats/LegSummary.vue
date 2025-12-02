@@ -44,9 +44,9 @@ const getTotalScore = (playerId: string, roundIndex: number): number => {
 // Use utility to get player names
 const getPlayerName = createPlayerNameGetter(players);
 
-// Check if this is a high score (100+)
+// Check if this is a high score (80+)
 const isHighScore = (score: number): boolean => {
-  return score >= 100;
+  return score >= 80;
 };
 
 // Toggle to show/hide leg details (defaults to false - hidden)
@@ -131,7 +131,9 @@ const [showLegDetails, toggleLegDetails] = useToggle(false);
             <td
               class="text-center p-2 bg-red-900/30 border-r-2 border-gray-600 font-bold"
             >
-              {{ getTotalScore(players[0].id, 0) }}
+              <template v-if="isHighScore(getTotalScore(players[0].id, 0))">
+                {{ getTotalScore(players[0].id, 0) }}
+              </template>
             </td>
             <td class="text-left p-2 border-r border-gray-600">
               {{ getPlayerName(players[0].id) }}
@@ -169,7 +171,9 @@ const [showLegDetails, toggleLegDetails] = useToggle(false);
             <td
               class="text-center p-2 bg-red-900/30 border-l-2 border-gray-600 font-bold"
             >
-              {{ getTotalScore(players[1].id, 0) }}
+              <template v-if="isHighScore(getTotalScore(players[1].id, 0))">
+                {{ getTotalScore(players[1].id, 0) }}
+              </template>
             </td>
           </tr>
           <tr
@@ -189,7 +193,7 @@ const [showLegDetails, toggleLegDetails] = useToggle(false);
                 v-if="
                   players[1] &&
                   getScore(players[1].id, roundIndex) &&
-                  isHighScore(getTotalScore(players[1].id, roundIndex))
+                  isHighScore(getTotalScore(players[0].id, roundIndex))
                 "
               >
                 {{ getTotalScore(players[0].id, roundIndex) }}

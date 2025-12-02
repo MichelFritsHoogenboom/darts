@@ -295,7 +295,9 @@ initializeMatch();
         v-if="match.winner"
         class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
       >
-        <div class="bg-gray-800 rounded-xl p-8 max-w-md mx-auto text-center">
+        <div
+          class="bg-gray-800 rounded-xl p-8 max-w-4xl w-full max-h-full mx-auto text-center overflow-y-auto"
+        >
           <h2 class="text-3xl font-bold mb-4 text-dartboard-green">
             🎉 Match Over!
           </h2>
@@ -308,9 +310,8 @@ initializeMatch();
 
           <!-- Match Summary -->
           <StatsMatchSummary :match="match" />
+          <button @click="resetGame" class="dartboard-button">New Match</button>
         </div>
-
-        <button @click="resetGame" class="dartboard-button">New Match</button>
       </div>
     </div>
   </div>
