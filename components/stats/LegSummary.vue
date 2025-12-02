@@ -2,6 +2,7 @@
 import type { Leg, PlayerLeg, Score } from "~/interfaces/leg";
 import type { Player } from "~/interfaces/player";
 import { createPlayerNameGetter } from "~/utils/player";
+import { useToggle } from "@vueuse/core";
 import CheckoutDouble from "./CheckoutDouble.vue";
 
 const { legIndex, leg, players, playerLegs, scoresByPlayer } = defineProps<{
@@ -47,31 +48,46 @@ const getPlayerName = createPlayerNameGetter(players);
 const isHighScore = (score: number): boolean => {
   return score >= 100;
 };
+
+// Toggle to show/hide leg details (defaults to false - hidden)
+const [showLegDetails, toggleLegDetails] = useToggle(false);
 </script>
 
 <template>
-  <div class="leg-summary bg-gray-800 rounded-lg px-4 pb-2 pt-1 mb-4">
+  <div class="leg-summary bg-gray-800 border-b border-gray-700 px-4 pb-2 pt-1">
     <div class="overflow-x-auto">
       <table class="w-full text-xs border-collapse">
         <thead>
           <tr class="pb-2 font-bold text-sm">
             <th colspan="9" class="py-2">
-              <StatsPlayersWithCenter
-                :players="[...players]"
-                size="small"
-                :player-legs="playerLegs"
-                :winner-id="leg.winner"
+              <div
+                class="grid grid-cols-[1fr_6fr_1fr] items-center justify-center gap-2"
               >
-                <span class="text-md font-bold">
-                  Leg
-                  <template v-if="legIndex !== undefined"
-                    >{{ legIndex + 1 }}
-                  </template>
-                </span>
-              </StatsPlayersWithCenter>
+                <span></span>
+                <StatsPlayersWithCenter
+                  :players="[...players]"
+                  size="small"
+                  :player-legs="playerLegs"
+                  :winner-id="leg.winner"
+                >
+                  <span class="text-xs font-bold">
+                    Leg
+                    <template v-if="legIndex !== undefined"
+                      >{{ legIndex + 1 }}
+                    </template>
+                  </span>
+                </StatsPlayersWithCenter>
+                <button
+                  @click="toggleLegDetails()"
+                  class="text-xs px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded transition-colors"
+                  :class="{ 'bg-gray-600': showLegDetails }"
+                >
+                  {{ showLegDetails ? "−" : "+" }}
+                </button>
+              </div>
             </th>
           </tr>
-          <tr class="border-b-2 border-gray-600">
+          <tr v-if="showLegDetails" class="border-b-2 border-gray-600">
             <!-- Left Player Columns -->
             <th
               class="text-center p-2 bg-red-900/30 border-r-2 border-gray-600"
@@ -110,7 +126,7 @@ const isHighScore = (score: number): boolean => {
             </th>
           </tr>
         </thead>
-        <tbody>
+        <tbody v-if="showLegDetails">
           <tr class="border-b border-gray-600">
             <td
               class="text-center p-2 bg-red-900/30 border-r-2 border-gray-600 font-bold"
@@ -169,7 +185,16 @@ const isHighScore = (score: number): boolean => {
                   getRemainingScore(players[0].id, roundIndex) === 0,
               }"
             >
-              {{ getTotalScore(players[0].id, roundIndex) }}
+              <div
+                v-if="
+                  players[1] &&
+                  getScore(players[1].id, roundIndex) &&
+                  isHighScore(getTotalScore(players[1].id, roundIndex))
+                "
+              >
+                {{ getTotalScore(players[0].id, roundIndex) }}
+              </div>
+
               <CheckoutDouble
                 v-if="
                   getRemainingScore(players[0].id, roundIndex - 1) === 0 &&
@@ -240,6 +265,10 @@ const isHighScore = (score: number): boolean => {
 
             <td
               class="text-center p-2 bg-red-900/30 border-l-2 border-gray-600 font-bold"
+              :class="{
+                'text-red-400':
+                  getRemainingScore(players[1].id, roundIndex) === 0,
+              }"
             >
               <div
                 v-if="
