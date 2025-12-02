@@ -8,6 +8,9 @@ import type { Leg } from "~/interfaces/leg";
 import type { PlayerLeg } from "~/interfaces/leg";
 import type { Score } from "~/interfaces/leg";
 
+// utils
+import { getPlayerWinnerCount } from "~/utils/match";
+
 //factories
 import { createSet } from "~/interfaces/set";
 import { createLeg } from "~/interfaces/leg";
@@ -126,12 +129,6 @@ export const useX01Game = (
     };
   });
 
-  const getPlayerWinnerCountOf = computed(() => {
-    return (playerId: string, entity: Array<Set | Leg>) => {
-      return entity?.filter((game) => game.winner === playerId).length || 0;
-    };
-  });
-
   // Computed to get the correct legs array for display
   const legsToDisplay = computed(() => {
     return currentSet.value ? currentSetGame.value : matchGame.value;
@@ -184,7 +181,7 @@ export const useX01Game = (
     // Reload current set's legs to get updated winner info
     await loadMatchGame();
 
-    const setsWon = getPlayerWinnerCountOf.value(
+    const setsWon = getPlayerWinnerCount(
       currentPlayerId.value,
       matchGame.value
     );
@@ -215,7 +212,7 @@ export const useX01Game = (
     // Reload current legs to get updated winner info
     await loadMatchGame();
 
-    const legsWon = getPlayerWinnerCountOf.value(
+    const legsWon = getPlayerWinnerCount(
       currentPlayerId.value,
       currentSet.value ? currentSetGame.value : matchGame.value
     );
@@ -305,7 +302,6 @@ export const useX01Game = (
     loadMatchGame,
     handleSetWin,
     handleLegWin,
-    getPlayerWinnerCountOf,
     legsToDisplay,
     validateScore,
     submitScore,

@@ -39,7 +39,7 @@ const checkoutDouble = computed(() => {
     return `D${number}`;
   }
 
-  return "D???";
+  return "D?";
 });
 </script>
 

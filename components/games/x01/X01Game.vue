@@ -4,6 +4,7 @@ import type { Match } from "~/interfaces/match";
 import type { Score } from "~/interfaces/leg";
 
 import { X01_GAME_PLAYED_IN } from "~/interfaces/x01MatchConfig";
+import { getPlayerWinnerCount } from "~/utils/match";
 
 import CheckoutSuggestions from "~/components/games/x01/CheckoutSuggestions.vue";
 
@@ -37,7 +38,6 @@ const {
   isValidScore,
   realTimePlayerScore,
   loadMatchGame,
-  getPlayerWinnerCountOf,
   legsToDisplay,
   validateScore,
   submitScore,
@@ -142,13 +142,13 @@ initializeMatch();
             <div
               v-if="match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets"
             >
-              Sets: {{ getPlayerWinnerCountOf(player.id, matchGame) }}/{{
+              Sets: {{ getPlayerWinnerCount(player.id, matchGame) }}/{{
                 match.matchConfig.setsToWin
               }}
             </div>
             <div>
               Legs:
-              {{ getPlayerWinnerCountOf(player.id, legsToDisplay) }}/
+              {{ getPlayerWinnerCount(player.id, legsToDisplay) }}/
               {{ match.matchConfig.legsToWinParent }}
             </div>
           </div>

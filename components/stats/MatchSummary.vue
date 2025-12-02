@@ -3,6 +3,7 @@ import type { Match } from "~/interfaces/match";
 import type { Set } from "~/interfaces/set";
 import type { Leg, PlayerLeg, Score } from "~/interfaces/leg";
 import { X01_GAME_PLAYED_IN } from "~/interfaces/x01MatchConfig";
+import { getPlayerWinnerCount } from "~/utils/match";
 import LegSummary from "./LegSummary.vue";
 import SetSummary from "./SetSummary.vue";
 
@@ -13,10 +14,7 @@ const { match } = defineProps<{
 const { players } = useGame(match);
 
 const gameState = useGame(match);
-const { getPlayerWinnerCountOf, matchGame, loadMatchGame } = useX01Game(
-  match,
-  gameState
-);
+const { matchGame, loadMatchGame } = useX01Game(match, gameState);
 
 const { getLegsForSet } = useLegs();
 const { getPlayerLegsForLeg } = usePlayerLegs();
@@ -110,7 +108,9 @@ onBeforeMount(async () => {
 
 <template>
   <div class="bg-gray-700 rounded-lg p-4 mb-6">
-    <h3 class="text-lg font-bold mb-2 flex justify-between items-center">
+    <h3
+      class="grid grid-cols-[20%_1fr_20%] font-bold mb-2 flex justify-between items-center"
+    >
       <span>
         {{ match.matchConfig.gameType }}
         {{ match.matchConfig.gameWinDefinition }}
@@ -125,23 +125,40 @@ onBeforeMount(async () => {
 
         {{ match.matchConfig.gamePlayedIn }}
       </span>
-      <span class="text-sm">
-        {{ match.updatedAt.toLocaleString() }}
+      <div>
+        <StatsPlayersWithCenter
+          size="large"
+          :players="[...players]"
+          :player-legs="legsWithScores.flatMap((legData) => legData.playerLegs)"
+          :winner-id="match.winner"
+          :show-badge="false"
+        >
+          <template
+            v-if="match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets"
+          >
+            {{
+              players[0] ? getPlayerWinnerCount(players[0].id, matchGame) : 0
+            }}
+            -
+            {{
+              players[1] ? getPlayerWinnerCount(players[1].id, matchGame) : 0
+            }}
+          </template>
+          <template v-else>
+            {{
+              players[0] ? getPlayerWinnerCount(players[0].id, matchGame) : 0
+            }}
+            -
+            {{
+              players[1] ? getPlayerWinnerCount(players[1].id, matchGame) : 0
+            }}
+          </template>
+        </StatsPlayersWithCenter>
+      </div>
+      <span class="text-sm justify-self-end">
+        {{ match.updatedAt.toLocaleDateString() }}
       </span>
     </h3>
-    <div :class="`grid grid-cols-${players.length} gap-4 text-sm mb-4`">
-      <div v-for="player in players" :key="player.id">
-        <div class="font-bold text-dartboard-red">
-          {{ getPlayerDisplayName(player) }}
-        </div>
-        <div v-if="match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets">
-          Sets: {{ getPlayerWinnerCountOf(player.id, matchGame) }}
-        </div>
-        <div v-else>
-          Legs: {{ getPlayerWinnerCountOf(player.id, matchGame) }}
-        </div>
-      </div>
-    </div>
 
     <!-- Display sets with their legs when in sets mode -->
     <SetSummary
@@ -157,8 +174,9 @@ onBeforeMount(async () => {
     <!-- Display legs directly when in legs mode -->
     <LegSummary
       v-else
-      v-for="legData in legsWithScores"
+      v-for="(legData, index) in legsWithScores"
       :key="legData.leg.id"
+      :leg-index="index"
       :leg="legData.leg"
       :players="[...players]"
       :player-legs="legData.playerLegs"

@@ -2,10 +2,10 @@
 import type { Set } from "~/interfaces/set";
 import type { Leg, PlayerLeg, Score } from "~/interfaces/leg";
 import type { Player } from "~/interfaces/player";
-import { createPlayerNameGetter } from "~/utils/player";
-import LegSummary from "./LegSummary.vue";
 
-const props = defineProps<{
+import { getPlayerWinnerCount } from "~/utils/match";
+
+const { set, setIndex, players, legsWithScores } = defineProps<{
   set: Set;
   setIndex: number;
   players: Player[];
@@ -16,23 +16,36 @@ const props = defineProps<{
   }>;
 }>();
 
-// Use utility to get player names
-const getPlayerName = createPlayerNameGetter(props.players);
+// Extract legs from legsWithScores for the winner count function
+const legs = computed(() => legsWithScores.map((legData) => legData.leg));
 </script>
 
 <template>
   <div>
-    <div class="flex justify-between items-center mb-4">
+    <div
+      class="grid grid-cols-[20%_1fr_20%] items-center mb-0 text-white bg-gray-900 px-4 py-2"
+    >
       <h4 class="text-lg font-bold">Set {{ setIndex + 1 }}</h4>
-      <div v-if="set.winner" class="text-green-400 font-semibold">
-        Winner: {{ getPlayerName(set.winner) }}
+      <div class="flex flex-col gap-1">
+        <StatsPlayersWithCenter
+          size="medium"
+          :players="players"
+          :player-legs="legsWithScores.flatMap((legData) => legData.playerLegs)"
+          :winner-id="set.winner"
+          :show-badge="false"
+        >
+          {{ getPlayerWinnerCount(players[0].id, legs) }} -
+          {{ getPlayerWinnerCount(players[1].id, legs) }}
+        </StatsPlayersWithCenter>
       </div>
+      <div></div>
     </div>
 
     <!-- Display all legs in this set -->
-    <LegSummary
-      v-for="legData in legsWithScores"
+    <StatsLegSummary
+      v-for="(legData, index) in legsWithScores"
       :key="legData.leg.id"
+      :leg-index="index"
       :leg="legData.leg"
       :players="players"
       :player-legs="legData.playerLegs"
@@ -40,3 +53,10 @@ const getPlayerName = createPlayerNameGetter(props.players);
     />
   </div>
 </template>
+
+<style scoped>
+:deep(.leg-summary) {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+</style>

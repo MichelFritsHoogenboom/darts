@@ -3,9 +3,16 @@ import type { Player } from "~/interfaces/player";
 import type { PlayerLeg } from "~/interfaces/leg";
 import { createPlayerNameGetter } from "~/utils/player";
 
-const { playerId, players, winnerId, playerLegs } = defineProps<{
+const {
+  playerId,
+  players,
+  showBadge = true,
+  winnerId,
+  playerLegs,
+} = defineProps<{
   playerId: string;
   players: Player[];
+  showBadge?: boolean;
   winnerId?: string;
   playerLegs: PlayerLeg[];
 }>();
@@ -15,20 +22,26 @@ const isWinner = computed(() => playerId === winnerId);
 </script>
 
 <template>
-  <div class="flex items-center gap-2 gap-y-1 justify-center">
+  <div class="player-name-with-badge">
     <span>{{ getPlayerName(playerId) }}</span>
+    <span class="text-xs text-gray-400" title="3 dart average">
+      {{
+        playerLegs
+          .find((pl) => pl.playerId === playerId)
+          ?.average?.toFixed(2) || "0.00"
+      }}
+    </span>
     <span
-      v-if="isWinner"
+      v-if="isWinner && showBadge"
       class="px-1 py-0.25 text-xs font-semibold bg-green-500 text-white rounded"
     >
       winner
     </span>
   </div>
-  <div class="text-xs text-gray-400">
-    <span>avg:</span>
-    {{
-      playerLegs.find((pl) => pl.playerId === playerId)?.average?.toFixed(2) ||
-      "0.00"
-    }}
-  </div>
 </template>
+
+<style scoped lang="postcss">
+.player-name-with-badge {
+  @apply flex items-center gap-2 gap-y-1 justify-center flex-wrap;
+}
+</style>
