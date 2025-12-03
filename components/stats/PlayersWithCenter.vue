@@ -33,6 +33,7 @@ const sizeClasses = computed(() => {
         :player-id="players[0].id"
         :players="players"
         :show-badge="showBadge"
+        :badge-first="true"
         :winner-id="winnerId"
         :player-legs="playerLegs"
       />

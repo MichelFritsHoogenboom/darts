@@ -41,7 +41,8 @@ export class MatchService extends BaseService<Match> {
    */
   async getAllUnfinishedMatches(): Promise<Match[]> {
     const table = await this.getTable();
-    const allMatches = await table.toArray();
+
+    const allMatches = await table.orderBy("updatedAt").reverse().toArray();
     return allMatches.filter((match: Match) => !match.winner);
   }
 
@@ -60,6 +61,7 @@ export class MatchService extends BaseService<Match> {
     // Get the most recent matches sorted by updatedAt descending
     const recentMatches = await table
       .orderBy("updatedAt")
+      .reverse()
 
       .limit(batchSize)
       .toArray();
