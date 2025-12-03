@@ -94,7 +94,7 @@ export function useMatches() {
 
       // Remove from local state (both matches and unfinishedMatches)
       removeObjectById(matches.value, id);
-      removeObjectById(unfinishedMatches.value, id);
+      removeById(unfinishedMatches.value, id);
     } catch (err) {
       error.value =
         err instanceof Error ? err.message : "Failed to delete match";

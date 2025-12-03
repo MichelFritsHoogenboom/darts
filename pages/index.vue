@@ -12,7 +12,7 @@ const {
 
 onBeforeMount(async () => {
   // Load both in parallel for better performance
-  await Promise.all([loadLastFinishedMatches(5), loadUnfinishedMatches()]);
+  await Promise.all([loadLastFinishedMatches(500), loadUnfinishedMatches()]);
 });
 </script>
 <template>

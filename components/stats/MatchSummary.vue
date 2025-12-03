@@ -8,8 +8,9 @@ import { useToggle } from "@vueuse/core";
 import LegSummary from "./LegSummary.vue";
 import SetSummary from "./SetSummary.vue";
 
-const { match } = defineProps<{
+const { match, openDetails = false } = defineProps<{
   match: Match;
+  openDetails?: boolean;
 }>();
 
 const { players } = useGame(match);
@@ -22,7 +23,7 @@ const { getPlayerLegsForLeg } = usePlayerLegs();
 const { getScoresForPlayerLeg } = useScores();
 
 // Toggle to show/hide summary (defaults to false - hidden)
-const [showSummary, toggleSummary] = useToggle(false);
+const [showSummary, toggleSummary] = useToggle(openDetails);
 
 // Store loaded leg data with scores, organized by set (if sets mode)
 const setsWithLegs = ref<

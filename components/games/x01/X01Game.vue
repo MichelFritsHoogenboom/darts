@@ -298,13 +298,22 @@ initializeMatch();
         <div
           class="bg-gray-800 rounded-xl p-8 max-w-4xl w-full max-h-full mx-auto text-center overflow-y-auto"
         >
-          <h2 class="text-3xl font-bold mb-4 text-dartboard-green">
-            Match Over!
-          </h2>
+          <h2 class="text-3xl font-bold mb-4">Match Over!</h2>
 
           <!-- Match Summary -->
-          <StatsMatchSummary :match="match" />
-          <button @click="resetGame" class="dartboard-button">New Match</button>
+          <StatsMatchSummary :match="match" :open-details="true" />
+          <button
+            v-if="currentLeg"
+            @click="undoLastTurn"
+            :disabled="!canUndo"
+            class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-2 px-3 rounded-lg transition-colors duration-200 text-sm"
+            title="Undo last turn (Ctrl+Z)"
+          >
+            Undo
+          </button>
+          <button v-if="currentLeg" @click="resetGame" class="dartboard-button">
+            New Match
+          </button>
         </div>
       </div>
     </div>

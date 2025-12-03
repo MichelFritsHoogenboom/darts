@@ -30,13 +30,14 @@ export class DartsDatabase extends Dexie {
     });
 
     // Version 2: Added multi-entry indexes for array fields (players)
+    // Note: Remove regular 'players' index and only keep '*players' multi-entry index
     this.version(2)
       .stores({
         players: "id, firstName, lastName, alias, createdAt, updatedAt",
         matches:
-          "id, gameType, players, *players, matchConfig, createdAt, updatedAt, winner",
-        sets: "id, matchId, legs, createdAt, updatedAt, players, *players, winner",
-        legs: "id, matchId, setId, gameType, players, *players, startingPlayer, winner, createdAt, updatedAt",
+          "id, gameType, *players, matchConfig, createdAt, updatedAt, winner",
+        sets: "id, matchId, legs, createdAt, updatedAt, *players, winner",
+        legs: "id, matchId, setId, gameType, *players, startingPlayer, winner, createdAt, updatedAt",
         playerLegs:
           "id, legId, playerId, scores, average, createdAt, updatedAt",
         scores: "id, playerLegId, playerId, totalScore, createdAt, updatedAt",

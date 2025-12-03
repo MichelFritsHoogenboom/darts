@@ -35,17 +35,15 @@ export const useX01Game = (
     handleMatchWin,
     resetScore,
     currentPlayerId,
-    getPreviousPlayerId,
     setPreviousPlayer,
     getNextPlayerId,
     setNextPlayer,
   } = gameState;
-  const { savePlayerLeg, getPlayerLegsForLeg, deletePlayerLeg } =
-    usePlayerLegs();
+  const { savePlayerLeg, getPlayerLegsForLeg } = usePlayerLegs();
   const { getLegsForSet, saveLeg, getLegsForMatch, deleteLeg } = useLegs();
   const { getSetsForMatch, saveSet, deleteSet } = useSets();
   const { getScoresForPlayerLeg, deleteScore } = useScores();
-
+  const { saveMatch } = useMatches();
   // factory functions
   const createNewSet = async (startingPlayer: string = match.players[0]) => {
     const set = createSet({
@@ -140,7 +138,7 @@ export const useX01Game = (
   // Check if undo is available
   const canUndo = computed(() => {
     // Check if match has more than 1 leg/set
-    if (matchGame.value.length > 1) {
+    if (matchGame.value.length > 1 || currentSetGame.value?.length > 1) {
       return true;
     }
 
@@ -154,19 +152,119 @@ export const useX01Game = (
     return false;
   });
 
+  const removeLastScore = async (playerLeg: PlayerLeg) => {
+    const lastScore = playerLeg.scores[playerLeg.scores.length - 1];
+    if (lastScore) {
+      await deleteScore(lastScore);
+      removeValueById(playerLeg.scores, lastScore);
+      await savePlayerLeg(playerLeg);
+      return true;
+    }
+    return false;
+  };
+
+  const initPreviousLeg = async (previousLeg: Leg) => {
+    const winner = previousLeg.winner;
+    currentLeg.value = previousLeg;
+    currentLeg.value!.winner = undefined;
+    await saveLeg(currentLeg.value!);
+
+    currentPlayerLegs.value = await getPlayerLegsForLeg(previousLeg.id);
+    currentPlayerLegScores.value = {};
+    await Promise.all(
+      currentPlayerLegs.value.map(async (playerLeg) => {
+        const scores = await getScoresForPlayerLeg(playerLeg.id);
+        currentPlayerLegScores.value[playerLeg.playerId] = scores;
+      })
+    );
+
+    let previousPlayerLeg = getCurrentPlayerLeg.value(winner!);
+    if (!previousPlayerLeg) return;
+
+    await removeLastScore(previousPlayerLeg);
+    currentPlayerId.value = previousPlayerLeg.playerId;
+  };
+
   const undoLastTurn = async () => {
-    if (!currentLeg.value) return;
+    if (!currentLeg.value || !canUndo.value) return;
+
+    if (match.winner) {
+      match.winner = undefined;
+      currentSet.value!.winner = undefined;
+      currentLeg.value!.winner = undefined;
+      await saveLeg(currentLeg.value!);
+      await saveSet(currentSet.value!);
+      await saveMatch(match);
+
+      await loadMatchGame();
+
+      const playerLeg = getCurrentPlayerLeg.value(currentPlayerId.value);
+      if (!playerLeg) return;
+
+      await removeLastScore(playerLeg);
+      await loadMatchGame();
+
+      return;
+    }
 
     setPreviousPlayer();
 
     const playerLeg = getCurrentPlayerLeg.value(currentPlayerId.value);
     if (!playerLeg) return;
 
-    const lastScore = playerLeg.scores[playerLeg.scores.length - 1];
-    if (lastScore) {
-      await deleteScore(lastScore);
-      removeValueById(playerLeg.scores, lastScore);
-      savePlayerLeg(playerLeg);
+    const lastScoreRemoved = await removeLastScore(playerLeg);
+
+    if (lastScoreRemoved) {
+      return;
+    }
+
+    if (!lastScoreRemoved) {
+      // Delete the leg first
+      if (!currentLeg.value || !currentSet.value) return;
+
+      await deleteLeg(currentLeg.value.id);
+      removeObjectById(currentSetGame.value, currentLeg.value.id);
+      removeValueById(currentSet.value?.game ?? [], currentLeg.value.id);
+      await saveSet(currentSet.value);
+
+      // Reload to get updated leg count
+      await loadMatchGame();
+
+      // Check if there are remaining legs in the set AFTER deletion
+      if (currentSetGame.value && currentSetGame.value.length > 0) {
+        // There are still legs, reactivate the last one
+        const previousLeg =
+          currentSetGame.value[currentSetGame.value.length - 1];
+        await initPreviousLeg(previousLeg);
+        await loadMatchGame();
+      } else {
+        // no more legs exist in the set, delete the set and re-activate the previous set
+        if (!currentSet.value) return;
+        await deleteSet(currentSet.value.id);
+
+        removeValueById(match.game, currentSet.value.id);
+        await saveMatch(match);
+
+        // Reload match game to get updated sets
+        await loadMatchGame();
+
+        // Get the latest set from match.game (if any sets remain)
+        const updatedSets = matchGame.value as Set[];
+
+        const latestSet = updatedSets[updatedSets.length - 1];
+        currentSet.value = latestSet;
+        currentSetGame.value = await getLegsForSet(latestSet.id);
+        currentSet.value!.winner = undefined;
+        await saveSet(latestSet);
+
+        const previousLeg =
+          currentSetGame.value[currentSetGame.value.length - 1];
+
+        await initPreviousLeg(previousLeg);
+
+        // Reload match game to get updated sets
+        await loadMatchGame();
+      }
     }
   };
 
@@ -346,8 +444,10 @@ export const useX01Game = (
       );
       if (currentSet.value) {
         currentSet.value.game.push(newLeg.id);
+        await saveSet(currentSet.value);
       } else {
         match.game.push(newLeg.id);
+        await saveMatch(match);
       }
       currentLeg.value = newLeg;
       currentPlayerId.value = newLeg.startingPlayer;
