@@ -35,18 +35,34 @@ export const useGame = (match: Match) => {
     await saveMatch(match);
   };
 
-  const getNextPlayerId = (playerId: string) => {
+  // Shared logic to get player ID at a relative index
+  const getPlayerIdAtOffset = (playerId: string, offset: number) => {
     const currentIndex = players.value.findIndex(
       (player) => player.id === playerId
     );
-    const nextIndex = (currentIndex + 1) % players.value.length;
-    return players.value[nextIndex].id;
+    const newIndex =
+      (currentIndex + offset + players.value.length) % players.value.length;
+    return players.value[newIndex].id;
+  };
+
+  const getNextPlayerId = (playerId: string) => {
+    return getPlayerIdAtOffset(playerId, 1);
+  };
+
+  const getPreviousPlayerId = (playerId: string) => {
+    return getPlayerIdAtOffset(playerId, -1);
   };
 
   const setNextPlayer = (playerid: string = currentPlayerId.value) => {
     // Switch to next player
     const nextPlayerIndex = getNextPlayerId(playerid);
     currentPlayerId.value = nextPlayerIndex;
+  };
+
+  const setPreviousPlayer = (playerid: string = currentPlayerId.value) => {
+    // Switch to previous player
+    const previousPlayerIndex = getPreviousPlayerId(playerid);
+    currentPlayerId.value = previousPlayerIndex;
   };
 
   const resetScore = () => {
@@ -70,7 +86,9 @@ export const useGame = (match: Match) => {
     scoreValidationMessage,
     currentScore,
     getNextPlayerId,
+    getPreviousPlayerId,
     setNextPlayer,
+    setPreviousPlayer,
     canUndo,
     undoLastTurn,
     handleMatchWin,

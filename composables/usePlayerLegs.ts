@@ -3,6 +3,8 @@ import { PlayerLegService } from "~/database/PlayerLegService";
 import type { PlayerLeg } from "~/interfaces/leg";
 
 const playerLegService = new PlayerLegService();
+const { getScoresForPlayerLeg, deleteScore } = useScores();
+
 export const usePlayerLegs = () => {
   const playerLegs = ref<PlayerLeg[]>([]);
   const loading = ref(false);
@@ -52,10 +54,15 @@ export const usePlayerLegs = () => {
     loading.value = true;
     error.value = null;
     try {
+      // First delete all related scores (which will also delete related single dart scores)
+      const scores = await getScoresForPlayerLeg(id);
+      for (const score of scores) {
+        await deleteScore(score.id);
+      }
+
+      // Then delete the player leg itself
       await playerLegService.delete(id);
-      playerLegs.value = playerLegs.value.filter(
-        (playerLeg) => playerLeg.id !== id
-      );
+      removeObjectById(playerLegs.value, id);
       return true;
     } catch (err) {
       error.value =

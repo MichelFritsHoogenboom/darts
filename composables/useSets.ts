@@ -4,6 +4,7 @@ import type { Set } from "~/interfaces/set";
 import type { Leg } from "~/interfaces/leg";
 
 const setService = new SetService();
+const { getLegsForSet, deleteLeg } = useLegs();
 
 export const useSets = () => {
   const sets = ref<Set[]>([]);
@@ -50,8 +51,15 @@ export const useSets = () => {
     loading.value = true;
     error.value = null;
     try {
+      // First delete all related legs (which will also delete their player legs, scores, and single dart scores)
+      const legs = await getLegsForSet(id);
+      for (const leg of legs) {
+        await deleteLeg(leg.id);
+      }
+
+      // Then delete the set itself
       await setService.delete(id);
-      sets.value = sets.value.filter((set) => set.id !== id);
+      removeObjectById(sets.value, id);
       return true;
     } catch (err) {
       error.value = err instanceof Error ? err.message : "Failed to delete set";

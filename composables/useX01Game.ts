@@ -35,14 +35,16 @@ export const useX01Game = (
     handleMatchWin,
     resetScore,
     currentPlayerId,
+    getPreviousPlayerId,
+    setPreviousPlayer,
     getNextPlayerId,
     setNextPlayer,
   } = gameState;
-  const { savePlayerLeg, getPlayerLegsForLeg } = usePlayerLegs();
-  const { getLegsForSet, saveLeg } = useLegs();
-  const { getLegsForMatch } = useLegs();
-  const { getSetsForMatch, saveSet } = useSets();
-  const { getScoresForPlayerLeg } = useScores();
+  const { savePlayerLeg, getPlayerLegsForLeg, deletePlayerLeg } =
+    usePlayerLegs();
+  const { getLegsForSet, saveLeg, getLegsForMatch, deleteLeg } = useLegs();
+  const { getSetsForMatch, saveSet, deleteSet } = useSets();
+  const { getScoresForPlayerLeg, deleteScore } = useScores();
 
   // factory functions
   const createNewSet = async (startingPlayer: string = match.players[0]) => {
@@ -134,6 +136,39 @@ export const useX01Game = (
   const legsToDisplay = computed(() => {
     return currentSet.value ? currentSetGame.value : matchGame.value;
   });
+
+  // Check if undo is available
+  const canUndo = computed(() => {
+    // Check if match has more than 1 leg/set
+    if (matchGame.value.length > 1) {
+      return true;
+    }
+
+    // Check if any playerLeg in the current leg has scores
+    if (currentLeg.value) {
+      return currentPlayerLegs.value.some(
+        (playerLeg) => playerLeg.scores.length > 0
+      );
+    }
+
+    return false;
+  });
+
+  const undoLastTurn = async () => {
+    if (!currentLeg.value) return;
+
+    setPreviousPlayer();
+
+    const playerLeg = getCurrentPlayerLeg.value(currentPlayerId.value);
+    if (!playerLeg) return;
+
+    const lastScore = playerLeg.scores[playerLeg.scores.length - 1];
+    if (lastScore) {
+      await deleteScore(lastScore);
+      removeValueById(playerLeg.scores, lastScore);
+      savePlayerLeg(playerLeg);
+    }
+  };
 
   const validateScore = () => {
     // Trigger validation by accessing the computed property
@@ -376,6 +411,8 @@ export const useX01Game = (
     currentLeg,
     currentPlayerLegs,
     currentPlayerLegScores,
+    canUndo,
+    undoLastTurn,
     matchGame,
     isValidScore,
     realTimePlayerScore,

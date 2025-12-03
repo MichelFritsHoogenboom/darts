@@ -3,6 +3,7 @@ import { LegService } from "~/database/LegService";
 import type { Leg } from "~/interfaces/leg";
 
 const legService = new LegService();
+const { getPlayerLegsForLeg, deletePlayerLeg } = usePlayerLegs();
 
 export const useLegs = () => {
   const legs = ref<Leg[]>([]);
@@ -49,8 +50,15 @@ export const useLegs = () => {
     loading.value = true;
     error.value = null;
     try {
+      // First delete all related player legs (which will also delete their scores and single dart scores)
+      const playerLegs = await getPlayerLegsForLeg(id);
+      for (const playerLeg of playerLegs) {
+        await deletePlayerLeg(playerLeg.id);
+      }
+
+      // Then delete the leg itself
       await legService.delete(id);
-      legs.value = legs.value.filter((leg) => leg.id !== id);
+      removeObjectById(legs.value, id);
       return true;
     } catch (err) {
       error.value = err instanceof Error ? err.message : "Failed to delete leg";

@@ -4,6 +4,9 @@ import type { Score } from "~/interfaces/leg";
 
 const scoreService = new ScoreService();
 
+const { getSingleDartScoresForScore, deleteSingleDartScore } =
+  useSingleDartScores();
+
 export const useScores = () => {
   const scores = ref<Score[]>([]);
   const loading = ref(false);
@@ -50,8 +53,15 @@ export const useScores = () => {
     loading.value = true;
     error.value = null;
     try {
+      // First delete all related single dart scores
+      const singleDartScores = await getSingleDartScoresForScore(id);
+      for (const singleDartScore of singleDartScores) {
+        await deleteSingleDartScore(singleDartScore.id);
+      }
+
+      // Then delete the score itself
       await scoreService.delete(id);
-      scores.value = scores.value.filter((score) => score.id !== id);
+      removeObjectById(scores.value, id);
       return true;
     } catch (err) {
       error.value =

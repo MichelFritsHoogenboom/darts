@@ -11,8 +11,8 @@ const {
 } = useMatches();
 
 onBeforeMount(async () => {
-  await loadLastFinishedMatches(5);
-  await loadUnfinishedMatches();
+  // Load both in parallel for better performance
+  await Promise.all([loadLastFinishedMatches(5), loadUnfinishedMatches()]);
 });
 </script>
 <template>

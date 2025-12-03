@@ -22,8 +22,6 @@ const {
   currentPlayerId,
   currentPlayer,
   players,
-  canUndo,
-  undoLastTurn,
 } = gameState;
 
 // Pass game state to useX01Game
@@ -41,6 +39,8 @@ const {
   legsToDisplay,
   validateScore,
   submitScore,
+  canUndo,
+  undoLastTurn,
 } = useX01Game(match, gameState);
 const { getLegsForSet } = useLegs();
 const { getPlayerLegsForLeg } = usePlayerLegs();
