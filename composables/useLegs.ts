@@ -69,11 +69,14 @@ export const useLegs = () => {
     }
   };
 
-  const getLegsForSet = async (setId: string): Promise<Leg[]> => {
+  const getLegsForSet = async (
+    setId: string,
+    sortOrder?: string[]
+  ): Promise<Leg[]> => {
     loading.value = true;
     error.value = null;
     try {
-      const setLegs = await legService.getLegsForSet(setId);
+      const setLegs = await legService.getLegsForSet(setId, sortOrder);
       return setLegs;
     } catch (err) {
       error.value =

@@ -82,8 +82,22 @@ const loadLegsData = async () => {
     const setsData = await Promise.all(
       sets.map(async (set) => {
         const setLegs = await getLegsForSet(set.id);
+
+        // Sort legs according to the order in set.game array
+        const sortedLegs = setLegs.sort((a, b) => {
+          const indexA = set.game.indexOf(a.id);
+          const indexB = set.game.indexOf(b.id);
+          // If not found in set.game, sort by updatedAt as fallback
+          if (indexA === -1 && indexB === -1) {
+            return a.updatedAt.getTime() - b.updatedAt.getTime();
+          }
+          if (indexA === -1) return 1;
+          if (indexB === -1) return -1;
+          return indexA - indexB;
+        });
+
         const legsData = await Promise.all(
-          setLegs.map((leg) => loadLegWithScores(leg))
+          sortedLegs.map((leg) => loadLegWithScores(leg))
         );
 
         return {
