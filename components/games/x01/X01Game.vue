@@ -299,14 +299,8 @@ initializeMatch();
           class="bg-gray-800 rounded-xl p-8 max-w-4xl w-full max-h-full mx-auto text-center overflow-y-auto"
         >
           <h2 class="text-3xl font-bold mb-4 text-dartboard-green">
-            🎉 Match Over!
+            Match Over!
           </h2>
-          <p class="text-xl mb-4">
-            <span class="font-bold">{{
-              getPlayerDisplayName(currentPlayer)
-            }}</span>
-            wins!
-          </p>
 
           <!-- Match Summary -->
           <StatsMatchSummary :match="match" />

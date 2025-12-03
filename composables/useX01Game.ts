@@ -38,10 +38,11 @@ export const useX01Game = (
     getNextPlayerId,
     setNextPlayer,
   } = gameState;
-  const { savePlayerLeg } = usePlayerLegs();
+  const { savePlayerLeg, getPlayerLegsForLeg } = usePlayerLegs();
   const { getLegsForSet, saveLeg } = useLegs();
   const { getLegsForMatch } = useLegs();
   const { getSetsForMatch, saveSet } = useSets();
+  const { getScoresForPlayerLeg } = useScores();
 
   // factory functions
   const createNewSet = async (startingPlayer: string = match.players[0]) => {
@@ -142,19 +143,100 @@ export const useX01Game = (
   // Async initialization function
   const initializeMatch = async () => {
     // Initialize currentSet if needed
+    await loadMatchGame();
+
+    if (matchGame.value.length === 0) {
+      if (match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets) {
+        currentSet.value = await createNewSet();
+      }
+
+      // Initialize currentLeg
+      currentLeg.value = await createNewleg();
+
+      // Push IDs to match.game (which stores IDs)
+      match.game.push(
+        currentSet.value ? currentSet.value.id : currentLeg.value.id
+      );
+      if (currentSet.value) {
+        currentSet.value.game.push(currentLeg.value.id);
+      }
+    } else {
+      // Match already has a winner, reinitialize from database
+      await reinitializeMatch();
+    }
+  };
+
+  const reinitializeMatch = async () => {
     if (match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets) {
-      currentSet.value = await createNewSet();
+      // Sets mode: load sets and find the last set without a winner
+      const sets = await getSetsForMatch(match.id);
+      matchGame.value = sets;
+      const currentSetInProgress = sets.find((set) => !set.winner);
+      currentSet.value = currentSetInProgress || null;
+
+      if (currentSet.value) {
+        // Load legs for the current set
+        currentSetGame.value = await getLegsForSet(currentSet.value.id);
+        // Find the last leg without a winner
+        const currentLegInProgress = currentSetGame.value.find(
+          (leg) => !leg.winner
+        );
+        currentLeg.value = currentLegInProgress || null;
+      } else {
+        currentSetGame.value = [];
+        currentLeg.value = null;
+      }
+    } else {
+      // Direct legs mode: load legs and find the last leg without a winner
+      const legs = await getLegsForMatch(match.id);
+      matchGame.value = legs;
+      const currentLegInProgress = legs.find((leg) => !leg.winner);
+      currentLeg.value = currentLegInProgress || null;
     }
 
-    // Initialize currentLeg
-    currentLeg.value = await createNewleg();
+    // Load player legs and scores for the current leg
+    if (currentLeg.value) {
+      currentPlayerLegs.value = await getPlayerLegsForLeg(currentLeg.value.id);
 
-    // Push IDs to match.game (which stores IDs)
-    match.game.push(
-      currentSet.value ? currentSet.value.id : currentLeg.value.id
-    );
-    if (currentSet.value) {
-      currentSet.value.game.push(currentLeg.value.id);
+      // Load scores for each player leg
+      currentPlayerLegScores.value = {};
+      await Promise.all(
+        currentPlayerLegs.value.map(async (playerLeg) => {
+          const scores = await getScoresForPlayerLeg(playerLeg.id);
+          currentPlayerLegScores.value[playerLeg.playerId] = scores;
+        })
+      );
+
+      // Determine the current player based on scores
+      // Find the player with the most recent score by checking createdAt timestamps
+      let lastScoreTime: Date | null = null;
+      let lastPlayerId: string | null = null;
+
+      for (const [playerId, scores] of Object.entries(
+        currentPlayerLegScores.value
+      )) {
+        if (scores.length > 0) {
+          // Get the most recent score for this player
+          const mostRecentScore = scores[scores.length - 1];
+          if (!lastScoreTime || mostRecentScore.createdAt > lastScoreTime) {
+            lastScoreTime = mostRecentScore.createdAt;
+            lastPlayerId = playerId;
+          }
+        }
+      }
+
+      // If there are scores, set the next player after the last one who threw
+      // Otherwise, use the leg's starting player
+      if (lastPlayerId) {
+        currentPlayerId.value = getNextPlayerId(lastPlayerId);
+      } else {
+        currentPlayerId.value = currentLeg.value.startingPlayer;
+      }
+    } else {
+      currentPlayerLegs.value = [];
+      currentPlayerLegScores.value = {};
+      // If no leg, default to first player
+      currentPlayerId.value = match.players[0];
     }
   };
 

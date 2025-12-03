@@ -6,6 +6,7 @@ const matchService = new MatchService();
 
 export function useMatches() {
   const matches = ref<Match[]>([]);
+  const unfinishedMatches = ref<Match[]>([]);
   const loading = ref(false);
   const error = ref<string | null>(null);
 
@@ -116,8 +117,13 @@ export function useMatches() {
     matches.value = await matchService.getLastFinishedMatches(limit);
   };
 
+  const loadUnfinishedMatches = async () => {
+    unfinishedMatches.value = await matchService.getAllUnfinishedMatches();
+  };
+
   return {
     matches: readonly(matches),
+    unfinishedMatches: readonly(unfinishedMatches),
     loading: readonly(loading),
     error: readonly(error),
     loadMatches,
@@ -127,5 +133,6 @@ export function useMatches() {
     searchMatches,
     getMatchesForPlayer,
     loadLastFinishedMatches,
+    loadUnfinishedMatches,
   };
 }

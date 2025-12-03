@@ -36,6 +36,16 @@ export class MatchService extends BaseService<Match> {
   }
 
   /**
+   * Retrieves all matches that are not yet finished (no winner assigned)
+   * @returns Promise resolving to an array of unfinished Match objects
+   */
+  async getAllUnfinishedMatches(): Promise<Match[]> {
+    const table = await this.getTable();
+    const allMatches = await table.toArray();
+    return allMatches.filter((match: Match) => !match.winner);
+  }
+
+  /**
    * Get the last N finished matches (matches with a winner)
    * Sorted by most recent first (by updatedAt)
    * Optimized: Fetches a small batch of recent matches instead of all matches

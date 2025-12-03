@@ -111,12 +111,12 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <div class="bg-gray-700 rounded-lg p-4 mb-6">
+  <div class="bg-gray-700 rounded-lg py-2 px-4">
     <h3
       class="grid grid-cols-[20%_1fr_20%] font-bold flex justify-between items-center"
     >
       <div>
-        <span class="text-xs">
+        <span class="text-xs font-normal">
           {{ match.updatedAt.toLocaleDateString() }}
         </span>
         <div class="text-sm">
@@ -159,11 +159,26 @@ onBeforeMount(async () => {
       <div class="flex items-center gap-2 justify-self-end">
         <button
           @click="toggleSummary()"
-          class="text-sm px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded transition-colors no-wrap"
+          class="text-sm px-3 py-1 bg-gray-600 font-normal hover:bg-gray-500 rounded transition-colors no-wrap"
           :class="{ 'bg-gray-500': showSummary }"
         >
           {{ showSummary ? "Hide" : "Show" }} Details
         </button>
+        <a
+          v-if="!match.winner"
+          :href="`/match/${match.id}`"
+          class="text-sm px-3 py-1 bg-gray-500 hover:bg-red-500 rounded transition-colors no-wrap flex items-center gap-2 min-h-[1.75rem]"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 640 640"
+            class="w-4 h-4 fill-current"
+          >
+            <path
+              d="M471.1 297.4C483.6 309.9 483.6 330.2 471.1 342.7L279.1 534.7C266.6 547.2 246.3 547.2 233.8 534.7C221.3 522.2 221.3 501.9 233.8 489.4L403.2 320L233.9 150.6C221.4 138.1 221.4 117.8 233.9 105.3C246.4 92.8 266.7 92.8 279.2 105.3L471.2 297.3z"
+            />
+          </svg>
+        </a>
       </div>
     </h3>
 

@@ -3,10 +3,16 @@ const startNewGame = () => {
   navigateTo("/setup");
 };
 
-const { matches, loadLastFinishedMatches } = useMatches();
+const {
+  matches,
+  unfinishedMatches,
+  loadLastFinishedMatches,
+  loadUnfinishedMatches,
+} = useMatches();
 
 onBeforeMount(async () => {
-  await loadLastFinishedMatches(10);
+  await loadLastFinishedMatches(5);
+  await loadUnfinishedMatches();
 });
 </script>
 <template>
@@ -32,11 +38,18 @@ onBeforeMount(async () => {
             Start New Game
           </button>
         </div>
-        <div>
-          <h2 class="text-xl font-bold mb-2">Last 10 matches</h2>
+        <div v-if="unfinishedMatches.length > 0" class="mb-6">
+          <h2 class="text-lg font-bold mb-2">Continue match</h2>
 
-          <div v-for="match in matches" :key="match.id" class="mb-8">
-            <StatsMatchSummary v-if="match.winner" :match="match" />
+          <div v-for="match in unfinishedMatches" :key="match.id" class="mb-4">
+            <StatsMatchSummary :match="match" />
+          </div>
+        </div>
+        <div v-if="matches.length > 0">
+          <h2 class="text-lg font-bold mb-2">Last 5 matches</h2>
+
+          <div v-for="match in matches" :key="match.id" class="mb-4">
+            <StatsMatchSummary :match="match" />
           </div>
         </div>
       </div>
