@@ -39,7 +39,11 @@ export const useX01Game = (
     getNextPlayerId,
     setNextPlayer,
   } = gameState;
-  const { savePlayerLeg, getPlayerLegsForLeg } = usePlayerLegs();
+  const {
+    savePlayerLeg,
+    getPlayerLegsForLeg,
+    calculateAndUpdatePlayerLegAverages,
+  } = usePlayerLegs();
   const { getLegsForSet, saveLeg, getLegsForMatch, deleteLeg } = useLegs();
   const { getSetsForMatch, saveSet, deleteSet } = useSets();
   const { getScoresForPlayerLeg, deleteScore } = useScores();
@@ -418,8 +422,11 @@ export const useX01Game = (
     }
   };
 
-  const handleLegWin = async () => {
+  const handleLegWin = async (createdScore: Score) => {
     if (!currentLeg.value) return;
+
+    // Calculate and update averages for all playerlegs in this leg
+    await calculateAndUpdatePlayerLegAverages(currentLeg.value.id);
 
     currentLeg.value.winner = currentPlayerId.value;
     await saveLeg(currentLeg.value);
@@ -481,8 +488,11 @@ export const useX01Game = (
     if (!playerLeg) return;
 
     const createdScore = await createScore({
+      matchId: match.id,
+      setId: currentSet.value?.id ?? "",
       playerId: currentPlayerId.value,
       playerLegId: playerLeg.id,
+      startScore: realTimePlayerScore.value(currentPlayerId.value),
       totalScore: score,
     });
 
@@ -494,7 +504,7 @@ export const useX01Game = (
 
     // Check for win condition
     if (realTimePlayerScore.value(currentPlayerId.value) === 0) {
-      await handleLegWin();
+      await handleLegWin(createdScore);
       return;
     }
 

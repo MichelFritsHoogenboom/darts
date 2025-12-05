@@ -152,14 +152,14 @@ onBeforeMount(async () => {
 
       <div>
         <StatsPlayersWithCenter
-          size="large"
+          size="medium"
           :players="[...players]"
           :player-legs="legsWithScores.flatMap((legData) => legData.playerLegs)"
           :winner-id="match.winner"
           :show-badge="false"
         >
           <span
-            class="inline-block px-2 mx-1 bg-gray-400/50 rounded-lg font-bold"
+            class="inline-block px-2 bg-gray-400/50 rounded-lg font-small font-bold"
           >
             {{
               players[0] ? getPlayerWinnerCount(players[0].id, matchGame) : 0

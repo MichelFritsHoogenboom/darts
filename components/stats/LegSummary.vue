@@ -4,6 +4,7 @@ import type { Player } from "~/interfaces/player";
 import { createPlayerNameGetter } from "~/utils/player";
 import { useToggle } from "@vueuse/core";
 import CheckoutDouble from "./CheckoutDouble.vue";
+import { createStats } from "~/interfaces/stats";
 
 const { legIndex, leg, players, playerLegs, scoresByPlayer } = defineProps<{
   legIndex: number;
@@ -12,6 +13,43 @@ const { legIndex, leg, players, playerLegs, scoresByPlayer } = defineProps<{
   playerLegs: PlayerLeg[];
   scoresByPlayer: Record<string, Score[]>;
 }>();
+
+// Composable for calculating averages
+const { calculateAndUpdatePlayerLegAverage, getPlayerLegsForLeg } =
+  usePlayerLegs();
+
+// Reactive ref to hold playerLegs with updated averages
+const playerLegsWithAverages = ref<PlayerLeg[]>([...playerLegs]);
+
+// Function to ensure all playerLegs have calculated averages
+const ensurePlayerLegAverages = async () => {
+  for (let i = 0; i < playerLegsWithAverages.value.length; i++) {
+    const playerLeg = playerLegsWithAverages.value[i];
+    // Check if stats.average is 0 or undefined (not calculated yet)
+    // Also check if there are scores for this player (indicates average should be calculated)
+    const hasScores = scoresByPlayer[playerLeg.playerId]?.length > 0;
+
+    if (!playerLeg.stats) {
+      playerLeg.stats = createStats();
+    }
+    // if (
+    //   hasScores &&
+    //   (!playerLeg.stats.average || playerLeg.stats.average === 0)
+    // ) {
+    // Calculate and update - this modifies the playerLeg object in place
+    await calculateAndUpdatePlayerLegAverage(playerLeg);
+    // The playerLeg object is already updated, so we can use it directly
+    // }
+  }
+
+  // Update the reactive ref
+  playerLegsWithAverages.value = await getPlayerLegsForLeg(leg.id);
+};
+
+// Calculate averages on mount if needed
+onBeforeMount(async () => {
+  await ensurePlayerLegAverages();
+});
 
 // Get max rounds for this leg
 const maxRounds = computed(() => {
@@ -65,9 +103,9 @@ const [showLegDetails, toggleLegDetails] = useToggle(false);
               >
                 <span></span>
                 <StatsPlayersWithCenter
-                  :players="[...players]"
+                  :player-stats="playerLegsWithAverages"
+                  :players="players"
                   size="small"
-                  :player-legs="playerLegs"
                   :winner-id="leg.winner"
                 >
                   <span class="text-xs font-bold">

@@ -8,6 +8,8 @@ const playerLegService = new PlayerLegService();
 const scoreService = new ScoreService();
 const singleDartScoreService = new SingleDartScoreService();
 import type { X01GameType } from "./x01MatchConfig";
+import type { Stats } from "./stats";
+import { createStats } from "./stats";
 export interface SingleDartScore {
   id: string;
   scoreId: string;
@@ -21,10 +23,13 @@ export interface SingleDartScore {
 
 export interface Score {
   id: string;
+  matchId: string;
+  setId?: string;
   playerId: string;
   playerLegId: string;
   createdAt: Date;
   updatedAt: Date;
+  startScore: number;
   totalScore: number;
   scoreDarts1?: SingleDartScore;
   scoreDarts2?: SingleDartScore;
@@ -38,8 +43,7 @@ export interface PlayerLeg {
   updatedAt: Date;
   playerId: string;
   scores: string[] | ReadonlyArray<string>; // Score IDs - accepts both mutable and readonly
-  average?: number;
-  checkout?: number;
+  stats: Stats;
 }
 
 export interface Leg {
@@ -76,11 +80,14 @@ export async function createSingleDartScore(overrides: {
 }
 
 export async function createScore(overrides: {
+  matchId: string;
+  setId?: string;
   playerId: string;
   playerLegId: string;
+  startScore: number;
   totalScore: number;
 }): Promise<Score> {
-  const score = {
+  const score: Score = {
     id: uuid(),
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -106,6 +113,7 @@ export async function createPlayerLeg(overrides: {
     createdAt: new Date(),
     updatedAt: new Date(),
     scores: [],
+    stats: createStats(),
     ...overrides,
   };
 

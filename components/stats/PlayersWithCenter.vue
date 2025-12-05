@@ -1,20 +1,29 @@
 <script lang="ts" setup>
-import type { Player } from "~/interfaces/player";
+import type { Player, PlayerStats } from "~/interfaces/player";
 import type { PlayerLeg } from "~/interfaces/leg";
 
 const {
+  playerStats,
   players,
-  playerLegs,
   size,
   winnerId,
   showBadge = true,
 } = defineProps<{
+  playerStats: PlayerStats[] | PlayerLeg[];
   players: Player[];
-  playerLegs: PlayerLeg[];
   size: "small" | "medium" | "large";
   winnerId?: string;
   showBadge?: boolean;
 }>();
+
+const getAverage = (playerId: string) => {
+  return (
+    playerStats.find((player) => {
+      // PlayerLeg has playerId, PlayerStats uses id
+      return ("playerId" in player ? player.playerId : player.id) === playerId;
+    })?.stats?.average ?? 0
+  );
+};
 
 const sizeClasses = computed(() => {
   const sizes: Record<"small" | "medium" | "large", string> = {
@@ -28,27 +37,33 @@ const sizeClasses = computed(() => {
 
 <template>
   <div :class="`flex flex-1 items-center gap-2 justify-center ${sizeClasses}`">
-    <div v-if="players[0]" class="flex-1 flex justify-end font-bold">
+    <div
+      v-if="players[0] && playerStats?.[0]"
+      class="flex-1 flex justify-end font-bold"
+    >
       <StatsPlayerNameWithBadge
         :player-id="players[0].id"
         :players="players"
         :show-badge="showBadge"
         :badge-first="true"
         :winner-id="winnerId"
-        :player-legs="playerLegs"
+        :average="getAverage(players[0].id)"
       />
     </div>
-    <span class="font-bold mx-6">
+    <span class="font-bold mx-5">
       <slot />
     </span>
 
-    <div v-if="players[1]" class="flex-1 flex justify-start font-bold">
+    <div
+      v-if="players[1] && playerStats?.[1]"
+      class="flex-1 flex justify-start font-bold"
+    >
       <StatsPlayerNameWithBadge
         :player-id="players[1].id"
         :players="players"
         :show-badge="showBadge"
         :winner-id="winnerId"
-        :player-legs="playerLegs"
+        :average="getAverage(players[1].id)"
       />
     </div>
   </div>

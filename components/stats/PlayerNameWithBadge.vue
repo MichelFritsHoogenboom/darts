@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { Player } from "~/interfaces/player";
-import type { PlayerLeg } from "~/interfaces/leg";
+
 import { createPlayerNameGetter } from "~/utils/player";
 
 const {
@@ -9,14 +9,14 @@ const {
   showBadge = true,
   badgeFirst = false,
   winnerId,
-  playerLegs,
+  average,
 } = defineProps<{
   playerId: string;
   players: Player[];
   showBadge?: boolean;
   badgeFirst?: boolean;
   winnerId?: string;
-  playerLegs: PlayerLeg[];
+  average: number;
 }>();
 
 const getPlayerName = createPlayerNameGetter(players);
@@ -30,11 +30,7 @@ const isWinner = computed(() => playerId === winnerId);
   >
     <span>{{ getPlayerName(playerId) }}</span>
     <span class="text-xs text-gray-400" title="3 dart average">
-      {{
-        playerLegs
-          .find((pl) => pl.playerId === playerId)
-          ?.average?.toFixed(2) || "0.00"
-      }}
+      {{ average.toFixed(2) }}
     </span>
     <span
       v-if="isWinner && showBadge"

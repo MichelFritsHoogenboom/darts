@@ -114,6 +114,58 @@ export const usePlayerLegs = () => {
     }
   };
 
+  const calculateAndUpdatePlayerLegAverage = async (
+    playerLeg: PlayerLeg
+  ): Promise<void> => {
+    // Get all scores for this playerleg
+    const scores = await getScoresForPlayerLeg(playerLeg.id);
+
+    if (scores.length === 0) {
+      // No scores, average remains 0
+      return;
+    }
+
+    // Sum up all totalScores
+    const totalScoreSum = scores.reduce(
+      (sum, score) => sum + score.totalScore,
+      0
+    );
+
+    // Calculate average: sum / (number of scores * 3 darts per score)
+    // This gives average per dart
+    const average = totalScoreSum / scores.length;
+
+    // Update playerleg.stats.average
+    playerLeg.stats.average = average;
+
+    // Save the updated playerleg
+    await savePlayerLeg(playerLeg);
+  };
+
+  const calculateAndUpdatePlayerLegAverages = async (
+    legId: string
+  ): Promise<void> => {
+    loading.value = true;
+    error.value = null;
+    try {
+      // Get all playerlegs for the leg
+      const playerLegs = await getPlayerLegsForLeg(legId);
+
+      // Loop over each playerleg and calculate/update average
+      for (const playerLeg of playerLegs) {
+        await calculateAndUpdatePlayerLegAverage(playerLeg);
+      }
+    } catch (err) {
+      error.value =
+        err instanceof Error
+          ? err.message
+          : "Failed to calculate and update player leg averages";
+      console.error("Error calculating player leg averages:", err);
+    } finally {
+      loading.value = false;
+    }
+  };
+
   return {
     playerLegs: readonly(playerLegs),
     loading: readonly(loading),
@@ -123,5 +175,7 @@ export const usePlayerLegs = () => {
     deletePlayerLeg,
     getPlayerLegsForLeg,
     getPlayerLegsForPlayer,
+    calculateAndUpdatePlayerLegAverage,
+    calculateAndUpdatePlayerLegAverages,
   };
 };

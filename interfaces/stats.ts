@@ -36,3 +36,49 @@ export interface Stats {
   setDarts?: DartsThrownHit;
   matchDarts?: DartsThrownHit;
 }
+
+// Factory functions to create new instances
+export function createCheckoutRanges(): CheckoutRanges {
+  return {
+    "0-40": 0,
+    "41-60": 0,
+    "61-80": 0,
+    "81-100": 0,
+    "101-130": 0,
+    "131-150": 0,
+    "151-170": 0,
+  };
+}
+
+export function createScoreRanges(): ScoreRanges {
+  return {
+    "0-9": 0,
+    "10-19": 0,
+    "20-29": 0,
+    "30-39": 0,
+    "40-53": 0, // 2 well aimed scoring darts and a loose dart
+    "54-65": 0, // three single darts of at least 18
+    "66-89": 0, // 1 triple and 1 single of at least 18, 1 loose dart
+    "90-125": 0, // one triple and two singles of at least 18
+    "126-161": 0, // 2 triples and one single dart of at least 18
+    "162-180": 0, // 3 triples (perfect aimed)
+  };
+}
+
+export function createDartsThrownHit(): DartsThrownHit {
+  return {
+    thrown: 0,
+    hit: 0,
+  };
+}
+
+export function createStats(): Stats {
+  return {
+    average: 0,
+    scoringDartsAverage: 0,
+    scores: createScoreRanges(),
+    checkouts: createCheckoutRanges(),
+    highestCheckout: 0,
+    doubles: createDartsThrownHit(),
+  };
+}
