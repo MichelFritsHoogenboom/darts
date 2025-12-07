@@ -22,6 +22,7 @@ const {
   currentPlayerId,
   currentPlayer,
   players,
+  playerStats,
 } = gameState;
 
 // Pass game state to useX01Game
@@ -108,7 +109,11 @@ const legWinNotification = ref<boolean>(false);
 const resetGame = () => {
   emit("game-reset");
 };
-initializeMatch();
+
+// Initialize match after players are loaded (onMounted runs after onBeforeMount)
+onMounted(async () => {
+  await initializeMatch();
+});
 </script>
 
 <template>

@@ -32,54 +32,66 @@ export const useX01Game = (
   const {
     currentScore,
     scoreValidationMessage,
-    handleMatchWin,
     resetScore,
+    playerStats,
     currentPlayerId,
     setPreviousPlayer,
     getNextPlayerId,
     setNextPlayer,
   } = gameState;
+  const { savePlayerLeg, getPlayerLegsForLeg } = usePlayerLegs();
   const {
-    savePlayerLeg,
-    getPlayerLegsForLeg,
     calculateAndUpdatePlayerLegAverages,
-  } = usePlayerLegs();
+    calculateAndUpdateMatchPlayerStatsAverages,
+  } = useAverages();
   const { getLegsForSet, saveLeg, getLegsForMatch, deleteLeg } = useLegs();
   const { getSetsForMatch, saveSet, deleteSet } = useSets();
   const { getScoresForPlayerLeg, deleteScore } = useScores();
   const { saveMatch } = useMatches();
   // factory functions
-  const createNewSet = async (startingPlayer: string = match.players[0]) => {
+  const createNewSet = async (
+    startingPlayer: string = currentPlayerId.value
+  ) => {
     const set = createSet({
       matchId: match.id,
-      players: toRaw(match.players),
+      players: toRaw(playerIds.value),
       startingPlayer: startingPlayer,
     });
 
     return set;
   };
 
-  const createPlayerLegs = async (players: string[], legId: string) => {
+  const createPlayerLegs = async (
+    players: string[],
+    legId: string,
+    matchId: string,
+    setId?: string
+  ) => {
     return await Promise.all(
       players.map((playerId) =>
         createPlayerLeg({
           legId: legId,
           playerId: playerId,
+          matchId: matchId,
+          setId: setId,
         }).then((playerLeg) => playerLeg.id)
       )
     );
   };
 
-  const createNewleg = async (startingPlayer: string = match.players[0]) => {
+  const createNewleg = async (
+    startingPlayer: string = currentPlayerId.value
+  ) => {
     const legId = uuid();
+    const setId = currentSet.value?.id;
 
     const legSettings = {
       id: legId,
       matchId: match.id,
       gameType: match.matchConfig.gameType,
-      players: await createPlayerLegs(match.players, legId),
+      players: await createPlayerLegs(playerIds.value, legId, match.id, setId),
       startingPlayer: startingPlayer,
-      ...(currentSet.value && { setId: currentSet.value.id }),
+      ...(setId && { setId: setId }),
     };
 
     return await createLeg(legSettings);
@@ -92,6 +104,11 @@ export const useX01Game = (
   const currentPlayerLegs = ref<PlayerLeg[]>([]);
   const currentPlayerLegScores = ref<Record<string, Score[]>>({});
   const matchGame = ref<Set[] | Leg[]>([]);
+
+  const playerIds = computed(() => {
+    // Use playerStats to get playerIds (loaded in onBeforeMount, so always available)
+    return playerStats?.value?.map((stat) => stat.playerId) ?? [];
+  });
 
   const isValidScore = computed(() => {
     const score = currentScore.value ?? 0;
@@ -373,7 +390,7 @@ export const useX01Game = (
       currentPlayerLegs.value = [];
       currentPlayerLegScores.value = {};
       // If no leg, default to first player
-      currentPlayerId.value = match.players[0];
+      currentPlayerId.value = "";
     }
   };
 
@@ -388,6 +405,13 @@ export const useX01Game = (
     } else {
       matchGame.value = await getLegsForMatch(match.id);
     }
+  };
+
+  const handleMatchWin = async () => {
+    await calculateAndUpdateMatchPlayerStatsAverages(match.id);
+
+    match.winner = currentPlayerId.value;
+    await saveMatch(match);
   };
 
   const handleSetWin = async () => {

@@ -112,6 +112,22 @@ export const useScores = () => {
     }
   };
 
+  const getScoresForMatch = async (matchId: string): Promise<Score[]> => {
+    loading.value = true;
+    error.value = null;
+    try {
+      const matchScores = await scoreService.getScoresForMatch(matchId);
+      return matchScores;
+    } catch (err) {
+      error.value =
+        err instanceof Error ? err.message : "Failed to load scores for match";
+      console.error("Error loading scores for match:", err);
+      return [];
+    } finally {
+      loading.value = false;
+    }
+  };
+
   return {
     scores: readonly(scores),
     loading: readonly(loading),
@@ -121,5 +137,6 @@ export const useScores = () => {
     deleteScore,
     getScoresForPlayerLeg,
     getScoresForPlayer,
+    getScoresForMatch,
   };
 };

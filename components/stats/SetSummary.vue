@@ -30,7 +30,7 @@ const legs = computed(() => legsWithScores.map((legData) => legData.leg));
         <StatsPlayersWithCenter
           size="small"
           :players="players"
-          :player-legs="legsWithScores.flatMap((legData) => legData.playerLegs)"
+          :player-stats="set.playerStats"
           :winner-id="set.winner"
           :show-badge="false"
         >

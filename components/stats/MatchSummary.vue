@@ -2,6 +2,7 @@
 import type { Match } from "~/interfaces/match";
 import type { Set } from "~/interfaces/set";
 import type { Leg, PlayerLeg, Score } from "~/interfaces/leg";
+import type { PlayerStats } from "~/interfaces/stats";
 import { X01_GAME_PLAYED_IN } from "~/interfaces/x01MatchConfig";
 import { getPlayerWinnerCount } from "~/utils/match";
 import { useToggle } from "@vueuse/core";
@@ -13,14 +14,17 @@ const { match, openDetails = false } = defineProps<{
   openDetails?: boolean;
 }>();
 
-const { players } = useGame(match);
-
 const gameState = useGame(match);
+const { players } = gameState;
 const { matchGame, loadMatchGame } = useX01Game(match, gameState);
 
 const { getLegsForSet } = useLegs();
 const { getPlayerLegsForLeg } = usePlayerLegs();
 const { getScoresForPlayerLeg } = useScores();
+const { getPlayerStatsForMatch } = usePlayerStats();
+
+// Load player stats for the match
+const matchPlayerStats = ref<PlayerStats[]>([]);
 
 // Toggle to show/hide summary (defaults to false - hidden)
 const [showSummary, toggleSummary] = useToggle(openDetails);
@@ -122,6 +126,7 @@ const loadLegsData = async () => {
 // Load data when component mounts
 onBeforeMount(async () => {
   await loadLegsData();
+  matchPlayerStats.value = await getPlayerStatsForMatch(match.id);
 });
 </script>
 
@@ -154,7 +159,7 @@ onBeforeMount(async () => {
         <StatsPlayersWithCenter
           size="medium"
           :players="[...players]"
-          :player-legs="legsWithScores.flatMap((legData) => legData.playerLegs)"
+          :player-stats="matchPlayerStats"
           :winner-id="match.winner"
           :show-badge="false"
         >

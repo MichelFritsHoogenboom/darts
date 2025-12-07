@@ -4,7 +4,7 @@ import type { Player } from "~/interfaces/player";
 import { createPlayerNameGetter } from "~/utils/player";
 import { useToggle } from "@vueuse/core";
 import CheckoutDouble from "./CheckoutDouble.vue";
-import { createStats } from "~/interfaces/stats";
+import type { PlayerStats } from "~/interfaces/stats";
 
 const { legIndex, leg, players, playerLegs, scoresByPlayer } = defineProps<{
   legIndex: number;
@@ -14,42 +14,8 @@ const { legIndex, leg, players, playerLegs, scoresByPlayer } = defineProps<{
   scoresByPlayer: Record<string, Score[]>;
 }>();
 
-// Composable for calculating averages
-const { calculateAndUpdatePlayerLegAverage, getPlayerLegsForLeg } =
-  usePlayerLegs();
-
-// Reactive ref to hold playerLegs with updated averages
-const playerLegsWithAverages = ref<PlayerLeg[]>([...playerLegs]);
-
-// Function to ensure all playerLegs have calculated averages
-const ensurePlayerLegAverages = async () => {
-  for (let i = 0; i < playerLegsWithAverages.value.length; i++) {
-    const playerLeg = playerLegsWithAverages.value[i];
-    // Check if stats.average is 0 or undefined (not calculated yet)
-    // Also check if there are scores for this player (indicates average should be calculated)
-    const hasScores = scoresByPlayer[playerLeg.playerId]?.length > 0;
-
-    if (!playerLeg.stats) {
-      playerLeg.stats = createStats();
-    }
-    // if (
-    //   hasScores &&
-    //   (!playerLeg.stats.average || playerLeg.stats.average === 0)
-    // ) {
-    // Calculate and update - this modifies the playerLeg object in place
-    await calculateAndUpdatePlayerLegAverage(playerLeg);
-    // The playerLeg object is already updated, so we can use it directly
-    // }
-  }
-
-  // Update the reactive ref
-  playerLegsWithAverages.value = await getPlayerLegsForLeg(leg.id);
-};
-
-// Calculate averages on mount if needed
-onBeforeMount(async () => {
-  await ensurePlayerLegAverages();
-});
+// Composable for getting player stats
+const { getPlayerStatsByPlayerLegId } = usePlayerStats();
 
 // Get max rounds for this leg
 const maxRounds = computed(() => {
@@ -79,6 +45,27 @@ const getTotalScore = (playerId: string, roundIndex: number): number => {
   return getScore(playerId, roundIndex)?.totalScore ?? 0;
 };
 
+// Get player stats for all players in the leg
+const playerStatsArray = ref<PlayerStats[]>([]);
+
+const loadPlayerStats = async () => {
+  const statsPromises = playerLegs.map(async (playerLeg) => {
+    const stats = await getPlayerStatsByPlayerLegId(playerLeg.id);
+    return stats;
+  });
+
+  const statsArray = await Promise.all(statsPromises);
+  // Filter out null values
+  playerStatsArray.value = statsArray.filter(
+    (stats): stats is PlayerStats => stats !== null
+  );
+};
+
+// Load player stats on mount
+onMounted(() => {
+  loadPlayerStats();
+});
+
 // Use utility to get player names
 const getPlayerName = createPlayerNameGetter(players);
 
@@ -103,7 +90,7 @@ const [showLegDetails, toggleLegDetails] = useToggle(false);
               >
                 <span></span>
                 <StatsPlayersWithCenter
-                  :player-stats="playerLegsWithAverages"
+                  :player-stats="playerStatsArray"
                   :players="players"
                   size="small"
                   :winner-id="leg.winner"

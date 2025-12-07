@@ -16,7 +16,7 @@ export interface Match {
   updatedAt: Date;
   gameType: GameType;
   matchConfig: x01MatchConfig;
-  players: string[] | ReadonlyArray<string>; // PlayerStats IDs - accepts both mutable and readonly
+  playerStats: string[] | ReadonlyArray<string>; // PlayerStats IDs - accepts both mutable and readonly
   game: string[] | ReadonlyArray<string>; // Leg or Set IDs - accepts both mutable and readonly
   winner?: string;
 }
@@ -28,7 +28,7 @@ export function createMatch(overrides: Partial<Match> = {}): Match {
     updatedAt: new Date(),
     gameType: GAME_TYPES.x01,
     matchConfig: defaultX01MatchConfig,
-    players: [],
+    playerStats: [],
     game: [],
     ...overrides,
   };

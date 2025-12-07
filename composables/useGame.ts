@@ -1,14 +1,16 @@
 import type { Match } from "~/interfaces/match";
+import type { PlayerStats } from "~/interfaces/stats";
 
 export const useGame = (match: Match) => {
   //composables
   const { players, loadPlayers } = usePlayers();
-  const { saveMatch } = useMatches();
+  const { getPlayerStatsById } = usePlayerStats();
 
   // Refs
   const scoreInput = useTemplateRef<HTMLInputElement>("scoreInput");
   const currentScore = ref<number>();
-  const currentPlayerId = ref<string>(match.players[0] as string); // Initialize with first player ID from match (before players are loaded)
+  const playerStats = ref<PlayerStats[]>([]);
+  const currentPlayerId = ref<string>("");
   const scoreValidationMessage = ref<string>("");
 
   // computed
@@ -28,11 +30,6 @@ export const useGame = (match: Match) => {
 
   const undoLastTurn = () => {
     alert("Undo last turn hasnt been built yet!");
-  };
-
-  const handleMatchWin = async () => {
-    match.winner = currentPlayerId.value;
-    await saveMatch(match);
   };
 
   // Shared logic to get player ID at a relative index
@@ -71,7 +68,26 @@ export const useGame = (match: Match) => {
   };
 
   onBeforeMount(async () => {
-    await loadPlayers(match.players);
+    // Load PlayerStats in the order of match.playerStats IDs
+    const statsPromises = match.playerStats.map((statsId) =>
+      getPlayerStatsById(statsId)
+    );
+    const loadedStats = await Promise.all(statsPromises);
+    // Filter out undefined values and maintain order
+    playerStats.value = loadedStats.filter(
+      (stat): stat is PlayerStats => stat !== undefined
+    );
+
+    // Get playerId from the first PlayerStats
+    if (playerStats.value.length > 0 && playerStats.value[0]?.playerId) {
+      currentPlayerId.value = playerStats.value[0].playerId;
+    }
+
+    // Load players using playerIds from PlayerStats (maintaining order)
+    const playerIds = playerStats.value.map((stat) => stat.playerId);
+    if (playerIds.length > 0) {
+      await loadPlayers(playerIds);
+    }
   });
   // Focus score input on page load
   onMounted(() => {
@@ -83,6 +99,7 @@ export const useGame = (match: Match) => {
     currentPlayerId,
     currentPlayer,
     players,
+    playerStats,
     scoreValidationMessage,
     currentScore,
     getNextPlayerId,
@@ -91,7 +108,6 @@ export const useGame = (match: Match) => {
     setPreviousPlayer,
     canUndo,
     undoLastTurn,
-    handleMatchWin,
     resetScore,
   };
 };

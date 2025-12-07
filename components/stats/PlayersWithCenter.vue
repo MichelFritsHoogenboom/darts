@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import type { Player, PlayerStats } from "~/interfaces/player";
-import type { PlayerLeg } from "~/interfaces/leg";
+import type { Player } from "~/interfaces/player";
+import type { PlayerStats } from "~/interfaces/stats";
 
 const {
   playerStats,
@@ -9,7 +9,7 @@ const {
   winnerId,
   showBadge = true,
 } = defineProps<{
-  playerStats: PlayerStats[] | PlayerLeg[];
+  playerStats: PlayerStats[];
   players: Player[];
   size: "small" | "medium" | "large";
   winnerId?: string;
@@ -17,12 +17,8 @@ const {
 }>();
 
 const getAverage = (playerId: string) => {
-  return (
-    playerStats.find((player) => {
-      // PlayerLeg has playerId, PlayerStats uses id
-      return ("playerId" in player ? player.playerId : player.id) === playerId;
-    })?.stats?.average ?? 0
-  );
+  const found = playerStats.find((player) => player.playerId === playerId);
+  return found?.average ?? 0;
 };
 
 const sizeClasses = computed(() => {

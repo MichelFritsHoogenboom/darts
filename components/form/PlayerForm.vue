@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, toRaw } from "vue";
-import { createPlayer } from "../../interfaces/player";
+import { createPlayer, type Player } from "../../interfaces/player";
 
 const props = defineProps({
   updatePlayer: {
@@ -12,7 +12,7 @@ const props = defineProps({
 const emit = defineEmits(["submit", "cancel"]);
 
 // Form data
-const formData = ref(createPlayer());
+const formData = ref<Player>(await createPlayer());
 const showAllFields = ref(false);
 
 // Computed property for birthDate to convert between Date and string (for date input)

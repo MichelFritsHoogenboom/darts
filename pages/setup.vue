@@ -9,7 +9,7 @@
 
       <SetupPlayerSelector
         :available-players="players as Player[]"
-        :selected-players="match.players as string[]"
+        :selected-players="selectedPlayers"
         :loading="loading"
         :error="error"
         @add-player="showPlayerForm = true"
@@ -37,6 +37,7 @@
 <script setup lang="ts">
 import { createMatch } from "../interfaces/match";
 import type { Player } from "../interfaces/player";
+import { createPlayerStats } from "../interfaces/stats";
 
 // Page meta
 definePageMeta({
@@ -51,6 +52,8 @@ const { saveMatch } = useMatches();
 
 // Reactive data
 const match = reactive(createMatch());
+
+const selectedPlayers = ref<string[]>([]);
 const showPlayerForm = ref(false);
 
 // Load players on mount
@@ -60,7 +63,7 @@ onBeforeMount(async () => {
 
 // Computed
 const canStartGame = computed(() => {
-  return match.players.length > 1;
+  return selectedPlayers.value.length > 1;
 });
 
 // Methods
@@ -68,6 +71,15 @@ const startGame = async () => {
   if (!canStartGame.value) return;
 
   try {
+    match.playerStats = await Promise.all(
+      selectedPlayers.value.map(async (playerId) => {
+        return await createPlayerStats({
+          playerId: playerId,
+          matchId: match.id,
+        }).then((playerStats) => playerStats.id);
+      })
+    );
+
     // Save match to database
     const savedMatch = await saveMatch(toRaw(match));
 
@@ -77,10 +89,6 @@ const startGame = async () => {
     console.error("Failed to save match:", err);
     // You could show a toast notification here
   }
-};
-
-const goBack = () => {
-  navigateTo("/");
 };
 
 // Handle player form submission
@@ -97,15 +105,15 @@ const handlePlayerSubmit = async (playerData: Player) => {
 // Player selection methods
 const addPlayerToMatch = (playerId: string) => {
   const player = players.value.find((p) => p.id === playerId);
-  if (player && !match.players.find((id) => id === playerId)) {
-    match.players.push(playerId);
+  if (player && !selectedPlayers.value.find((id) => id === playerId)) {
+    selectedPlayers.value.push(playerId);
   }
 };
 
 const removePlayerFromMatch = (playerId: string) => {
-  const index = match.players.findIndex((id) => id === playerId);
+  const index = selectedPlayers.value.findIndex((id) => id === playerId);
   if (index > -1) {
-    match.players.splice(index, 1);
+    selectedPlayers.value.splice(index, 1);
   }
 };
 </script>

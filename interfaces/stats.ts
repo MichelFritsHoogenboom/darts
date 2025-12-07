@@ -1,3 +1,9 @@
+import { v4 as uuid } from "uuid";
+import { toRaw } from "vue";
+import { PlayerStatsService } from "~/database/PlayerStatsService";
+
+const playerStatsService = new PlayerStatsService();
+
 export interface CheckoutRanges {
   "0-40": number;
   "41-60": number;
@@ -26,7 +32,14 @@ export interface DartsThrownHit {
   hit: number;
 }
 
-export interface Stats {
+export interface PlayerStats {
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  playerId: string;
+  matchId?: string;
+  setId?: string;
+  playerLegId?: string;
   average: number;
   scoringDartsAverage: number;
   scores: ScoreRanges;
@@ -72,13 +85,33 @@ export function createDartsThrownHit(): DartsThrownHit {
   };
 }
 
-export function createStats(): Stats {
-  return {
+export async function createPlayerStats(
+  overrides: Partial<PlayerStats> & {
+    playerId: string;
+    matchId?: string;
+    setId?: string;
+    playerLegId?: string;
+  }
+): Promise<PlayerStats> {
+  const playerStats = {
+    id: uuid(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
     average: 0,
     scoringDartsAverage: 0,
     scores: createScoreRanges(),
     checkouts: createCheckoutRanges(),
     highestCheckout: 0,
     doubles: createDartsThrownHit(),
+    ...overrides,
   };
+
+  // Save to database
+  try {
+    await playerStatsService.upsert(toRaw(playerStats));
+  } catch (error) {
+    console.error("Failed to save player stats to database:", error);
+  }
+
+  return playerStats;
 }

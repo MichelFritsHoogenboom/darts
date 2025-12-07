@@ -37,4 +37,10 @@ export class ScoreService extends BaseService<Score> {
     const scores = await table.where("playerId").equals(playerId).toArray();
     return this.sortScoresByCreatedAt(scores);
   }
+
+  async getScoresForMatch(matchId: string): Promise<Score[]> {
+    const table = await this.getTable();
+    const scores = await table.where("matchId").equals(matchId).toArray();
+    return this.sortScoresByCreatedAt(scores);
+  }
 }

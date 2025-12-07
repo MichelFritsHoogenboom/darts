@@ -2,10 +2,13 @@ import { ref, readonly } from "vue";
 import { MatchService } from "../database/MatchService";
 import type { Match } from "../interfaces/match";
 import { X01_GAME_PLAYED_IN } from "../interfaces/x01MatchConfig";
+import type { PlayerStats } from "../interfaces/stats";
 
 const matchService = new MatchService();
 const { getSetsForMatch, deleteSet } = useSets();
 const { getLegsForMatch, deleteLeg } = useLegs();
+const { getScoresForMatch } = useScores();
+const { getPlayerStatsForMatch, savePlayerStats } = usePlayerStats();
 
 export function useMatches() {
   const matches = ref<Match[]>([]);
@@ -31,6 +34,7 @@ export function useMatches() {
     try {
       loading.value = true;
       error.value = null;
+
       const savedMatch = await matchService.upsert(toRaw(match));
 
       // Update local state
@@ -94,7 +98,7 @@ export function useMatches() {
 
       // Remove from local state (both matches and unfinishedMatches)
       removeObjectById(matches.value, id);
-      removeById(unfinishedMatches.value, id);
+      removeObjectById(unfinishedMatches.value, id);
     } catch (err) {
       error.value =
         err instanceof Error ? err.message : "Failed to delete match";
