@@ -243,6 +243,7 @@ export const useX01Game = (
       await removeLastScore(playerLeg);
       await loadMatchGame();
 
+      resetScore();
       return;
     }
 
@@ -254,6 +255,7 @@ export const useX01Game = (
     const lastScoreRemoved = await removeLastScore(playerLeg);
 
     if (lastScoreRemoved) {
+      resetScore();
       return;
     }
 
@@ -276,6 +278,7 @@ export const useX01Game = (
           currentSetGame.value[currentSetGame.value.length - 1];
         await initPreviousLeg(previousLeg);
         await loadMatchGame();
+        resetScore();
       } else {
         // no more legs exist in the set, delete the set and re-activate the previous set
         if (!currentSet.value) return;
@@ -303,6 +306,7 @@ export const useX01Game = (
 
         // Reload match game to get updated sets
         await loadMatchGame();
+        resetScore();
       }
     }
   };

@@ -22,7 +22,6 @@ const {
   currentPlayerId,
   currentPlayer,
   players,
-  playerStats,
 } = gameState;
 
 // Pass game state to useX01Game
@@ -48,6 +47,29 @@ const { getPlayerLegsForLeg } = usePlayerLegs();
 const { getScoresForPlayerLeg } = useScores();
 
 // Game state refs
+const scoreCardRefs = ref<HTMLElement[]>([]);
+
+// Set ref for score card
+const setScoreCardRef = (el: Element | ComponentPublicInstance | null) => {
+  if (el && el instanceof HTMLElement) {
+    // Avoid duplicates
+    if (!scoreCardRefs.value.includes(el)) {
+      scoreCardRefs.value.push(el);
+    }
+  }
+};
+
+// Scroll all score cards to bottom
+const scrollScoreCardsToBottom = () => {
+  nextTick(() => {
+    // Filter out any null/undefined refs and scroll
+    scoreCardRefs.value
+      .filter((scoreCard) => scoreCard)
+      .forEach((scoreCard) => {
+        scoreCard.scrollTop = scoreCard.scrollHeight;
+      });
+  });
+};
 
 // Load legs for current set when it changes
 watch(
@@ -92,8 +114,19 @@ watch(
     );
 
     currentPlayerLegScores.value = scoresByPlayerId;
+    // Scroll to bottom after scores are loaded
+    scrollScoreCardsToBottom();
   },
   { immediate: true, deep: true }
+);
+
+// Watch for score changes and scroll to bottom
+watch(
+  () => currentPlayerLegScores.value,
+  () => {
+    scrollScoreCardsToBottom();
+  },
+  { deep: true }
 );
 
 // Load sets for match when in sets mode
@@ -171,19 +204,42 @@ onMounted(async () => {
           ]"
         >
           <div class="text-center">
-            <h3 class="text-xl font-bold mb-1">
-              {{ getPlayerDisplayName(player) }}
-            </h3>
-            <div class="text-4xl font-bold text-dartboard-red mb-2">
+            <div class="text-5xl font-bold text-white mb-2 py-2">
               {{ realTimePlayerScore(player.id) }}
-            </div>
-            <div class="text-xs text-gray-400">
-              Current Turn: {{ currentPlayerId === player.id ? "Yes" : "No" }}
             </div>
           </div>
         </div>
       </div>
+      <div :class="`grid grid-cols-${players.length} gap-4`">
+        <div
+          v-for="player in players"
+          :key="player.id"
+          class="bg-gray-800 rounded-xl p-3"
+        >
+          <div
+            :ref="setScoreCardRef"
+            class="space-y-1 max-h-80 overflow-y-auto score-card"
+          >
+            <div
+              v-for="(score, index) in currentPlayerLegScores[player.id] || []"
+              :key="`p1-${index}`"
+              class="flex justify-between items-center bg-gray-700 rounded px-2 py-1"
+            >
+              <span class="text-xs text-gray-400">{{ (index + 1) * 3 }}</span>
 
+              <span class="font-bold text-md flex-1 text-center">{{
+                score.totalScore
+              }}</span>
+            </div>
+            <div
+              v-if="(currentPlayerLegScores[player.id] || []).length === 0"
+              class="text-center text-gray-500 py-2 text-sm"
+            >
+              No scores yet
+            </div>
+          </div>
+        </div>
+      </div>
       <!-- Score Input -->
       <div class="bg-gray-800 rounded-xl p-4">
         <h3 class="text-xl font-bold text-center mb-3">
@@ -266,34 +322,6 @@ onMounted(async () => {
       />
 
       <!-- Score History -->
-      <div :class="`grid grid-cols-${players.length} gap-4`">
-        <div
-          v-for="player in players"
-          :key="player.id"
-          class="bg-gray-800 rounded-xl p-3"
-        >
-          <h4 class="text-lg font-bold mb-2 text-center">
-            {{ getPlayerDisplayName(player) }}'s Scores
-          </h4>
-          <div class="space-y-1 max-h-32 overflow-y-auto">
-            <div
-              v-for="(score, index) in currentPlayerLegScores[player.id] || []"
-              :key="`p1-${index}`"
-              class="flex justify-between items-center bg-gray-700 rounded px-2 py-1"
-            >
-              <span class="text-xs text-gray-400">{{ (index + 1) * 3 }}</span>
-
-              <span class="font-bold text-sm">{{ score.totalScore }}</span>
-            </div>
-            <div
-              v-if="(currentPlayerLegScores[player.id] || []).length === 0"
-              class="text-center text-gray-500 py-2 text-sm"
-            >
-              No scores yet
-            </div>
-          </div>
-        </div>
-      </div>
 
       <!-- Game Over Modal -->
       <div

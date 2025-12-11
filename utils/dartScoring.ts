@@ -2,48 +2,71 @@
 
 // All possible single dart scores
 const SINGLE_SCORES = [
-  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 25 // 25 = bull
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+  19,
+  20,
+  25, // 25 = bull
 ];
 
 // All possible double scores (2x each number 1-20, plus double bull = 50)
 const DOUBLE_SCORES = [
-  2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 50
+  2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40,
+  50,
 ];
 
 // All possible triple scores (3x each number 1-20)
 const TRIPLE_SCORES = [
-  3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45, 48, 51, 54, 57, 60
+  3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45, 48, 51, 54, 57, 60,
 ];
 
 // All possible dart scores in one throw
-const ALL_DART_SCORES = [...new Set([...SINGLE_SCORES, ...DOUBLE_SCORES, ...TRIPLE_SCORES])].sort((a, b) => a - b);
+const ALL_DART_SCORES = [
+  ...new Set([...SINGLE_SCORES, ...DOUBLE_SCORES, ...TRIPLE_SCORES]),
+].sort((a, b) => a - b);
 
 // Generate all possible 3-dart combinations
 function generateAllPossibleScores() {
   const possibleScores = new Set();
   possibleScores.add(0);
-  
+
   // Single dart
-  ALL_DART_SCORES.forEach(score => {
+  ALL_DART_SCORES.forEach((score) => {
     possibleScores.add(score);
   });
-  
+
   // Two darts
-  ALL_DART_SCORES.forEach(first => {
-    ALL_DART_SCORES.forEach(second => {
+  ALL_DART_SCORES.forEach((first) => {
+    ALL_DART_SCORES.forEach((second) => {
       possibleScores.add(first + second);
     });
   });
-  
+
   // Three darts
-  ALL_DART_SCORES.forEach(first => {
-    ALL_DART_SCORES.forEach(second => {
-      ALL_DART_SCORES.forEach(third => {
+  ALL_DART_SCORES.forEach((first) => {
+    ALL_DART_SCORES.forEach((second) => {
+      ALL_DART_SCORES.forEach((third) => {
         possibleScores.add(first + second + third);
       });
     });
   });
-  
+
   return Array.from(possibleScores).sort((a, b) => a - b);
 }
 
@@ -58,7 +81,7 @@ export function isAchievableScore(score) {
 // Get checkout suggestions for a given score
 export function getCheckoutSuggestions(score) {
   if (score > 170) return [];
-  
+
   // Complete list of all possible checkouts
   const checkoutPatterns = {
     170: ["T20 T20 Bull"],
@@ -156,7 +179,7 @@ export function getCheckoutSuggestions(score) {
     71: ["T13 D16", "T19 D7"],
     70: ["T18 D8", "T20 D5"],
     69: ["T19 D6"],
-    68: ["T16 D10"],
+    68: ["T20 D4", "T16 D10"],
     67: ["T17 D8", "T9 D20"],
     66: ["T10 D18", "T16 D9"],
     65: ["T11 D16", "T15 D10"],
@@ -222,9 +245,9 @@ export function getCheckoutSuggestions(score) {
     5: ["S1 D2"],
     4: ["D2"],
     3: ["S1 D1"],
-    2: ["D1"]
+    2: ["D1"],
   };
-  
+
   return checkoutPatterns[score] || [];
 }
 
@@ -232,10 +255,10 @@ export function getCheckoutSuggestions(score) {
 export function getCheckoutStatus(score) {
   if (score > 170) return { isCheckout: false, suggestions: [] };
   if (score <= 2) return { isCheckout: false, suggestions: [] };
-  
+
   const suggestions = getCheckoutSuggestions(score);
   return {
     isCheckout: suggestions.length > 0,
-    suggestions: suggestions
+    suggestions: suggestions,
   };
 }
