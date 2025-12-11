@@ -162,12 +162,13 @@ onMounted(async () => {
       <div class="bg-gray-800 rounded-xl p-1 text-center">
         <div class="text-lg font-bold text-white">
           <span
+            class="text-md"
             v-if="match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets"
           >
             Set {{ matchGame.length }} - Leg
             {{ currentSetGame.length }}
           </span>
-          <span v-else>
+          <span class="text-md" v-else>
             Leg
             {{ matchGame.length }}
           </span>
@@ -247,7 +248,7 @@ onMounted(async () => {
             >
               <span class="text-xs text-gray-400">{{ (index + 1) * 3 }}</span>
 
-              <span class="font-bold text-md flex-1 text-center">{{
+              <span class="font-bold text-lg flex-1 text-center">{{
                 score.totalScore
               }}</span>
             </div>

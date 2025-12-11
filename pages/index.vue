@@ -51,7 +51,7 @@ onBeforeMount(async () => {
               disabled
               class="dartboard-button text-lg px-8 py-3 w-full"
             >
-              Go to head to head
+              Go Head to Head
             </button>
           </div>
         </div>

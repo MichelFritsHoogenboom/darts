@@ -37,9 +37,14 @@ export function sortByOrder<T extends { id: string }>(
   sortOrder: string[],
   useUpdatedAtFallback: boolean = false
 ): T[] {
-  return items.sort((a: T, b: T) => {
+  const sorted = items.sort((a: T, b: T) => {
     const indexA = sortOrder.indexOf(a.id);
     const indexB = sortOrder.indexOf(b.id);
+
+    // If both items are in sortOrder, sort by their position
+    if (indexA !== -1 && indexB !== -1) {
+      return indexA - indexB;
+    }
 
     // If not found in sortOrder and fallback is enabled, sort by updatedAt
     if (useUpdatedAtFallback) {
@@ -52,10 +57,19 @@ export function sortByOrder<T extends { id: string }>(
         }
         return 0;
       }
-      if (indexA === -1) return 1;
-      if (indexB === -1) return -1;
+      if (indexA === -1) return 1; // a not found, place at end
+      if (indexB === -1) return -1; // b not found, place at end
+    } else {
+      // If not found in sortOrder and no fallback, place at end
+      if (indexA === -1 && indexB === -1) {
+        return 0; // Maintain original order for items not in sortOrder
+      }
+      if (indexA === -1) return 1; // a not found, place at end
+      if (indexB === -1) return -1; // b not found, place at end
     }
 
     return indexA - indexB;
   });
+
+  return sorted;
 }

@@ -516,7 +516,7 @@ export const useX01Game = (
 
     const score = currentScore.value;
 
-    if (!score) {
+    if (score === undefined) {
       alert("Score cannot be empty!");
       return;
     }

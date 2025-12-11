@@ -173,7 +173,7 @@ export function getCheckoutSuggestions(score) {
     77: ["T19 D10", "T15 D16"],
     76: ["T16 D14", "T20 D8"],
     75: ["T17 D12"],
-    74: ["T16 D13"],
+    74: ["T14 D16", "T16 D13"],
     73: ["T19 D8"],
     72: ["T16 D12", "T20 D6"],
     71: ["T13 D16", "T19 D7"],
