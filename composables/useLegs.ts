@@ -88,11 +88,14 @@ export const useLegs = () => {
     }
   };
 
-  const getLegsForMatch = async (matchId: string): Promise<Leg[]> => {
+  const getLegsForMatch = async (
+    matchId: string,
+    sortOrder?: string[]
+  ): Promise<Leg[]> => {
     loading.value = true;
     error.value = null;
     try {
-      const matchLegs = await legService.getLegsForMatch(matchId);
+      const matchLegs = await legService.getLegsForMatch(matchId, sortOrder);
       return matchLegs;
     } catch (err) {
       error.value =

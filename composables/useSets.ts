@@ -70,11 +70,14 @@ export const useSets = () => {
     }
   };
 
-  const getSetsForMatch = async (matchId: string): Promise<Set[]> => {
+  const getSetsForMatch = async (
+    matchId: string,
+    sortOrder?: string[]
+  ): Promise<Set[]> => {
     loading.value = true;
     error.value = null;
     try {
-      const matchSets = await setService.getSetsForMatch(matchId);
+      const matchSets = await setService.getSetsForMatch(matchId, sortOrder);
       return matchSets;
     } catch (err) {
       error.value =

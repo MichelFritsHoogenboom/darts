@@ -1,5 +1,6 @@
 import { BaseService } from "./BaseService";
 import type { Leg } from "~/interfaces/leg";
+import { sortByOrder } from "~/utils/array";
 
 export class LegService extends BaseService<Leg> {
   protected getTableName(): string {
@@ -12,24 +13,20 @@ export class LegService extends BaseService<Leg> {
 
     // If sortOrder is provided, sort legs according to that order
     if (sortOrder && sortOrder.length > 0) {
-      return legs.sort((a: Leg, b: Leg) => {
-        const indexA = sortOrder.indexOf(a.id);
-        const indexB = sortOrder.indexOf(b.id);
-        // If not found in sortOrder, sort by updatedAt as fallback
-        if (indexA === -1 && indexB === -1) {
-          return a.updatedAt.getTime() - b.updatedAt.getTime();
-        }
-        if (indexA === -1) return 1;
-        if (indexB === -1) return -1;
-        return indexA - indexB;
-      });
+      return sortByOrder(legs, sortOrder, true);
     }
 
     return legs;
   }
 
-  async getLegsForMatch(matchId: string): Promise<Leg[]> {
+  async getLegsForMatch(matchId: string, sortOrder?: string[]): Promise<Leg[]> {
     const table = await this.getTable();
-    return await table.where("matchId").equals(matchId).toArray();
+    const legs = await table.where("matchId").equals(matchId).toArray();
+
+    if (sortOrder && sortOrder.length > 0) {
+      return sortByOrder(legs, sortOrder, false);
+    }
+
+    return legs;
   }
 }

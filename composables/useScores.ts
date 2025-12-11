@@ -128,6 +128,22 @@ export const useScores = () => {
     }
   };
 
+  const getScoresForSet = async (setId: string): Promise<Score[]> => {
+    loading.value = true;
+    error.value = null;
+    try {
+      const setScores = await scoreService.getScoresForSet(setId);
+      return setScores;
+    } catch (err) {
+      error.value =
+        err instanceof Error ? err.message : "Failed to load scores for set";
+      console.error("Error loading scores for set:", err);
+      return [];
+    } finally {
+      loading.value = false;
+    }
+  };
+
   return {
     scores: readonly(scores),
     loading: readonly(loading),
@@ -138,5 +154,6 @@ export const useScores = () => {
     getScoresForPlayerLeg,
     getScoresForPlayer,
     getScoresForMatch,
+    getScoresForSet,
   };
 };

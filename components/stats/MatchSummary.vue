@@ -18,7 +18,8 @@ const gameState = useGame(match);
 const { players } = gameState;
 const { matchGame, loadMatchGame } = useX01Game(match, gameState);
 
-const { getLegsForSet } = useLegs();
+const { getLegsForSet, getLegsForMatch } = useLegs();
+const { getSetsForMatch } = useSets();
 const { getPlayerLegsForLeg } = usePlayerLegs();
 const { getScoresForPlayerLeg } = useScores();
 const { getPlayerStatsForMatch } = usePlayerStats();
@@ -82,26 +83,13 @@ const loadLegsData = async () => {
 
   if (match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets) {
     // Sets mode: organize legs by set
-    const sets = matchGame.value as Set[];
+    const sets = await getSetsForMatch(match.id, Array.from(match.game));
     const setsData = await Promise.all(
       sets.map(async (set) => {
-        const setLegs = await getLegsForSet(set.id);
-
-        // Sort legs according to the order in set.game array
-        const sortedLegs = setLegs.sort((a, b) => {
-          const indexA = set.game.indexOf(a.id);
-          const indexB = set.game.indexOf(b.id);
-          // If not found in set.game, sort by updatedAt as fallback
-          if (indexA === -1 && indexB === -1) {
-            return a.updatedAt.getTime() - b.updatedAt.getTime();
-          }
-          if (indexA === -1) return 1;
-          if (indexB === -1) return -1;
-          return indexA - indexB;
-        });
+        const setLegs = await getLegsForSet(set.id, Array.from(set.game));
 
         const legsData = await Promise.all(
-          sortedLegs.map((leg) => loadLegWithScores(leg))
+          setLegs.map((leg) => loadLegWithScores(leg))
         );
 
         return {
@@ -114,7 +102,7 @@ const loadLegsData = async () => {
     setsWithLegs.value = setsData;
   } else {
     // Direct legs mode
-    const allLegs = matchGame.value as Leg[];
+    const allLegs = await getLegsForMatch(match.id, Array.from(match.game));
     const legsData = await Promise.all(
       allLegs.map((leg) => loadLegWithScores(leg))
     );

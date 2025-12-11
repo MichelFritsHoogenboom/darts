@@ -114,8 +114,10 @@ export const usePlayerStats = () => {
     loading.value = true;
     error.value = null;
     try {
-      const stats = await playerStatsService.getPlayerStatsForSet(setId);
-      return stats;
+      const allStats = await playerStatsService.getPlayerStatsForSet(setId);
+      // Only return set-level stats (those without playerLegId)
+      const filteredStats = allStats.filter((stat) => !stat.playerLegId);
+      return filteredStats;
     } catch (err) {
       error.value =
         err instanceof Error

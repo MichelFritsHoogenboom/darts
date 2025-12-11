@@ -16,6 +16,7 @@ import { createSet } from "~/interfaces/set";
 import { createLeg } from "~/interfaces/leg";
 import { createScore } from "~/interfaces/leg";
 import { createPlayerLeg } from "~/interfaces/leg";
+import { createPlayerStats } from "~/interfaces/stats";
 
 //enums
 import { X01_GAME_PLAYED_IN } from "~/interfaces/x01MatchConfig";
@@ -43,6 +44,7 @@ export const useX01Game = (
   const {
     calculateAndUpdatePlayerLegAverages,
     calculateAndUpdateMatchPlayerStatsAverages,
+    calculateAndUpdateSetPlayerStatsAverages,
   } = useAverages();
   const { getLegsForSet, saveLeg, getLegsForMatch, deleteLeg } = useLegs();
   const { getSetsForMatch, saveSet, deleteSet } = useSets();
@@ -52,11 +54,27 @@ export const useX01Game = (
   const createNewSet = async (
     startingPlayer: string = currentPlayerId.value
   ) => {
-    const set = createSet({
+    // Create PlayerStats for each player in the same order as playerIds
+
+    const set = await createSet({
       matchId: match.id,
-      players: toRaw(playerIds.value),
+      playerStats: [],
       startingPlayer: startingPlayer,
     });
+
+    const playerStatsIds = await Promise.all(
+      playerIds.value.map(async (playerId) => {
+        const playerStats = await createPlayerStats({
+          playerId: playerId,
+          matchId: match.id,
+          setId: set.id,
+        });
+        return playerStats.id;
+      })
+    );
+
+    set.playerStats = playerStatsIds;
+    await saveSet(set);
 
     return set;
   };
@@ -418,6 +436,9 @@ export const useX01Game = (
     if (!currentSet.value) {
       return;
     }
+
+    await calculateAndUpdateSetPlayerStatsAverages(currentSet.value.id);
+
     currentSet.value.winner = currentPlayerId.value;
     await saveSet(currentSet.value);
 

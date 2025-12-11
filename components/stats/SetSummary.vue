@@ -2,6 +2,7 @@
 import type { Set } from "~/interfaces/set";
 import type { Leg, PlayerLeg, Score } from "~/interfaces/leg";
 import type { Player } from "~/interfaces/player";
+import type { PlayerStats } from "~/interfaces/stats";
 
 import { getPlayerWinnerCount } from "~/utils/match";
 
@@ -15,6 +16,16 @@ const { set, setIndex, players, legsWithScores } = defineProps<{
     scoresByPlayer: Record<string, Score[]>;
   }>;
 }>();
+
+const { getPlayerStatsById } = usePlayerStats();
+
+const playerStatsArray = ref<PlayerStats[]>([]);
+
+onMounted(async () => {
+  playerStatsArray.value = await Promise.all(
+    set.playerStats.map((playerStat) => getPlayerStatsById(playerStat))
+  );
+});
 
 // Extract legs from legsWithScores for the winner count function
 const legs = computed(() => legsWithScores.map((legData) => legData.leg));
@@ -30,7 +41,7 @@ const legs = computed(() => legsWithScores.map((legData) => legData.leg));
         <StatsPlayersWithCenter
           size="small"
           :players="players"
-          :player-stats="set.playerStats"
+          :player-stats="playerStatsArray"
           :winner-id="set.winner"
           :show-badge="false"
         >

@@ -307,18 +307,24 @@ onMounted(async () => {
 
           <!-- Match Summary -->
           <StatsMatchSummary :match="match" :open-details="true" />
-          <button
-            v-if="currentLeg"
-            @click="undoLastTurn"
-            :disabled="!canUndo"
-            class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-2 px-3 rounded-lg transition-colors duration-200 text-sm"
-            title="Undo last turn (Ctrl+Z)"
-          >
-            Undo
-          </button>
-          <button v-if="currentLeg" @click="resetGame" class="dartboard-button">
-            New Match
-          </button>
+          <div class="flex gap-2 py-4 justify-end">
+            <button
+              v-if="currentLeg"
+              @click="undoLastTurn"
+              :disabled="!canUndo"
+              class="dartboard-button bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed"
+              title="Undo last turn (Ctrl+Z)"
+            >
+              Undo
+            </button>
+            <button
+              v-if="currentLeg"
+              @click="resetGame"
+              class="dartboard-button"
+            >
+              New Match
+            </button>
+          </div>
         </div>
       </div>
     </div>

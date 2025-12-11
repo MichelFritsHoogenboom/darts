@@ -10,7 +10,7 @@ export interface Set {
   matchId: string;
   createdAt: Date;
   updatedAt: Date;
-  players: string[] | ReadonlyArray<string>; // PlayerStats IDs - accepts both mutable and readonly
+  playerStats: string[] | ReadonlyArray<string>; // PlayerStats IDs - accepts both mutable and readonly
   startingPlayer: string;
   game: string[] | ReadonlyArray<string>; // Leg IDs - accepts both mutable and readonly
   winner?: string;
@@ -19,7 +19,7 @@ export interface Set {
 export async function createSet(
   overrides: Partial<Set> & {
     matchId: string;
-    players: Array<string>; // PlayerStats IDs
+    playerStats: Array<string>; // PlayerStats IDs
     startingPlayer: string;
   }
 ): Promise<Set> {
