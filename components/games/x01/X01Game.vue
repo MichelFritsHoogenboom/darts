@@ -159,9 +159,8 @@ onMounted(async () => {
   <div class="max-w-6xl mx-auto">
     <!-- Game Board -->
     <div class="space-y-4">
-      <!-- Match Status -->
-      <div class="bg-gray-800 rounded-xl p-4 text-center">
-        <div class="text-lg font-bold text-white mb-2">
+      <div class="bg-gray-800 rounded-xl p-1 text-center">
+        <div class="text-lg font-bold text-white">
           <span
             v-if="match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets"
           >
@@ -170,26 +169,37 @@ onMounted(async () => {
           </span>
           <span v-else>
             Leg
-            {{ matchGame.length }} of
-            {{ match.matchConfig.legsToWinParent }}
+            {{ matchGame.length }}
           </span>
         </div>
-        <div :class="`grid grid-cols-${players.length} gap-4 text-sm`">
+      </div>
+
+      <!-- Match Status -->
+
+      <div :class="`grid grid-cols-${players.length} gap-4 text-sm`">
+        <div
+          class="p-2 flex flex-row items-center justify-center gap-4"
+          v-for="player in players"
+          :key="player.id"
+        >
           <div
-            class="bg-gray-700 rounded-lg p-2"
-            v-for="player in players"
-            :key="player.id"
+            class="rounded-xl p-4 text-center w-full"
+            :class="
+              currentPlayerId === player.id
+                ? 'bg-dartboard-red/60'
+                : 'bg-gray-700'
+            "
           >
-            <div class="font-bold text-dartboard-red">
+            <div class="font-bold text-3xl">
               {{ getPlayerDisplayName(player) }}
             </div>
-            <div
+            <span
               v-if="match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets"
             >
               Sets: {{ getPlayerWinnerCount(player.id, matchGame) }}/{{
                 match.matchConfig.setsToWin
               }}
-            </div>
+            </span>
             <div>
               Legs:
               {{ getPlayerWinnerCount(player.id, legsToDisplay) }}/
