@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import type { Player, PlayerStats } from "../../interfaces/player";
+import type { Player } from "../../interfaces/player";
 
 const props = defineProps<{
   availablePlayers: Player[];
@@ -36,19 +36,35 @@ const availablePlayers = computed(() => {
     }));
 
   // Add placeholder option at the beginning
-  return [{ value: "", label: "Select a player to add" }, ...players];
+  return [
+    { value: "", label: "Select a player to add" },
+    ...players,
+    { value: "new", label: "Create a new player" },
+  ];
 });
 
 const addPlayerToMatch = () => {
-  if (selectedPlayerId.value) {
+  if (selectedPlayerId.value && selectedPlayerId.value !== "new") {
     emit("select-player", selectedPlayerId.value);
-    selectedPlayerId.value = ""; // Reset selection
+  } else if (selectedPlayerId.value === "new") {
+    emit("add-player");
   }
+
+  selectedPlayerId.value = ""; // Reset selection
 };
 
 const removePlayerFromMatch = (playerId: string) => {
   emit("remove-player", playerId);
 };
+
+// Expose method to reset dropdown
+const resetDropdown = () => {
+  selectedPlayerId.value = "";
+};
+
+defineExpose({
+  resetDropdown,
+});
 </script>
 
 <template>
@@ -72,19 +88,13 @@ const removePlayerFromMatch = (playerId: string) => {
         <div class="flex-1">
           <FormSelect
             v-model="selectedPlayerId"
+            @update:modelValue="addPlayerToMatch"
             :options="availablePlayers"
+            :disabled="selectedPlayers.length >= 2"
             variant="dark"
           >
           </FormSelect>
         </div>
-        <FormButton
-          @click="addPlayerToMatch"
-          :disabled="!selectedPlayerId"
-          variant="primary"
-          size="md"
-        >
-          Select Player
-        </FormButton>
       </div>
 
       <!-- Selected Players List -->
@@ -113,13 +123,6 @@ const removePlayerFromMatch = (playerId: string) => {
             </button>
           </div>
         </div>
-      </div>
-
-      <!-- Add New Player Button -->
-      <div class="flex justify-center">
-        <FormButton @click="$emit('add-player')" variant="outline">
-          Add New Player
-        </FormButton>
       </div>
     </div>
   </div>

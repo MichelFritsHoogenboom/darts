@@ -2,12 +2,13 @@
   <div
     class="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900"
   >
-    <div class="container mx-auto px-4 py-8">
+    <div class="container max-w-4xl mx-auto px-4 py-8">
       <header class="text-center mb-8">
         <h1 class="text-4xl font-bold text-white mb-2">Game Configuration</h1>
       </header>
 
       <SetupPlayerSelector
+        ref="playerSelectorRef"
         :available-players="players as Player[]"
         :selected-players="selectedPlayers"
         :loading="loading"
@@ -17,10 +18,14 @@
         @remove-player="removePlayerFromMatch"
       />
 
-      <SetupX01MatchSetup v-model="match.matchConfig" />
-      <FormButton @click="startGame" :disabled="!canStartGame"
-        >Start Game</FormButton
-      >
+      <SetupX01MatchSetup v-model="match.matchConfig">
+        <template #footer>
+          <FormButton @click="startGame" :disabled="!canStartGame"
+            >Start Game</FormButton
+          >
+        </template>
+      </SetupX01MatchSetup>
+
       <!-- Player Form Modal -->
       <UiModal v-model="showPlayerForm">
         <template #title>Add New Player</template>
@@ -55,6 +60,7 @@ const match = reactive(createMatch());
 
 const selectedPlayers = ref<string[]>([]);
 const showPlayerForm = ref(false);
+const playerSelectorRef = ref<{ resetDropdown: () => void } | null>(null);
 
 // Load players on mount
 onBeforeMount(async () => {
@@ -94,8 +100,12 @@ const startGame = async () => {
 // Handle player form submission
 const handlePlayerSubmit = async (playerData: Player) => {
   try {
-    await savePlayer(playerData);
+    const savedPlayer = await savePlayer(playerData);
     showPlayerForm.value = false;
+    // Add the newly created player to the match
+    if (savedPlayer && savedPlayer.id) {
+      addPlayerToMatch(savedPlayer.id);
+    }
   } catch (err) {
     console.error("Failed to save player:", err);
     // You could show a toast notification here
@@ -108,6 +118,8 @@ const addPlayerToMatch = (playerId: string) => {
   if (player && !selectedPlayers.value.find((id) => id === playerId)) {
     selectedPlayers.value.push(playerId);
   }
+  // Reset dropdown to empty value
+  playerSelectorRef.value?.resetDropdown();
 };
 
 const removePlayerFromMatch = (playerId: string) => {
