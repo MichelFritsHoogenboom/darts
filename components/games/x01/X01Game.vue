@@ -71,6 +71,12 @@ const scrollScoreCardsToBottom = () => {
   });
 };
 
+// Get the column index of the active player (1-based for CSS grid)
+const activePlayerColumn = computed(() => {
+  const index = players.value.findIndex((p) => p.id === currentPlayerId.value);
+  return index >= 0 ? index + 1 : 1;
+});
+
 // Load legs for current set when it changes
 watch(
   () => currentSet.value,
@@ -199,14 +205,18 @@ onMounted(async () => {
           v-for="player in players"
           :key="player.id"
           :class="[
-            'player-card',
+            'player-card relative',
             currentPlayerId === player.id ? 'active' : 'inactive',
           ]"
         >
           <div class="text-center">
-            <div class="text-5xl font-bold text-white mb-2 py-2">
+            <div class="text-5xl font-bold text-white mb-2">
               {{ realTimePlayerScore(player.id) }}
             </div>
+            <CheckoutSuggestions
+              v-if="!match.winner"
+              :score="realTimePlayerScore(player.id)"
+            />
           </div>
         </div>
       </div>
@@ -218,7 +228,7 @@ onMounted(async () => {
         >
           <div
             :ref="setScoreCardRef"
-            class="space-y-1 max-h-80 overflow-y-auto score-card"
+            class="space-y-1 max-h-80 h-80 overflow-y-auto score-card"
           >
             <div
               v-for="(score, index) in currentPlayerLegScores[player.id] || []"
@@ -241,11 +251,17 @@ onMounted(async () => {
         </div>
       </div>
       <!-- Score Input -->
-      <div class="bg-gray-800 rounded-xl p-4">
-        <h3 class="text-xl font-bold text-center mb-3">
-          {{ getPlayerDisplayName(currentPlayer) }}'s Turn
-        </h3>
-        <div class="max-w-md mx-auto">
+      <div
+        class="bg-gray-800 rounded-xl p-4 grid"
+        :class="`grid-cols-${players.length}`"
+      >
+        <div
+          class="max-w-md mx-auto w-full"
+          :style="{
+            gridColumnStart: activePlayerColumn,
+            gridColumnEnd: activePlayerColumn + 1,
+          }"
+        >
           <input
             ref="scoreInput"
             v-model="currentScore"
@@ -294,16 +310,9 @@ onMounted(async () => {
             >
               Undo
             </button>
-            <button
-              @click="resetGame"
-              class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-3 rounded-lg transition-colors duration-200 text-sm"
-            >
-              New Game
-            </button>
           </div>
         </div>
       </div>
-
       <!-- Leg Win Notification -->
       <div
         v-if="legWinNotification"
@@ -315,11 +324,6 @@ onMounted(async () => {
       </div>
 
       <!-- Checkout Suggestions -->
-      <CheckoutSuggestions
-        v-if="!match.winner"
-        :player-name="getPlayerDisplayName(currentPlayer)"
-        :score="realTimePlayerScore(currentPlayerId)"
-      />
 
       <!-- Score History -->
 
