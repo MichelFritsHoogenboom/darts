@@ -25,18 +25,35 @@ onBeforeMount(async () => {
       </header>
 
       <div class="max-w-4xl mx-auto">
-        <div class="bg-gray-800 rounded-xl p-8 text-center mb-8">
-          <h2 class="text-2xl font-bold mb-6">Welcome to Darts!</h2>
-          <p class="text-gray-300 mb-8">
-            Set up your players and start a game of darts.
-          </p>
+        <div class="flex gap-4 items-stretch">
+          <div class="flex-1 bg-gray-800 rounded-xl p-8 text-center mb-8">
+            <h2 class="text-2xl font-bold mb-6">X01 Friendly</h2>
+            <p class="text-gray-300 mb-8">
+              Set up your players and start a friendly game of darts.
+            </p>
 
-          <button
-            @click="startNewGame"
-            class="dartboard-button text-lg px-8 py-3 w-full"
-          >
-            Start New Game
-          </button>
+            <button
+              @click="startNewGame"
+              class="dartboard-button text-lg px-8 py-3 w-full"
+            >
+              Start New Game
+            </button>
+          </div>
+          <div class="flex-1 bg-gray-800 rounded-xl p-8 text-center mb-8">
+            <h2 class="text-2xl font-bold mb-6">Head to Head</h2>
+            <p class="text-gray-300 mb-8">
+              Start a rivalry between two players by setting up a head to head
+              competition.
+            </p>
+
+            <button
+              @click="startNewGame"
+              disabled
+              class="dartboard-button text-lg px-8 py-3 w-full"
+            >
+              Go to head to head
+            </button>
+          </div>
         </div>
         <div v-if="unfinishedMatches.length > 0" class="mb-6">
           <h2 class="text-lg font-bold mb-2">Continue match</h2>

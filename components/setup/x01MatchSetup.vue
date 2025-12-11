@@ -144,7 +144,7 @@ const legsToWinMatchOptions = Object.entries(LEGS_TO_WIN_MATCH_OPTIONS).map(
           config.legsToWinParent > 1)
       "
     >
-      <FormCheckbox v-model="config.tiebreak">
+      <FormCheckbox v-model="config.tiebreak" disabled>
         <template #label>Enable Tiebreak</template>
       </FormCheckbox>
     </div>

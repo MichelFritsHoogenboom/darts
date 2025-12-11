@@ -69,7 +69,7 @@ defineExpose({
 
 <template>
   <div class="bg-gray-800 rounded-xl p-8 mb-6">
-    <h2 class="text-2xl font-bold text-center mb-6">Players</h2>
+    <h2 class="text-2xl font-bold mb-6">Players</h2>
 
     <!-- Loading State -->
     <div v-if="loading" class="text-center text-gray-400 mt-4">
