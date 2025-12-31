@@ -51,30 +51,24 @@ onMounted(() => {
   <div
     class="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900"
   >
-    <div class="container mx-auto px-4 py-2">
-      <header class="text-center mb-4">
-        <h1 class="text-3xl font-bold text-white mb-1">🎯 Game on!</h1>
-      </header>
-
-      <!-- Loading State -->
-      <div v-if="loading" class="text-center text-gray-400 mt-8">
-        Loading match...
-      </div>
-
-      <!-- Error State -->
-      <div v-else-if="error" class="text-center text-red-400 mt-8">
-        Error: {{ error }}
-        <br />
-        <button
-          @click="navigateTo('/setup')"
-          class="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
-        >
-          Back to Setup
-        </button>
-      </div>
-
-      <!-- Game Component -->
-      <X01Game v-else-if="match" :match="match" @game-reset="handleGameReset" />
+    <!-- Loading State -->
+    <div v-if="loading" class="text-center text-gray-400 mt-8">
+      Loading match...
     </div>
+
+    <!-- Error State -->
+    <div v-else-if="error" class="text-center text-red-400 mt-8">
+      Error: {{ error }}
+      <br />
+      <button
+        @click="navigateTo('/setup')"
+        class="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
+      >
+        Back to Setup
+      </button>
+    </div>
+
+    <!-- Game Component -->
+    <X01Game v-else-if="match" :match="match" @game-reset="handleGameReset" />
   </div>
 </template>

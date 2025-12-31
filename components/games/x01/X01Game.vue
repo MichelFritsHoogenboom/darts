@@ -6,8 +6,7 @@ import type { Score } from "~/interfaces/leg";
 import { X01_GAME_PLAYED_IN } from "~/interfaces/x01MatchConfig";
 import { getPlayerWinnerCount } from "~/utils/match";
 
-import CheckoutSuggestions from "~/components/games/x01/CheckoutSuggestions.vue";
-
+import PlayerComponent from "~/components/games/x01/PlayerComponent.vue";
 const { match } = defineProps<{ match: Match }>();
 
 const emit = defineEmits<{
@@ -45,6 +44,8 @@ const {
 const { getLegsForSet } = useLegs();
 const { getPlayerLegsForLeg } = usePlayerLegs();
 const { getScoresForPlayerLeg } = useScores();
+
+provide("matchId", match.id);
 
 // Game state refs
 const scoreCardRefs = ref<HTMLElement[]>([]);
@@ -156,59 +157,57 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="max-w-6xl mx-auto">
+  <div class="w-full mx-auto">
     <!-- Game Board -->
-    <div class="space-y-4">
-      <div class="bg-gray-800 rounded-xl p-1 text-center">
-        <div class="text-lg font-bold text-white">
-          <span
-            class="text-md"
-            v-if="match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets"
-          >
-            Set {{ matchGame.length }} - Leg
-            {{ currentSetGame.length }}
-          </span>
-          <span class="text-md" v-else>
-            Leg
-            {{ matchGame.length }}
-          </span>
-        </div>
+
+    <div class="bg-gray-800 p-1 text-center">
+      <div class="text-lg font-bold text-white">
+        <span
+          class="text-md"
+          v-if="match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets"
+        >
+          Set {{ matchGame.length }} - Leg
+          {{ currentSetGame.length }}
+        </span>
+        <span class="text-md" v-else>
+          Leg
+          {{ matchGame.length }}
+        </span>
+      </div>
+      <div class="grid grid-cols-3 gap-4 text-sm border-b border-gray-500 pb-4">
+        <PlayerComponent
+          :player="players[0]"
+          :currentPlayerId="currentPlayerId"
+        />
+        <div></div>
+        <PlayerComponent
+          :player="players[1]"
+          :currentPlayerId="currentPlayerId"
+        />
       </div>
 
       <!-- Match Status -->
 
-      <div :class="`grid grid-cols-${players.length} gap-4 text-sm`">
-        <div
-          class="p-2 flex flex-row items-center justify-center gap-4"
-          v-for="player in players"
-          :key="player.id"
-        >
-          <div
-            class="rounded-xl p-4 text-center w-full"
-            :class="
-              currentPlayerId === player.id
-                ? 'bg-dartboard-red/60'
-                : 'bg-gray-700'
-            "
-          >
-            <div class="font-bold text-3xl">
-              {{ getPlayerDisplayName(player) }}
-            </div>
-            <span
-              v-if="match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets"
-            >
-              Sets: {{ getPlayerWinnerCount(player.id, matchGame) }}/{{
-                match.matchConfig.setsToWin
-              }}
-            </span>
-            <div>
-              Legs:
-              {{ getPlayerWinnerCount(player.id, legsToDisplay) }}/
-              {{ match.matchConfig.legsToWinParent }}
-            </div>
-          </div>
+      <!-- <div :class="`grid grid-cols-3 gap-4 text-sm`">
+        <PlayerComponent
+          :player="players[0]"
+          :currentPlayerId="currentPlayerId"
+        />
+        <span v-if="match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets">
+          Sets: {{ getPlayerWinnerCount(players[0].id, matchGame) }}/{{
+            match.matchConfig.setsToWin
+          }}
+        </span>
+        <div>
+          Legs:
+          {{ getPlayerWinnerCount(players[0].id, legsToDisplay) }}/
+          {{ match.matchConfig.legsToWinParent }}
         </div>
-      </div>
+        <PlayerComponent
+          :player="players[1]"
+          :currentPlayerId="currentPlayerId"
+        />
+      </div> -->
 
       <!-- Current Scores -->
       <div :class="`grid grid-cols-${players.length} gap-4`">

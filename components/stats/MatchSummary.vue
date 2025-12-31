@@ -128,7 +128,9 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <div class="bg-gray-700 rounded-lg py-2 px-4">
+  <div
+    class="bg-gray-700 rounded-xl py-4 px-6 border border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-200"
+  >
     <h3
       class="grid grid-cols-[20%_1fr_20%] font-bold flex justify-between items-center"
     >

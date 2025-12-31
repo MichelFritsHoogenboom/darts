@@ -115,6 +115,9 @@ export const useX01Game = (
     return await createLeg(legSettings);
   };
 
+  // Get event emitter from plugin
+  const { $event } = useNuxtApp();
+
   // game state refs - initialize as null/empty, will be set in initializeGame
   const currentSet = ref<Set | null>(null);
   const currentSetGame = ref<Leg[]>([]);
@@ -242,6 +245,7 @@ export const useX01Game = (
 
       await removeLastScore(playerLeg);
       await loadMatchGame();
+      $event("undo-last-turn");
 
       resetScore();
       return;
@@ -255,6 +259,7 @@ export const useX01Game = (
     const lastScoreRemoved = await removeLastScore(playerLeg);
 
     if (lastScoreRemoved) {
+      $event("undo-last-turn");
       resetScore();
       return;
     }
@@ -278,6 +283,7 @@ export const useX01Game = (
           currentSetGame.value[currentSetGame.value.length - 1];
         await initPreviousLeg(previousLeg);
         await loadMatchGame();
+        $event("undo-last-turn");
         resetScore();
       } else {
         // no more legs exist in the set, delete the set and re-activate the previous set
@@ -306,6 +312,7 @@ export const useX01Game = (
 
         // Reload match game to get updated sets
         await loadMatchGame();
+        $event("undo-last-turn");
         resetScore();
       }
     }
@@ -445,6 +452,7 @@ export const useX01Game = (
 
     currentSet.value.winner = currentPlayerId.value;
     await saveSet(currentSet.value);
+    $event("set-finished");
 
     // Reload current set's legs to get updated winner info
     await loadMatchGame();
@@ -548,12 +556,15 @@ export const useX01Game = (
     playerLeg.scores.push(createdScore.id);
     await savePlayerLeg(playerLeg);
 
+    $event("score-submitted");
+
     // Clear validation message
     scoreValidationMessage.value = "";
 
     // Check for win condition
     if (realTimePlayerScore.value(currentPlayerId.value) === 0) {
       await handleLegWin(createdScore);
+      $event("leg-finished");
       return;
     }
 

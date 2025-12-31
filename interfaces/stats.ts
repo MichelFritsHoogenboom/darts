@@ -24,7 +24,8 @@ export interface ScoreRanges {
   "66-89": number; // 1 triple and 1 single of at least 18, 1 loose dart
   "90-125": number; // one triple and two singles of at least 18
   "126-161": number; // 2 triples and one single dart of at least 18
-  "162-180": number; // 3 triples (perfect aimed)
+  "162-179": number; // 3 triples (perfect aimed)
+  "180": number; // 3 triple 20's (perfect aimed)
 }
 
 export interface DartsThrownHit {
@@ -74,7 +75,8 @@ export function createScoreRanges(): ScoreRanges {
     "66-89": 0, // 1 triple and 1 single of at least 18, 1 loose dart
     "90-125": 0, // one triple and two singles of at least 18
     "126-161": 0, // 2 triples and one single dart of at least 18
-    "162-180": 0, // 3 triples (perfect aimed)
+    "162-179": 0, // 3 triples (perfect aimed)
+    "180": 0, // 3 triple 20's (perfect aimed)
   };
 }
 

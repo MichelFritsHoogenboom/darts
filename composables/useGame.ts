@@ -28,10 +28,6 @@ export const useGame = (match: Match) => {
 
   // methods
 
-  const undoLastTurn = () => {
-    alert("Undo last turn hasnt been built yet!");
-  };
-
   // Shared logic to get player ID at a relative index
   const getPlayerIdAtOffset = (playerId: string, offset: number) => {
     const currentIndex = players.value.findIndex(
@@ -107,7 +103,7 @@ export const useGame = (match: Match) => {
     setNextPlayer,
     setPreviousPlayer,
     canUndo,
-    undoLastTurn,
+
     resetScore,
   };
 };
