@@ -177,11 +177,13 @@ onMounted(async () => {
       <div class="grid grid-cols-3 gap-4 text-sm border-b border-gray-500 pb-4">
         <PlayerComponent
           :player="players[0]"
+          :score="realTimePlayerScore(players[0].id)"
           :currentPlayerId="currentPlayerId"
         />
         <div></div>
         <PlayerComponent
           :player="players[1]"
+          :score="realTimePlayerScore(players[1].id)"
           :currentPlayerId="currentPlayerId"
         />
       </div>
@@ -223,10 +225,6 @@ onMounted(async () => {
             <div class="text-5xl font-bold text-white mb-2">
               {{ realTimePlayerScore(player.id) }}
             </div>
-            <CheckoutSuggestions
-              v-if="!match.winner"
-              :score="realTimePlayerScore(player.id)"
-            />
           </div>
         </div>
       </div>

@@ -4,6 +4,7 @@ import type { Player } from "~/interfaces/player";
 const { player, currentPlayerId } = defineProps<{
   player: Player;
   currentPlayerId: string;
+  score: number;
 }>();
 
 const getPlayerDisplayName = (player: Player) => {
@@ -26,7 +27,7 @@ const getPlayerDisplayName = (player: Player) => {
       class="rounded-xl p-4 pb-2 text-left grid grid-cols-3 w-full bg-gray-700"
     >
       <strong>Mogelijke uitgooi:</strong>
-      <GamesX01CheckoutSuggestions :score="121" class="col-span-2" />
+      <GamesX01CheckoutSuggestions :score="score" class="col-span-2" />
     </div>
     <div class="rounded-xl p-4 pb-2 w-full bg-gray-700">
       <StatsScoreCounts :playerId="player.id" />
