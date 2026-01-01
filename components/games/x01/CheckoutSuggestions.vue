@@ -13,13 +13,13 @@ const checkoutStatus = computed(() => {
 });
 </script>
 <template>
-  <div v-if="checkoutStatus.isCheckout">
+  <div v-if="checkoutStatus.isCheckout" class="flex gap-2">
     <div
       v-for="(suggestion, index) in checkoutStatus.suggestions"
       :key="index"
-      class="bg-gray-500 rounded-lg text-center mb-2"
+      class="bg-gray-500 rounded-lg text-center py-1 px-2"
     >
-      <span class="font-mono text-xs">{{ suggestion }}</span>
+      <span class="font-mono font-bold text-xs">{{ suggestion }}</span>
     </div>
   </div>
   <div v-else>Onmogelijk</div>

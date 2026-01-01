@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount } from "vue";
 import { createScoreRanges, type ScoreRanges } from "~/interfaces/stats";
 
 const matchId = inject<string>("matchId");
@@ -79,6 +78,7 @@ const handleUndoLastTurn = async () => {
 };
 
 onMounted(async () => {
+  // Initialize data
   await updateLegsPlayed();
   await updatePlayerMatchScoreCounts();
 
@@ -99,10 +99,18 @@ const averagePerLeg = (value: number) => {
   if (legsPlayed.value === 0) return "0.000";
   return (value / legsPlayed.value).toFixed(3);
 };
+
+const lowScoresSum = computed(() => {
+  if (!playerStats.value) return 0;
+  return (
+    (playerStats.value.scores["0-9"] || 0) +
+    (playerStats.value.scores["10-19"] || 0)
+  );
+});
 </script>
 <template>
   <div class="grid grid-cols-3 w-full score-counts" v-if="playerStats">
-    <div class="score-counts__header">Score</div>
+    <div class="score-counts__header"></div>
     <div class="score-counts__header">Aantal</div>
     <div class="score-counts__header">Aantal per leg</div>
 
@@ -133,12 +141,10 @@ const averagePerLeg = (value: number) => {
     <div>20 - 29</div>
     <div>{{ playerStats.scores["20-29"] }}</div>
     <div>{{ averagePerLeg(playerStats.scores["20-29"]) }}</div>
-    <div>10 - 19</div>
-    <div>{{ playerStats.scores["10-19"] }}</div>
-    <div>{{ averagePerLeg(playerStats.scores["10-19"]) }}</div>
-    <div>0 - 9</div>
-    <div>{{ playerStats.scores["0-9"] }}</div>
-    <div>{{ averagePerLeg(playerStats.scores["0-9"]) }}</div>
+    <div>0 - 19</div>
+    <div>{{ lowScoresSum }}</div>
+    <div>{{ averagePerLeg(lowScoresSum) }}</div>
+
     <div class="score-counts__footer">Gespeelde legs</div>
     <div class="score-counts__footer">{{ legsPlayed }}</div>
   </div>
@@ -149,9 +155,9 @@ const averagePerLeg = (value: number) => {
   text-align: start;
 }
 .score-counts__header {
-  @apply mb-3 font-bold;
+  @apply mb-1 font-bold;
 }
 .score-counts__footer {
-  @apply mt-2 font-bold;
+  @apply font-bold;
 }
 </style>

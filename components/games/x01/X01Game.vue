@@ -162,8 +162,8 @@ onMounted(async () => {
   >
     <!-- Game Board -->
 
-    <div class="mt-2 flex flex-1 flex-col text-center">
-      <div class="text-lg font-bold text-white pb-4">
+    <div class="mt-1 flex flex-1 flex-col text-center">
+      <div class="text-lg font-bold text-white pb-2">
         <span
           class="text-md"
           v-if="match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets"

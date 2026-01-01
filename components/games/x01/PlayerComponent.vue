@@ -14,7 +14,7 @@ const getPlayerDisplayName = (player: Player) => {
 <template>
   <div class="flex flex-col items-center justify-start gap-4">
     <div
-      class="rounded-xl p-4 text-center w-full"
+      class="rounded-xl p-2 text-center w-full"
       :class="
         currentPlayerId === player.id ? 'bg-dartboard-red/60' : 'bg-gray-700'
       "
@@ -28,7 +28,13 @@ const getPlayerDisplayName = (player: Player) => {
       <GamesX01CheckoutSuggestions :score="score" class="col-span-2" />
     </div>
     <div class="rounded-xl p-4 pb-2 w-full bg-gray-700">
-      <StatsScoreCounts :playerId="player.id" />
+      <GamesX01ScoreCounts :playerId="player.id" />
+    </div>
+    <div class="rounded-xl p-4 pb-2 w-full bg-gray-700">
+      <GamesX01Averages :playerId="player.id" />
+    </div>
+    <div class="rounded-xl p-4 pb-2 w-full bg-gray-700">
+      <GamesX01Checkouts :playerId="player.id" />
     </div>
   </div>
 </template>
