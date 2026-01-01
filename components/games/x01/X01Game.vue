@@ -157,11 +157,13 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="w-full mx-auto">
+  <div
+    class="w-full min-h-screen h-full mx-auto flex flex-col gap-2 self-stretch"
+  >
     <!-- Game Board -->
 
-    <div class="bg-gray-800 p-1 text-center">
-      <div class="text-lg font-bold text-white">
+    <div class="mt-2 flex flex-1 flex-col text-center">
+      <div class="text-lg font-bold text-white pb-4">
         <span
           class="text-md"
           v-if="match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets"
@@ -174,13 +176,165 @@ onMounted(async () => {
           {{ matchGame.length }}
         </span>
       </div>
-      <div class="grid grid-cols-3 gap-4 text-sm border-b border-gray-500 pb-4">
+      <div class="flex-1 grid grid-cols-3 gap-4 text-sm pb-4 px-2">
         <PlayerComponent
           :player="players[0]"
           :score="realTimePlayerScore(players[0].id)"
           :currentPlayerId="currentPlayerId"
         />
-        <div></div>
+        <div class="flex flex-col gap-4">
+          <div class="flex items-stretch gap-4">
+            <div
+              class="flex-1 text-center flex flex-wrap justify-center content-center self-stretch"
+              :class="[
+                'player-card relative',
+                currentPlayerId === players[0].id ? 'active' : 'inactive',
+              ]"
+            >
+              <div class="text-5xl font-bold text-white">
+                {{ realTimePlayerScore(players[0].id) }}
+              </div>
+            </div>
+            <div class="flex-shrink-0 grid grid-cols-3 gap-2">
+              <template
+                v-if="
+                  match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets
+                "
+              >
+                <div class="player-card inactive text-3xl font-bold">
+                  {{ getPlayerWinnerCount(players[0].id, matchGame) }}
+                </div>
+                <div
+                  class="text-center text-lg font-bold flex justify-center items-center"
+                >
+                  Sets
+                </div>
+                <div class="player-card inactive text-3xl font-bold">
+                  {{ getPlayerWinnerCount(players[1].id, matchGame) }}
+                </div>
+              </template>
+              <div class="player-card inactive text-3xl font-bold">
+                {{ getPlayerWinnerCount(players[0].id, legsToDisplay) }}
+              </div>
+              <div
+                class="text-center text-lg font-bold flex justify-center items-center"
+              >
+                Legs
+              </div>
+              <div class="player-card inactive text-3xl font-bold">
+                {{ getPlayerWinnerCount(players[1].id, legsToDisplay) }}
+              </div>
+            </div>
+            <div
+              class="flex-1 text-center flex flex-wrap justify-center content-center self-stretch"
+              :class="[
+                'player-card relative',
+                currentPlayerId === players[1].id ? 'active' : 'inactive',
+              ]"
+            >
+              <div class="text-5xl font-bold text-white mb-2">
+                {{ realTimePlayerScore(players[1].id) }}
+              </div>
+            </div>
+          </div>
+          <div :class="`flex-1 grid grid-cols-${players.length} gap-4`">
+            <div
+              v-for="player in players"
+              :key="player.id"
+              class="bg-gray-800 rounded-xl pt-4"
+            >
+              <div
+                :ref="setScoreCardRef"
+                class="space-y-1 max-h-100 h-100 overflow-y-auto score-card"
+              >
+                <div
+                  v-for="(score, index) in currentPlayerLegScores[player.id] ||
+                  []"
+                  :key="`p1-${index}`"
+                  class="flex justify-between items-center bg-gray-700 rounded px-2 py-1"
+                >
+                  <span class="text-xs text-gray-400">{{
+                    (index + 1) * 3
+                  }}</span>
+
+                  <span class="font-bold text-lg flex-1 text-center">{{
+                    score.totalScore
+                  }}</span>
+                </div>
+                <div
+                  v-if="(currentPlayerLegScores[player.id] || []).length === 0"
+                  class="text-center text-gray-500 py-2 text-sm"
+                >
+                  No scores yet
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Score Input -->
+          <div
+            class="align-self-end bg-gray-800 rounded-xl gap-4 pt-3 grid"
+            :class="`grid-cols-${players.length}`"
+          >
+            <div
+              class="max-w-md mx-auto w-full"
+              :style="{
+                gridColumnStart: activePlayerColumn,
+                gridColumnEnd: activePlayerColumn + 1,
+              }"
+            >
+              <input
+                ref="scoreInput"
+                v-model="currentScore"
+                type="number"
+                min="0"
+                max="180"
+                class="score-input w-full text-xl py-2"
+                :class="{
+                  'border-yellow-500':
+                    scoreValidationMessage &&
+                    !scoreValidationMessage.includes('not achievable'),
+                  invalid:
+                    scoreValidationMessage &&
+                    scoreValidationMessage.includes('not achievable'),
+                }"
+                placeholder="Enter score"
+                @keyup.enter="submitScore"
+                @keydown.ctrl.z.prevent="undoLastTurn"
+                @input="validateScore"
+              />
+              <div
+                v-if="scoreValidationMessage"
+                class="text-xs mt-1 text-center"
+                :class="{
+                  'text-yellow-400':
+                    scoreValidationMessage.includes('mistype') ||
+                    scoreValidationMessage.includes('negative'),
+                  'text-red-400':
+                    scoreValidationMessage.includes('not achievable'),
+                }"
+              >
+                {{ scoreValidationMessage }}
+              </div>
+              <div class="flex gap-2 mt-3">
+                <button
+                  @click="submitScore"
+                  :disabled="!isValidScore"
+                  class="dartboard-button flex-1 py-2"
+                >
+                  Submit Score
+                </button>
+                <button
+                  @click="undoLastTurn"
+                  :disabled="!canUndo"
+                  class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-2 px-3 rounded-lg transition-colors duration-200 text-sm"
+                  title="Undo last turn (Ctrl+Z)"
+                >
+                  Undo
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
         <PlayerComponent
           :player="players[1]"
           :score="realTimePlayerScore(players[1].id)"
@@ -190,137 +344,8 @@ onMounted(async () => {
 
       <!-- Match Status -->
 
-      <!-- <div :class="`grid grid-cols-3 gap-4 text-sm`">
-        <PlayerComponent
-          :player="players[0]"
-          :currentPlayerId="currentPlayerId"
-        />
-        <span v-if="match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets">
-          Sets: {{ getPlayerWinnerCount(players[0].id, matchGame) }}/{{
-            match.matchConfig.setsToWin
-          }}
-        </span>
-        <div>
-          Legs:
-          {{ getPlayerWinnerCount(players[0].id, legsToDisplay) }}/
-          {{ match.matchConfig.legsToWinParent }}
-        </div>
-        <PlayerComponent
-          :player="players[1]"
-          :currentPlayerId="currentPlayerId"
-        />
-      </div> -->
-
       <!-- Current Scores -->
-      <div :class="`grid grid-cols-${players.length} gap-4`">
-        <div
-          v-for="player in players"
-          :key="player.id"
-          :class="[
-            'player-card relative',
-            currentPlayerId === player.id ? 'active' : 'inactive',
-          ]"
-        >
-          <div class="text-center">
-            <div class="text-5xl font-bold text-white mb-2">
-              {{ realTimePlayerScore(player.id) }}
-            </div>
-          </div>
-        </div>
-      </div>
-      <div :class="`grid grid-cols-${players.length} gap-4`">
-        <div
-          v-for="player in players"
-          :key="player.id"
-          class="bg-gray-800 rounded-xl p-3"
-        >
-          <div
-            :ref="setScoreCardRef"
-            class="space-y-1 max-h-80 h-80 overflow-y-auto score-card"
-          >
-            <div
-              v-for="(score, index) in currentPlayerLegScores[player.id] || []"
-              :key="`p1-${index}`"
-              class="flex justify-between items-center bg-gray-700 rounded px-2 py-1"
-            >
-              <span class="text-xs text-gray-400">{{ (index + 1) * 3 }}</span>
 
-              <span class="font-bold text-lg flex-1 text-center">{{
-                score.totalScore
-              }}</span>
-            </div>
-            <div
-              v-if="(currentPlayerLegScores[player.id] || []).length === 0"
-              class="text-center text-gray-500 py-2 text-sm"
-            >
-              No scores yet
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- Score Input -->
-      <div
-        class="bg-gray-800 rounded-xl p-4 grid"
-        :class="`grid-cols-${players.length}`"
-      >
-        <div
-          class="max-w-md mx-auto w-full"
-          :style="{
-            gridColumnStart: activePlayerColumn,
-            gridColumnEnd: activePlayerColumn + 1,
-          }"
-        >
-          <input
-            ref="scoreInput"
-            v-model="currentScore"
-            type="number"
-            min="0"
-            max="180"
-            class="score-input w-full text-xl py-2"
-            :class="{
-              'border-yellow-500':
-                scoreValidationMessage &&
-                !scoreValidationMessage.includes('not achievable'),
-              invalid:
-                scoreValidationMessage &&
-                scoreValidationMessage.includes('not achievable'),
-            }"
-            placeholder="Enter score"
-            @keyup.enter="submitScore"
-            @keydown.ctrl.z.prevent="undoLastTurn"
-            @input="validateScore"
-          />
-          <div
-            v-if="scoreValidationMessage"
-            class="text-xs mt-1 text-center"
-            :class="{
-              'text-yellow-400':
-                scoreValidationMessage.includes('mistype') ||
-                scoreValidationMessage.includes('negative'),
-              'text-red-400': scoreValidationMessage.includes('not achievable'),
-            }"
-          >
-            {{ scoreValidationMessage }}
-          </div>
-          <div class="flex gap-2 mt-3">
-            <button
-              @click="submitScore"
-              :disabled="!isValidScore"
-              class="dartboard-button flex-1 py-2"
-            >
-              Submit Score
-            </button>
-            <button
-              @click="undoLastTurn"
-              :disabled="!canUndo"
-              class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-2 px-3 rounded-lg transition-colors duration-200 text-sm"
-              title="Undo last turn (Ctrl+Z)"
-            >
-              Undo
-            </button>
-          </div>
-        </div>
-      </div>
       <!-- Leg Win Notification -->
       <div
         v-if="legWinNotification"
@@ -330,10 +355,6 @@ onMounted(async () => {
           x🎯 {{ getPlayerDisplayName(currentPlayer) }} wins the leg!
         </div>
       </div>
-
-      <!-- Checkout Suggestions -->
-
-      <!-- Score History -->
 
       <!-- Game Over Modal -->
       <div

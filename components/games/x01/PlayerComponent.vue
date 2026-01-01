@@ -12,7 +12,7 @@ const getPlayerDisplayName = (player: Player) => {
 };
 </script>
 <template>
-  <div class="p-2 flex flex-col items-center justify-center gap-4">
+  <div class="flex flex-col items-center justify-start gap-4">
     <div
       class="rounded-xl p-4 text-center w-full"
       :class="
@@ -23,9 +23,7 @@ const getPlayerDisplayName = (player: Player) => {
         {{ getPlayerDisplayName(player) }}
       </div>
     </div>
-    <div
-      class="rounded-xl p-4 pb-2 text-left grid grid-cols-3 w-full bg-gray-700"
-    >
+    <div class="rounded-xl p-4 text-left grid grid-cols-3 w-full bg-gray-700">
       <strong>Mogelijke uitgooi:</strong>
       <GamesX01CheckoutSuggestions :score="score" class="col-span-2" />
     </div>
