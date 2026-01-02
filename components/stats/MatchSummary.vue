@@ -129,7 +129,7 @@ onBeforeMount(async () => {
 
 <template>
   <div
-    class="bg-gray-700 rounded-xl py-4 px-6 border border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-200"
+    class="stat-well flex flex-col gap-2 py-4 px-6 border border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-200"
   >
     <h3
       class="grid grid-cols-[20%_1fr_20%] font-bold flex justify-between items-center"
@@ -163,7 +163,7 @@ onBeforeMount(async () => {
           :show-badge="false"
         >
           <span
-            class="inline-block px-2 bg-gray-400/50 rounded-lg font-small font-bold"
+            class="inline-block px-2 bg-gray-400/50 font-small font-bold rounded"
           >
             {{
               players[0] ? getPlayerWinnerCount(players[0].id, matchGame) : 0
@@ -178,7 +178,7 @@ onBeforeMount(async () => {
       <div class="flex items-center gap-2 justify-self-end">
         <button
           @click="toggleSummary()"
-          class="text-sm px-3 py-1 bg-gray-600 font-normal hover:bg-gray-500 rounded transition-colors no-wrap"
+          class="text-sm px-3 py-1 bg-gray-600 font-normal hover:bg-gray-500 transition-colors no-wrap"
           :class="{ 'bg-gray-500': showSummary }"
         >
           {{ showSummary ? "Hide" : "Show" }} Details
@@ -186,7 +186,7 @@ onBeforeMount(async () => {
         <a
           v-if="!match.winner"
           :href="`/match/${match.id}`"
-          class="text-sm px-3 py-1 bg-gray-500 hover:bg-red-500 rounded transition-colors no-wrap flex items-center gap-2 min-h-[1.75rem]"
+          class="text-sm px-3 py-1 bg-gray-500 hover:bg-red-500 transition-colors no-wrap flex items-center gap-2 min-h-[1.75rem]"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

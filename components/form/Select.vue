@@ -41,7 +41,7 @@ const handleInput = (event: Event) => {
       :value="modelValue"
       @input="handleInput"
       :disabled="disabled"
-      class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-dartboard-red focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+      class="w-full bg-gray-700 border border-gray-600 px-4 py-3 text-white focus:border-dartboard-red focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
     >
       <option
         v-for="option in options"

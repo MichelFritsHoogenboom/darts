@@ -22,7 +22,7 @@ defineEmits(["click"]);
 
 const buttonClasses = computed(() => {
   const baseClasses =
-    "font-bold rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800";
+    "font-bold  transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800";
 
   const variantClasses: Record<ButtonVariant, string> = {
     primary:

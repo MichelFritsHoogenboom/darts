@@ -25,7 +25,7 @@ const labelClasses = computed(() => {
 
 const inputClasses = computed(() => {
   const baseClasses =
-    "w-full border rounded-lg px-4 py-3 focus:border-dartboard-red focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed";
+    "w-full border  px-4 py-3 focus:border-dartboard-red focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed";
   const variantClasses: Record<InputVariant, string> = {
     dark: "bg-gray-700 border-gray-600 text-white",
     light: "bg-white border-gray-300 text-gray-900",

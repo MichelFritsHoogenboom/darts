@@ -68,7 +68,7 @@ defineExpose({
 </script>
 
 <template>
-  <div class="bg-gray-800 rounded-xl p-8 mb-6">
+  <div class="player-card inactive rounded-lg p-8 mb-6">
     <h2 class="text-2xl font-bold mb-6">Players</h2>
 
     <!-- Loading State -->
@@ -104,7 +104,7 @@ defineExpose({
           <div
             v-for="player in selectedPlayersFullData"
             :key="player?.id"
-            class="bg-gray-700 rounded-lg p-4 flex justify-between items-center"
+            class="bg-gray-700 p-4 flex justify-between items-center"
           >
             <div>
               <h4 class="text-white font-medium">

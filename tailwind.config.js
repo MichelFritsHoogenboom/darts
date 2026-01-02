@@ -12,7 +12,7 @@ module.exports = {
     extend: {
       colors: {
         dartboard: {
-          red: '#dc2626',
+          red: '#a12929',
           green: '#16a34a',
           black: '#1f2937',
           white: '#f9fafb'

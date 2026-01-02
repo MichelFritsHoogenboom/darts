@@ -13,27 +13,26 @@ const getPlayerDisplayName = (player: Player) => {
 </script>
 <template>
   <div class="flex flex-col items-center justify-start gap-4">
-    <div
-      class="rounded-xl p-2 text-center w-full"
-      :class="
-        currentPlayerId === player.id ? 'bg-dartboard-red/60' : 'bg-gray-700'
-      "
-    >
+    <div class="pb-2 text-center">
       <div class="font-bold text-3xl">
-        {{ getPlayerDisplayName(player) }}
+        <StatsPlayerNameWithBadge
+          :playerId="player.id"
+          :players="[player]"
+          :average="90.21"
+        />
       </div>
     </div>
-    <div class="rounded-xl p-4 text-left grid grid-cols-3 w-full bg-gray-700">
+    <div class="stat-well">
       <strong>Mogelijke uitgooi:</strong>
       <GamesX01CheckoutSuggestions :score="score" class="col-span-2" />
     </div>
-    <div class="rounded-xl p-4 pb-2 w-full bg-gray-700">
+    <div class="stat-well">
       <GamesX01ScoreCounts :playerId="player.id" />
     </div>
-    <div class="rounded-xl p-4 pb-2 w-full bg-gray-700">
+    <div class="stat-well">
       <GamesX01Averages :playerId="player.id" />
     </div>
-    <div class="rounded-xl p-4 pb-2 w-full bg-gray-700">
+    <div class="stat-well">
       <GamesX01Checkouts :playerId="player.id" />
     </div>
   </div>

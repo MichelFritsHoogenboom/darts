@@ -18,7 +18,7 @@ defineEmits(["update:modelValue"]);
       :disabled="disabled"
       :required="required"
       type="checkbox"
-      class="w-4 h-4 text-dartboard-red bg-gray-700 border-gray-600 rounded focus:ring-dartboard-red focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed"
+      class="w-4 h-4 text-dartboard-red bg-gray-700 border-gray-600 focus:ring-dartboard-red focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed"
     />
     <span v-if="$slots.label" class="ml-2 text-sm font-medium text-gray-300">
       <slot name="label" />

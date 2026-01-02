@@ -101,7 +101,7 @@ const averagePerLeg = (value: number) => {
 };
 </script>
 <template>
-  <div class="grid grid-cols-3 w-full score-counts" v-if="playerStats">
+  <template v-if="playerStats">
     <div class="score-counts__header">Checkouts</div>
     <div class="score-counts__header">Pogingen</div>
     <div class="score-counts__header">Percentage</div>
@@ -127,13 +127,9 @@ const averagePerLeg = (value: number) => {
     <div class="score-counts__footer">
       {{ averagePerLeg(playerStats.scores["40-53"]) }}
     </div>
-  </div>
+  </template>
 </template>
 <style scoped>
-.score-counts {
-  line-height: 1.5;
-  text-align: start;
-}
 .score-counts__header {
   @apply mb-1 font-bold;
 }

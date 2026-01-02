@@ -109,7 +109,7 @@ const lowScoresSum = computed(() => {
 });
 </script>
 <template>
-  <div class="grid grid-cols-3 w-full score-counts" v-if="playerStats">
+  <template v-if="playerStats">
     <div class="score-counts__header"></div>
     <div class="score-counts__header">Aantal</div>
     <div class="score-counts__header">Aantal per leg</div>
@@ -147,13 +147,9 @@ const lowScoresSum = computed(() => {
 
     <div class="score-counts__footer">Gespeelde legs</div>
     <div class="score-counts__footer">{{ legsPlayed }}</div>
-  </div>
+  </template>
 </template>
 <style scoped>
-.score-counts {
-  line-height: 1.5;
-  text-align: start;
-}
 .score-counts__header {
   @apply mb-1 font-bold;
 }

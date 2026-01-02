@@ -17,7 +17,7 @@ const checkoutStatus = computed(() => {
     <div
       v-for="(suggestion, index) in checkoutStatus.suggestions"
       :key="index"
-      class="bg-gray-500 rounded-lg text-center py-1 px-2"
+      class="bg-gray-500 text-center rounded py-1 px-2"
     >
       <span class="font-mono font-bold text-xs">{{ suggestion }}</span>
     </div>
