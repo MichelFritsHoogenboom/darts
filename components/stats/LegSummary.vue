@@ -88,7 +88,7 @@ const [showLegDetails, toggleLegDetails] = useToggle(false);
               <div
                 class="grid grid-cols-[1fr_6fr_1fr] items-center justify-center gap-2"
               >
-                <span></span>
+                <span>{{ leg.createdAt.toLocaleString() }}</span>
                 <StatsPlayersWithCenter
                   :player-stats="playerStatsArray"
                   :players="players"

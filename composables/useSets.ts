@@ -5,6 +5,7 @@ import type { Leg } from "~/interfaces/leg";
 
 const setService = new SetService();
 const { getLegsForSet, deleteLeg } = useLegs();
+const { getPlayerStatsForSet, deletePlayerStats } = usePlayerStats();
 
 export const useSets = () => {
   const sets = ref<Set[]>([]);
@@ -55,6 +56,12 @@ export const useSets = () => {
       const legs = await getLegsForSet(id);
       for (const leg of legs) {
         await deleteLeg(leg.id);
+      }
+
+      // Delete all playerStats for this set
+      const setPlayerStats = await getPlayerStatsForSet(id);
+      for (const playerStat of setPlayerStats) {
+        await deletePlayerStats(playerStat.id);
       }
 
       // Then delete the set itself

@@ -1,30 +1,105 @@
 <script lang="ts" setup>
 import type { Player } from "~/interfaces/player";
-import type { Score } from "~/interfaces/leg";
+import type { Score, Leg } from "~/interfaces/leg";
 import type { PlayerStats } from "~/interfaces/stats";
+import type { Set } from "~/interfaces/set";
 
 const { $listen, $unlisten } = useNuxtApp();
-const { player, currentPlayerId } = defineProps<{
+const {
+  player,
+  currentPlayerId,
+  currentLeg,
+  currentSet,
+  matchGame,
+  currentSetGame,
+} = defineProps<{
   player: Player;
   currentPlayerId: string;
   realTimeScore: number;
+  currentLeg?: Leg | null;
+  currentSet?: Set | null;
+  matchGame: Set[];
+  currentSetGame?: Leg[];
 }>();
 
-const { getPlayerStatsForMatch } = usePlayerStats();
+const {
+  getPlayerStatsForMatch,
+  getPlayerStatsForSet,
+  getPlayerStatsByPlayerLegId,
+} = usePlayerStats();
 const { getScoresForMatch } = useScores();
-const { calculateAndUpdateMatchPlayerStatsAverages } = useAverages();
+const {
+  calculateAndUpdateMatchPlayerStatsAverages,
+  calculateAndUpdateSetPlayerStatsAverages,
+  calculateAndUpdatePlayerLegAverages,
+} = useAverages();
+const { getPlayerLegsForLeg } = usePlayerLegs();
+const { getLegsForMatch } = useLegs();
 
 const matchId = inject<string>("matchId");
+
+const matchPlayerStats = ref<PlayerStats | undefined>(undefined);
+const setPlayerStats = ref<PlayerStats | undefined>(undefined);
+const legPlayerStats = ref<PlayerStats | undefined>(undefined);
+const playerScores = ref<Score[]>([]);
+const lastSetAverage = ref<number>(0);
+const lastLegAverage = ref<number>(0);
 
 const updatePlayerAverages = async () => {
   if (!matchId) return;
 
   await calculateAndUpdateMatchPlayerStatsAverages(matchId);
   await updateMatchPlayerStats();
-};
 
-const matchPlayerStats = ref<PlayerStats | undefined>(undefined);
-const playerScores = ref<Score[]>([]);
+  // Also update set and leg averages if applicable
+  if (currentSet) {
+    await calculateAndUpdateSetPlayerStatsAverages(currentSet.id);
+    await updateSetPlayerStats();
+  }
+
+  if (currentSetGame && currentSetGame.length > 1 && currentSet) {
+    await calculateAndUpdateSetPlayerStatsAverages(currentSet.id);
+    await updateSetPlayerStats();
+    await updateLegPlayerStats();
+
+    // Get all playerLegs for this match
+    const allLegs = await getLegsForMatch(matchId);
+    console.log("allLegs", allLegs);
+    // Sort by updatedAt (most recent last)
+    const sortedLegs = allLegs.sort(
+      (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+    );
+    // Get the second last leg
+    if (sortedLegs.length >= 2) {
+      const secondLastLeg = sortedLegs[sortedLegs.length - 2];
+      console.log("secondLastLeg", secondLastLeg);
+      const allPlayerLegs = await getPlayerLegsForLeg(secondLastLeg.id);
+      console.log("allPlayerLegs", allPlayerLegs);
+      // Find player leg for current player
+      const playerLegForCurrentPlayer = allPlayerLegs.find(
+        (pl) => pl.playerId === player.id
+      );
+      console.log("playerLegForCurrentPlayer", playerLegForCurrentPlayer);
+      if (playerLegForCurrentPlayer) {
+        // Get playerStats for this playerLeg
+        const stats = await getPlayerStatsByPlayerLegId(
+          playerLegForCurrentPlayer.id
+        );
+
+        console.log("stats", stats);
+        // Set lastLegAverage to the average from stats
+        lastLegAverage.value = stats?.average || 0;
+      } else {
+        lastLegAverage.value = 0;
+      }
+    }
+  }
+
+  if (currentLeg) {
+    await calculateAndUpdatePlayerLegAverages(currentLeg.id);
+    await updateLegPlayerStats();
+  }
+};
 
 const updateMatchPlayerStats = async () => {
   const matchStats = await getPlayerStatsForMatch(matchId!);
@@ -33,16 +108,51 @@ const updateMatchPlayerStats = async () => {
   );
 };
 
+const updateSetPlayerStats = async () => {
+  if (!currentSet) {
+    setPlayerStats.value = undefined;
+    return;
+  }
+
+  const setStats = await getPlayerStatsForSet(currentSet.id);
+  setPlayerStats.value = setStats.find((stat) => stat.playerId === player.id);
+};
+
+const updateLegPlayerStats = async () => {
+  if (!currentLeg) {
+    legPlayerStats.value = undefined;
+    return;
+  }
+
+  // Get all player legs for the current leg
+  const playerLegs = await getPlayerLegsForLeg(currentLeg.id);
+  // Find the player leg for this player
+  const playerLeg = playerLegs.find((pl) => pl.playerId === player.id);
+
+  if (!playerLeg) {
+    legPlayerStats.value = undefined;
+    return;
+  }
+
+  // Get stats for this player leg
+  const stats = await getPlayerStatsByPlayerLegId(playerLeg.id);
+  legPlayerStats.value = stats || undefined;
+};
+
 const updatePlayerScores = async () => {
   const scores = await getScoresForMatch(matchId!);
   playerScores.value = scores.filter((score) => score.playerId === player.id);
 };
 
-const updateStats = async () => {
+const updateStatsCurrentPlayer = async () => {
   if (currentPlayerId === player.id) {
-    await updatePlayerAverages();
-    await updatePlayerScores();
+    updateStats();
   }
+};
+
+const updateStats = async () => {
+  await updatePlayerAverages();
+  await updatePlayerScores();
 };
 
 onMounted(async () => {
@@ -51,14 +161,18 @@ onMounted(async () => {
   await updatePlayerScores();
 
   // Listen for score submission events
-  $listen("score-submitted", updateStats);
+  $listen("score-submitted", updateStatsCurrentPlayer);
   $listen("undo-last-turn", updateStats);
+  $listen("leg-finished", updateStats);
+  $listen("set-finished", updateStats);
 });
 
 onBeforeUnmount(() => {
   // Clean up event listeners
   $unlisten("score-submitted", updateStats);
   $unlisten("undo-last-turn", updateStats);
+  $unlisten("leg-finished", updateStats);
+  $unlisten("set-finished", updateStats);
 });
 </script>
 <template>
@@ -83,7 +197,13 @@ onBeforeUnmount(() => {
       />
     </div>
     <div class="stat-well" v-if="matchPlayerStats">
-      <GamesX01Averages :matchplayerStats="matchPlayerStats" />
+      <GamesX01Averages
+        :matchAverage="matchPlayerStats.average"
+        :legAverage="legPlayerStats?.average || 0"
+        :setAverage="setPlayerStats?.average || 0"
+        :lastSetAverage="lastSetAverage"
+        :lastLegAverage="lastLegAverage"
+      />
     </div>
     <div class="stat-well">
       <GamesX01Checkouts :playerId="player.id" />

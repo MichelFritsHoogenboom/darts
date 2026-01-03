@@ -52,6 +52,7 @@ export const useLegs = () => {
     try {
       // First delete all related player legs (which will also delete their scores and single dart scores)
       const playerLegs = await getPlayerLegsForLeg(id);
+
       for (const playerLeg of playerLegs) {
         await deletePlayerLeg(playerLeg.id);
       }

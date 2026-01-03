@@ -1,6 +1,7 @@
 import { ref, readonly, toRaw } from "vue";
 import { PlayerStatsService } from "~/database/PlayerStatsService";
 import type { PlayerStats } from "~/interfaces/stats";
+import { removeObjectById } from "~/utils/array";
 
 const playerStatsService = new PlayerStatsService();
 
@@ -156,6 +157,23 @@ export const usePlayerStats = () => {
     }
   };
 
+  const deletePlayerStats = async (id: string): Promise<boolean> => {
+    loading.value = true;
+    error.value = null;
+    try {
+      await playerStatsService.delete(id);
+      removeObjectById(playerStats.value, id);
+      return true;
+    } catch (err) {
+      error.value =
+        err instanceof Error ? err.message : "Failed to delete player stats";
+      console.error("Error deleting player stats:", err);
+      return false;
+    } finally {
+      loading.value = false;
+    }
+  };
+
   return {
     playerStats: readonly(playerStats),
     loading: readonly(loading),
@@ -167,5 +185,6 @@ export const usePlayerStats = () => {
     getPlayerStatsForMatch,
     getPlayerStatsForSet,
     savePlayerStats,
+    deletePlayerStats,
   };
 };

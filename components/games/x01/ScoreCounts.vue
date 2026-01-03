@@ -66,7 +66,6 @@ const updatePlayerMatchScoreCounts = async () => {
     const rangeKey = getScoreRangeKey(score.totalScore);
     scoreRanges[rangeKey] = (scoreRanges[rangeKey] || 0) + 1;
   });
-  console.log("scoreRanges", scoreRanges);
 
   // Update playerStatsRef with new scores
   playerStatsRef.value.scores = scoreRanges;
@@ -90,7 +89,6 @@ const handleUndoLastTurn = async () => {
 watch(
   () => playerScores,
   () => {
-    console.log("playerScores changed", playerScores);
     updatePlayerMatchScoreCounts();
   },
   { deep: true }

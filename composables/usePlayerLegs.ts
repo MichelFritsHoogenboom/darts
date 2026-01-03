@@ -1,9 +1,12 @@
 import { ref, readonly } from "vue";
 import { PlayerLegService } from "~/database/PlayerLegService";
+import { PlayerStatsService } from "~/database/PlayerStatsService";
 import type { PlayerLeg } from "~/interfaces/leg";
 
 const playerLegService = new PlayerLegService();
+const playerStatsService = new PlayerStatsService();
 const { getScoresForPlayerLeg, deleteScore } = useScores();
+const { getPlayerStatsByPlayerLegId, deletePlayerStats } = usePlayerStats();
 
 export const usePlayerLegs = () => {
   const playerLegs = ref<PlayerLeg[]>([]);
@@ -60,6 +63,12 @@ export const usePlayerLegs = () => {
         await deleteScore(score.id);
       }
 
+      // Delete the related PlayerStats
+      const playerStats = await getPlayerStatsByPlayerLegId(id);
+      if (playerStats) {
+        await deletePlayerStats(playerStats.id);
+      }
+
       // Then delete the player leg itself
       await playerLegService.delete(id);
       removeObjectById(playerLegs.value, id);
@@ -93,7 +102,8 @@ export const usePlayerLegs = () => {
   };
 
   const getPlayerLegsForPlayer = async (
-    playerId: string
+    playerId: string,
+    matchId?: string
   ): Promise<PlayerLeg[]> => {
     loading.value = true;
     error.value = null;

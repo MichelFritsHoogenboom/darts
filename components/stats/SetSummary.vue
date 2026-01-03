@@ -36,7 +36,11 @@ const legs = computed(() => legsWithScores.map((legData) => legData.leg));
     <div
       class="grid grid-cols-[20%_1fr_20%] items-center mb-0 text-white bg-gray-900 px-4 py-2"
     >
-      <h4 class="text-md font-bold">Set {{ setIndex + 1 }}</h4>
+      <h4 class="text-md font-bold">
+        Set {{ setIndex + 1 }}
+        {{ set.createdAt.toLocaleTimeString() }}
+        {{ set.id }}
+      </h4>
       <div class="flex flex-col gap-1">
         <StatsPlayersWithCenter
           size="small"

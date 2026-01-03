@@ -184,6 +184,10 @@ onMounted(async () => {
           :player="players[0]"
           :realTimeScore="realTimePlayerScore(players[0].id)"
           :currentPlayerId="currentPlayerId"
+          :currentLeg="currentLeg"
+          :currentSet="currentSet"
+          :matchGame="matchGame"
+          :currentSetGame="currentSetGame"
         />
         <div class="flex flex-col gap-4" v-if="players[0] && players[1]">
           <div class="flex items-stretch gap-4">
@@ -331,6 +335,10 @@ onMounted(async () => {
           :player="players[1]"
           :realTimeScore="realTimePlayerScore(players[1].id)"
           :currentPlayerId="currentPlayerId"
+          :currentLeg="currentLeg"
+          :currentSet="currentSet"
+          :currentSetGame="currentSetGame"
+          :matchGame="matchGame"
         />
       </div>
 
