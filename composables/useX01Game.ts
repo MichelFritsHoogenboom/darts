@@ -342,7 +342,11 @@ export const useX01Game = (
       );
       if (currentSet.value) {
         currentSet.value.game.push(currentLeg.value.id);
+        await saveSet(currentSet.value);
       }
+
+      // Save match to persist the first set/leg in match.game
+      await saveMatch(match);
     } else {
       // Match already has a winner, reinitialize from database
       await reinitializeMatch();
@@ -472,6 +476,10 @@ export const useX01Game = (
       const newLeg = await createNewleg(newSet.startingPlayer);
       match.game.push(newSet.id);
       currentSet.value.game.push(newLeg.id);
+
+      // Save set and match to persist the new set/leg in their game arrays
+      await saveSet(currentSet.value);
+      await saveMatch(match);
 
       currentLeg.value = newLeg;
       currentPlayerId.value = newLeg.startingPlayer;

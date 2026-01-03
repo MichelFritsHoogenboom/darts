@@ -45,13 +45,6 @@ const updateStats = async () => {
   }
 };
 
-// Ensure average is always a number (handle cases where it might be stored as string)
-const playerAverage = computed(() => {
-  const avg = matchPlayerStats.value?.average;
-  if (typeof avg === "number") return avg;
-  return Number(avg) || 0;
-});
-
 onMounted(async () => {
   // Initialize data
   await updatePlayerAverages();
@@ -75,7 +68,7 @@ onBeforeUnmount(() => {
         <StatsPlayerNameWithBadge
           :playerId="player.id"
           :players="[player]"
-          :average="playerAverage"
+          :average="matchPlayerStats?.average || 0"
         />
       </div>
     </div>

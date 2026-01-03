@@ -104,8 +104,9 @@ const loadLegsData = async () => {
       })
     );
 
-    // Reverse both sets and legs within sets to show oldest first
-    setsWithLegs.value = setsData.reverse().map((setData) => ({
+    // Sets are already sorted by match.game order (oldest first) via sortByOrder
+    // Reverse legs within sets to show oldest first
+    setsWithLegs.value = setsData.map((setData) => ({
       ...setData,
       legsWithScores: setData.legsWithScores.reverse(),
     }));
