@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { createScoreRanges, type ScoreRanges } from "~/interfaces/stats";
+import type { Score } from "~/interfaces/leg";
+import type { PlayerStats } from "~/interfaces/stats";
 
 const matchId = inject<string>("matchId");
 
@@ -7,15 +9,26 @@ const matchId = inject<string>("matchId");
 const { $listen, $unlisten } = useNuxtApp();
 
 const { getLegsForMatch } = useLegs();
-const { getPlayerStatsForMatch, savePlayerStats } = usePlayerStats();
-const { getScoresForMatch } = useScores();
+const { savePlayerStats } = usePlayerStats();
 
-const { playerId } = defineProps<{
-  playerId: string;
+const { playerScores, playerStats } = defineProps<{
+  playerStats: PlayerStats;
+  playerScores: Score[];
 }>();
 
-const matchStats = await getPlayerStatsForMatch(matchId!);
-const playerStats = ref(matchStats.find((stat) => stat.playerId === playerId));
+const playerStatsRef = ref<PlayerStats>(playerStats);
+
+// Watch the prop and sync with local ref
+watch(
+  () => playerStats,
+  (newStats) => {
+    if (newStats) {
+      playerStatsRef.value = newStats;
+    }
+  },
+  { immediate: true, deep: true }
+);
+
 const legsPlayed = ref(0);
 
 // Create a cached mapping of score ranges from the interface
@@ -45,11 +58,6 @@ const getScoreRangeKey = (totalScore: number): keyof ScoreRanges => {
 };
 
 const updatePlayerMatchScoreCounts = async () => {
-  if (!playerStats.value) return;
-
-  const scores = await getScoresForMatch(matchId!);
-  const playerScores = scores.filter((score) => score.playerId === playerId);
-
   // Use existing scores or create new ScoreRanges
   const scoreRanges: ScoreRanges = createScoreRanges();
 
@@ -58,12 +66,13 @@ const updatePlayerMatchScoreCounts = async () => {
     const rangeKey = getScoreRangeKey(score.totalScore);
     scoreRanges[rangeKey] = (scoreRanges[rangeKey] || 0) + 1;
   });
+  console.log("scoreRanges", scoreRanges);
 
-  // Update playerStats with new scores
-  playerStats.value.scores = scoreRanges;
+  // Update playerStatsRef with new scores
+  playerStatsRef.value.scores = scoreRanges;
 
-  // Save the updated playerStats
-  await savePlayerStats(playerStats.value);
+  // Save the updated stats
+  await savePlayerStats(playerStatsRef.value);
 };
 
 const updateLegsPlayed = async () => {
@@ -77,20 +86,28 @@ const handleUndoLastTurn = async () => {
   await updatePlayerMatchScoreCounts();
 };
 
+// Watch playerScores changes and update counts (only when scores actually change)
+watch(
+  () => playerScores,
+  () => {
+    console.log("playerScores changed", playerScores);
+    updatePlayerMatchScoreCounts();
+  },
+  { deep: true }
+);
+
 onMounted(async () => {
   // Initialize data
   await updateLegsPlayed();
   await updatePlayerMatchScoreCounts();
 
   // Listen for score submission events
-  $listen("score-submitted", updatePlayerMatchScoreCounts);
   $listen("leg-finished", updateLegsPlayed);
   $listen("undo-last-turn", handleUndoLastTurn);
 });
 
 onBeforeUnmount(() => {
   // Clean up event listeners
-  $unlisten("score-submitted", updatePlayerMatchScoreCounts);
   $unlisten("leg-finished", updateLegsPlayed);
   $unlisten("undo-last-turn", handleUndoLastTurn);
 });
@@ -101,46 +118,46 @@ const averagePerLeg = (value: number) => {
 };
 
 const lowScoresSum = computed(() => {
-  if (!playerStats.value) return 0;
+  if (!playerStatsRef.value) return 0;
   return (
-    (playerStats.value.scores["0-9"] || 0) +
-    (playerStats.value.scores["10-19"] || 0)
+    (playerStatsRef.value.scores["0-9"] || 0) +
+    (playerStatsRef.value.scores["10-19"] || 0)
   );
 });
 </script>
 <template>
-  <template v-if="playerStats">
+  <template v-if="playerStatsRef">
     <div class="score-counts__header"></div>
     <div class="score-counts__header">Aantal</div>
     <div class="score-counts__header">Aantal per leg</div>
 
     <div>180's</div>
-    <div>{{ playerStats.scores["180"] }}</div>
-    <div>{{ averagePerLeg(playerStats.scores["180"]) }}</div>
+    <div>{{ playerStatsRef.scores["180"] }}</div>
+    <div>{{ averagePerLeg(playerStatsRef.scores["180"]) }}</div>
     <div>162 - 179</div>
-    <div>{{ playerStats.scores["162-179"] }}</div>
-    <div>{{ averagePerLeg(playerStats.scores["162-179"]) }}</div>
+    <div>{{ playerStatsRef.scores["162-179"] }}</div>
+    <div>{{ averagePerLeg(playerStatsRef.scores["162-179"]) }}</div>
     <div>126 - 161</div>
-    <div>{{ playerStats.scores["126-161"] }}</div>
-    <div>{{ averagePerLeg(playerStats.scores["126-161"]) }}</div>
+    <div>{{ playerStatsRef.scores["126-161"] }}</div>
+    <div>{{ averagePerLeg(playerStatsRef.scores["126-161"]) }}</div>
     <div>90 - 125</div>
-    <div>{{ playerStats.scores["90-125"] }}</div>
-    <div>{{ averagePerLeg(playerStats.scores["90-125"]) }}</div>
+    <div>{{ playerStatsRef.scores["90-125"] }}</div>
+    <div>{{ averagePerLeg(playerStatsRef.scores["90-125"]) }}</div>
     <div>66 - 89</div>
-    <div>{{ playerStats.scores["66-89"] }}</div>
-    <div>{{ averagePerLeg(playerStats.scores["66-89"]) }}</div>
+    <div>{{ playerStatsRef.scores["66-89"] }}</div>
+    <div>{{ averagePerLeg(playerStatsRef.scores["66-89"]) }}</div>
     <div>54 - 65</div>
-    <div>{{ playerStats.scores["54-65"] }}</div>
-    <div>{{ averagePerLeg(playerStats.scores["54-65"]) }}</div>
+    <div>{{ playerStatsRef.scores["54-65"] }}</div>
+    <div>{{ averagePerLeg(playerStatsRef.scores["54-65"]) }}</div>
     <div>40 - 53</div>
-    <div>{{ playerStats.scores["40-53"] }}</div>
-    <div>{{ averagePerLeg(playerStats.scores["40-53"]) }}</div>
+    <div>{{ playerStatsRef.scores["40-53"] }}</div>
+    <div>{{ averagePerLeg(playerStatsRef.scores["40-53"]) }}</div>
     <div>30 - 39</div>
-    <div>{{ playerStats.scores["30-39"] }}</div>
-    <div>{{ averagePerLeg(playerStats.scores["30-39"]) }}</div>
+    <div>{{ playerStatsRef.scores["30-39"] }}</div>
+    <div>{{ averagePerLeg(playerStatsRef.scores["30-39"]) }}</div>
     <div>20 - 29</div>
-    <div>{{ playerStats.scores["20-29"] }}</div>
-    <div>{{ averagePerLeg(playerStats.scores["20-29"]) }}</div>
+    <div>{{ playerStatsRef.scores["20-29"] }}</div>
+    <div>{{ averagePerLeg(playerStatsRef.scores["20-29"]) }}</div>
     <div>0 - 19</div>
     <div>{{ lowScoresSum }}</div>
     <div>{{ averagePerLeg(lowScoresSum) }}</div>

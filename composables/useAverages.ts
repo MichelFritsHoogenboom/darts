@@ -35,22 +35,21 @@ export const useAverages = () => {
       (score) => score.playerId === playerStat.playerId
     );
 
-    if (scores.length === 0) {
-      // No scores, average remains 0
-      return;
+    let average = 0;
+
+    if (scores.length > 0) {
+      // Sum up all totalScores for this player
+      const totalScoreSum = scores.reduce(
+        (sum, score) => sum + score.totalScore,
+        0
+      );
+
+      // Calculate average: sum / (number of scores * 3 darts per score)
+      // This gives average per dart
+      average = totalScoreSum / scores.length;
     }
 
-    // Sum up all totalScores for this player
-    const totalScoreSum = scores.reduce(
-      (sum, score) => sum + score.totalScore,
-      0
-    );
-
-    // Calculate average: sum / (number of scores * 3 darts per score)
-    // This gives average per dart
-    const average = totalScoreSum / scores.length;
-
-    // Update playerStats.average
+    // Update playerStats.average (will be 0 if no scores)
     playerStat.average = average;
 
     // Save the updated playerStats

@@ -1,139 +1,48 @@
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount } from "vue";
-import { createScoreRanges, type ScoreRanges } from "~/interfaces/stats";
+import type { PlayerStats } from "~/interfaces/stats";
 
-const matchId = inject<string>("matchId");
-
-// Get event listener from plugin
-const { $listen, $unlisten } = useNuxtApp();
-
-const { getLegsForMatch } = useLegs();
-const { getPlayerStatsForMatch, savePlayerStats } = usePlayerStats();
-const { getScoresForMatch } = useScores();
-
-const { playerId } = defineProps<{
-  playerId: string;
+const { matchplayerStats } = defineProps<{
+  matchplayerStats: PlayerStats;
 }>();
 
-const matchStats = await getPlayerStatsForMatch(matchId!);
-const playerStats = ref(matchStats.find((stat) => stat.playerId === playerId));
-const legsPlayed = ref(0);
-
-// Create a cached mapping of score ranges from the interface
-const scoreRangeMapping = (() => {
-  const sampleRanges = createScoreRanges();
-  const keys = Object.keys(sampleRanges) as Array<keyof ScoreRanges>;
-
-  return keys
-    .map((key) => {
-      if (key === "180") {
-        return { key, min: 180, max: 180 };
-      }
-      const [min, max] = key.split("-").map(Number);
-      return { key, min, max };
-    })
-    .sort((a, b) => b.min - a.min); // Sort descending by min value
-})();
-
-// Helper function to map totalScore to ScoreRanges key using interface keys dynamically
-const getScoreRangeKey = (totalScore: number): keyof ScoreRanges => {
-  for (const { key, min, max } of scoreRangeMapping) {
-    if (totalScore >= min && totalScore <= max) {
-      return key;
-    }
-  }
-  return "0-9"; // Fallback (should never happen if ranges cover all scores)
+const onedartAverage = (value: number) => {
+  return (value / 3).toFixed(2);
 };
 
-const updatePlayerMatchScoreCounts = async () => {
-  if (!playerStats.value) return;
-
-  const scores = await getScoresForMatch(matchId!);
-  const playerScores = scores.filter((score) => score.playerId === playerId);
-
-  // Use existing scores or create new ScoreRanges
-  const scoreRanges: ScoreRanges = createScoreRanges();
-
-  // Update score ranges based on totalScore
-  playerScores.forEach((score) => {
-    const rangeKey = getScoreRangeKey(score.totalScore);
-    scoreRanges[rangeKey] = (scoreRanges[rangeKey] || 0) + 1;
-  });
-
-  // Update playerStats with new scores
-  playerStats.value.scores = scoreRanges;
-
-  // Save the updated playerStats
-  await savePlayerStats(playerStats.value);
-};
-
-const updateLegsPlayed = async () => {
-  const legs = await getLegsForMatch(matchId!);
-
-  legsPlayed.value = legs.length;
-};
-
-const handleUndoLastTurn = async () => {
-  await updateLegsPlayed();
-  await updatePlayerMatchScoreCounts();
-};
-
-onMounted(async () => {
-  await updateLegsPlayed();
-  await updatePlayerMatchScoreCounts();
-
-  // Listen for score submission events
-  $listen("score-submitted", updatePlayerMatchScoreCounts);
-  $listen("leg-finished", updateLegsPlayed);
-  $listen("undo-last-turn", handleUndoLastTurn);
-});
-
-onBeforeUnmount(() => {
-  // Clean up event listeners
-  $unlisten("score-submitted", updatePlayerMatchScoreCounts);
-  $unlisten("leg-finished", updateLegsPlayed);
-  $unlisten("undo-last-turn", handleUndoLastTurn);
-});
-
-const averagePerLeg = (value: number) => {
-  if (legsPlayed.value === 0) return "0.000";
-  return (value / legsPlayed.value).toFixed(3);
+const formatAverage = (average: number) => {
+  return average.toFixed(2);
 };
 </script>
 <template>
-  <template v-if="playerStats">
+  <template v-if="matchplayerStats">
     <div class="score-counts__header"></div>
     <div class="score-counts__header">3 dart gem.</div>
     <div class="score-counts__header">1 dart gem.</div>
 
     <div>Leg</div>
-    <div>{{ playerStats.scores["180"] }}</div>
-    <div>{{ averagePerLeg(playerStats.scores["180"]) }}</div>
+    <div>{{ formatAverage(matchplayerStats.average) }}</div>
+    <div>{{ onedartAverage(matchplayerStats.average) }}</div>
     <div>Set</div>
-    <div>{{ playerStats.scores["162-179"] }}</div>
-    <div>{{ averagePerLeg(playerStats.scores["162-179"]) }}</div>
+    <div></div>
+    <div></div>
     <div>Wedstrijd</div>
-    <div>{{ playerStats.scores["126-161"] }}</div>
-    <div>{{ averagePerLeg(playerStats.scores["126-161"]) }}</div>
+    <div>{{ formatAverage(matchplayerStats.average) }}</div>
+    <div>{{ onedartAverage(matchplayerStats.average) }}</div>
     <div>Laatste leg winst</div>
-    <div>{{ playerStats.scores["90-125"] }}</div>
-    <div>{{ averagePerLeg(playerStats.scores["90-125"]) }}</div>
+    <div></div>
+    <div></div>
     <div>Laatste leg</div>
-    <div>{{ playerStats.scores["90-125"] }}</div>
-    <div>{{ averagePerLeg(playerStats.scores["90-125"]) }}</div>
+    <div></div>
+    <div></div>
     <div>Laatste set</div>
-    <div>{{ playerStats.scores["66-89"] }}</div>
-    <div>{{ averagePerLeg(playerStats.scores["66-89"]) }}</div>
+    <div></div>
+    <div></div>
     <div class="score-counts__footer">Beste leg</div>
-    <div class="score-counts__footer">{{ playerStats.scores["54-65"] }}</div>
-    <div class="score-counts__footer">
-      {{ averagePerLeg(playerStats.scores["54-65"]) }}
-    </div>
+    <div class="score-counts__footer"></div>
+    <div class="score-counts__footer"></div>
     <div class="score-counts__footer">Beste set</div>
-    <div class="score-counts__footer">{{ playerStats.scores["40-53"] }}</div>
-    <div class="score-counts__footer">
-      {{ averagePerLeg(playerStats.scores["40-53"]) }}
-    </div>
+    <div class="score-counts__footer"></div>
+    <div class="score-counts__footer"></div>
   </template>
 </template>
 <style scoped>

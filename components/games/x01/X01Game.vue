@@ -180,21 +180,22 @@ onMounted(async () => {
       </div>
       <div class="flex-1 grid grid-cols-3 gap-4 text-sm pb-4 px-2">
         <PlayerComponent
+          v-if="players[0]?.id"
           :player="players[0]"
-          :score="realTimePlayerScore(players[0].id)"
+          :realTimeScore="realTimePlayerScore(players[0].id)"
           :currentPlayerId="currentPlayerId"
         />
-        <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-4" v-if="players[0] && players[1]">
           <div class="flex items-stretch gap-4">
             <div
               class="flex-1 text-center flex flex-wrap justify-center content-center self-stretch"
               :class="[
                 'player-card relative rounded-xl',
-                currentPlayerId === players[0].id ? 'active' : 'inactive',
+                currentPlayerId === players[0]?.id ? 'active' : 'inactive',
               ]"
             >
               <div class="text-5xl font-bold text-white">
-                {{ realTimePlayerScore(players[0].id) }}
+                {{ realTimePlayerScore(players[0]?.id) }}
               </div>
             </div>
             <div class="flex-shrink-0 grid grid-cols-3 gap-2">
@@ -204,7 +205,7 @@ onMounted(async () => {
                 "
               >
                 <div class="player-card rounded-xl inactive text-3xl font-bold">
-                  {{ getPlayerWinnerCount(players[0].id, matchGame) }}
+                  {{ getPlayerWinnerCount(players[0]?.id, matchGame) }}
                 </div>
                 <div
                   class="text-center text-lg font-bold flex justify-center items-center"
@@ -212,11 +213,11 @@ onMounted(async () => {
                   Sets
                 </div>
                 <div class="player-card rounded-xl inactive text-3xl font-bold">
-                  {{ getPlayerWinnerCount(players[1].id, matchGame) }}
+                  {{ getPlayerWinnerCount(players[1]?.id, matchGame) }}
                 </div>
               </template>
               <div class="player-card rounded-xl inactive text-3xl font-bold">
-                {{ getPlayerWinnerCount(players[0].id, legsToDisplay) }}
+                {{ getPlayerWinnerCount(players[0]?.id, legsToDisplay) }}
               </div>
               <div
                 class="text-center text-lg font-bold flex justify-center items-center"
@@ -224,18 +225,18 @@ onMounted(async () => {
                 Legs
               </div>
               <div class="player-card rounded-xl inactive text-3xl font-bold">
-                {{ getPlayerWinnerCount(players[1].id, legsToDisplay) }}
+                {{ getPlayerWinnerCount(players[1]?.id, legsToDisplay) }}
               </div>
             </div>
             <div
               class="flex-1 text-center flex flex-wrap justify-center content-center self-stretch"
               :class="[
                 'player-card relative rounded-xl',
-                currentPlayerId === players[1].id ? 'active' : 'inactive',
+                currentPlayerId === players[1]?.id ? 'active' : 'inactive',
               ]"
             >
               <div class="text-5xl font-bold text-white mb-2">
-                {{ realTimePlayerScore(players[1].id) }}
+                {{ realTimePlayerScore(players[1]?.id) }}
               </div>
             </div>
           </div>
@@ -326,8 +327,9 @@ onMounted(async () => {
           </div>
         </div>
         <PlayerComponent
+          v-if="players[1]?.id"
           :player="players[1]"
-          :score="realTimePlayerScore(players[1].id)"
+          :realTimeScore="realTimePlayerScore(players[1].id)"
           :currentPlayerId="currentPlayerId"
         />
       </div>
