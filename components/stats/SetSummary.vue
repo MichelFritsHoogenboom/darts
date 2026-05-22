@@ -23,7 +23,7 @@ const playerStatsArray = ref<PlayerStats[]>([]);
 
 onMounted(async () => {
   playerStatsArray.value = await Promise.all(
-    set.playerStats.map((playerStat) => getPlayerStatsById(playerStat))
+    set.playerStats.map((playerStat) => getPlayerStatsById(playerStat)),
   );
 });
 
@@ -36,11 +36,7 @@ const legs = computed(() => legsWithScores.map((legData) => legData.leg));
     <div
       class="grid grid-cols-[20%_1fr_20%] items-center mb-0 text-white bg-gray-900 px-4 py-2"
     >
-      <h4 class="text-md font-bold">
-        Set {{ setIndex + 1 }}
-        {{ set.createdAt.toLocaleTimeString() }}
-        {{ set.id }}
-      </h4>
+      <h4 class="text-md font-bold">Set {{ setIndex + 1 }}</h4>
       <div class="flex flex-col gap-1">
         <StatsPlayersWithCenter
           size="small"
@@ -49,8 +45,8 @@ const legs = computed(() => legsWithScores.map((legData) => legData.leg));
           :winner-id="set.winner"
           :show-badge="false"
         >
-          {{ getPlayerWinnerCount(players[0].id, legs) }} -
-          {{ getPlayerWinnerCount(players[1].id, legs) }}
+          {{ players[0] ? getPlayerWinnerCount(players[0].id, legs) : 0 }} -
+          {{ players[1] ? getPlayerWinnerCount(players[1].id, legs) : 0 }}
         </StatsPlayersWithCenter>
       </div>
       <div></div>

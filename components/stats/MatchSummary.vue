@@ -84,14 +84,10 @@ const loadLegsData = async () => {
   if (match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets) {
     // Sets mode: organize legs by set
     // match.game has sets in creation order (oldest first)
-    const sets = await getSetsForMatch(match.id, Array.from(match.game));
+    const sets = await getSetsForMatch(match.id);
     const setsData = await Promise.all(
       sets.map(async (set) => {
-        // set.game has legs in creation order (oldest first)
-        const setLegs = await getLegsForSet(
-          set.id,
-          Array.from(set.game).reverse()
-        );
+        const setLegs = await getLegsForSet(set.id);
 
         const legsData = await Promise.all(
           setLegs.map((leg) => loadLegWithScores(leg))
@@ -104,15 +100,10 @@ const loadLegsData = async () => {
       })
     );
 
-    // Sets are already sorted by match.game order (oldest first) via sortByOrder
-    // Reverse legs within sets to show oldest first
-    setsWithLegs.value = setsData.map((setData) => ({
-      ...setData,
-      legsWithScores: setData.legsWithScores.reverse(),
-    }));
+    setsWithLegs.value = setsData;
   } else {
     // Direct legs mode
-    const allLegs = await getLegsForMatch(match.id, Array.from(match.game));
+    const allLegs = await getLegsForMatch(match.id);
     const legsData = await Promise.all(
       allLegs.map((leg) => loadLegWithScores(leg))
     );

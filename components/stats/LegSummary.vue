@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import type { Leg, PlayerLeg, Score } from "~/interfaces/leg";
 import type { Player } from "~/interfaces/player";
+import { formatDateTime } from "~/utils/date";
 import { createPlayerNameGetter } from "~/utils/player";
 import { useToggle } from "@vueuse/core";
 import CheckoutDouble from "./CheckoutDouble.vue";
@@ -76,6 +77,7 @@ const isHighScore = (score: number): boolean => {
 
 // Toggle to show/hide leg details (defaults to false - hidden)
 const [showLegDetails, toggleLegDetails] = useToggle(false);
+
 </script>
 
 <template>
@@ -88,7 +90,7 @@ const [showLegDetails, toggleLegDetails] = useToggle(false);
               <div
                 class="grid grid-cols-[1fr_6fr_1fr] items-center justify-center gap-2"
               >
-                <span>{{ leg.createdAt.toLocaleString() }}</span>
+                <span>{{ formatDateTime(leg.createdAt) }}</span>
                 <StatsPlayersWithCenter
                   :player-stats="playerStatsArray"
                   :players="players"

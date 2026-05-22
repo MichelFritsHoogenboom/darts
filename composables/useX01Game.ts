@@ -230,8 +230,6 @@ export const useX01Game = (
   const undoLastTurn = async () => {
     if (!currentLeg.value || !canUndo.value) return;
 
-    console.log("undoLastTurn");
-
     if (match.winner) {
       match.winner = undefined;
       currentSet.value!.winner = undefined;
@@ -280,9 +278,7 @@ export const useX01Game = (
 
       // Check if there are remaining legs in the set AFTER deletion
       if (currentSetGame.value && currentSetGame.value.length > 0) {
-        // There are still legs, reactivate the last one
-        const previousLeg =
-          currentSetGame.value[currentSetGame.value.length - 1];
+        const previousLeg = currentSetGame.value.at(-1)!;
         await initPreviousLeg(previousLeg);
         await loadMatchGame();
         $event("undo-last-turn");
@@ -360,17 +356,12 @@ export const useX01Game = (
       // Sets mode: load sets and find the last set without a winner
       const sets = await getSetsForMatch(match.id);
       matchGame.value = sets;
-      const currentSetInProgress = sets.find((set) => !set.winner);
-      currentSet.value = currentSetInProgress || null;
+      currentSet.value = sets.filter((set) => !set.winner).at(-1) ?? null;
 
       if (currentSet.value) {
-        // Load legs for the current set
         currentSetGame.value = await getLegsForSet(currentSet.value.id);
-        // Find the last leg without a winner
-        const currentLegInProgress = currentSetGame.value.find(
-          (leg) => !leg.winner,
-        );
-        currentLeg.value = currentLegInProgress || null;
+        currentLeg.value =
+          currentSetGame.value.filter((leg) => !leg.winner).at(-1) ?? null;
       } else {
         currentSetGame.value = [];
         currentLeg.value = null;
@@ -379,8 +370,7 @@ export const useX01Game = (
       // Direct legs mode: load legs and find the last leg without a winner
       const legs = await getLegsForMatch(match.id);
       matchGame.value = legs;
-      const currentLegInProgress = legs.find((leg) => !leg.winner);
-      currentLeg.value = currentLegInProgress || null;
+      currentLeg.value = legs.filter((leg) => !leg.winner).at(-1) ?? null;
     }
 
     // Load player legs and scores for the current leg

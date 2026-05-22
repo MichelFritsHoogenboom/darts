@@ -57,21 +57,14 @@ const updatePlayerAverages = async () => {
     await updateSetPlayerStats();
   }
 
-  if (currentSetGame && currentSetGame.length > 1 && currentSet) {
-    await calculateAndUpdateSetPlayerStatsAverages(currentSet.id);
-    await updateSetPlayerStats();
+  // Get all playerLegs for this match
+  const allLegs = await getLegsForMatch(matchId);
+
+  if (allLegs?.length > 1) {
     await updateLegPlayerStats();
 
-    // Get all playerLegs for this match
-    const allLegs = await getLegsForMatch(matchId);
-
-    // Sort by updatedAt (most recent last)
-    const sortedLegs = allLegs.sort(
-      (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
-    );
-    // Get the second last leg
-    if (sortedLegs.length >= 2) {
-      const secondLastLeg = sortedLegs[sortedLegs.length - 2];
+    const secondLastLeg = allLegs.at(-2);
+    if (secondLastLeg) {
 
       const allPlayerLegs = await getPlayerLegsForLeg(secondLastLeg.id);
 
@@ -86,12 +79,13 @@ const updatePlayerAverages = async () => {
           playerLegForCurrentPlayer.id,
         );
 
-        console.log("stats", stats);
         // Set lastLegAverage to the average from stats
         lastLegAverage.value = stats?.average || 0;
       } else {
         lastLegAverage.value = 0;
       }
+    } else {
+      lastLegAverage.value = 0;
     }
   }
 
