@@ -64,26 +64,26 @@ const updatePlayerAverages = async () => {
 
     // Get all playerLegs for this match
     const allLegs = await getLegsForMatch(matchId);
-    console.log("allLegs", allLegs);
+
     // Sort by updatedAt (most recent last)
     const sortedLegs = allLegs.sort(
-      (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+      (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
     );
     // Get the second last leg
     if (sortedLegs.length >= 2) {
       const secondLastLeg = sortedLegs[sortedLegs.length - 2];
-      console.log("secondLastLeg", secondLastLeg);
+
       const allPlayerLegs = await getPlayerLegsForLeg(secondLastLeg.id);
-      console.log("allPlayerLegs", allPlayerLegs);
+
       // Find player leg for current player
       const playerLegForCurrentPlayer = allPlayerLegs.find(
-        (pl) => pl.playerId === player.id
+        (pl) => pl.playerId === player.id,
       );
-      console.log("playerLegForCurrentPlayer", playerLegForCurrentPlayer);
+
       if (playerLegForCurrentPlayer) {
         // Get playerStats for this playerLeg
         const stats = await getPlayerStatsByPlayerLegId(
-          playerLegForCurrentPlayer.id
+          playerLegForCurrentPlayer.id,
         );
 
         console.log("stats", stats);
@@ -104,7 +104,7 @@ const updatePlayerAverages = async () => {
 const updateMatchPlayerStats = async () => {
   const matchStats = await getPlayerStatsForMatch(matchId!);
   matchPlayerStats.value = matchStats.find(
-    (stat) => stat.playerId === player.id
+    (stat) => stat.playerId === player.id,
   );
 };
 

@@ -26,7 +26,7 @@ import { isAchievableScore } from "~/utils/dartScoring.js";
 
 export const useX01Game = (
   match: Match,
-  gameState: ReturnType<typeof useGame>
+  gameState: ReturnType<typeof useGame>,
 ) => {
   //composables
   // Use game state passed from component
@@ -52,7 +52,7 @@ export const useX01Game = (
   const { saveMatch } = useMatches();
   // factory functions
   const createNewSet = async (
-    startingPlayer: string = currentPlayerId.value
+    startingPlayer: string = currentPlayerId.value,
   ) => {
     // Create PlayerStats for each player in the same order as playerIds
 
@@ -70,7 +70,7 @@ export const useX01Game = (
           setId: set.id,
         });
         return playerStats.id;
-      })
+      }),
     );
 
     set.playerStats = playerStatsIds;
@@ -83,7 +83,7 @@ export const useX01Game = (
     players: string[],
     legId: string,
     matchId: string,
-    setId?: string
+    setId?: string,
   ) => {
     return await Promise.all(
       players.map((playerId) =>
@@ -92,13 +92,13 @@ export const useX01Game = (
           playerId: playerId,
           matchId: matchId,
           setId: setId,
-        }).then((playerLeg) => playerLeg.id)
-      )
+        }).then((playerLeg) => playerLeg.id),
+      ),
     );
   };
 
   const createNewleg = async (
-    startingPlayer: string = currentPlayerId.value
+    startingPlayer: string = currentPlayerId.value,
   ) => {
     const legId = uuid();
     const setId = currentSet.value?.id;
@@ -187,7 +187,7 @@ export const useX01Game = (
     // Check if any playerLeg in the current leg has scores
     if (currentLeg.value) {
       return currentPlayerLegs.value.some(
-        (playerLeg) => playerLeg.scores.length > 0
+        (playerLeg) => playerLeg.scores.length > 0,
       );
     }
 
@@ -217,7 +217,7 @@ export const useX01Game = (
       currentPlayerLegs.value.map(async (playerLeg) => {
         const scores = await getScoresForPlayerLeg(playerLeg.id);
         currentPlayerLegScores.value[playerLeg.playerId] = scores;
-      })
+      }),
     );
 
     let previousPlayerLeg = getCurrentPlayerLeg.value(winner!);
@@ -229,6 +229,8 @@ export const useX01Game = (
 
   const undoLastTurn = async () => {
     if (!currentLeg.value || !canUndo.value) return;
+
+    console.log("undoLastTurn");
 
     if (match.winner) {
       match.winner = undefined;
@@ -338,7 +340,7 @@ export const useX01Game = (
 
       // Push IDs to match.game (which stores IDs)
       match.game.push(
-        currentSet.value ? currentSet.value.id : currentLeg.value.id
+        currentSet.value ? currentSet.value.id : currentLeg.value.id,
       );
       if (currentSet.value) {
         currentSet.value.game.push(currentLeg.value.id);
@@ -366,7 +368,7 @@ export const useX01Game = (
         currentSetGame.value = await getLegsForSet(currentSet.value.id);
         // Find the last leg without a winner
         const currentLegInProgress = currentSetGame.value.find(
-          (leg) => !leg.winner
+          (leg) => !leg.winner,
         );
         currentLeg.value = currentLegInProgress || null;
       } else {
@@ -391,7 +393,7 @@ export const useX01Game = (
         currentPlayerLegs.value.map(async (playerLeg) => {
           const scores = await getScoresForPlayerLeg(playerLeg.id);
           currentPlayerLegScores.value[playerLeg.playerId] = scores;
-        })
+        }),
       );
 
       // Determine the current player based on scores
@@ -400,7 +402,7 @@ export const useX01Game = (
       let lastPlayerId: string | null = null;
 
       for (const [playerId, scores] of Object.entries(
-        currentPlayerLegScores.value
+        currentPlayerLegScores.value,
       )) {
         if (scores.length > 0) {
           // Get the most recent score for this player
@@ -463,14 +465,14 @@ export const useX01Game = (
 
     const setsWon = getPlayerWinnerCount(
       currentPlayerId.value,
-      matchGame.value
+      matchGame.value,
     );
 
     if (setsWon === match.matchConfig.setsToWin) {
       await handleMatchWin();
     } else {
       const newSet = await createNewSet(
-        getNextPlayerId(currentSet.value.startingPlayer)
+        getNextPlayerId(currentSet.value.startingPlayer),
       );
       currentSet.value = newSet;
       const newLeg = await createNewleg(newSet.startingPlayer);
@@ -501,7 +503,7 @@ export const useX01Game = (
 
     const legsWon = getPlayerWinnerCount(
       currentPlayerId.value,
-      currentSet.value ? currentSetGame.value : matchGame.value
+      currentSet.value ? currentSetGame.value : matchGame.value,
     );
 
     if (legsWon === match.matchConfig.legsToWinParent) {
@@ -512,7 +514,7 @@ export const useX01Game = (
       }
     } else {
       const newLeg = await createNewleg(
-        getNextPlayerId(currentLeg.value.startingPlayer)
+        getNextPlayerId(currentLeg.value.startingPlayer),
       );
       if (currentSet.value) {
         currentSet.value.game.push(newLeg.id);

@@ -16,7 +16,7 @@ export const useAverages = () => {
   const error = ref<string | null>(null);
 
   const calculateAndUpdateMatchPlayerStatAverage = async (
-    playerStat: PlayerStats
+    playerStat: PlayerStats,
   ): Promise<void> => {
     // Only calculate if playerStat has a matchId and playerId, and does NOT have a playerLegId or setId
     // (to ensure we're only updating match-level stats, not leg-level or set-level stats)
@@ -32,7 +32,7 @@ export const useAverages = () => {
     // Get all scores for this match, filtered by player
     const allScores = await getScoresForMatch(playerStat.matchId);
     const scores = allScores.filter(
-      (score) => score.playerId === playerStat.playerId
+      (score) => score.playerId === playerStat.playerId,
     );
 
     let average = 0;
@@ -41,7 +41,7 @@ export const useAverages = () => {
       // Sum up all totalScores for this player
       const totalScoreSum = scores.reduce(
         (sum, score) => sum + score.totalScore,
-        0
+        0,
       );
 
       // Calculate average: sum / (number of scores * 3 darts per score)
@@ -57,7 +57,7 @@ export const useAverages = () => {
   };
 
   const calculateAndUpdateMatchPlayerStatsAverages = async (
-    matchId: string
+    matchId: string,
   ): Promise<void> => {
     loading.value = true;
     error.value = null;
@@ -78,31 +78,30 @@ export const useAverages = () => {
   };
 
   const calculateAndUpdatePlayerLegAverage = async (
-    playerLeg: PlayerLeg
+    playerLeg: PlayerLeg,
   ): Promise<void> => {
-    // Get all scores for this playerleg
-    const scores = await getScoresForPlayerLeg(playerLeg.id);
-
-    if (scores.length === 0) {
-      // No scores, average remains 0
-      return;
-    }
-
-    // Sum up all totalScores
-    const totalScoreSum = scores.reduce(
-      (sum, score) => sum + score.totalScore,
-      0
-    );
-
-    // Calculate average: sum / (number of scores * 3 darts per score)
-    // This gives average per dart
-    const average = totalScoreSum / scores.length;
     const playerStats = await getPlayerStatsByPlayerLegId(playerLeg.id);
-
     if (!playerStats) {
       console.error("Player stats not found for player leg:", playerLeg.id);
       return;
     }
+
+    // Get all scores for this playerleg
+    const scores = await getScoresForPlayerLeg(playerLeg.id);
+    let average = 0;
+
+    if (scores.length > 0) {
+      // Sum up all totalScores
+      const totalScoreSum = scores.reduce(
+        (sum, score) => sum + score.totalScore,
+        0,
+      );
+
+      // Calculate average: sum / (number of scores * 3 darts per score)
+      // This gives average per dart
+      average = totalScoreSum / scores.length;
+    }
+
     // Update playerStats.average
     playerStats.average = average;
 
@@ -111,7 +110,7 @@ export const useAverages = () => {
   };
 
   const calculateAndUpdatePlayerLegAverages = async (
-    legId: string
+    legId: string,
   ): Promise<void> => {
     loading.value = true;
     error.value = null;
@@ -135,7 +134,7 @@ export const useAverages = () => {
   };
 
   const calculateAndUpdateSetPlayerStatAverage = async (
-    playerStat: PlayerStats
+    playerStat: PlayerStats,
   ): Promise<void> => {
     // Only calculate if playerStat has a setId and playerId, and does NOT have a playerLegId
     // (to ensure we're only updating set-level stats, not leg-level stats)
@@ -146,24 +145,21 @@ export const useAverages = () => {
     // Get all scores for this set, filtered by player
     const allScores = await getScoresForSet(playerStat.setId);
     const scores = allScores.filter(
-      (score) => score.playerId === playerStat.playerId
+      (score) => score.playerId === playerStat.playerId,
     );
 
-    if (scores.length === 0) {
-      // No scores, average remains 0
-      return;
+    let average = 0;
+    if (scores.length > 0) {
+      // Sum up all totalScores for this player
+      const totalScoreSum = scores.reduce(
+        (sum, score) => sum + score.totalScore,
+        0,
+      );
+
+      // Calculate average: sum / (number of scores * 3 darts per score)
+      // This gives average per dart
+      average = totalScoreSum / scores.length;
     }
-
-    // Sum up all totalScores for this player
-    const totalScoreSum = scores.reduce(
-      (sum, score) => sum + score.totalScore,
-      0
-    );
-
-    // Calculate average: sum / (number of scores * 3 darts per score)
-    // This gives average per dart
-    const average = totalScoreSum / scores.length;
-
     // Update playerStats.average
     playerStat.average = average;
 
@@ -172,7 +168,7 @@ export const useAverages = () => {
   };
 
   const calculateAndUpdateSetPlayerStatsAverages = async (
-    setId: string
+    setId: string,
   ): Promise<void> => {
     loading.value = true;
     error.value = null;
