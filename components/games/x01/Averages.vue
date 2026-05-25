@@ -4,13 +4,19 @@ const {
   legAverage = 0,
   setAverage = 0,
   lastLegAverage = 0,
+  lastLegWinAverage = 0,
   lastSetAverage = 0,
+  bestLegAverage = 0,
+  bestSetAverage = 0,
 } = defineProps<{
   matchAverage: number;
   legAverage: number;
   setAverage: number;
   lastLegAverage: number;
+  lastLegWinAverage: number;
   lastSetAverage: number;
+  bestLegAverage: number;
+  bestSetAverage: number;
 }>();
 
 const onedartAverage = (value: number) => {
@@ -37,20 +43,20 @@ const formatAverage = (average: number) => {
   <div>{{ formatAverage(matchAverage) }}</div>
   <div>{{ onedartAverage(matchAverage) }}</div>
   <div>Laatste leg winst</div>
-  <div></div>
-  <div></div>
+  <div>{{ formatAverage(lastLegWinAverage) }}</div>
+  <div>{{ onedartAverage(lastLegWinAverage) }}</div>
   <div>Laatste leg</div>
   <div>{{ formatAverage(lastLegAverage) }}</div>
   <div>{{ onedartAverage(lastLegAverage) }}</div>
   <div>Laatste set</div>
   <div>{{ formatAverage(lastSetAverage) }}</div>
   <div>{{ onedartAverage(lastSetAverage) }}</div>
-  <div class="score-counts__footer">Beste leg</div>
-  <div class="score-counts__footer"></div>
-  <div class="score-counts__footer"></div>
-  <div class="score-counts__footer">Beste set</div>
-  <div class="score-counts__footer"></div>
-  <div class="score-counts__footer"></div>
+  <div class="score-counts__footer">Beste gewonnen leg</div>
+  <div class="score-counts__footer">{{ formatAverage(bestLegAverage) }}</div>
+  <div class="score-counts__footer">{{ onedartAverage(bestLegAverage) }}</div>
+  <div class="score-counts__footer">Beste gewonnen set</div>
+  <div class="score-counts__footer">{{ formatAverage(bestSetAverage) }}</div>
+  <div class="score-counts__footer">{{ onedartAverage(bestSetAverage) }}</div>
 </template>
 <style scoped>
 .score-counts {

@@ -5,14 +5,7 @@ import type { PlayerStats } from "~/interfaces/stats";
 import type { Set } from "~/interfaces/set";
 
 const { $listen, $unlisten } = useNuxtApp();
-const {
-  player,
-  currentPlayerId,
-  currentLeg,
-  currentSet,
-  matchGame,
-  currentSetGame,
-} = defineProps<{
+const { player, currentPlayerId, currentLeg, currentSet } = defineProps<{
   player: Player;
   currentPlayerId: string;
   realTimeScore: number;
@@ -45,6 +38,43 @@ const legPlayerStats = ref<PlayerStats | undefined>(undefined);
 const playerScores = ref<Score[]>([]);
 const lastSetAverage = ref<number>(0);
 const lastLegAverage = ref<number>(0);
+const lastLegWinAverage = ref<number>(0);
+const bestLegAverage = ref<number>(0);
+const bestSetAverage = ref<number>(0);
+
+const maxAverage = (averages: number[]) =>
+  averages.length ? Math.max(...averages) : 0;
+
+const getWonAverages = async <T extends { winner?: string }>(
+  items: T[],
+  getAverage: (item: T) => Promise<number>,
+) => {
+  const won = items.filter((item) => item.winner === player.id);
+  return Promise.all(won.map(getAverage));
+};
+
+const updateBestWonAverage = async <T extends { winner?: string }>(
+  items: T[],
+  getAverage: (item: T) => Promise<number>,
+  target: Ref<number>,
+) => {
+  const averages = await getWonAverages(items, getAverage);
+  target.value = maxAverage(averages);
+};
+
+const getLegAverage = async (leg: Leg) => {
+  const playerLegs = await getPlayerLegsForLeg(leg.id);
+  const playerLeg = playerLegs.find((pl) => pl.playerId === player.id);
+  if (!playerLeg) return 0;
+  const stats = await getPlayerStatsByPlayerLegId(playerLeg.id);
+  return stats?.average ?? 0;
+};
+
+const updateLegWonAverages = async (allLegs: Leg[]) => {
+  const averages = await getWonAverages(allLegs, getLegAverage);
+  lastLegWinAverage.value = averages.at(-1) ?? 0;
+  bestLegAverage.value = maxAverage(averages);
+};
 
 const updatePlayerAverages = async () => {
   if (!matchId) return;
@@ -59,11 +89,13 @@ const updatePlayerAverages = async () => {
 
     const allSets = await getSetsForMatch(matchId);
     await updateLastSetAverage(allSets);
+    await updateBestSetAverage(allSets);
   }
 
   const allLegs = await getLegsForMatch(matchId);
 
   await updateLastLegAverage(allLegs);
+  await updateLegWonAverages(allLegs);
 
   if (currentLeg) {
     await calculateAndUpdatePlayerLegAverages(currentLeg.id);
@@ -100,6 +132,12 @@ const updateLastLegAverage = async (allLegs: Leg[]) => {
     }
   }
 };
+
+const updateBestSetAverage = (allSets: Set[]) =>
+  updateBestWonAverage(allSets, async (set) => {
+    const setStats = await getPlayerStatsForSet(set.id);
+    return setStats.find((stat) => stat.playerId === player.id)?.average ?? 0;
+  }, bestSetAverage);
 
 const updateLastSetAverage = async (allSets: Set[]) => {
   if (allSets?.length > 1) {
@@ -214,8 +252,11 @@ onBeforeUnmount(() => {
         :matchAverage="matchPlayerStats.average"
         :legAverage="legPlayerStats?.average || 0"
         :setAverage="setPlayerStats?.average || 0"
-        :lastSetAverage="lastSetAverage"
+        :lastSetAverage="lastSetAverage || setPlayerStats?.average || 0"
         :lastLegAverage="lastLegAverage || legPlayerStats?.average || 0"
+        :lastLegWinAverage="lastLegWinAverage"
+        :bestLegAverage="bestLegAverage"
+        :bestSetAverage="bestSetAverage"
       />
     </div>
     <div class="stat-well">
