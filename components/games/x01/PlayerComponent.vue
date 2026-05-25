@@ -35,6 +35,7 @@ const {
 } = useAverages();
 const { getPlayerLegsForLeg } = usePlayerLegs();
 const { getLegsForMatch } = useLegs();
+const { getSetsForMatch } = useSets();
 
 const matchId = inject<string>("matchId");
 
@@ -55,17 +56,27 @@ const updatePlayerAverages = async () => {
   if (currentSet) {
     await calculateAndUpdateSetPlayerStatsAverages(currentSet.id);
     await updateSetPlayerStats();
+
+    const allSets = await getSetsForMatch(matchId);
+    await updateLastSetAverage(allSets);
   }
 
-  // Get all playerLegs for this match
   const allLegs = await getLegsForMatch(matchId);
 
+  await updateLastLegAverage(allLegs);
+
+  if (currentLeg) {
+    await calculateAndUpdatePlayerLegAverages(currentLeg.id);
+    await updateLegPlayerStats();
+  }
+};
+
+const updateLastLegAverage = async (allLegs: Leg[]) => {
   if (allLegs?.length > 1) {
     await updateLegPlayerStats();
 
     const secondLastLeg = allLegs.at(-2);
     if (secondLastLeg) {
-
       const allPlayerLegs = await getPlayerLegsForLeg(secondLastLeg.id);
 
       // Find player leg for current player
@@ -88,10 +99,18 @@ const updatePlayerAverages = async () => {
       lastLegAverage.value = 0;
     }
   }
+};
 
-  if (currentLeg) {
-    await calculateAndUpdatePlayerLegAverages(currentLeg.id);
-    await updateLegPlayerStats();
+const updateLastSetAverage = async (allSets: Set[]) => {
+  if (allSets?.length > 1) {
+    const secondLastSet = allSets.at(-2);
+    if (secondLastSet) {
+      const setStats = await getPlayerStatsForSet(secondLastSet.id);
+      const stats = setStats.find((stat) => stat.playerId === player.id);
+      lastSetAverage.value = stats?.average ?? 0;
+    } else {
+      lastSetAverage.value = 0;
+    }
   }
 };
 
@@ -196,7 +215,7 @@ onBeforeUnmount(() => {
         :legAverage="legPlayerStats?.average || 0"
         :setAverage="setPlayerStats?.average || 0"
         :lastSetAverage="lastSetAverage"
-        :lastLegAverage="lastLegAverage"
+        :lastLegAverage="lastLegAverage || legPlayerStats?.average || 0"
       />
     </div>
     <div class="stat-well">

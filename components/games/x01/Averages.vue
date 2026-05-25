@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import type { PlayerStats } from "~/interfaces/stats";
-
 const {
   matchAverage = 0,
   legAverage = 0,
@@ -45,8 +43,8 @@ const formatAverage = (average: number) => {
   <div>{{ formatAverage(lastLegAverage) }}</div>
   <div>{{ onedartAverage(lastLegAverage) }}</div>
   <div>Laatste set</div>
-  <div></div>
-  <div></div>
+  <div>{{ formatAverage(lastSetAverage) }}</div>
+  <div>{{ onedartAverage(lastSetAverage) }}</div>
   <div class="score-counts__footer">Beste leg</div>
   <div class="score-counts__footer"></div>
   <div class="score-counts__footer"></div>
