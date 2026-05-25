@@ -31,4 +31,8 @@
   @apply bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900;
   min-width: 1600px;
 }
+
+.container {
+  max-width: unset;
+}
 </style>
