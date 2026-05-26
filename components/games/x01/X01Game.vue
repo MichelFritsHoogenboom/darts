@@ -265,11 +265,9 @@ onMounted(async () => {
                       : '',
                   ]"
                 >
-                  <span
-                    class="text-xs total-darts text-gray-400"
-                    title="Total darts"
-                    >{{ (index + 1) * 3 }}</span
-                  >
+                  <span class="total-darts text-gray-400" title="Total darts">{{
+                    (index + 1) * 3
+                  }}</span>
 
                   <span
                     class="font-bold text-xs start-score text-center"
@@ -414,7 +412,9 @@ onMounted(async () => {
 }
 
 .total-darts {
-  width: 30px;
+  width: 20px;
+  font-size: 0.625rem;
+  line-height: 1;
 }
 
 .start-score {
@@ -423,6 +423,8 @@ onMounted(async () => {
 
 .total-score {
   flex: 1;
+  text-align: right;
+  padding-inline: 35px;
 }
 
 .score-row--player-two .total-darts {
@@ -432,6 +434,7 @@ onMounted(async () => {
 
 .score-row--player-two .total-score {
   order: 1;
+  text-align: left;
 }
 
 .score-row--player-two .start-score {
