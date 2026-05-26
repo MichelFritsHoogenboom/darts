@@ -1,7 +1,11 @@
 <script lang="ts" setup>
 import type { Player } from "~/interfaces/player";
 import type { Score, Leg } from "~/interfaces/leg";
-import type { PlayerStats } from "~/interfaces/stats";
+import {
+  createCheckoutRanges,
+  type CheckoutRanges,
+  type PlayerStats,
+} from "~/interfaces/stats";
 import type { Set } from "~/interfaces/set";
 
 const { $listen, $unlisten } = useNuxtApp();
@@ -19,6 +23,7 @@ const {
   getPlayerStatsForMatch,
   getPlayerStatsForSet,
   getPlayerStatsByPlayerLegId,
+  savePlayerStats,
 } = usePlayerStats();
 const { getScoresForMatch } = useScores();
 const {
@@ -41,7 +46,9 @@ const lastLegAverage = ref<number>(0);
 const lastLegWinAverage = ref<number>(0);
 const bestLegAverage = ref<number>(0);
 const bestSetAverage = ref<number>(0);
-
+const playerCheckouts = computed(() =>
+  playerScores.value.filter((score) => score.startScore === score.totalScore),
+);
 const maxAverage = (averages: number[]) =>
   averages.length ? Math.max(...averages) : 0;
 
@@ -134,10 +141,14 @@ const updateLastLegAverage = async (allLegs: Leg[]) => {
 };
 
 const updateBestSetAverage = (allSets: Set[]) =>
-  updateBestWonAverage(allSets, async (set) => {
-    const setStats = await getPlayerStatsForSet(set.id);
-    return setStats.find((stat) => stat.playerId === player.id)?.average ?? 0;
-  }, bestSetAverage);
+  updateBestWonAverage(
+    allSets,
+    async (set) => {
+      const setStats = await getPlayerStatsForSet(set.id);
+      return setStats.find((stat) => stat.playerId === player.id)?.average ?? 0;
+    },
+    bestSetAverage,
+  );
 
 const updateLastSetAverage = async (allSets: Set[]) => {
   if (allSets?.length > 1) {
@@ -202,14 +213,41 @@ const updateStatsCurrentPlayer = async () => {
 };
 
 const updateStats = async () => {
-  await updatePlayerAverages();
   await updatePlayerScores();
+  await updatePlayerAverages();
+  await updatePlayerCheckouts();
+};
+
+const parseCheckoutRange = (key: keyof CheckoutRanges) => {
+  const [min, max] = key.split("-").map(Number);
+  return { min, max };
+};
+
+const updatePlayerCheckouts = async () => {
+  if (!matchPlayerStats.value) return;
+
+  const checkouts = createCheckoutRanges();
+
+  for (const currentKey of Object.keys(
+    checkouts,
+  ) as (keyof CheckoutRanges)[]) {
+    const { min, max } = parseCheckoutRange(currentKey);
+    const inRange = playerScores.value.filter(
+      (score) => score.startScore >= min && score.startScore <= max,
+    );
+    checkouts[currentKey].thrown = inRange.length;
+    checkouts[currentKey].hit = inRange.filter(
+      (score) => score.startScore === score.totalScore,
+    ).length;
+  }
+
+  matchPlayerStats.value.checkouts = checkouts;
+  await savePlayerStats(matchPlayerStats.value);
 };
 
 onMounted(async () => {
   // Initialize data
-  await updatePlayerAverages();
-  await updatePlayerScores();
+  await updateStats();
 
   // Listen for score submission events
   $listen("score-submitted", updateStatsCurrentPlayer);
@@ -259,8 +297,12 @@ onBeforeUnmount(() => {
         :bestSetAverage="bestSetAverage"
       />
     </div>
-    <div class="stat-well">
-      <GamesX01Checkouts :playerId="player.id" />
+    <div class="stat-well" v-if="matchPlayerStats">
+      <GamesX01Checkouts
+        :playerStats="matchPlayerStats"
+        :playerScores="playerScores"
+        :playerCheckouts="playerCheckouts"
+      />
     </div>
   </div>
 </template>

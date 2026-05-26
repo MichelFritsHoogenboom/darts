@@ -54,13 +54,13 @@ export interface PlayerStats {
 // Factory functions to create new instances
 export function createCheckoutRanges(): CheckoutRanges {
   return {
-    "0-40": 0,
-    "41-60": 0,
-    "61-80": 0,
-    "81-100": 0,
-    "101-130": 0,
-    "131-150": 0,
-    "151-170": 0,
+    "0-40": createDartsThrownHit(),
+    "41-60": createDartsThrownHit(),
+    "61-80": createDartsThrownHit(),
+    "81-100": createDartsThrownHit(),
+    "101-130": createDartsThrownHit(),
+    "131-150": createDartsThrownHit(),
+    "151-170": createDartsThrownHit(),
   };
 }
 
@@ -93,7 +93,7 @@ export async function createPlayerStats(
     matchId?: string;
     setId?: string;
     playerLegId?: string;
-  }
+  },
 ): Promise<PlayerStats> {
   const playerStats = {
     id: uuid(),

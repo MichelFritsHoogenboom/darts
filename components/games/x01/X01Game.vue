@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { Match } from "~/interfaces/match";
-
 import type { Score } from "~/interfaces/leg";
 
 import { X01_GAME_PLAYED_IN } from "~/interfaces/x01MatchConfig";
@@ -88,7 +87,7 @@ watch(
       currentSetGame.value = [];
     }
   },
-  { immediate: true, deep: true }
+  { immediate: true, deep: true },
 );
 
 // Load player legs when current leg changes
@@ -99,7 +98,7 @@ watch(
       currentPlayerLegs.value = await getPlayerLegsForLeg(legId);
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 // Load scores for each player leg and group by playerId
@@ -117,14 +116,14 @@ watch(
       playerLegs.map(async (playerLeg) => {
         const scores = await getScoresForPlayerLeg(playerLeg.id);
         scoresByPlayerId[playerLeg.playerId] = scores;
-      })
+      }),
     );
 
     currentPlayerLegScores.value = scoresByPlayerId;
     // Scroll to bottom after scores are loaded
     scrollScoreCardsToBottom();
   },
-  { immediate: true, deep: true }
+  { immediate: true, deep: true },
 );
 
 // Watch for score changes and scroll to bottom
@@ -133,7 +132,7 @@ watch(
   () => {
     scrollScoreCardsToBottom();
   },
-  { deep: true }
+  { deep: true },
 );
 
 // Load sets for match when in sets mode
@@ -142,7 +141,7 @@ watch(
   async () => {
     await loadMatchGame();
   },
-  { immediate: true, deep: true }
+  { immediate: true, deep: true },
 );
 
 const legWinNotification = ref<boolean>(false);

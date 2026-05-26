@@ -51,10 +51,10 @@ const formatAverage = (average: number) => {
   <div>Laatste set</div>
   <div>{{ formatAverage(lastSetAverage) }}</div>
   <div>{{ onedartAverage(lastSetAverage) }}</div>
-  <div class="score-counts__footer">Beste gewonnen leg</div>
+  <div class="score-counts__footer">Beste leg winst</div>
   <div class="score-counts__footer">{{ formatAverage(bestLegAverage) }}</div>
   <div class="score-counts__footer">{{ onedartAverage(bestLegAverage) }}</div>
-  <div class="score-counts__footer">Beste gewonnen set</div>
+  <div class="score-counts__footer">Beste set winst</div>
   <div class="score-counts__footer">{{ formatAverage(bestSetAverage) }}</div>
   <div class="score-counts__footer">{{ onedartAverage(bestSetAverage) }}</div>
 </template>

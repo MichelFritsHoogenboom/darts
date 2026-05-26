@@ -1,133 +1,114 @@
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount } from "vue";
-import { createScoreRanges, type ScoreRanges } from "~/interfaces/stats";
+import type { CheckoutRanges, PlayerStats } from "~/interfaces/stats";
+import type { Score } from "~/interfaces/leg";
 
-const matchId = inject<string>("matchId");
-
-// Get event listener from plugin
-const { $listen, $unlisten } = useNuxtApp();
-
-const { getLegsForMatch } = useLegs();
-const { getPlayerStatsForMatch, savePlayerStats } = usePlayerStats();
-const { getScoresForMatch } = useScores();
-
-const { playerId } = defineProps<{
-  playerId: string;
+const { playerStats, playerCheckouts } = defineProps<{
+  playerStats: PlayerStats;
+  playerCheckouts: Score[];
 }>();
 
-const matchStats = await getPlayerStatsForMatch(matchId!);
-const playerStats = ref(matchStats.find((stat) => stat.playerId === playerId));
-const legsPlayed = ref(0);
+const bestCheckouts = computed(() =>
+  [...playerCheckouts].sort((a, b) => b.totalScore - a.totalScore).slice(0, 5),
+);
 
-// Create a cached mapping of score ranges from the interface
-const scoreRangeMapping = (() => {
-  const sampleRanges = createScoreRanges();
-  const keys = Object.keys(sampleRanges) as Array<keyof ScoreRanges>;
+const formatCheckoutRangeKey = (key: keyof CheckoutRanges) =>
+  key.replace("-", " - ");
 
-  return keys
-    .map((key) => {
-      if (key === "180") {
-        return { key, min: 180, max: 180 };
-      }
-      const [min, max] = key.split("-").map(Number);
-      return { key, min, max };
-    })
-    .sort((a, b) => b.min - a.min); // Sort descending by min value
-})();
+const checkoutPercentage = (thrown: number, hit: number) => {
+  if (!thrown) return "—";
+  return `${Math.round((hit / thrown) * 100)}%`;
+};
 
-// Helper function to map totalScore to ScoreRanges key using interface keys dynamically
-const getScoreRangeKey = (totalScore: number): keyof ScoreRanges => {
-  for (const { key, min, max } of scoreRangeMapping) {
-    if (totalScore >= min && totalScore <= max) {
-      return key;
-    }
+const checkoutsAbove100 = computed(() => {
+  let thrown = 0;
+  let hit = 0;
+
+  for (const key of Object.keys(
+    playerStats.checkouts,
+  ) as (keyof CheckoutRanges)[]) {
+    const min = Number(key.split("-")[0]);
+    if (min <= 100) continue;
+    thrown += playerStats.checkouts[key].thrown;
+    hit += playerStats.checkouts[key].hit;
   }
-  return "0-9"; // Fallback (should never happen if ranges cover all scores)
-};
 
-const updatePlayerMatchScoreCounts = async () => {
-  if (!playerStats.value) return;
-
-  const scores = await getScoresForMatch(matchId!);
-  const playerScores = scores.filter((score) => score.playerId === playerId);
-
-  // Use existing scores or create new ScoreRanges
-  const scoreRanges: ScoreRanges = createScoreRanges();
-
-  // Update score ranges based on totalScore
-  playerScores.forEach((score) => {
-    const rangeKey = getScoreRangeKey(score.totalScore);
-    scoreRanges[rangeKey] = (scoreRanges[rangeKey] || 0) + 1;
-  });
-
-  // Update playerStats with new scores
-  playerStats.value.scores = scoreRanges;
-
-  // Save the updated playerStats
-  await savePlayerStats(playerStats.value);
-};
-
-const updateLegsPlayed = async () => {
-  const legs = await getLegsForMatch(matchId!);
-
-  legsPlayed.value = legs.length;
-};
-
-const handleUndoLastTurn = async () => {
-  await updateLegsPlayed();
-  await updatePlayerMatchScoreCounts();
-};
-
-onMounted(async () => {
-  await updateLegsPlayed();
-  await updatePlayerMatchScoreCounts();
-
-  // Listen for score submission events
-  $listen("score-submitted", updatePlayerMatchScoreCounts);
-  $listen("leg-finished", updateLegsPlayed);
-  $listen("undo-last-turn", handleUndoLastTurn);
+  return { thrown, hit };
 });
 
-onBeforeUnmount(() => {
-  // Clean up event listeners
-  $unlisten("score-submitted", updatePlayerMatchScoreCounts);
-  $unlisten("leg-finished", updateLegsPlayed);
-  $unlisten("undo-last-turn", handleUndoLastTurn);
-});
+const checkoutsAbove100Label = computed(() => {
+  const keys = Object.keys(playerStats.checkouts) as (keyof CheckoutRanges)[];
+  const above = keys.filter((key) => Number(key.split("-")[0]) > 100);
+  if (!above.length) return "100+";
 
-const averagePerLeg = (value: number) => {
-  if (legsPlayed.value === 0) return "0.000";
-  return (value / legsPlayed.value).toFixed(3);
-};
+  const min = Math.min(...above.map((key) => Number(key.split("-")[0])));
+  const max = Math.max(...above.map((key) => Number(key.split("-")[1])));
+  return `${min} - ${max}`;
+});
 </script>
 <template>
-  <template v-if="playerStats">
-    <div class="score-counts__header">Checkouts</div>
-    <div class="score-counts__header">Pogingen</div>
-    <div class="score-counts__header">Percentage</div>
+  <div class="score-counts__header">Checkouts</div>
+  <div class="score-counts__header">Pogingen</div>
+  <div class="score-counts__header">Percentage</div>
 
-    <div>40-</div>
-    <div>{{ playerStats.scores["180"] }}</div>
-    <div>{{ averagePerLeg(playerStats.scores["180"]) }}</div>
-    <div>60-</div>
-    <div>{{ playerStats.scores["162-179"] }}</div>
-    <div>{{ averagePerLeg(playerStats.scores["162-179"]) }}</div>
-    <div>80-</div>
-    <div>{{ playerStats.scores["126-161"] }}</div>
-    <div>{{ averagePerLeg(playerStats.scores["126-161"]) }}</div>
-    <div>100-</div>
-    <div>{{ playerStats.scores["90-125"] }}</div>
-    <div>{{ averagePerLeg(playerStats.scores["90-125"]) }}</div>
-    <div>100+</div>
-    <div>{{ playerStats.scores["90-125"] }}</div>
-    <div>{{ averagePerLeg(playerStats.scores["90-125"]) }}</div>
+  <div>{{ formatCheckoutRangeKey("0-40") }}</div>
+  <div>{{ playerStats.checkouts["0-40"].thrown }}</div>
+  <div>
+    {{
+      checkoutPercentage(
+        playerStats.checkouts["0-40"].thrown,
+        playerStats.checkouts["0-40"].hit,
+      )
+    }}
+  </div>
+  <div>{{ formatCheckoutRangeKey("41-60") }}</div>
+  <div>{{ playerStats.checkouts["41-60"].thrown }}</div>
+  <div>
+    {{
+      checkoutPercentage(
+        playerStats.checkouts["41-60"].thrown,
+        playerStats.checkouts["41-60"].hit,
+      )
+    }}
+  </div>
+  <div>{{ formatCheckoutRangeKey("61-80") }}</div>
+  <div>{{ playerStats.checkouts["61-80"].thrown }}</div>
+  <div>
+    {{
+      checkoutPercentage(
+        playerStats.checkouts["61-80"].thrown,
+        playerStats.checkouts["61-80"].hit,
+      )
+    }}
+  </div>
+  <div>{{ formatCheckoutRangeKey("81-100") }}</div>
+  <div>{{ playerStats.checkouts["81-100"].thrown }}</div>
+  <div>
+    {{
+      checkoutPercentage(
+        playerStats.checkouts["81-100"].thrown,
+        playerStats.checkouts["81-100"].hit,
+      )
+    }}
+  </div>
+  <div>{{ checkoutsAbove100Label }}</div>
+  <div>{{ checkoutsAbove100.thrown }}</div>
+  <div>
+    {{
+      checkoutPercentage(
+        checkoutsAbove100.thrown,
+        checkoutsAbove100.hit,
+      )
+    }}
+  </div>
 
-    <div class="score-counts__footer">Beste finishes</div>
-    <div class="score-counts__footer">{{ playerStats.scores["40-53"] }}</div>
-    <div class="score-counts__footer">
-      {{ averagePerLeg(playerStats.scores["40-53"]) }}
-    </div>
-  </template>
+  <div class="score-counts__footer">Hoogste checkouts</div>
+  <div class="score-counts__footer col-span-2">
+    {{
+      bestCheckouts.length
+        ? bestCheckouts.map((score) => score.totalScore).join(", ")
+        : "—"
+    }}
+  </div>
 </template>
 <style scoped>
 .score-counts__header {
