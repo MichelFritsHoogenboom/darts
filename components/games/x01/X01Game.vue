@@ -189,7 +189,7 @@ onMounted(async () => {
           :currentSetGame="currentSetGame"
         />
         <div class="flex flex-col gap-4" v-if="players[0] && players[1]">
-          <div class="flex items-stretch gap-4">
+          <div class="flex items-stretch score-board gap-4">
             <div
               class="flex-1 text-center flex flex-wrap justify-center content-center self-stretch"
               :class="[
@@ -446,5 +446,9 @@ onMounted(async () => {
 }
 .undo-button:hover:not(:disabled) {
   background-color: #5a6fa0;
+}
+
+.score-board .player-card {
+  line-height: unset;
 }
 </style>
