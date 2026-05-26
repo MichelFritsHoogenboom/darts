@@ -5,13 +5,13 @@ import { PlayerStatsService } from "~/database/PlayerStatsService";
 const playerStatsService = new PlayerStatsService();
 
 export interface CheckoutRanges {
-  "0-40": number;
-  "41-60": number;
-  "61-80": number;
-  "81-100": number;
-  "101-130": number;
-  "131-150": number;
-  "151-170": number;
+  "0-40": DartsThrownHit;
+  "41-60": DartsThrownHit;
+  "61-80": DartsThrownHit;
+  "81-100": DartsThrownHit;
+  "101-130": DartsThrownHit;
+  "131-150": DartsThrownHit;
+  "151-170": DartsThrownHit;
 }
 
 export interface ScoreRanges {

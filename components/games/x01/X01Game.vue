@@ -258,17 +258,30 @@ onMounted(async () => {
                   []"
                   :key="`p1-${index}`"
                   :class="[
-                    'flex justify-between items-center bg-gray-700 px-2 py-1',
+                    'flex justify-around items-center bg-gray-700 px-2 py-1',
                     index === 0 ? 'rounded-t-lg' : '',
+                    players[1] && player.id === players[1].id
+                      ? 'score-row--player-two'
+                      : '',
                   ]"
                 >
-                  <span class="text-xs text-gray-400">{{
-                    (index + 1) * 3
-                  }}</span>
+                  <span
+                    class="text-xs total-darts text-gray-400"
+                    title="Total darts"
+                    >{{ (index + 1) * 3 }}</span
+                  >
 
-                  <span class="font-bold text-lg flex-1 text-center">{{
-                    score.totalScore
-                  }}</span>
+                  <span
+                    class="font-bold text-xs start-score text-center"
+                    title="Start score"
+                    >({{ score.startScore }})
+                  </span>
+
+                  <span
+                    class="font-bold text-lg flex-1 total-score text-center"
+                    title="Total score thrown this turn"
+                    >{{ score.totalScore }}</span
+                  >
                 </div>
                 <div
                   v-if="(currentPlayerLegScores[player.id] || []).length === 0"
@@ -399,6 +412,32 @@ onMounted(async () => {
   max-height: 510px;
   overflow: scroll;
 }
+
+.total-darts {
+  width: 30px;
+}
+
+.start-score {
+  width: 40px;
+}
+
+.total-score {
+  flex: 1;
+}
+
+.score-row--player-two .total-darts {
+  order: 3;
+  text-align: right;
+}
+
+.score-row--player-two .total-score {
+  order: 1;
+}
+
+.score-row--player-two .start-score {
+  order: 2;
+}
+
 .undo-button {
   background-color: #43588b;
 }
