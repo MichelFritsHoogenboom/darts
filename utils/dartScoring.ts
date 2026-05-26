@@ -254,7 +254,7 @@ export function getCheckoutSuggestions(score) {
 // Get the current player's checkout status
 export function getCheckoutStatus(score) {
   if (score > 170) return { isCheckout: false, suggestions: [] };
-  if (score <= 2) return { isCheckout: false, suggestions: [] };
+  if (score <= 1) return { isCheckout: false, suggestions: [] };
 
   const suggestions = getCheckoutSuggestions(score);
   return {
