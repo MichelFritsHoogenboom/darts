@@ -58,7 +58,7 @@ const loadPlayerStats = async () => {
   const statsArray = await Promise.all(statsPromises);
   // Filter out null values
   playerStatsArray.value = statsArray.filter(
-    (stats): stats is PlayerStats => stats !== null
+    (stats): stats is PlayerStats => stats !== null,
   );
 };
 
@@ -77,7 +77,6 @@ const isHighScore = (score: number): boolean => {
 
 // Toggle to show/hide leg details (defaults to false - hidden)
 const [showLegDetails, toggleLegDetails] = useToggle(false);
-
 </script>
 
 <template>
@@ -90,7 +89,7 @@ const [showLegDetails, toggleLegDetails] = useToggle(false);
               <div
                 class="grid grid-cols-[1fr_6fr_1fr] items-center justify-center gap-2"
               >
-                <span>{{ formatDateTime(leg.createdAt) }}</span>
+                <span></span>
                 <StatsPlayersWithCenter
                   :player-stats="playerStatsArray"
                   :players="players"

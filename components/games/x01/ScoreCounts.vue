@@ -26,7 +26,7 @@ watch(
       playerStatsRef.value = newStats;
     }
   },
-  { immediate: true, deep: true }
+  { immediate: true, deep: true },
 );
 
 const legsPlayed = ref(0);
@@ -91,7 +91,7 @@ watch(
   () => {
     updatePlayerMatchScoreCounts();
   },
-  { deep: true }
+  { deep: true },
 );
 
 onMounted(async () => {
@@ -160,7 +160,7 @@ const lowScoresSum = computed(() => {
     <div>{{ lowScoresSum }}</div>
     <div>{{ averagePerLeg(lowScoresSum) }}</div>
 
-    <div class="score-counts__footer">Gespeelde legs</div>
+    <div class="score-counts__footer">Totaal aantal legs</div>
     <div class="score-counts__footer">{{ legsPlayed }}</div>
   </template>
 </template>

@@ -8,6 +8,7 @@ const {
   lastSetAverage = 0,
   bestLegAverage = 0,
   bestSetAverage = 0,
+  isSetMatch = false,
 } = defineProps<{
   matchAverage: number;
   legAverage: number;
@@ -17,6 +18,7 @@ const {
   lastSetAverage: number;
   bestLegAverage: number;
   bestSetAverage: number;
+  isSetMatch?: boolean;
 }>();
 
 const onedartAverage = (value: number) => {
@@ -35,9 +37,11 @@ const formatAverage = (average: number) => {
   <div>Leg</div>
   <div>{{ formatAverage(legAverage) }}</div>
   <div>{{ onedartAverage(legAverage) }}</div>
-  <div>Set</div>
-  <div>{{ formatAverage(setAverage) }}</div>
-  <div>{{ onedartAverage(setAverage) }}</div>
+  <template v-if="isSetMatch">
+    <div>Set</div>
+    <div>{{ formatAverage(setAverage) }}</div>
+    <div>{{ onedartAverage(setAverage) }}</div>
+  </template>
 
   <div>Wedstrijd</div>
   <div>{{ formatAverage(matchAverage) }}</div>
@@ -48,15 +52,19 @@ const formatAverage = (average: number) => {
   <div>Laatste leg</div>
   <div>{{ formatAverage(lastLegAverage) }}</div>
   <div>{{ onedartAverage(lastLegAverage) }}</div>
-  <div>Laatste set</div>
-  <div>{{ formatAverage(lastSetAverage) }}</div>
-  <div>{{ onedartAverage(lastSetAverage) }}</div>
+  <template v-if="isSetMatch">
+    <div>Laatste set</div>
+    <div>{{ formatAverage(lastSetAverage) }}</div>
+    <div>{{ onedartAverage(lastSetAverage) }}</div>
+  </template>
   <div class="score-counts__footer">Beste leg winst</div>
   <div class="score-counts__footer">{{ formatAverage(bestLegAverage) }}</div>
   <div class="score-counts__footer">{{ onedartAverage(bestLegAverage) }}</div>
-  <div class="score-counts__footer">Beste set winst</div>
-  <div class="score-counts__footer">{{ formatAverage(bestSetAverage) }}</div>
-  <div class="score-counts__footer">{{ onedartAverage(bestSetAverage) }}</div>
+  <template v-if="isSetMatch">
+    <div class="score-counts__footer">Beste set winst</div>
+    <div class="score-counts__footer">{{ formatAverage(bestSetAverage) }}</div>
+    <div class="score-counts__footer">{{ onedartAverage(bestSetAverage) }}</div>
+  </template>
 </template>
 <style scoped>
 .score-counts {

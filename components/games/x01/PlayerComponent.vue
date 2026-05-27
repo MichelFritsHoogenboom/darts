@@ -49,6 +49,7 @@ const bestSetAverage = ref<number>(0);
 const playerCheckouts = computed(() =>
   playerScores.value.filter((score) => score.startScore === score.totalScore),
 );
+const isSetMatch = computed(() => !!currentSet);
 const maxAverage = (averages: number[]) =>
   averages.length ? Math.max(...averages) : 0;
 
@@ -228,9 +229,7 @@ const updatePlayerCheckouts = async () => {
 
   const checkouts = createCheckoutRanges();
 
-  for (const currentKey of Object.keys(
-    checkouts,
-  ) as (keyof CheckoutRanges)[]) {
+  for (const currentKey of Object.keys(checkouts) as (keyof CheckoutRanges)[]) {
     const { min, max } = parseCheckoutRange(currentKey);
     const inRange = playerScores.value.filter(
       (score) => score.startScore >= min && score.startScore <= max,
@@ -295,6 +294,7 @@ onBeforeUnmount(() => {
         :lastLegWinAverage="lastLegWinAverage"
         :bestLegAverage="bestLegAverage"
         :bestSetAverage="bestSetAverage"
+        :isSetMatch="isSetMatch"
       />
     </div>
     <div class="stat-well" v-if="matchPlayerStats">

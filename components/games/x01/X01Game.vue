@@ -219,7 +219,9 @@ onMounted(async () => {
                   {{ getPlayerWinnerCount(players[1]?.id, matchGame) }}
                 </div>
               </template>
-              <div class="player-card rounded-xl inactive text-3xl font-bold">
+              <div
+                class="player-card rounded-xl inactive text-3xl font-bold flex items-center justify-center"
+              >
                 {{ getPlayerWinnerCount(players[0]?.id, legsToDisplay) }}
               </div>
               <div
@@ -227,7 +229,9 @@ onMounted(async () => {
               >
                 Legs
               </div>
-              <div class="player-card rounded-xl inactive text-3xl font-bold">
+              <div
+                class="player-card rounded-xl inactive text-3xl font-bold flex items-center justify-center"
+              >
                 {{ getPlayerWinnerCount(players[1]?.id, legsToDisplay) }}
               </div>
             </div>

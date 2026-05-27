@@ -58,7 +58,7 @@ onMounted(() => {
           {{ match.matchConfig.legsToWinParent }} legs to win set
         </template>
         <template v-else>
-          {{ match.matchConfig.legsToWinParent }}
+          {{ match.matchConfig.legsToWinParent }} legs
         </template>
       </span>
     </template>
