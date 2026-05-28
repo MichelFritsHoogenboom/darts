@@ -30,6 +30,7 @@ export interface Score {
   updatedAt: Date;
   startScore: number;
   totalScore: number;
+  dartsThrown?: 1 | 2 | 3;
   scoreDarts1?: SingleDartScore;
   scoreDarts2?: SingleDartScore;
   scoreDarts3?: SingleDartScore;
@@ -85,12 +86,14 @@ export async function createScore(overrides: {
   playerLegId: string;
   startScore: number;
   totalScore: number;
+  dartsThrown?: 1 | 2 | 3;
 }): Promise<Score> {
   const score: Score = {
     id: uuid(),
     createdAt: new Date(),
     updatedAt: new Date(),
     ...overrides,
+    dartsThrown: overrides.dartsThrown ?? 3,
   };
 
   // Save to database
