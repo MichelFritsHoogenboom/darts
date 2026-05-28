@@ -215,8 +215,8 @@ const updateStatsCurrentPlayer = async () => {
 
 const updateStats = async () => {
   await updatePlayerAverages();
-  await updatePlayerCheckouts();
   await updatePlayerScores();
+  await updatePlayerCheckouts();
 };
 
 const parseCheckoutRange = (key: keyof CheckoutRanges) => {

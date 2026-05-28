@@ -376,31 +376,41 @@ onMounted(async () => {
       >
         <div class="bg-gray-800 p-8 max-w-md w-full mx-auto text-center">
           <h2 class="text-2xl font-bold mb-2">
-            {{ pendingLegWinnerName }} wint de leg
+            {{ pendingLegWinnerName }} wint de leg!
           </h2>
-          <p class="text-gray-300 mb-6">Hoeveel pijlen op de finish?</p>
+          <p class="text-gray-300 mb-6">Hoeveel pijlen?</p>
           <div class="flex flex-col gap-3">
             <button
               type="button"
-              class="dartboard-button w-full py-3"
+              class="btn-gray w-full py-3"
               @click="confirmLegFinish(1)"
             >
               1 pijl
             </button>
             <button
               type="button"
-              class="dartboard-button w-full py-3"
+              class="btn-gray w-full py-3"
               @click="confirmLegFinish(2)"
             >
               2 pijlen
             </button>
             <button
               type="button"
-              class="dartboard-button w-full py-3"
+              class="btn-gray w-full py-3"
               @click="confirmLegFinish(3)"
             >
               3 pijlen
             </button>
+            <div class="flex justify-start">
+              <button
+                type="button"
+                class="undo-button p-3 mt-2 text-white font-bold transition-colors duration-200"
+                title="Laatste worp ongedaan maken (Ctrl+Z)"
+                @click="undoLastTurn"
+              >
+                Undo
+              </button>
+            </div>
           </div>
         </div>
       </div>
