@@ -49,6 +49,8 @@ export const useX01Game = (
   const { getLegsForSet, saveLeg, getLegsForMatch, deleteLeg } = useLegs();
   const { getSetsForMatch, saveSet, deleteSet } = useSets();
   const { getScoresForPlayerLeg, deleteScore } = useScores();
+
+  const pendingLegWin = ref<{ score: Score } | null>(null);
   const { saveMatch } = useMatches();
   // factory functions
   const createNewSet = async (
@@ -156,8 +158,13 @@ export const useX01Game = (
   const realTimePlayerScore = computed(() => {
     return (playerId: string) => {
       const scores = currentPlayerLegScores.value[playerId];
-      const totalScoreThrown =
+      let totalScoreThrown =
         scores?.reduce((total, score) => total + score.totalScore, 0) || 0;
+
+      const pending = pendingLegWin.value;
+      if (pending?.score.playerId === playerId) {
+        totalScoreThrown += pending.score.totalScore;
+      }
 
       return currentLeg.value
         ? currentLeg.value.gameType - totalScoreThrown
@@ -179,6 +186,8 @@ export const useX01Game = (
 
   // Check if undo is available
   const canUndo = computed(() => {
+    if (pendingLegWin.value) return true;
+
     // Check if match has more than 1 leg/set
     if (matchGame.value.length > 1 || currentSetGame.value?.length > 1) {
       return true;
@@ -287,8 +296,49 @@ export const useX01Game = (
     return true;
   };
 
+  const undoPendingLegWin = () => {
+    if (!pendingLegWin.value) return false;
+    pendingLegWin.value = null;
+    return true;
+  };
+
+  const confirmLegFinish = async (darts: 1 | 2 | 3) => {
+    const pending = pendingLegWin.value;
+    if (!pending) return;
+
+    pendingLegWin.value = null;
+
+    const playerLeg = getCurrentPlayerLeg.value(pending.score.playerId);
+    if (!playerLeg) return;
+
+    const checkoutScore = await createScore({
+      matchId: pending.score.matchId,
+      setId: pending.score.setId,
+      playerId: pending.score.playerId,
+      playerLegId: pending.score.playerLegId,
+      startScore: pending.score.startScore,
+      totalScore: pending.score.totalScore,
+      dartsThrown: darts,
+    });
+
+    playerLeg.scores.push(checkoutScore.id);
+    await savePlayerLeg(playerLeg);
+
+    $event("score-submitted");
+    await handleLegWin(checkoutScore);
+    $event("leg-finished");
+    resetScore();
+  };
+
   const undoLastTurn = async () => {
     if (!currentLeg.value || !canUndo.value) return;
+
+    if (pendingLegWin.value) {
+      undoPendingLegWin();
+      $event("undo-last-turn");
+      resetScore();
+      return;
+    }
 
     if (match.winner) {
       match.winner = undefined;
@@ -562,12 +612,35 @@ export const useX01Game = (
     const playerLeg = getCurrentPlayerLeg.value(currentPlayerId.value);
     if (!playerLeg) return;
 
+    const startScore = realTimePlayerScore.value(currentPlayerId.value);
+    const isCheckout = startScore - score === 0;
+
+    if (isCheckout) {
+      pendingLegWin.value = {
+        score: {
+          id: uuid(),
+          matchId: match.id,
+          setId: currentSet.value?.id ?? "",
+          playerId: currentPlayerId.value,
+          playerLegId: playerLeg.id,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          startScore,
+          totalScore: score,
+        },
+      };
+      scoreValidationMessage.value = "";
+      $event("score-submitted");
+      resetScore();
+      return;
+    }
+
     const createdScore = await createScore({
       matchId: match.id,
       setId: currentSet.value?.id ?? "",
       playerId: currentPlayerId.value,
       playerLegId: playerLeg.id,
-      startScore: realTimePlayerScore.value(currentPlayerId.value),
+      startScore,
       totalScore: score,
     });
 
@@ -575,16 +648,7 @@ export const useX01Game = (
     await savePlayerLeg(playerLeg);
 
     $event("score-submitted");
-
-    // Clear validation message
     scoreValidationMessage.value = "";
-
-    // Check for win condition
-    if (realTimePlayerScore.value(currentPlayerId.value) === 0) {
-      await handleLegWin(createdScore);
-      $event("leg-finished");
-      return;
-    }
 
     setNextPlayer();
     // Focus on score input for next player
@@ -601,6 +665,8 @@ export const useX01Game = (
     currentPlayerLegScores,
     canUndo,
     undoLastTurn,
+    pendingLegWin: readonly(pendingLegWin),
+    confirmLegFinish,
     matchGame,
     isValidScore,
     realTimePlayerScore,

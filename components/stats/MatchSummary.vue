@@ -170,7 +170,7 @@ onBeforeMount(async () => {
       <div class="flex items-center gap-2 justify-self-end">
         <button
           @click="toggleSummary()"
-          class="text-sm px-3 py-1 bg-gray-600 font-normal hover:bg-gray-500 transition-colors no-wrap"
+          class="btn-gray"
           :class="{ 'bg-gray-500': showSummary }"
         >
           {{ showSummary ? "Hide" : "Show" }} Details

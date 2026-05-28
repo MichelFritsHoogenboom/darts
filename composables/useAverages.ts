@@ -1,5 +1,6 @@
 import type { PlayerStats } from "~/interfaces/stats";
 import type { PlayerLeg } from "~/interfaces/leg";
+import { calculateThreeDartAverage } from "~/utils/averages";
 
 const { getScoresForMatch, getScoresForPlayerLeg, getScoresForSet } =
   useScores();
@@ -35,22 +36,7 @@ export const useAverages = () => {
       (score) => score.playerId === playerStat.playerId,
     );
 
-    let average = 0;
-
-    if (scores.length > 0) {
-      // Sum up all totalScores for this player
-      const totalScoreSum = scores.reduce(
-        (sum, score) => sum + score.totalScore,
-        0,
-      );
-
-      // Calculate average: sum / (number of scores * 3 darts per score)
-      // This gives average per dart
-      average = totalScoreSum / scores.length;
-    }
-
-    // Update playerStats.average (will be 0 if no scores)
-    playerStat.average = average;
+    playerStat.average = calculateThreeDartAverage(scores);
 
     // Save the updated playerStats
     await savePlayerStats(playerStat);
@@ -88,22 +74,8 @@ export const useAverages = () => {
 
     // Get all scores for this playerleg
     const scores = await getScoresForPlayerLeg(playerLeg.id);
-    let average = 0;
 
-    if (scores.length > 0) {
-      // Sum up all totalScores
-      const totalScoreSum = scores.reduce(
-        (sum, score) => sum + score.totalScore,
-        0,
-      );
-
-      // Calculate average: sum / (number of scores * 3 darts per score)
-      // This gives average per dart
-      average = totalScoreSum / scores.length;
-    }
-
-    // Update playerStats.average
-    playerStats.average = average;
+    playerStats.average = calculateThreeDartAverage(scores);
 
     // Save the updated playerStats
     await savePlayerStats(playerStats);
@@ -148,20 +120,7 @@ export const useAverages = () => {
       (score) => score.playerId === playerStat.playerId,
     );
 
-    let average = 0;
-    if (scores.length > 0) {
-      // Sum up all totalScores for this player
-      const totalScoreSum = scores.reduce(
-        (sum, score) => sum + score.totalScore,
-        0,
-      );
-
-      // Calculate average: sum / (number of scores * 3 darts per score)
-      // This gives average per dart
-      average = totalScoreSum / scores.length;
-    }
-    // Update playerStats.average
-    playerStat.average = average;
+    playerStat.average = calculateThreeDartAverage(scores);
 
     // Save the updated playerStats
     await savePlayerStats(playerStat);

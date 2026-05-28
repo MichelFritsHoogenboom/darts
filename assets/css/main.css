@@ -62,6 +62,10 @@
   .dartboard-button:disabled {
     @apply bg-gray-600 cursor-not-allowed;
   }
+
+  .btn-gray {
+    @apply text-sm px-3 py-1 bg-gray-600 font-normal text-white hover:bg-gray-500 transition-colors whitespace-nowrap;
+  }
   
   .score-input {
     @apply bg-gray-800 border border-gray-600  px-4 py-3 text-center text-2xl font-bold text-white focus:border-dartboard-red focus:outline-none transition-colors duration-200;

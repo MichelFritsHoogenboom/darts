@@ -4,6 +4,7 @@ import type { Score } from "~/interfaces/leg";
 
 import { X01_GAME_PLAYED_IN } from "~/interfaces/x01MatchConfig";
 import { getPlayerWinnerCount } from "~/utils/match";
+import { getPlayerDisplayName } from "~/utils/player";
 
 import PlayerComponent from "~/components/games/x01/PlayerComponent.vue";
 const { match } = defineProps<{ match: Match }>();
@@ -39,7 +40,15 @@ const {
   submitScore,
   canUndo,
   undoLastTurn,
+  pendingLegWin,
+  confirmLegFinish,
 } = useX01Game(match, gameState);
+
+const pendingLegWinnerName = computed(() =>
+  pendingLegWin.value && currentPlayer.value
+    ? getPlayerDisplayName(currentPlayer.value)
+    : "",
+);
 const { getLegsForSet } = useLegs();
 const { getPlayerLegsForLeg } = usePlayerLegs();
 const { getScoresForPlayerLeg } = useScores();
@@ -144,7 +153,6 @@ watch(
   { immediate: true, deep: true },
 );
 
-const legWinNotification = ref<boolean>(false);
 const resetGame = () => {
   emit("game-reset");
 };
@@ -312,8 +320,9 @@ onMounted(async () => {
                 type="number"
                 min="0"
                 max="180"
-                class="score-input w-full border-2 text-lg py-2"
+                class="score-input w-full border-2 text-lg py-2 disabled:cursor-not-allowed disabled:opacity-60"
                 placeholder="Enter score"
+                :disabled="!!pendingLegWin"
                 @keyup.enter="submitScore"
                 @keydown.ctrl.z.prevent="undoLastTurn"
                 @input="validateScore"
@@ -327,7 +336,7 @@ onMounted(async () => {
               <div class="flex gap-2 mt-3">
                 <button
                   @click="submitScore"
-                  :disabled="!isValidScore"
+                  :disabled="!isValidScore || !!pendingLegWin"
                   class="dartboard-button flex-1 py-2 rounded-bl-lg"
                 >
                   Submit Score
@@ -360,13 +369,49 @@ onMounted(async () => {
 
       <!-- Current Scores -->
 
-      <!-- Leg Win Notification -->
+      <!-- Leg finish modal -->
       <div
-        v-if="legWinNotification"
-        class="bg-gradient-to-r from-yellow-900 to-yellow-800 p-3 border-2 border-yellow-600 text-center"
+        v-if="pendingLegWin"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
       >
-        <div class="text-yellow-100 font-bold text-lg">
-          x🎯 {{ getPlayerDisplayName(currentPlayer) }} wins the leg!
+        <div class="bg-gray-800 p-8 max-w-md w-full mx-auto text-center">
+          <h2 class="text-2xl font-bold mb-2">
+            {{ pendingLegWinnerName }} wint de leg!
+          </h2>
+          <p class="text-gray-300 mb-6">Hoeveel pijlen?</p>
+          <div class="flex flex-col gap-3">
+            <button
+              type="button"
+              class="btn-gray w-full py-3"
+              @click="confirmLegFinish(1)"
+            >
+              1 pijl
+            </button>
+            <button
+              type="button"
+              class="btn-gray w-full py-3"
+              @click="confirmLegFinish(2)"
+            >
+              2 pijlen
+            </button>
+            <button
+              type="button"
+              class="btn-gray w-full py-3"
+              @click="confirmLegFinish(3)"
+            >
+              3 pijlen
+            </button>
+            <div class="flex justify-start">
+              <button
+                type="button"
+                class="undo-button p-3 mt-2 text-white font-bold transition-colors duration-200"
+                title="Laatste worp ongedaan maken (Ctrl+Z)"
+                @click="undoLastTurn"
+              >
+                Undo
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
