@@ -51,6 +51,7 @@ export const useX01Game = (
   const { getScoresForPlayerLeg, deleteScore } = useScores();
 
   const pendingLegWin = ref<{ score: Score } | null>(null);
+  const pendingGoldenCamel = ref<{ score: Score } | null>(null);
   const { saveMatch } = useMatches();
   // factory functions
   const createNewSet = async (
@@ -161,9 +162,14 @@ export const useX01Game = (
       let totalScoreThrown =
         scores?.reduce((total, score) => total + score.totalScore, 0) || 0;
 
-      const pending = pendingLegWin.value;
-      if (pending?.score.playerId === playerId) {
-        totalScoreThrown += pending.score.totalScore;
+      const pendingWin = pendingLegWin.value;
+      if (pendingWin?.score.playerId === playerId) {
+        totalScoreThrown += pendingWin.score.totalScore;
+      }
+
+      const pendingCamel = pendingGoldenCamel.value;
+      if (pendingCamel?.score.playerId === playerId) {
+        totalScoreThrown += pendingCamel.score.totalScore;
       }
 
       return currentLeg.value
@@ -186,7 +192,7 @@ export const useX01Game = (
 
   // Check if undo is available
   const canUndo = computed(() => {
-    if (pendingLegWin.value) return true;
+    if (pendingLegWin.value || pendingGoldenCamel.value) return true;
 
     // Check if match has more than 1 leg/set
     if (matchGame.value.length > 1 || currentSetGame.value?.length > 1) {
@@ -302,6 +308,43 @@ export const useX01Game = (
     return true;
   };
 
+  const undoPendingGoldenCamel = () => {
+    if (!pendingGoldenCamel.value) return false;
+    pendingGoldenCamel.value = null;
+    return true;
+  };
+
+  const confirmGoldenCamel = async (isGoldenCamel: boolean) => {
+    const pending = pendingGoldenCamel.value;
+    if (!pending) return;
+
+    pendingGoldenCamel.value = null;
+
+    const playerLeg = getCurrentPlayerLeg.value(pending.score.playerId);
+    if (!playerLeg) return;
+
+    const createdScore = await createScore({
+      matchId: pending.score.matchId,
+      setId: pending.score.setId,
+      playerId: pending.score.playerId,
+      playerLegId: pending.score.playerLegId,
+      startScore: pending.score.startScore,
+      totalScore: 26,
+      ...(isGoldenCamel ? { isGoldenCamel: true } : {}),
+    });
+
+    playerLeg.scores.push(createdScore.id);
+    await savePlayerLeg(playerLeg);
+
+    $event("score-submitted");
+    scoreValidationMessage.value = "";
+
+    setNextPlayer();
+    nextTick(() => {
+      resetScore();
+    });
+  };
+
   const confirmLegFinish = async (darts: 1 | 2 | 3) => {
     const pending = pendingLegWin.value;
     if (!pending) return;
@@ -335,6 +378,13 @@ export const useX01Game = (
 
     if (pendingLegWin.value) {
       undoPendingLegWin();
+      $event("undo-last-turn");
+      resetScore();
+      return;
+    }
+
+    if (pendingGoldenCamel.value) {
+      undoPendingGoldenCamel();
       $event("undo-last-turn");
       resetScore();
       return;
@@ -635,6 +685,26 @@ export const useX01Game = (
       return;
     }
 
+    if (score === 26) {
+      pendingGoldenCamel.value = {
+        score: {
+          id: uuid(),
+          matchId: match.id,
+          setId: currentSet.value?.id ?? "",
+          playerId: currentPlayerId.value,
+          playerLegId: playerLeg.id,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          startScore,
+          totalScore: 26,
+        },
+      };
+      scoreValidationMessage.value = "";
+      $event("score-submitted");
+      resetScore();
+      return;
+    }
+
     const createdScore = await createScore({
       matchId: match.id,
       setId: currentSet.value?.id ?? "",
@@ -666,7 +736,9 @@ export const useX01Game = (
     canUndo,
     undoLastTurn,
     pendingLegWin: readonly(pendingLegWin),
+    pendingGoldenCamel: readonly(pendingGoldenCamel),
     confirmLegFinish,
+    confirmGoldenCamel,
     matchGame,
     isValidScore,
     realTimePlayerScore,

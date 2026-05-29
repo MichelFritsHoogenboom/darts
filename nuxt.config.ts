@@ -5,7 +5,10 @@ export default defineNuxtConfig({
   imports: {
     autoImport: true,
   },
-  css: ["~/assets/css/main.css"],
+  css: ["~/assets/css/main.css", "@fortawesome/fontawesome-svg-core/styles.css"],
+  build: {
+    transpile: ["@fortawesome/vue-fontawesome"],
+  },
   app: {
     head: {
       title: "Darts Game - 501",

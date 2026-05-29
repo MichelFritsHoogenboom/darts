@@ -178,7 +178,7 @@ onBeforeMount(async () => {
         <a
           v-if="!match.winner"
           :href="`/match/${match.id}`"
-          class="text-sm px-3 py-1 bg-gray-500 hover:bg-red-500 transition-colors no-wrap flex items-center gap-2 min-h-[1.75rem]"
+          class="btn-gray flex items-center gap-2 min-h-[1.75rem]"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
