@@ -86,6 +86,25 @@ const activePlayerColumn = computed(() => {
   return index >= 0 ? index + 1 : 1;
 });
 
+const scoreInputGapRem = 1; // matches gap-4 between columns
+
+const scoreInputPositionStyle = computed(() => {
+  const columnCount = players.value.length || 1;
+  const columnIndex = Math.max(0, activePlayerColumn.value - 1);
+
+  if (columnCount === 1) {
+    return { width: "100%", left: "0" };
+  }
+
+  const columnWidth = `calc((100% - ${(columnCount - 1) * scoreInputGapRem}rem) / ${columnCount})`;
+  const left =
+    columnIndex === 0
+      ? "0"
+      : `calc(${columnIndex} * ((100% - ${(columnCount - 1) * scoreInputGapRem}rem) / ${columnCount} + ${scoreInputGapRem}rem))`;
+
+  return { width: columnWidth, left };
+});
+
 // Load legs for current set when it changes
 watch(
   () => currentSet.value,
@@ -303,52 +322,48 @@ onMounted(async () => {
             </div>
           </div>
           <!-- Score Input -->
-          <div
-            class="align-self-end bg-gray-800 rounded-lg gap-4 px-2 py-3 grid"
-            :class="`grid-cols-${players.length}`"
-          >
-            <div
-              class="max-w-md mx-auto w-full"
-              :style="{
-                gridColumnStart: activePlayerColumn,
-                gridColumnEnd: activePlayerColumn + 1,
-              }"
-            >
-              <input
-                ref="scoreInput"
-                v-model="currentScore"
-                type="number"
-                min="0"
-                max="180"
-                class="score-input w-full border-2 text-lg py-2 disabled:cursor-not-allowed disabled:opacity-60"
-                placeholder="Enter score"
-                :disabled="!!pendingLegWin"
-                @keyup.enter="submitScore"
-                @keydown.ctrl.z.prevent="undoLastTurn"
-                @input="validateScore"
-              />
+          <div class="align-self-end bg-gray-800 rounded-lg px-2 py-3">
+            <div class="score-input-track relative">
               <div
-                v-if="scoreValidationMessage"
-                class="text-xs mt-1 text-center text-red-400"
+                class="score-input-slider absolute top-0 max-w-md w-full"
+                :style="scoreInputPositionStyle"
               >
-                {{ scoreValidationMessage }}
-              </div>
-              <div class="flex gap-2 mt-3">
-                <button
-                  @click="submitScore"
-                  :disabled="!isValidScore || !!pendingLegWin"
-                  class="dartboard-button flex-1 py-2 rounded-bl-lg"
+                <input
+                  ref="scoreInput"
+                  v-model="currentScore"
+                  type="number"
+                  min="0"
+                  max="180"
+                  class="score-input w-full border-2 text-lg py-2 disabled:cursor-not-allowed disabled:opacity-60"
+                  placeholder="Enter score"
+                  :disabled="!!pendingLegWin"
+                  @keyup.enter="submitScore"
+                  @keydown.ctrl.z.prevent="undoLastTurn"
+                  @input="validateScore"
+                />
+                <div
+                  v-if="scoreValidationMessage"
+                  class="text-xs mt-1 text-center text-red-400"
                 >
-                  Submit Score
-                </button>
-                <button
-                  @click="undoLastTurn"
-                  :disabled="!canUndo"
-                  class="undo-button rounded-br-lg disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-2 px-3 transition-colors duration-200 text-sm"
-                  title="Undo last turn (Ctrl+Z)"
-                >
-                  Undo
-                </button>
+                  {{ scoreValidationMessage }}
+                </div>
+                <div class="flex gap-2 mt-3">
+                  <button
+                    @click="submitScore"
+                    :disabled="!isValidScore || !!pendingLegWin"
+                    class="dartboard-button flex-1 py-2 rounded-bl-lg"
+                  >
+                    Submit Score
+                  </button>
+                  <button
+                    @click="undoLastTurn"
+                    :disabled="!canUndo"
+                    class="undo-button rounded-br-lg disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-2 px-3 transition-colors duration-200 text-sm"
+                    title="Undo last turn (Ctrl+Z)"
+                  >
+                    Undo
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -404,7 +419,7 @@ onMounted(async () => {
             <div class="flex justify-start">
               <button
                 type="button"
-                class="undo-button p-3 mt-2 text-white font-bold transition-colors duration-200"
+                class="undo-button py-2 px-3 mt-2 text-sm text-white font-bold transition-colors duration-200"
                 title="Laatste worp ongedaan maken (Ctrl+Z)"
                 @click="undoLastTurn"
               >
@@ -499,5 +514,21 @@ onMounted(async () => {
 
 .score-board .player-card {
   line-height: unset;
+}
+
+.score-input-track {
+  min-height: 7.5rem;
+}
+
+.score-input-slider {
+  transition:
+    left 0.2s ease-in-out,
+    width 0.2s ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .score-input-slider {
+    transition: none;
+  }
 }
 </style>
