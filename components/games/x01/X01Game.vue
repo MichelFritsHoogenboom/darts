@@ -41,14 +41,75 @@ const {
   canUndo,
   undoLastTurn,
   pendingLegWin,
+  pendingGoldenCamel,
   confirmLegFinish,
+  confirmGoldenCamel,
 } = useX01Game(match, gameState);
+
+const { getScoresForMatch } = useScores();
+const { $listen, $unlisten } = useNuxtApp();
+
+const camelLeaderPlayerId = ref<string | null>(null);
+
+const countGoldenCamels = (scores: Score[], playerId: string) =>
+  scores.filter(
+    (s) =>
+      s.playerId === playerId && s.totalScore === 26 && s.isGoldenCamel,
+  ).length;
+
+const refreshCamelLeader = async () => {
+  if (players.value.length < 2) {
+    camelLeaderPlayerId.value = null;
+    return;
+  }
+
+  const scores = await getScoresForMatch(match.id);
+  const counts = players.value.map((p) => ({
+    id: p.id,
+    count: countGoldenCamels(scores, p.id),
+  }));
+
+  const max = Math.max(...counts.map((c) => c.count));
+  if (max === 0) {
+    camelLeaderPlayerId.value = null;
+    return;
+  }
+
+  const leaders = counts.filter((c) => c.count === max);
+  camelLeaderPlayerId.value =
+    leaders.length === 1 ? leaders[0].id : null;
+};
+
+const scoreInputBlocked = computed(
+  () => !!pendingLegWin.value || !!pendingGoldenCamel.value,
+);
 
 const pendingLegWinnerName = computed(() =>
   pendingLegWin.value && currentPlayer.value
     ? getPlayerDisplayName(currentPlayer.value)
     : "",
 );
+watch(
+  () => players.value.length,
+  (length) => {
+    if (length >= 2) {
+      refreshCamelLeader();
+    }
+  },
+);
+
+onMounted(() => {
+  $listen("score-submitted", refreshCamelLeader);
+  $listen("undo-last-turn", refreshCamelLeader);
+  $listen("leg-finished", refreshCamelLeader);
+});
+
+onBeforeUnmount(() => {
+  $unlisten("score-submitted", refreshCamelLeader);
+  $unlisten("undo-last-turn", refreshCamelLeader);
+  $unlisten("leg-finished", refreshCamelLeader);
+});
+
 const { getLegsForSet } = useLegs();
 const { getPlayerLegsForLeg } = usePlayerLegs();
 const { getScoresForPlayerLeg } = useScores();
@@ -179,6 +240,7 @@ const resetGame = () => {
 // Initialize match after players are loaded (onMounted runs after onBeforeMount)
 onMounted(async () => {
   await initializeMatch();
+  await refreshCamelLeader();
 });
 </script>
 
@@ -214,6 +276,7 @@ onMounted(async () => {
           :currentSet="currentSet"
           :matchGame="matchGame"
           :currentSetGame="currentSetGame"
+          :showGoldenCamel="camelLeaderPlayerId === players[0].id"
         />
         <div class="flex flex-col gap-4" v-if="players[0] && players[1]">
           <div class="flex items-stretch score-board gap-4">
@@ -336,7 +399,7 @@ onMounted(async () => {
                   max="180"
                   class="score-input w-full border-2 text-lg py-2 disabled:cursor-not-allowed disabled:opacity-60"
                   placeholder="Enter score"
-                  :disabled="!!pendingLegWin"
+                  :disabled="scoreInputBlocked"
                   @keyup.enter="submitScore"
                   @keydown.ctrl.z.prevent="undoLastTurn"
                   @input="validateScore"
@@ -350,7 +413,7 @@ onMounted(async () => {
                 <div class="flex gap-2 mt-3">
                   <button
                     @click="submitScore"
-                    :disabled="!isValidScore || !!pendingLegWin"
+                    :disabled="!isValidScore || scoreInputBlocked"
                     class="dartboard-button flex-1 py-2 rounded-bl-lg"
                   >
                     Submit Score
@@ -377,6 +440,7 @@ onMounted(async () => {
           :currentSet="currentSet"
           :currentSetGame="currentSetGame"
           :matchGame="matchGame"
+          :showGoldenCamel="camelLeaderPlayerId === players[1].id"
         />
       </div>
 
@@ -415,6 +479,43 @@ onMounted(async () => {
               @click="confirmLegFinish(3)"
             >
               3 pijlen
+            </button>
+            <div class="flex justify-start">
+              <button
+                type="button"
+                class="undo-button py-2 px-3 mt-2 text-sm text-white font-bold transition-colors duration-200"
+                title="Laatste worp ongedaan maken (Ctrl+Z)"
+                @click="undoLastTurn"
+              >
+                Undo
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Golden camel modal -->
+      <div
+        v-if="pendingGoldenCamel"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      >
+        <div class="bg-gray-800 p-8 max-w-md w-full mx-auto text-center">
+          <h2 class="text-2xl font-bold mb-2">Gouden kameel?</h2>
+          <p class="text-gray-300 mb-6">Was dit 20, 1 en 5?</p>
+          <div class="flex flex-col gap-3">
+            <button
+              type="button"
+              class="btn-gray w-full"
+              @click="confirmGoldenCamel(true)"
+            >
+              Ja, gouden kameel
+            </button>
+            <button
+              type="button"
+              class="btn-gray w-full"
+              @click="confirmGoldenCamel(false)"
+            >
+              Nee
             </button>
             <div class="flex justify-start">
               <button

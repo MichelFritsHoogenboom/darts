@@ -9,15 +9,17 @@ import {
 import type { Set } from "~/interfaces/set";
 
 const { $listen, $unlisten } = useNuxtApp();
-const { player, currentPlayerId, currentLeg, currentSet } = defineProps<{
-  player: Player;
-  currentPlayerId: string;
-  realTimeScore: number;
-  currentLeg?: Leg | null;
-  currentSet?: Set | null;
-  matchGame: Set[];
-  currentSetGame?: Leg[];
-}>();
+const { player, currentPlayerId, currentLeg, currentSet, showGoldenCamel } =
+  defineProps<{
+    player: Player;
+    currentPlayerId: string;
+    realTimeScore: number;
+    currentLeg?: Leg | null;
+    currentSet?: Set | null;
+    matchGame: Set[];
+    currentSetGame?: Leg[];
+    showGoldenCamel?: boolean;
+  }>();
 
 const {
   getPlayerStatsForMatch,
@@ -271,6 +273,7 @@ onBeforeUnmount(() => {
           :playerId="player.id"
           :players="[player]"
           :average="matchPlayerStats?.average || 0"
+          :showGoldenCamel="showGoldenCamel"
         />
       </div>
     </div>

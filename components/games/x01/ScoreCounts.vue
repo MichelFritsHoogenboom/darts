@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { createScoreRanges, type ScoreRanges } from "~/interfaces/stats";
 import type { Score } from "~/interfaces/leg";
 import type { PlayerStats } from "~/interfaces/stats";
+import { faCamel } from "~/utils/icons/faCamel";
 
 const matchId = inject<string>("matchId");
 
@@ -37,6 +39,7 @@ const scoreRangeMapping = (() => {
   const keys = Object.keys(sampleRanges) as Array<keyof ScoreRanges>;
 
   return keys
+    .filter((key) => key !== "goldenCamel")
     .map((key) => {
       if (key === "180") {
         return { key, min: 180, max: 180 };
@@ -66,6 +69,10 @@ const updatePlayerMatchScoreCounts = async () => {
     const rangeKey = getScoreRangeKey(score.totalScore);
     scoreRanges[rangeKey] = (scoreRanges[rangeKey] || 0) + 1;
   });
+
+  scoreRanges.goldenCamel = playerScores.filter(
+    (score) => score.totalScore === 26 && score.isGoldenCamel,
+  ).length;
 
   // Update playerStatsRef with new scores
   playerStatsRef.value.scores = scoreRanges;
@@ -154,8 +161,34 @@ const lowScoresSum = computed(() => {
     <div>{{ playerStatsRef.scores["30-39"] }}</div>
     <div>{{ averagePerLeg(playerStatsRef.scores["30-39"]) }}</div>
     <div>20 - 29</div>
-    <div>{{ playerStatsRef.scores["20-29"] }}</div>
-    <div>{{ averagePerLeg(playerStatsRef.scores["20-29"]) }}</div>
+    <div class="inline-flex flex-wrap items-center gap-x-1">
+      <span>{{ playerStatsRef.scores["20-29"] }}</span>
+      <span
+        class="score-counts__camel-count"
+        title="Gouden kamelen"
+      >
+        (<FontAwesomeIcon
+          :icon="faCamel"
+          class="score-counts__camel-icon"
+          title="Gouden kamelen"
+        />
+        {{ playerStatsRef.scores.goldenCamel }})
+      </span>
+    </div>
+    <div class="inline-flex flex-wrap items-center gap-x-1">
+      <span>{{ averagePerLeg(playerStatsRef.scores["20-29"]) }}</span>
+      <span
+        class="score-counts__camel-count"
+        title="Gouden kamelen per leg"
+      >
+        (<FontAwesomeIcon
+          :icon="faCamel"
+          class="score-counts__camel-icon"
+          title="Gouden kamelen per leg"
+        />
+        {{ averagePerLeg(playerStatsRef.scores.goldenCamel) }})
+      </span>
+    </div>
     <div>0 - 19</div>
     <div>{{ lowScoresSum }}</div>
     <div>{{ averagePerLeg(lowScoresSum) }}</div>
@@ -170,5 +203,17 @@ const lowScoresSum = computed(() => {
 }
 .score-counts__footer {
   @apply font-bold;
+}
+
+.score-counts__camel-count {
+  @apply inline-flex items-center gap-0.5;
+}
+
+.score-counts__camel-icon {
+  @apply inline-block h-3.5 w-3.5 shrink-0 align-middle text-gray-300;
+}
+
+.score-counts__camel-icon :deep(svg) {
+  @apply h-full w-full;
 }
 </style>

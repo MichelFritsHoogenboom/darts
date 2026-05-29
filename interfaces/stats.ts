@@ -26,6 +26,7 @@ export interface ScoreRanges {
   "126-161": number; // 2 triples and one single dart of at least 18
   "162-179": number; // 3 triples (perfect aimed)
   "180": number; // 3 triple 20's (perfect aimed)
+  goldenCamel: number;
 }
 
 export interface DartsThrownHit {
@@ -77,6 +78,7 @@ export function createScoreRanges(): ScoreRanges {
     "126-161": 0, // 2 triples and one single dart of at least 18
     "162-179": 0, // 3 triples (perfect aimed)
     "180": 0, // 3 triple 20's (perfect aimed)
+    goldenCamel: 0,
   };
 }
 

@@ -31,6 +31,7 @@ export interface Score {
   startScore: number;
   totalScore: number;
   dartsThrown?: 1 | 2 | 3;
+  isGoldenCamel?: boolean;
   scoreDarts1?: SingleDartScore;
   scoreDarts2?: SingleDartScore;
   scoreDarts3?: SingleDartScore;
@@ -87,6 +88,7 @@ export async function createScore(overrides: {
   startScore: number;
   totalScore: number;
   dartsThrown?: 1 | 2 | 3;
+  isGoldenCamel?: boolean;
 }): Promise<Score> {
   const score: Score = {
     id: uuid(),

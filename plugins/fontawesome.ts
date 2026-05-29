@@ -1,0 +1,12 @@
+import { library, config } from "@fortawesome/fontawesome-svg-core";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { faCamel } from "~/utils/icons/faCamel";
+// import { faIcon } from "@fortawesome/free-solid-svg-icons";
+// library.add(faIcon);
+
+config.autoAddCss = false;
+library.add(faCamel);
+
+export default defineNuxtPlugin((nuxtApp) => {
+  nuxtApp.vueApp.component("font-awesome-icon", FontAwesomeIcon);
+});
