@@ -7,7 +7,8 @@
     "build": "nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
-    "preview": "nuxt preview",
+    "generate:gh-pages": "NUXT_SPA=true NUXT_APP_BASE_URL=/darts/ nuxt generate && node scripts/prepare-gh-pages.mjs",
+    "preview:gh-pages": "pnpm generate:gh-pages && nuxt preview",
     "postinstall": "nuxt prepare"
   },
   "devDependencies": {

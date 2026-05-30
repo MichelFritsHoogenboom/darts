@@ -1,7 +1,12 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+const githubPagesBase = process.env.NUXT_APP_BASE_URL || "/";
+const isSpaBuild = process.env.NUXT_SPA === "true";
+
 export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ["@nuxtjs/tailwindcss"],
+  // SPA only for static GitHub Pages builds; keep SSR in dev (ssr:false breaks nuxt dev)
+  ssr: !isSpaBuild,
   imports: {
     autoImport: true,
   },
@@ -10,6 +15,7 @@ export default defineNuxtConfig({
     transpile: ["@fortawesome/vue-fontawesome"],
   },
   app: {
+    baseURL: githubPagesBase,
     head: {
       title: "Darts Game - 501",
       meta: [
