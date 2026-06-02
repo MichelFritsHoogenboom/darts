@@ -3,6 +3,10 @@ const startNewGame = () => {
   navigateTo("/setup");
 };
 
+const startHead2Head = () => {
+  navigateTo("/head2head");
+};
+
 const {
   matches,
   unfinishedMatches,
@@ -33,7 +37,9 @@ onBeforeMount(async () => {
           Start New Game
         </button>
       </div>
-      <div class="flex-1 player-card inactive rounded-lg p-8 text-center mb-8">
+      <div
+        class="flex-1 player-card player-card--actionable inactive rounded-lg p-8 text-center mb-8"
+      >
         <h2 class="text-2xl font-bold mb-6">Head to Head</h2>
         <p class="text-gray-300 mb-8">
           Start a rivalry between two players by setting up a head to head
@@ -41,8 +47,7 @@ onBeforeMount(async () => {
         </p>
 
         <button
-          @click="startNewGame"
-          disabled
+          @click="startHead2Head"
           class="dartboard-button text-lg px-8 py-3 w-full"
         >
           Go Head to Head

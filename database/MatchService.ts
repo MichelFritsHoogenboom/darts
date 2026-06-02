@@ -51,6 +51,19 @@ export class MatchService extends BaseService<Match> {
    * Sorted by most recent first (by updatedAt)
    * Optimized: Fetches a small batch of recent matches instead of all matches
    */
+  async getMatchesByIds(ids: string[]): Promise<Match[]> {
+    if (ids.length === 0) return [];
+    const table = await this.getTable();
+    const matches = await Promise.all(ids.map((id) => table.get(id)));
+    return matches.filter((m): m is Match => m !== undefined);
+  }
+
+  async getMatchesForCompetitionEdition(
+    edition: { matches: string[] }
+  ): Promise<Match[]> {
+    return await this.getMatchesByIds([...edition.matches]);
+  }
+
   async getLastFinishedMatches(limit: number = 10): Promise<Match[]> {
     const table = await this.getTable();
 
