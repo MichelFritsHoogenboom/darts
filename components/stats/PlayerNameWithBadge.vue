@@ -37,13 +37,12 @@ const isWinner = computed(() => playerId === winnerId);
       class="golden-camel-sparkle"
       title="Meeste gouden kamelen"
     >
-      <FontAwesomeIcon
-        :icon="faCamel"
-        class="golden-camel-sparkle__icon"
-      />
+      <FontAwesomeIcon :icon="faCamel" class="golden-camel-sparkle__icon" />
     </span>
-    <span>{{ getPlayerName(playerId) }}</span>
-    <span class="text-xs text-gray-400" title="3 dart average">
+    <span class="player-name-with-badge__name">{{
+      getPlayerName(playerId)
+    }}</span>
+    <span class="text-xs text-gray-400 font-oswald" title="3 dart average">
       {{ average.toFixed(2) }}
     </span>
     <span
@@ -69,8 +68,9 @@ const isWinner = computed(() => playerId === winnerId);
 }
 
 .golden-camel-sparkle__icon {
-  @apply h-[1.125rem] w-[1.125rem] text-amber-400;
+  @apply h-[0.80em] w-[0.80em] text-amber-400;
   animation: golden-camel-glow 2.4s ease-in-out infinite;
+  transform: skewX(-8deg);
 }
 
 .golden-camel-sparkle::before,

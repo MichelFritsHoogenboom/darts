@@ -53,7 +53,7 @@ const legsWithScores = ref<
 
 // Helper function to load a leg with its playerLegs and scores
 const loadLegWithScores = async (
-  leg: Leg
+  leg: Leg,
 ): Promise<{
   leg: Leg;
   playerLegs: PlayerLeg[];
@@ -67,7 +67,7 @@ const loadLegWithScores = async (
     playerLegs.map(async (playerLeg) => {
       const scores = await getScoresForPlayerLeg(playerLeg.id);
       scoresByPlayer[playerLeg.playerId] = scores;
-    })
+    }),
   );
 
   return {
@@ -90,14 +90,14 @@ const loadLegsData = async () => {
         const setLegs = await getLegsForSet(set.id);
 
         const legsData = await Promise.all(
-          setLegs.map((leg) => loadLegWithScores(leg))
+          setLegs.map((leg) => loadLegWithScores(leg)),
         );
 
         return {
           set,
           legsWithScores: legsData,
         };
-      })
+      }),
     );
 
     setsWithLegs.value = setsData;
@@ -105,7 +105,7 @@ const loadLegsData = async () => {
     // Direct legs mode
     const allLegs = await getLegsForMatch(match.id);
     const legsData = await Promise.all(
-      allLegs.map((leg) => loadLegWithScores(leg))
+      allLegs.map((leg) => loadLegWithScores(leg)),
     );
 
     legsWithScores.value = legsData;
@@ -121,7 +121,7 @@ onBeforeMount(async () => {
 
 <template>
   <div
-    class="stat-well flex flex-col gap-2 py-4 px-6 border border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-200"
+    class="stat-well flex flex-col gap-2 py-2 px-6 border border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-200"
   >
     <h3
       class="grid grid-cols-[20%_1fr_20%] font-bold flex justify-between items-center"
@@ -148,7 +148,7 @@ onBeforeMount(async () => {
 
       <div>
         <StatsPlayersWithCenter
-          size="medium"
+          size="large"
           :players="[...players]"
           :player-stats="matchPlayerStats"
           :winner-id="match.winner"
