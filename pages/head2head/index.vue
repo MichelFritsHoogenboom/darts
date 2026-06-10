@@ -54,12 +54,14 @@ watch(head2HeadOverview, async () => {
 
       <div v-if="loading" class="text-center text-gray-400">Laden...</div>
       <div v-else-if="error" class="text-center text-red-400">{{ error }}</div>
-      <div
-        v-else-if="head2HeadOverview.length === 0"
-        class="player-card inactive rounded-lg p-8 text-center text-gray-400"
-      >
-        Nog geen rivalries. Start er een!
-      </div>
+      <UiSummaryCardLayout v-else-if="head2HeadOverview.length === 0">
+        <template #center>
+          <div class="text-gray-400 text-sm text-center">
+            Nog geen head to head competities aangemaakt.
+          </div>
+        </template>
+      </UiSummaryCardLayout>
+
       <div v-else>
         <Head2headRivalryCard
           v-for="item in head2HeadOverview"

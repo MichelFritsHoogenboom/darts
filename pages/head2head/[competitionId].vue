@@ -44,13 +44,11 @@ const loadDetail = async () => {
 
   edition.value = current;
   matches.value = await getMatchesByIds([...current.matches]);
-  matches.value.sort(
-    (a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()
-  );
+  matches.value.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
 
   await loadPlayers([...current.playerIds]);
   rivalryPlayers.value = (players.value as Player[]).filter((p) =>
-    current.playerIds.includes(p.id)
+    current.playerIds.includes(p.id),
   );
 };
 
@@ -70,14 +68,17 @@ const standings = computed(() => {
   return computeEditionStandings(edition.value, matches.value);
 });
 
-const unfinishedMatches = computed(() => matches.value.filter((m) => !m.winner));
+const unfinishedMatches = computed(() =>
+  matches.value.filter((m) => !m.winner),
+);
+const finishedMatches = computed(() => matches.value.filter((m) => !!m.winner));
 
 const finishedCount = computed(
-  () => matches.value.filter((m) => m.winner).length
+  () => matches.value.filter((m) => m.winner).length,
 );
 
 const amountMatches = computed(
-  () => edition.value?.competitionConfig.amountMatches ?? 0
+  () => edition.value?.competitionConfig.amountMatches ?? 0,
 );
 
 const showStartMatch = computed(() => {
@@ -94,10 +95,6 @@ const winsDisplay = computed(() => {
 });
 
 const pageTitle = computed(() => {
-  if (competition.value?.name) return competition.value.name;
-  if (rivalryPlayers.value.length >= 2) {
-    return `${getPlayerFullName(rivalryPlayers.value[0])} vs ${getPlayerFullName(rivalryPlayers.value[1])}`;
-  }
   return "Head to Head";
 });
 
@@ -139,33 +136,33 @@ const beginNewEdition = async () => {
     </div>
 
     <div v-else-if="edition" class="max-w-4xl mx-auto">
-      <div class="player-card inactive rounded-lg p-8 mb-6">
-        <p class="text-gray-400 text-sm mb-4">
-          Seizoen {{ edition.editionNumber }} · {{ finishedCount }} /
-          {{ amountMatches }} wedstrijden
-        </p>
-        <StatsPlayersWithCenter
-          v-if="rivalryPlayers.length >= 2"
-          size="large"
-          :players="[rivalryPlayers[0], rivalryPlayers[1]]"
-          :player-stats="[]"
-          :show-badge="false"
-        >
-          <span
-            class="inline-block px-4 py-2 bg-gray-400/50 font-bold rounded text-2xl"
+      <UiSummaryCardLayout wrapper-class="mb-6">
+        <template #left>
+          <p class="text-gray-400 text-sm">
+            Seizoen {{ edition.editionNumber }} · {{ finishedCount }} /
+            {{ amountMatches }} wedstrijden
+          </p>
+        </template>
+        <template #center>
+          <StatsPlayersWithCenter
+            v-if="rivalryPlayers.length >= 2"
+            size="xlarge"
+            :players="[rivalryPlayers[0], rivalryPlayers[1]]"
+            :player-stats="[]"
+            :show-badge="false"
           >
-            {{ winsDisplay }}
-          </span>
-        </StatsPlayersWithCenter>
-      </div>
+            <span
+              class="inline-block px-4 py-2 bg-gray-400/50 font-bold rounded text-2xl"
+            >
+              {{ winsDisplay }}
+            </span>
+          </StatsPlayersWithCenter>
+        </template>
+      </UiSummaryCardLayout>
 
       <div v-if="unfinishedMatches.length > 0" class="mb-6">
         <h2 class="text-lg font-bold mb-2">Wedstrijd hervatten</h2>
-        <div
-          v-for="match in unfinishedMatches"
-          :key="match.id"
-          class="mb-4"
-        >
+        <div v-for="match in unfinishedMatches" :key="match.id" class="mb-4">
           <StatsMatchSummary :match="match" />
         </div>
       </div>
@@ -183,18 +180,19 @@ const beginNewEdition = async () => {
         </FormButton>
       </div>
 
-      <div v-if="matches.length > 0">
+      <div v-if="finishedMatches.length > 0">
         <h2 class="text-lg font-bold mb-2">Wedstrijden</h2>
-        <div v-for="match in matches" :key="match.id" class="mb-4">
+        <div v-for="match in finishedMatches" :key="match.id" class="mb-4">
           <StatsMatchSummary :match="match" />
         </div>
       </div>
-      <div
-        v-else
-        class="player-card inactive rounded-lg p-6 text-center text-gray-400"
-      >
-        Nog geen wedstrijden gespeeld.
-      </div>
+      <UiSummaryCardLayout v-else>
+        <template #center>
+          <div class="text-gray-400 text-sm text-center">
+            Nog geen wedstrijden afgerond.
+          </div>
+        </template>
+      </UiSummaryCardLayout>
 
       <Head2headEditionChampionOverlay
         v-model="showChampionOverlay"

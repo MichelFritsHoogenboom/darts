@@ -120,12 +120,8 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <div
-    class="stat-well flex flex-col gap-2 py-2 px-6 border border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-200"
-  >
-    <h3
-      class="grid grid-cols-[20%_1fr_20%] font-bold flex justify-between items-center"
-    >
+  <UiSummaryCardLayout>
+    <template #left>
       <div>
         <span class="text-xs font-normal">
           {{ match.updatedAt.toLocaleDateString() }}
@@ -145,53 +141,48 @@ onBeforeMount(async () => {
           {{ match.matchConfig.gamePlayedIn }}
         </div>
       </div>
+    </template>
 
-      <div>
-        <StatsPlayersWithCenter
-          size="large"
-          :players="[...players]"
-          :player-stats="matchPlayerStats"
-          :winner-id="match.winner"
-          :show-badge="false"
+    <template #center>
+      <StatsPlayersWithCenter
+        size="large"
+        :players="[...players]"
+        :player-stats="matchPlayerStats"
+        :winner-id="match.winner"
+        :show-badge="false"
+      >
+        <span class="inline-block px-2 bg-gray-400/50 font-small font-bold rounded">
+          {{ players[0] ? getPlayerWinnerCount(players[0].id, matchGame) : 0 }}
+          -
+          {{ players[1] ? getPlayerWinnerCount(players[1].id, matchGame) : 0 }}
+        </span>
+      </StatsPlayersWithCenter>
+    </template>
+
+    <template #actions>
+      <button
+        @click="toggleSummary()"
+        class="btn-gray"
+        :class="{ 'bg-gray-500': showSummary }"
+      >
+        {{ showSummary ? "Hide" : "Show" }} Details
+      </button>
+      <NuxtLink
+        v-if="!match.winner"
+        :to="`/match/${match.id}`"
+        class="btn-gray flex items-center gap-2 min-h-[1.75rem]"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 640 640"
+          class="w-4 h-4 fill-current"
         >
-          <span
-            class="inline-block px-2 bg-gray-400/50 font-small font-bold rounded"
-          >
-            {{
-              players[0] ? getPlayerWinnerCount(players[0].id, matchGame) : 0
-            }}
-            -
-            {{
-              players[1] ? getPlayerWinnerCount(players[1].id, matchGame) : 0
-            }}
-          </span>
-        </StatsPlayersWithCenter>
-      </div>
-      <div class="flex items-center gap-2 justify-self-end">
-        <button
-          @click="toggleSummary()"
-          class="btn-gray"
-          :class="{ 'bg-gray-500': showSummary }"
-        >
-          {{ showSummary ? "Hide" : "Show" }} Details
-        </button>
-        <NuxtLink
-          v-if="!match.winner"
-          :to="`/match/${match.id}`"
-          class="btn-gray flex items-center gap-2 min-h-[1.75rem]"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 640 640"
-            class="w-4 h-4 fill-current"
-          >
-            <path
-              d="M471.1 297.4C483.6 309.9 483.6 330.2 471.1 342.7L279.1 534.7C266.6 547.2 246.3 547.2 233.8 534.7C221.3 522.2 221.3 501.9 233.8 489.4L403.2 320L233.9 150.6C221.4 138.1 221.4 117.8 233.9 105.3C246.4 92.8 266.7 92.8 279.2 105.3L471.2 297.3z"
-            />
-          </svg>
-        </NuxtLink>
-      </div>
-    </h3>
+          <path
+            d="M471.1 297.4C483.6 309.9 483.6 330.2 471.1 342.7L279.1 534.7C266.6 547.2 246.3 547.2 233.8 534.7C221.3 522.2 221.3 501.9 233.8 489.4L403.2 320L233.9 150.6C221.4 138.1 221.4 117.8 233.9 105.3C246.4 92.8 266.7 92.8 279.2 105.3L471.2 297.3z"
+          />
+        </svg>
+      </NuxtLink>
+    </template>
 
     <!-- Display sets with their legs when in sets mode -->
     <div v-if="showSummary" class="mt-2">
@@ -217,5 +208,5 @@ onBeforeMount(async () => {
         :scores-by-player="legData.scoresByPlayer"
       />
     </div>
-  </div>
+  </UiSummaryCardLayout>
 </template>

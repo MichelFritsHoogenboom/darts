@@ -11,7 +11,7 @@ const {
 } = defineProps<{
   playerStats: PlayerStats[];
   players: Player[];
-  size: "small" | "medium" | "large";
+  size: "small" | "medium" | "large" | "xlarge";
   winnerId?: string;
   showBadge?: boolean;
 }>();
@@ -22,10 +22,11 @@ const getAverage = (playerId: string) => {
 };
 
 const sizeClasses = computed(() => {
-  const sizes: Record<"small" | "medium" | "large", string> = {
+  const sizes: Record<"small" | "medium" | "large" | "xlarge", string> = {
     small: "text-sm",
-    medium: "text-md",
+    medium: "text-base",
     large: "text-lg",
+    xlarge: "text-2xl",
   };
   return sizes[size];
 });
@@ -33,10 +34,7 @@ const sizeClasses = computed(() => {
 
 <template>
   <div :class="`flex flex-1 items-center gap-2 justify-center ${sizeClasses}`">
-    <div
-      v-if="players[0] && playerStats?.[0]"
-      class="flex-1 flex justify-end font-bold"
-    >
+    <div v-if="players[0]" class="flex-1 flex justify-end font-bold">
       <StatsPlayerNameWithBadge
         :player-id="players[0].id"
         :players="players"
@@ -50,10 +48,7 @@ const sizeClasses = computed(() => {
       <slot />
     </span>
 
-    <div
-      v-if="players[1] && playerStats?.[1]"
-      class="flex-1 flex justify-start font-bold"
-    >
+    <div v-if="players[1]" class="flex-1 flex justify-start font-bold">
       <StatsPlayerNameWithBadge
         :player-id="players[1].id"
         :players="players"
