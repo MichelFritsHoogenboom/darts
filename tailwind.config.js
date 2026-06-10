@@ -10,13 +10,19 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        oswald: ["Oswald", "sans-serif"],
+        "barlow-condensed": ['"Barlow Condensed"', "sans-serif"],
+      },
       colors: {
         dartboard: {
           red: '#a12929',
           green: '#16a34a',
           black: '#1f2937',
           white: '#f9fafb'
-        }
+        },
+       
+        logo: '#fafafa',
       }
     },
   },

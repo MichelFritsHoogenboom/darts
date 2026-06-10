@@ -147,6 +147,10 @@ export function useMatches() {
     unfinishedMatches.value = await matchService.getAllUnfinishedMatches();
   };
 
+  const getMatchesByIds = async (ids: string[]) => {
+    return await matchService.getMatchesByIds(ids);
+  };
+
   return {
     matches: readonly(matches),
     unfinishedMatches: readonly(unfinishedMatches),
@@ -160,5 +164,6 @@ export function useMatches() {
     getMatchesForPlayer,
     loadLastFinishedMatches,
     loadUnfinishedMatches,
+    getMatchesByIds,
   };
 }

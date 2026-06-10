@@ -268,7 +268,7 @@ onBeforeUnmount(() => {
 <template>
   <div class="flex flex-col items-center justify-start gap-4">
     <div class="pb-2 text-center">
-      <div class="font-bold text-3xl">
+      <div class="font-oswald text-3xl">
         <StatsPlayerNameWithBadge
           :playerId="player.id"
           :players="[player]"
@@ -310,4 +310,10 @@ onBeforeUnmount(() => {
   </div>
 </template>
 
-<style></style>
+<style scoped>
+:deep(.player-name-with-badge__name) {
+  @apply font-oswald font-bold inline-block text-logo;
+  transform: skewX(-8deg);
+  letter-spacing: -1px;
+}
+</style>

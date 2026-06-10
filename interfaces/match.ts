@@ -19,6 +19,7 @@ export interface Match {
   playerStats: string[] | ReadonlyArray<string>; // PlayerStats IDs - accepts both mutable and readonly
   game: string[] | ReadonlyArray<string>; // Leg or Set IDs - accepts both mutable and readonly
   winner?: string;
+  competitionEditionId?: string;
 }
 
 export function createMatch(overrides: Partial<Match> = {}): Match {

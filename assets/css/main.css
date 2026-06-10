@@ -3,6 +3,11 @@
 @tailwind utilities;
 
 @layer base {
+  body {
+    @apply font-barlow-condensed font-normal;
+    font-size: 17px;
+  }
+
   .main-background {
     position: relative;
     z-index: 1;
@@ -64,7 +69,7 @@
   }
 
   .btn-gray {
-    @apply text-sm px-3 py-1 bg-gray-600 font-normal text-white hover:bg-gray-500 transition-colors whitespace-nowrap;
+    @apply text-base px-3 py-1 bg-gray-600 font-normal text-white hover:bg-gray-500 transition-colors whitespace-nowrap;
   }
   
   .score-input {
@@ -86,6 +91,17 @@
   .player-card.inactive {
     @apply border-gray-600;
   }
+
+  .home-mode-card {
+    @apply font-barlow-condensed font-bold;
+  }
+
+  .home-mode-card__title {
+    @apply font-oswald font-bold inline-block text-logo;
+    transform: skewX(-8deg);
+    text-transform: uppercase;
+    letter-spacing: -1px;
+  }
   
   .stat-well {
     @apply bg-gradient-to-br from-gray-700/55 via-gray-700/45 to-gray-800/55;
@@ -96,6 +112,7 @@
     @apply hover:border-gray-500/40;
     @apply hover:shadow-lg hover:shadow-black/20;
     @apply px-4 py-2 text-left grid grid-cols-3 w-full ;
+
  
       line-height: 1.5;
       text-align: start;

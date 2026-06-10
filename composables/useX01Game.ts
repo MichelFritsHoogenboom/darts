@@ -555,6 +555,18 @@ export const useX01Game = (
 
     match.winner = currentPlayerId.value;
     await saveMatch(match);
+
+    if (match.competitionEditionId) {
+      const { onEditionMatchFinished } = useCompetitionEditions();
+      const result = await onEditionMatchFinished(match);
+      if (result.competitionId) {
+        const query = result.editionComplete ? { editionComplete: "1" } : {};
+        await navigateTo({
+          path: `/head2head/${result.competitionId}`,
+          query,
+        });
+      }
+    }
   };
 
   const handleSetWin = async () => {

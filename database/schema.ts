@@ -4,10 +4,13 @@ import type { Match } from "../interfaces/match";
 import type { Set } from "../interfaces/set";
 import type { Leg, PlayerLeg, Score, SingleDartScore } from "../interfaces/leg";
 import type { PlayerStats } from "../interfaces/stats";
+import type { Competition, CompetitionEdition } from "../interfaces/competition";
 
 export class DartsDatabase extends Dexie {
   // Define tables
   players!: Dexie.Table<Player>;
+  competitions!: Dexie.Table<Competition>;
+  competitionEditions!: Dexie.Table<CompetitionEdition>;
   matches!: Dexie.Table<Match>;
   sets!: Dexie.Table<Set>;
   legs!: Dexie.Table<Leg>;
@@ -96,6 +99,32 @@ export class DartsDatabase extends Dexie {
       .upgrade(async (tx) => {
         console.log(
           "Migrating database to version 4: Adding matchId and setId indexes to scores table"
+        );
+      });
+
+    // Version 5: Competitions, editions, match.competitionEditionId
+    this.version(5)
+      .stores({
+        players: "id, firstName, lastName, alias, createdAt, updatedAt",
+        competitions: "id, competitionType, createdAt, updatedAt",
+        competitionEditions:
+          "id, competitionId, editionNumber, *playerIds, createdAt, updatedAt, winner",
+        matches:
+          "id, gameType, *players, matchConfig, competitionEditionId, createdAt, updatedAt, winner",
+        sets: "id, matchId, legs, createdAt, updatedAt, *players, winner",
+        legs: "id, matchId, setId, gameType, *players, startingPlayer, winner, createdAt, updatedAt",
+        playerLegs:
+          "id, legId, playerId, scores, average, createdAt, updatedAt",
+        scores:
+          "id, playerLegId, playerId, matchId, setId, totalScore, createdAt, updatedAt",
+        singleDartScores:
+          "id, scoreId, playerId, score, createdAt, updatedAt, doubleHit, isSetDart, isMatchDart",
+        playerStats:
+          "id, playerId, matchId, setId, playerLegId, createdAt, updatedAt",
+      })
+      .upgrade(async () => {
+        console.log(
+          "Migrating database to version 5: competitions, competitionEditions, competitionEditionId on matches"
         );
       });
   }

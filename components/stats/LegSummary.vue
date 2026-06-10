@@ -82,7 +82,7 @@ const [showLegDetails, toggleLegDetails] = useToggle(false);
 <template>
   <div class="leg-summary bg-gray-800 border-b border-gray-700 px-4 pb-2 pt-1">
     <div class="overflow-x-auto">
-      <table class="w-full text-xs border-collapse">
+      <table class="w-full text-sm border-collapse">
         <thead>
           <tr class="pb-2 font-bold text-sm">
             <th colspan="9" class="py-2">
@@ -96,7 +96,7 @@ const [showLegDetails, toggleLegDetails] = useToggle(false);
                   size="small"
                   :winner-id="leg.winner"
                 >
-                  <span class="text-xs font-bold">
+                  <span class="text-sm font-bold">
                     Leg
                     <template v-if="legIndex !== undefined"
                       >{{ legIndex + 1 }}

@@ -4,7 +4,13 @@ const isSpaBuild = process.env.NUXT_SPA === "true";
 
 export default defineNuxtConfig({
   devtools: { enabled: true },
-  modules: ["@nuxtjs/tailwindcss"],
+  modules: ["@nuxtjs/tailwindcss", "@nuxt/fonts"],
+  fonts: {
+    families: [
+      { name: "Oswald", provider: "google", weights: [400, 700] },
+      { name: "Barlow Condensed", provider: "google" },
+    ],
+  },
   // SPA only for static GitHub Pages builds; keep SSR in dev (ssr:false breaks nuxt dev)
   ssr: !isSpaBuild,
   imports: {

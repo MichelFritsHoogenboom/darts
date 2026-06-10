@@ -53,8 +53,7 @@ const camelLeaderPlayerId = ref<string | null>(null);
 
 const countGoldenCamels = (scores: Score[], playerId: string) =>
   scores.filter(
-    (s) =>
-      s.playerId === playerId && s.totalScore === 26 && s.isGoldenCamel,
+    (s) => s.playerId === playerId && s.totalScore === 26 && s.isGoldenCamel,
   ).length;
 
 const refreshCamelLeader = async () => {
@@ -76,8 +75,7 @@ const refreshCamelLeader = async () => {
   }
 
   const leaders = counts.filter((c) => c.count === max);
-  camelLeaderPlayerId.value =
-    leaders.length === 1 ? leaders[0].id : null;
+  camelLeaderPlayerId.value = leaders.length === 1 ? leaders[0].id : null;
 };
 
 const scoreInputBlocked = computed(
@@ -89,6 +87,29 @@ const pendingLegWinnerName = computed(() =>
     ? getPlayerDisplayName(currentPlayer.value)
     : "",
 );
+
+const legFinishOptions = [
+  { label: "1 pijl", value: 1 },
+  { label: "2 pijlen", value: 2 },
+  { label: "3 pijlen", value: 3 },
+];
+
+const goldenCamelOptions = [
+  { label: "Ja, gouden kameel", value: true },
+  { label: "Nee", value: false },
+];
+
+const handleLegFinishSelect = (value: string | number | boolean) => {
+  if (value === 1 || value === 2 || value === 3) {
+    confirmLegFinish(value);
+  }
+};
+
+const handleGoldenCamelSelect = (value: string | number | boolean) => {
+  if (typeof value === "boolean") {
+    confirmGoldenCamel(value);
+  }
+};
 watch(
   () => players.value.length,
   (length) => {
@@ -252,7 +273,7 @@ onMounted(async () => {
 
     <div class="flex flex-1 flex-col justify-content-center">
       <div class="font-bold text-white pb-3 px-2">
-        <div class="flex justify-center text-sm items-center gap-4">
+        <div class="flex justify-center items-center gap-4">
           <span
             class="text-md text-center"
             v-if="match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets"
@@ -266,7 +287,7 @@ onMounted(async () => {
           </span>
         </div>
       </div>
-      <div class="flex-1 grid grid-cols-3 gap-4 text-sm pb-4 px-2">
+      <div class="flex-1 grid grid-cols-3 gap-4 pb-4 px-2">
         <PlayerComponent
           v-if="players[0]?.id"
           :player="players[0]"
@@ -281,7 +302,7 @@ onMounted(async () => {
         <div class="flex flex-col gap-4" v-if="players[0] && players[1]">
           <div class="flex items-stretch score-board gap-4">
             <div
-              class="flex-1 text-center flex flex-wrap justify-center content-center self-stretch"
+              class="flex-1 text-center font-oswald flex flex-wrap justify-center content-center self-stretch"
               :class="[
                 'player-card relative rounded-xl',
                 currentPlayerId === players[0]?.id ? 'active' : 'inactive',
@@ -291,7 +312,7 @@ onMounted(async () => {
                 {{ realTimePlayerScore(players[0]?.id) }}
               </div>
             </div>
-            <div class="flex-shrink-0 grid grid-cols-3 gap-2">
+            <div class="flex-shrink-0 font-oswald grid grid-cols-3 gap-2">
               <template
                 v-if="
                   match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets
@@ -326,7 +347,7 @@ onMounted(async () => {
               </div>
             </div>
             <div
-              class="flex-1 text-center flex flex-wrap justify-center content-center self-stretch"
+              class="flex-1 text-center font-oswald flex flex-wrap justify-center content-center self-stretch"
               :class="[
                 'player-card relative rounded-xl',
                 currentPlayerId === players[1]?.id ? 'active' : 'inactive',
@@ -359,12 +380,14 @@ onMounted(async () => {
                       : '',
                   ]"
                 >
-                  <span class="total-darts text-gray-400" title="Total darts">{{
-                    (index + 1) * 3
-                  }}</span>
+                  <span
+                    class="total-darts text-gray-400 text-xs"
+                    title="Total darts"
+                    >{{ (index + 1) * 3 }}</span
+                  >
 
                   <span
-                    class="font-bold text-xs start-score text-center"
+                    class="font-bold text-sm start-score text-center"
                     title="Start score"
                     >({{ score.startScore }})
                   </span>
@@ -448,88 +471,23 @@ onMounted(async () => {
 
       <!-- Current Scores -->
 
-      <!-- Leg finish modal -->
-      <div
-        v-if="pendingLegWin"
-        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-      >
-        <div class="bg-gray-800 p-8 max-w-md w-full mx-auto text-center">
-          <h2 class="text-2xl font-bold mb-2">
-            {{ pendingLegWinnerName }} wint de leg!
-          </h2>
-          <p class="text-gray-300 mb-6">Hoeveel pijlen?</p>
-          <div class="flex flex-col gap-3">
-            <button
-              type="button"
-              class="btn-gray w-full py-3"
-              @click="confirmLegFinish(1)"
-            >
-              1 pijl
-            </button>
-            <button
-              type="button"
-              class="btn-gray w-full py-3"
-              @click="confirmLegFinish(2)"
-            >
-              2 pijlen
-            </button>
-            <button
-              type="button"
-              class="btn-gray w-full py-3"
-              @click="confirmLegFinish(3)"
-            >
-              3 pijlen
-            </button>
-            <div class="flex justify-start">
-              <button
-                type="button"
-                class="undo-button py-2 px-3 mt-2 text-sm text-white font-bold transition-colors duration-200"
-                title="Laatste worp ongedaan maken (Ctrl+Z)"
-                @click="undoLastTurn"
-              >
-                Undo
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <GamesX01DecisionModal
+        :visible="!!pendingLegWin"
+        :title="`${pendingLegWinnerName} wint de leg!`"
+        description="Hoeveel pijlen?"
+        :options="legFinishOptions"
+        @select="handleLegFinishSelect"
+        @undo="undoLastTurn"
+      />
 
-      <!-- Golden camel modal -->
-      <div
-        v-if="pendingGoldenCamel"
-        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-      >
-        <div class="bg-gray-800 p-8 max-w-md w-full mx-auto text-center">
-          <h2 class="text-2xl font-bold mb-2">Gouden kameel?</h2>
-          <p class="text-gray-300 mb-6">Was dit 20, 1 en 5?</p>
-          <div class="flex flex-col gap-3">
-            <button
-              type="button"
-              class="btn-gray w-full"
-              @click="confirmGoldenCamel(true)"
-            >
-              Ja, gouden kameel
-            </button>
-            <button
-              type="button"
-              class="btn-gray w-full"
-              @click="confirmGoldenCamel(false)"
-            >
-              Nee
-            </button>
-            <div class="flex justify-start">
-              <button
-                type="button"
-                class="undo-button py-2 px-3 mt-2 text-sm text-white font-bold transition-colors duration-200"
-                title="Laatste worp ongedaan maken (Ctrl+Z)"
-                @click="undoLastTurn"
-              >
-                Undo
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <GamesX01DecisionModal
+        :visible="!!pendingGoldenCamel"
+        title="Gouden kameel?"
+        description="Was dit 20, 1 en 5?"
+        :options="goldenCamelOptions"
+        @select="handleGoldenCamelSelect"
+        @undo="undoLastTurn"
+      />
 
       <!-- Game Over Modal -->
       <div
@@ -578,7 +536,6 @@ onMounted(async () => {
 
 .total-darts {
   width: 20px;
-  font-size: 0.625rem;
   line-height: 1;
 }
 
@@ -590,6 +547,8 @@ onMounted(async () => {
   flex: 1;
   text-align: right;
   padding-inline: 35px;
+  @apply font-oswald;
+  font-weight: 500;
 }
 
 .score-row--player-two .total-darts {

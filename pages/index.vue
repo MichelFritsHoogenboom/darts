@@ -3,6 +3,10 @@ const startNewGame = () => {
   navigateTo("/setup");
 };
 
+const startHead2Head = () => {
+  navigateTo("/head2head");
+};
+
 const {
   matches,
   unfinishedMatches,
@@ -16,52 +20,60 @@ onBeforeMount(async () => {
 });
 </script>
 <template>
-  <div class="max-w-4xl mx-auto">
-    <div class="flex gap-4 items-stretch">
-      <div
-        class="flex-1 player-card player-card--actionable inactive rounded-lg p-8 text-center mb-8"
-      >
-        <h2 class="text-2xl font-bold mb-6">X01 Friendly</h2>
-        <p class="text-gray-300 mb-8">
-          Set up your players and start a friendly game of darts.
-        </p>
+  <div
+    class="max-w-6xl mx-auto grid grid-cols-[minmax(0,1fr)_16rem] gap-6 items-start"
+  >
+    <div class="flex gap-4 items-stretch col-span-2">
+      <UiHomeModeCard
+        title="X01 Friendly"
+        description="Set up your players and start a friendly game of darts."
+        button-label="Quick Friendly"
+        actionable
+        @action="startNewGame"
+      />
 
-        <button
-          @click="startNewGame"
-          class="dartboard-button text-lg px-8 py-3 w-full"
-        >
-          Start New Game
-        </button>
-      </div>
-      <div class="flex-1 player-card inactive rounded-lg p-8 text-center mb-8">
-        <h2 class="text-2xl font-bold mb-6">Head to Head</h2>
-        <p class="text-gray-300 mb-8">
-          Start a rivalry between two players by setting up a head to head
-          competition.
-        </p>
+      <UiHomeModeCard
+        title="Head to Head"
+        description="Start a rivalry between two players by setting up a head to head competition."
+        button-label="Go Head to Head"
+        actionable
+        @action="startHead2Head"
+      />
 
-        <button
-          @click="startNewGame"
-          disabled
-          class="dartboard-button text-lg px-8 py-3 w-full"
-        >
-          Go Head to Head
-        </button>
-      </div>
+      <UiHomeModeCard
+        title="Tournaments"
+        description="Create, manage, and play tournaments while tracking standings and every match from start to finish."
+        button-label="Manage and play"
+        disabled
+      />
+      <UiHomeModeCard
+        title="Training"
+        description="Train your scoring, checkouts, and consistency with focused darts practice routines."
+        button-label="Start training"
+        disabled
+      />
     </div>
-    <div v-if="unfinishedMatches.length > 0" class="mb-6">
-      <h2 class="text-lg font-bold mb-2">Continue match</h2>
-
-      <div v-for="match in unfinishedMatches" :key="match.id" class="mb-4">
-        <StatsMatchSummary :match="match" />
+    <div class="flex flex-col gap-6">
+      <div v-if="unfinishedMatches.length > 0">
+        <h2 class="text-lg font-bold mb-2">Continue match</h2>
+        <div v-for="match in unfinishedMatches" :key="match.id" class="mb-4">
+          <StatsMatchSummary :match="match" />
+        </div>
       </div>
-    </div>
-    <div v-if="matches.length > 0">
-      <h2 class="text-lg font-bold mb-2">Last 5 matches</h2>
-
-      <div v-for="match in matches" :key="match.id" class="mb-4">
-        <StatsMatchSummary :match="match" />
+      <div v-if="matches.length > 0">
+        <h2 class="text-lg font-bold mb-2">Last 5 matches</h2>
+        <div v-for="match in matches" :key="match.id" class="mb-4">
+          <StatsMatchSummary :match="match" />
+        </div>
       </div>
+      <UiSummaryCardLayout v-else>
+        <template #center>
+          <div class="text-gray-400 text-sm text-center">
+            Nog geen wedstrijden gespeeld.
+          </div>
+        </template>
+      </UiSummaryCardLayout>
     </div>
+    <aside class="w-64 shrink-0 flex flex-col items-center gap-0 pt-4"></aside>
   </div>
 </template>
