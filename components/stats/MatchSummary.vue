@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { faPlay } from "~/assets/icons/faPlay";
 import type { Match } from "~/interfaces/match";
 import type { Set } from "~/interfaces/set";
 import type { Leg, PlayerLeg, Score } from "~/interfaces/leg";
@@ -151,7 +153,9 @@ onBeforeMount(async () => {
         :winner-id="match.winner"
         :show-badge="false"
       >
-        <span class="inline-block px-2 bg-gray-400/50 font-small font-bold rounded">
+        <span
+          class="inline-block px-2 bg-gray-400/50 font-small font-bold rounded"
+        >
           {{ players[0] ? getPlayerWinnerCount(players[0].id, matchGame) : 0 }}
           -
           {{ players[1] ? getPlayerWinnerCount(players[1].id, matchGame) : 0 }}
@@ -170,17 +174,9 @@ onBeforeMount(async () => {
       <NuxtLink
         v-if="!match.winner"
         :to="`/match/${match.id}`"
-        class="btn-gray flex items-center gap-2 min-h-[1.75rem]"
+        class="btn-gray flex items-center gap-2"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 640 640"
-          class="w-4 h-4 fill-current"
-        >
-          <path
-            d="M471.1 297.4C483.6 309.9 483.6 330.2 471.1 342.7L279.1 534.7C266.6 547.2 246.3 547.2 233.8 534.7C221.3 522.2 221.3 501.9 233.8 489.4L403.2 320L233.9 150.6C221.4 138.1 221.4 117.8 233.9 105.3C246.4 92.8 266.7 92.8 279.2 105.3L471.2 297.3z"
-          />
-        </svg>
+        <FontAwesomeIcon :icon="faPlay" class="w-4 h-4" />
       </NuxtLink>
     </template>
 

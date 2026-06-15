@@ -531,7 +531,7 @@ onMounted(async () => {
 }
 .score-card-container {
   max-height: 510px;
-  overflow: scroll;
+  overflow: auto;
 }
 
 .total-darts {

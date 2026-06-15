@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { createScoreRanges, type ScoreRanges } from "~/interfaces/stats";
 import type { Score } from "~/interfaces/leg";
 import type { PlayerStats } from "~/interfaces/stats";
-import { faCamel } from "~/utils/icons/faCamel";
+import { faCamel } from "~/assets/icons/faCamel";
 
 const matchId = inject<string>("matchId");
 
@@ -163,10 +163,7 @@ const lowScoresSum = computed(() => {
     <div>20 - 29</div>
     <div class="inline-flex flex-wrap items-center gap-x-1">
       <span>{{ playerStatsRef.scores["20-29"] }}</span>
-      <span
-        class="score-counts__camel-count"
-        title="Gouden kamelen"
-      >
+      <span class="score-counts__camel-count" title="Gouden kamelen">
         (<FontAwesomeIcon
           :icon="faCamel"
           class="score-counts__camel-icon"
@@ -177,10 +174,7 @@ const lowScoresSum = computed(() => {
     </div>
     <div class="inline-flex flex-wrap items-center gap-x-1">
       <span>{{ averagePerLeg(playerStatsRef.scores["20-29"]) }}</span>
-      <span
-        class="score-counts__camel-count"
-        title="Gouden kamelen per leg"
-      >
+      <span class="score-counts__camel-count" title="Gouden kamelen per leg">
         (<FontAwesomeIcon
           :icon="faCamel"
           class="score-counts__camel-icon"
