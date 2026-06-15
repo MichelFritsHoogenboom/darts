@@ -24,7 +24,7 @@ const { saveEdition, findHead2HeadCompetitionForPair } =
 
 const selectedPlayers = ref<string[]>([]);
 const amountMatches = ref(7);
-const useFixedConfig = ref(false);
+const useFixedConfig = ref(true);
 const matchConfig = ref({ ...defaultX01MatchConfig });
 const showPlayerForm = ref(false);
 const playerSelectorRef = ref<{ resetDropdown: () => void } | null>(null);
@@ -134,14 +134,18 @@ const createRivalry = async () => {
       </div>
 
       <div class="player-card inactive rounded-lg p-8 mb-6">
-        <FormCheckbox v-model="useFixedConfig">
+        <FormCheckbox v-model="useFixedConfig" disabled>
           <template #label
             >Vaste wedstrijdinstellingen voor dit seizoen</template
           >
         </FormCheckbox>
       </div>
 
-      <SetupX01MatchSetup v-if="useFixedConfig" v-model="matchConfig" />
+      <SetupX01MatchSetup
+        v-if="useFixedConfig"
+        v-model="matchConfig"
+        class="mb-6"
+      />
 
       <div
         v-if="duplicateCompetition"
