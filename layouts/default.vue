@@ -6,7 +6,7 @@
           <div>
             <NuxtLink to="/">
               <img
-                src="/assets/css/images/logo.svg"
+                src="~/assets/images/logo.svg"
                 alt="ADL Amateur Darts League Logo"
                 title="ADL Amateur Darts League"
                 class="h-8 w-auto filter brightness-0 invert"

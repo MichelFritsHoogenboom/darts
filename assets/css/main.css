@@ -27,7 +27,7 @@
   }
   .main-background::before {
   
-    background-image: url('./images/background.jpg');
+    background-image: url('../images/background.jpg');
     background-size: 100% auto;
     background-position: 0 -200px;
     background-repeat: no-repeat;
@@ -70,6 +70,7 @@
 
   .btn-gray {
     @apply text-base px-3 py-1 bg-gray-600 font-normal text-white hover:bg-gray-500 transition-colors whitespace-nowrap;
+    min-height: 2rem;
   }
   
   .score-input {

@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import type { Player } from "~/interfaces/player";
 
 import { createPlayerNameGetter } from "~/utils/player";
-import { faCamel } from "~/utils/icons/faCamel";
+import { faCamel } from "~/assets/icons/faCamel";
 
 const {
   playerId,
