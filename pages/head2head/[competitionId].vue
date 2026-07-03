@@ -154,7 +154,7 @@ const beginNewEdition = async () => {
           <UiDisplayHeader tag-size="h1" display-size="h1" emphasize>
             Seizoen {{ edition.editionNumber }}
           </UiDisplayHeader>
-          <UiDisplayHeader tag-size="h2" display-size="h3">
+          <UiDisplayHeader tag-size="h2" display-size="h4">
             {{ finishedCount }} / {{ amountMatches }} wedstrijden gespeeld
           </UiDisplayHeader>
 
@@ -183,7 +183,7 @@ const beginNewEdition = async () => {
           </div>
         </div>
 
-        <div class="side">
+        <div v-if="rivalryPlayers.length >= 2" class="side">
           <PlayerImage :player="rivalryPlayers[1]" :silhouette-index="1" />
         </div>
       </div>
@@ -261,7 +261,7 @@ const beginNewEdition = async () => {
     -45deg,
     rgb(55 65 81 / 0.04) 0%,
     rgb(55 65 81 / 0.01) 20%,
-    rgb(156 163 175 / 0.08) 50%,
+    rgb(156 163 175 / 0.12) 50%,
     rgb(55 65 81 / 0.01) 80%,
     rgb(55 65 81 / 0.04) 100%
   );

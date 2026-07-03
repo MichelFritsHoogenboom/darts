@@ -1,4 +1,3 @@
-import { ref, readonly, shallowReadonly } from "vue";
 import { CompetitionService } from "../database/CompetitionService";
 import { CompetitionEditionService } from "../database/CompetitionEditionService";
 import { MatchService } from "../database/MatchService";
@@ -25,7 +24,7 @@ export function useCompetitions() {
     error.value = null;
     try {
       const saved = await competitionService.upsert(
-        cloneCompetition(competition)
+        cloneCompetition(competition),
       );
       const index = competitions.value.findIndex((c) => c.id === saved.id);
       if (index > -1) {
@@ -60,9 +59,8 @@ export function useCompetitions() {
         const edition = await editionService.getCurrentEdition(competition.id);
         if (!edition) continue;
 
-        const matches = await matchService.getMatchesForCompetitionEdition(
-          edition
-        );
+        const matches =
+          await matchService.getMatchesForCompetitionEdition(edition);
         const editionStats = await getPlayerStatsForCompetitionEdition(
           edition.id,
         );
@@ -76,14 +74,14 @@ export function useCompetitions() {
         );
       }
 
-      items.sort(
-        (a, b) => b.lastActiveAt.getTime() - a.lastActiveAt.getTime()
-      );
+      items.sort((a, b) => b.lastActiveAt.getTime() - a.lastActiveAt.getTime());
 
       head2HeadOverview.value = items;
     } catch (err) {
       error.value =
-        err instanceof Error ? err.message : "Failed to load head2head overview";
+        err instanceof Error
+          ? err.message
+          : "Failed to load head2head overview";
       console.error(err);
     } finally {
       loading.value = false;
