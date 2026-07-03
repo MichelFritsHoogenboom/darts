@@ -58,8 +58,7 @@ onUnmounted(() => {
 
 <style scoped lang="scss">
 .player-image {
-  display: inline-block;
-  position: relative;
+  @apply block relative;
 
   .photo,
   .sizer {
@@ -67,12 +66,11 @@ onUnmounted(() => {
   }
 
   .sizer {
-    visibility: hidden;
+    @apply invisible;
   }
 
   .silhouette {
-    position: absolute;
-    inset: 0;
+    @apply absolute inset-0;
     background-color: color-mix(
       in srgb,
       theme("colors.gray.800") 50%,
@@ -82,10 +80,6 @@ onUnmounted(() => {
     mask-size: contain;
     mask-repeat: no-repeat;
     mask-position: center bottom;
-    -webkit-mask-image: var(--mask-image);
-    -webkit-mask-size: contain;
-    -webkit-mask-repeat: no-repeat;
-    -webkit-mask-position: center bottom;
   }
 }
 </style>
