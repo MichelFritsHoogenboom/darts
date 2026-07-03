@@ -154,12 +154,12 @@ const beginNewEdition = async () => {
         </div>
 
         <div class="text-center">
-          <div class="text-gray-400 text-sm mb-2">
+          <UiDisplayHeader tag-size="h1" display-size="h1" emphasize>
             Seizoen {{ edition.editionNumber }}
-          </div>
-          <div class="text-gray-400 text-sm mb-2">
-            {{ finishedCount }} / {{ amountMatches }} wedstrijden
-          </div>
+          </UiDisplayHeader>
+          <UiDisplayHeader tag-size="h2" display-size="h3">
+            {{ finishedCount }} / {{ amountMatches }} wedstrijden gespeeld
+          </UiDisplayHeader>
 
           <span
             class="inline-block px-4 py-2 bg-gray-400/50 font-bold rounded text-2xl"
@@ -221,13 +221,49 @@ const beginNewEdition = async () => {
 
 <style scoped lang="scss">
 .rivalry-header {
-  @apply grid grid-cols-[40%_20%_40%] items-center mb-6;
-  position: relative;
+  @apply grid grid-cols-[25%_50%_25%] items-center mb-6 py-0 relative mt-6 w-[90%] mx-auto;
+  @apply backdrop-blur-sm border-gray-600/25 shadow-md shadow-black/20;
+  background-color: rgb(31 41 55 / 0.7);
+  background-image: linear-gradient(
+    -45deg,
+    rgb(55 65 81 / 0.04) 0%,
+    rgb(55 65 81 / 0.01) 20%,
+    rgb(156 163 175 / 0.08) 50%,
+    rgb(55 65 81 / 0.01) 80%,
+    rgb(55 65 81 / 0.04) 100%
+  );
+  background-size: 300% 300%;
+  animation: rivalry-header-shift 20s ease-in-out infinite;
+
+  .text-center {
+    @apply relative -top-6;
+  }
 
   .player-image {
-    @apply h-56 w-auto;
+    @apply h-60 w-auto;
     position: absolute;
     bottom: 0;
+  }
+
+  :deep(.display-header.h1) {
+    @apply mb-3;
+  }
+}
+
+@keyframes rivalry-header-shift {
+  0%,
+  100% {
+    background-position: -100% 0%;
+  }
+
+  50% {
+    background-position: 200% 0%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rivalry-header {
+    animation: none;
   }
 }
 </style>
