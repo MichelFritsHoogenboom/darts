@@ -195,7 +195,7 @@ const beginNewEdition = async () => {
           :key="match.id"
           class="match-item"
         >
-          <StatsMatchSummary :match="match" />
+          <StatsMatchSummary :match="match" @deleted="loadDetail" />
         </div>
       </div>
 

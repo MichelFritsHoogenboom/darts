@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { faPlay } from "~/assets/icons/faPlay";
 import type { Match } from "~/interfaces/match";
 import type { Set } from "~/interfaces/set";
@@ -16,6 +17,10 @@ const { match, openDetails = false } = defineProps<{
   openDetails?: boolean;
 }>();
 
+const emit = defineEmits<{
+  deleted: [matchId: string];
+}>();
+
 const gameState = useGame(match);
 const { players } = gameState;
 const { matchGame, loadMatchGame } = useX01Game(match, gameState);
@@ -23,8 +28,12 @@ const { matchGame, loadMatchGame } = useX01Game(match, gameState);
 const { getLegsForSet, getLegsForMatch } = useLegs();
 const { getSetsForMatch } = useSets();
 const { getPlayerLegsForLeg } = usePlayerLegs();
-const { getScoresForPlayerLeg } = useScores();
+const { getScoresForPlayerLeg, getScoresForMatch } = useScores();
 const { getPlayerStatsForMatch } = usePlayerStats();
+const { deleteMatch } = useMatches();
+
+const deleting = ref(false);
+const hasScores = ref(true);
 
 // Load player stats for the match
 const matchPlayerStats = ref<PlayerStats[]>([]);
@@ -114,9 +123,27 @@ const loadLegsData = async () => {
   }
 };
 
+const deleteEmptyMatch = async () => {
+  if (hasScores.value || deleting.value) return;
+
+  deleting.value = true;
+  try {
+    await deleteMatch(match.id);
+    emit("deleted", match.id);
+  } catch (err) {
+    console.error("Failed to delete match:", err);
+  } finally {
+    deleting.value = false;
+  }
+};
+
 // Load data when component mounts
 onBeforeMount(async () => {
-  await loadLegsData();
+  const [scores] = await Promise.all([
+    getScoresForMatch(match.id),
+    loadLegsData(),
+  ]);
+  hasScores.value = scores.length > 0;
   matchPlayerStats.value = await getPlayerStatsForMatch(match.id);
 });
 </script>
@@ -178,6 +205,16 @@ onBeforeMount(async () => {
       >
         <FontAwesomeIcon :icon="faPlay" class="w-4 h-4" />
       </NuxtLink>
+      <button
+        v-if="!hasScores"
+        type="button"
+        class="btn-gray"
+        :disabled="deleting"
+        title="Verwijderen"
+        @click="deleteEmptyMatch"
+      >
+        <FontAwesomeIcon :icon="faTrash" class="w-4 h-4" />
+      </button>
     </template>
 
     <!-- Display sets with their legs when in sets mode -->

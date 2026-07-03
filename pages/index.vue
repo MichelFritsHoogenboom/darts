@@ -59,7 +59,7 @@ onBeforeMount(async () => {
           Continue match
         </UiDisplayHeader>
         <div v-for="match in unfinishedMatches" :key="match.id" class="mb-4">
-          <StatsMatchSummary :match="match" />
+          <StatsMatchSummary :match="match" @deleted="loadUnfinishedMatches" />
         </div>
       </div>
       <div v-if="matches.length > 0">
