@@ -16,7 +16,7 @@ defineEmits<{
   <div
     class="home-mode-card"
     :class="[
-      'card-panel inactive',
+      'card-panel',
       actionable ? 'card-panel--actionable' : '',
     ]"
   >

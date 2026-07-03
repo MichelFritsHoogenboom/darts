@@ -319,7 +319,7 @@ onMounted(async () => {
               class="flex-1 text-center font-oswald flex flex-wrap justify-center content-center self-stretch"
               :class="[
                 'card-panel relative rounded-xl',
-                currentPlayerId === players[0]?.id ? 'active' : 'inactive',
+                currentPlayerId === players[0]?.id ? 'active' : '',
               ]"
             >
               <div class="text-5xl font-bold text-white">
@@ -332,7 +332,7 @@ onMounted(async () => {
                   match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets
                 "
               >
-                <div class="card-panel rounded-xl inactive text-3xl font-bold">
+                <div class="card-panel rounded-xl text-3xl font-bold">
                   {{ getPlayerWinnerCount(players[0]?.id, matchGame) }}
                 </div>
                 <div
@@ -340,12 +340,12 @@ onMounted(async () => {
                 >
                   Sets
                 </div>
-                <div class="card-panel rounded-xl inactive text-3xl font-bold">
+                <div class="card-panel rounded-xl text-3xl font-bold">
                   {{ getPlayerWinnerCount(players[1]?.id, matchGame) }}
                 </div>
               </template>
               <div
-                class="card-panel rounded-xl inactive text-3xl font-bold flex items-center justify-center"
+                class="card-panel rounded-xl text-3xl font-bold flex items-center justify-center"
               >
                 {{ getPlayerWinnerCount(players[0]?.id, legsToDisplay) }}
               </div>
@@ -355,7 +355,7 @@ onMounted(async () => {
                 Legs
               </div>
               <div
-                class="card-panel rounded-xl inactive text-3xl font-bold flex items-center justify-center"
+                class="card-panel rounded-xl text-3xl font-bold flex items-center justify-center"
               >
                 {{ getPlayerWinnerCount(players[1]?.id, legsToDisplay) }}
               </div>
@@ -364,7 +364,7 @@ onMounted(async () => {
               class="flex-1 text-center font-oswald flex flex-wrap justify-center content-center self-stretch"
               :class="[
                 'card-panel relative rounded-xl',
-                currentPlayerId === players[1]?.id ? 'active' : 'inactive',
+                currentPlayerId === players[1]?.id ? 'active' : '',
               ]"
             >
               <div class="text-5xl font-bold text-white mb-2">

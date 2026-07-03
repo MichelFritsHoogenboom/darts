@@ -144,7 +144,9 @@ const beginNewEdition = async () => {
     </div>
 
     <div v-else-if="edition" class="max-w-4xl mx-auto">
-      <div class="grid grid-cols-[40%_20%_40%] items-center mb-6 card-panel">
+      <div
+        class="grid grid-cols-[40%_20%_40%] items-center mb-6 card-panel"
+      >
         <div v-if="rivalryPlayers.length >= 2" class="flex justify-center">
           <img
             :src="getPlayerImageUrl(0)"

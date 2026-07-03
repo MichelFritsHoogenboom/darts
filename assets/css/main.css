@@ -82,15 +82,11 @@
   }
   
   .card-panel {    
-    @apply bg-gray-800  p-4 border-2 transition-all duration-300 rounded-lg; 
+    @apply bg-gray-800 p-4 border-2 border-gray-600 transition-all duration-300 rounded-lg; 
   }
   
-  .card-panel.active, .card-panel--actionable.inactive:hover {
+  .card-panel.active, .card-panel--actionable:hover {
     @apply border-dartboard-red shadow-lg shadow-red-500/20;
-  }
-  
-  .card-panel.inactive {
-    @apply border-gray-600;
   }
 
 
