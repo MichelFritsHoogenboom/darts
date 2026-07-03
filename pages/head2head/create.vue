@@ -127,13 +127,13 @@ const createRivalry = async () => {
         @remove-player="removePlayer"
       />
 
-      <div class="player-card inactive rounded-lg p-8 mb-6">
+      <div class="card-panel inactive rounded-lg p-8 mb-6">
         <FormSelect v-model="amountMatches" :options="AMOUNT_MATCH_OPTIONS">
           <template #label>Aantal wedstrijden</template>
         </FormSelect>
       </div>
 
-      <div class="player-card inactive rounded-lg p-8 mb-6">
+      <div class="card-panel inactive rounded-lg p-8 mb-6">
         <FormCheckbox v-model="useFixedConfig" disabled>
           <template #label
             >Vaste wedstrijdinstellingen voor dit seizoen</template

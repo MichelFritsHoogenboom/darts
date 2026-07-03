@@ -318,7 +318,7 @@ onMounted(async () => {
             <div
               class="flex-1 text-center font-oswald flex flex-wrap justify-center content-center self-stretch"
               :class="[
-                'player-card relative rounded-xl',
+                'card-panel relative rounded-xl',
                 currentPlayerId === players[0]?.id ? 'active' : 'inactive',
               ]"
             >
@@ -332,7 +332,7 @@ onMounted(async () => {
                   match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets
                 "
               >
-                <div class="player-card rounded-xl inactive text-3xl font-bold">
+                <div class="card-panel rounded-xl inactive text-3xl font-bold">
                   {{ getPlayerWinnerCount(players[0]?.id, matchGame) }}
                 </div>
                 <div
@@ -340,12 +340,12 @@ onMounted(async () => {
                 >
                   Sets
                 </div>
-                <div class="player-card rounded-xl inactive text-3xl font-bold">
+                <div class="card-panel rounded-xl inactive text-3xl font-bold">
                   {{ getPlayerWinnerCount(players[1]?.id, matchGame) }}
                 </div>
               </template>
               <div
-                class="player-card rounded-xl inactive text-3xl font-bold flex items-center justify-center"
+                class="card-panel rounded-xl inactive text-3xl font-bold flex items-center justify-center"
               >
                 {{ getPlayerWinnerCount(players[0]?.id, legsToDisplay) }}
               </div>
@@ -355,7 +355,7 @@ onMounted(async () => {
                 Legs
               </div>
               <div
-                class="player-card rounded-xl inactive text-3xl font-bold flex items-center justify-center"
+                class="card-panel rounded-xl inactive text-3xl font-bold flex items-center justify-center"
               >
                 {{ getPlayerWinnerCount(players[1]?.id, legsToDisplay) }}
               </div>
@@ -363,7 +363,7 @@ onMounted(async () => {
             <div
               class="flex-1 text-center font-oswald flex flex-wrap justify-center content-center self-stretch"
               :class="[
-                'player-card relative rounded-xl',
+                'card-panel relative rounded-xl',
                 currentPlayerId === players[1]?.id ? 'active' : 'inactive',
               ]"
             >
@@ -593,7 +593,7 @@ onMounted(async () => {
   background-color: #5a6fa0;
 }
 
-.score-board .player-card {
+.score-board .card-panel {
   line-height: unset;
 }
 

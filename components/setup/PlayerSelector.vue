@@ -68,7 +68,7 @@ defineExpose({
 </script>
 
 <template>
-  <div class="player-card inactive rounded-lg p-8 mb-6">
+  <div class="card-panel inactive rounded-lg p-8 mb-6">
     <h2 class="text-2xl font-bold mb-6">Players</h2>
 
     <!-- Loading State -->
