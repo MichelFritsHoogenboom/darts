@@ -185,6 +185,30 @@ export function useCompetitionEditions() {
     return stats;
   };
 
+  const getEdition = async (editionId: string) => {
+    return await editionService.get(editionId);
+  };
+
+  const getEditionSetupPath = async (editionId: string) => {
+    const edition = await getEdition(editionId);
+    if (!edition) return undefined;
+
+    return `/head2head/${edition.competitionId}/setup`;
+  };
+
+  const removeMatchFromEdition = async (match: Match) => {
+    if (!match.competitionEditionId) return;
+
+    const edition = await getEdition(match.competitionEditionId);
+    if (!edition) return;
+
+    const updatedEdition = cloneCompetitionEdition(edition);
+    updatedEdition.matches = updatedEdition.matches.filter(
+      (id) => id !== match.id,
+    );
+    await saveEdition(updatedEdition);
+  };
+
   const onEditionMatchFinished = async (match: Match): Promise<{
     editionComplete: boolean;
     competitionId?: string;
@@ -193,7 +217,7 @@ export function useCompetitionEditions() {
       return { editionComplete: false };
     }
 
-    const edition = await editionService.get(match.competitionEditionId);
+    const edition = await getEdition(match.competitionEditionId);
     if (!edition) return { editionComplete: false };
 
     const competition = await competitionService.get(edition.competitionId);
@@ -229,6 +253,8 @@ export function useCompetitionEditions() {
     loading: readonly(loading),
     error: readonly(error),
     saveEdition,
+    getEditionSetupPath,
+    removeMatchFromEdition,
     getEditionsForCompetition,
     getCurrentEdition,
     findHead2HeadCompetitionForPair,

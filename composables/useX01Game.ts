@@ -444,17 +444,21 @@ export const useX01Game = (
   };
 
   // Async initialization function
-  const initializeMatch = async () => {
+  const initializeMatch = async (startingPlayerId?: string) => {
     // Initialize currentSet if needed
     await loadMatchGame();
 
     if (matchGame.value.length === 0) {
+      if (!startingPlayerId) return;
+
+      currentPlayerId.value = startingPlayerId;
+
       if (match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets) {
-        currentSet.value = await createNewSet();
+        currentSet.value = await createNewSet(startingPlayerId);
       }
 
       // Initialize currentLeg
-      currentLeg.value = await createNewleg();
+      currentLeg.value = await createNewleg(startingPlayerId);
 
       // Push IDs to match.game (which stores IDs)
       match.game.push(

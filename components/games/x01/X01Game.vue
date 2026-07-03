@@ -4,7 +4,7 @@ import type { Score } from "~/interfaces/leg";
 
 import { X01_GAME_PLAYED_IN } from "~/interfaces/x01MatchConfig";
 import { getPlayerWinnerCount } from "~/utils/match";
-import { getPlayerDisplayName } from "~/utils/player";
+import { getPlayerDisplayName, getPlayerFullName } from "~/utils/player";
 
 import PlayerComponent from "~/components/games/x01/PlayerComponent.vue";
 const { match } = defineProps<{ match: Match }>();
@@ -48,7 +48,12 @@ const {
 } = useX01Game(match, gameState);
 
 const { getScoresForMatch } = useScores();
+const { deleteMatch } = useMatches();
+const { getEditionSetupPath } = useCompetitionEditions();
 const { $listen, $unlisten } = useNuxtApp();
+
+const pendingStartingPlayer = ref(false);
+const setupBackPath = ref("/setup");
 
 const camelLeaderPlayerId = ref<string | null>(null);
 
@@ -80,7 +85,10 @@ const refreshCamelLeader = async () => {
 };
 
 const scoreInputBlocked = computed(
-  () => !!pendingLegWin.value || !!pendingGoldenCamel.value,
+  () =>
+    pendingStartingPlayer.value ||
+    !!pendingLegWin.value ||
+    !!pendingGoldenCamel.value,
 );
 
 const pendingLegWinnerName = computed(() =>
@@ -99,6 +107,26 @@ const goldenCamelOptions = [
   { label: "Ja, gouden kameel", value: true },
   { label: "Nee", value: false },
 ];
+
+const startingPlayerOptions = computed(() =>
+  players.value.map((player) => ({
+    label: getPlayerFullName(player),
+    value: player.id,
+  })),
+);
+
+const handleStartingPlayerSelect = async (value: string | number | boolean) => {
+  if (typeof value !== "string") return;
+
+  pendingStartingPlayer.value = false;
+  await initializeMatch(value);
+};
+
+const handleStartingPlayerBack = async () => {
+  pendingStartingPlayer.value = false;
+  await deleteMatch(match.id);
+  await navigateTo(setupBackPath.value);
+};
 
 const handleLegFinishSelect = (value: string | number | boolean) => {
   if (value === 1 || value === 2 || value === 3) {
@@ -273,9 +301,23 @@ const returnToHead2Head = async () => {
 };
 
 // Initialize match after players are loaded (onMounted runs after onBeforeMount)
+onBeforeMount(async () => {
+  if (match.competitionEditionId) {
+    const path = await getEditionSetupPath(match.competitionEditionId);
+    if (path) {
+      setupBackPath.value = path;
+    }
+  }
+});
+
 onMounted(async () => {
-  await initializeMatch();
-  await refreshCamelLeader();
+  await loadMatchGame();
+  if (matchGame.value.length === 0) {
+    pendingStartingPlayer.value = true;
+  } else {
+    await initializeMatch();
+    await refreshCamelLeader();
+  }
 });
 </script>
 
@@ -484,6 +526,16 @@ onMounted(async () => {
       <!-- Match Status -->
 
       <!-- Current Scores -->
+
+      <GamesX01DecisionModal
+        :visible="pendingStartingPlayer"
+        title="Start wedstrijd"
+        description="Wie heeft de bull gewonnen?"
+        :options="startingPlayerOptions"
+        undo-label="Terug"
+        @select="handleStartingPlayerSelect"
+        @undo="handleStartingPlayerBack"
+      />
 
       <GamesX01DecisionModal
         :visible="!!pendingLegWin"
