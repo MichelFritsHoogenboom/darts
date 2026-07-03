@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import type { Match } from "~/interfaces/match";
 import type { Player } from "~/interfaces/player";
+import type { PlayerStats } from "~/interfaces/stats";
 import type { CompetitionEdition } from "~/interfaces/competition";
 import { canStartNewMatch, computeEditionStandings } from "~/utils/rivalry";
-import { getPlayerFullName } from "~/utils/player";
 
 definePageMeta({
   layout: false,
@@ -17,6 +17,7 @@ const {
   getCurrentEdition,
   createH2HMatch,
   startNewEdition,
+  loadEditionPlayerStats,
   loading: editionLoading,
 } = useCompetitionEditions();
 const { getMatchesByIds } = useMatches();
@@ -26,6 +27,7 @@ const competition = ref<Awaited<ReturnType<typeof getCompetition>>>();
 const edition = ref<CompetitionEdition>();
 const matches = ref<Match[]>([]);
 const rivalryPlayers = ref<Player[]>([]);
+const loadedEditionPlayerStats = ref<PlayerStats[]>([]);
 const showChampionOverlay = ref(false);
 const startingMatch = ref(false);
 
@@ -50,6 +52,10 @@ const loadDetail = async () => {
   rivalryPlayers.value = (players.value as Player[]).filter((p) =>
     current.playerIds.includes(p.id),
   );
+
+  const loaded = await loadEditionPlayerStats(edition.value, matches.value);
+  edition.value.playerStats = loaded.map((s) => s.id);
+  loadedEditionPlayerStats.value = loaded;
 };
 
 onBeforeMount(async () => {
@@ -118,14 +124,6 @@ const startMatch = async () => {
   }
 };
 
-const DEFAULT_PLAYER_IMAGES = [
-  "https://images.gc.pdcservices.co.uk/fit-in/600x600/7843dbf0-f21a-11f0-a2b2-337f630ef140.png",
-  "https://images.gc.pdcservices.co.uk/fit-in/600x600/f62e2ac0-f233-11f0-b992-c9679735a32e.png",
-] as const;
-
-const getPlayerImageUrl = (index: number) =>
-  DEFAULT_PLAYER_IMAGES[index] ?? DEFAULT_PLAYER_IMAGES[0];
-
 const beginNewEdition = async () => {
   if (!edition.value) return;
   await startNewEdition(competitionId.value, edition.value);
@@ -136,24 +134,18 @@ const beginNewEdition = async () => {
 <template>
   <NuxtLayout name="default">
     <template #title>
-      <h1 class="text-xl font-bold text-white mb-2">{{ pageTitle }}</h1>
+      <h1 class="page-title">{{ pageTitle }}</h1>
     </template>
 
-    <div v-if="editionLoading && !edition" class="text-center text-gray-400">
-      Laden...
-    </div>
+    <div v-if="editionLoading && !edition" class="loading">Laden...</div>
 
-    <div v-else-if="edition" class="max-w-4xl mx-auto">
+    <div v-else-if="edition" class="page-content">
       <div class="card-panel rivalry-header">
-        <div v-if="rivalryPlayers.length >= 2" class="flex justify-center">
-          <img
-            :src="getPlayerImageUrl(0)"
-            :alt="getPlayerFullName(rivalryPlayers[0])"
-            class="player-image"
-          />
+        <div v-if="rivalryPlayers.length >= 2" class="side">
+          <PlayerImage :player="rivalryPlayers[0]" :silhouette-index="0" />
         </div>
 
-        <div class="text-center">
+        <div class="content">
           <UiDisplayHeader tag-size="h1" display-size="h1" emphasize>
             Seizoen {{ edition.editionNumber }}
           </UiDisplayHeader>
@@ -161,12 +153,18 @@ const beginNewEdition = async () => {
             {{ finishedCount }} / {{ amountMatches }} wedstrijden gespeeld
           </UiDisplayHeader>
 
-          <span
-            class="inline-block px-4 py-2 bg-gray-400/50 font-bold rounded text-2xl"
+          <StatsPlayersWithCenter
+            v-if="rivalryPlayers.length >= 2"
+            class="stats"
+            size="xlarge"
+            :players="rivalryPlayers"
+            :player-stats="loadedEditionPlayerStats"
+            :winner-id="edition.winner"
+            :show-badge="true"
           >
-            {{ winsDisplay }}
-          </span>
-          <div class="mt-4 justify-center flex gap-4">
+            <span class="wins">{{ winsDisplay }}</span>
+          </StatsPlayersWithCenter>
+          <div class="actions">
             <FormButton
               v-if="showStartMatch"
               :disabled="startingMatch"
@@ -180,33 +178,35 @@ const beginNewEdition = async () => {
           </div>
         </div>
 
-        <div class="flex justify-center">
-          <img
-            :src="getPlayerImageUrl(1)"
-            :alt="getPlayerFullName(rivalryPlayers[1])"
-            class="player-image"
-          />
+        <div class="side">
+          <PlayerImage :player="rivalryPlayers[1]" :silhouette-index="1" />
         </div>
       </div>
 
-      <div v-if="unfinishedMatches.length > 0" class="mb-6">
-        <h2 class="text-lg font-bold mb-2">Wedstrijd hervatten</h2>
-        <div v-for="match in unfinishedMatches" :key="match.id" class="mb-4">
+      <div v-if="unfinishedMatches.length > 0" class="section">
+        <h2 class="section-title">Wedstrijd hervatten</h2>
+        <div
+          v-for="match in unfinishedMatches"
+          :key="match.id"
+          class="match-item"
+        >
           <StatsMatchSummary :match="match" />
         </div>
       </div>
 
       <div v-if="finishedMatches.length > 0">
-        <h2 class="text-lg font-bold mb-2">Wedstrijden</h2>
-        <div v-for="match in finishedMatches" :key="match.id" class="mb-4">
+        <h2 class="section-title">Wedstrijden</h2>
+        <div
+          v-for="match in finishedMatches"
+          :key="match.id"
+          class="match-item"
+        >
           <StatsMatchSummary :match="match" />
         </div>
       </div>
       <UiSummaryCardLayout v-else>
         <template #center>
-          <div class="text-gray-400 text-sm text-center">
-            Nog geen wedstrijden afgerond.
-          </div>
+          <div class="empty-state">Nog geen wedstrijden afgerond.</div>
         </template>
       </UiSummaryCardLayout>
 
@@ -220,6 +220,34 @@ const beginNewEdition = async () => {
 </template>
 
 <style scoped lang="scss">
+.page-title {
+  @apply text-xl font-bold text-white mb-2;
+}
+
+.loading {
+  @apply text-center text-gray-400;
+}
+
+.page-content {
+  @apply max-w-4xl mx-auto;
+}
+
+.section {
+  @apply mb-6;
+}
+
+.section-title {
+  @apply text-lg font-bold mb-2;
+}
+
+.match-item {
+  @apply mb-4;
+}
+
+.empty-state {
+  @apply text-gray-400 text-sm text-center;
+}
+
 .rivalry-header {
   @apply grid grid-cols-[25%_50%_25%] items-center mb-6 py-0 relative mt-6 w-[90%] mx-auto;
   @apply backdrop-blur-sm border-gray-600/25 shadow-md shadow-black/20;
@@ -235,14 +263,28 @@ const beginNewEdition = async () => {
   background-size: 300% 300%;
   animation: rivalry-header-shift 20s ease-in-out infinite;
 
-  .text-center {
-    @apply relative -top-6;
+  .side {
+    @apply flex justify-center;
   }
 
-  .player-image {
-    @apply h-60 w-auto;
-    position: absolute;
-    bottom: 0;
+  :deep(.player-image) {
+    @apply absolute bottom-0;
+  }
+
+  .content {
+    @apply text-center relative -top-6;
+  }
+
+  .stats {
+    @apply my-7;
+  }
+
+  .wins {
+    @apply inline-block px-4 py-2 bg-gray-400/50 font-bold rounded text-2xl;
+  }
+
+  .actions {
+    @apply mt-4 justify-center flex gap-4;
   }
 
   :deep(.display-header.h1) {

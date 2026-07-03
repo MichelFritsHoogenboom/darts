@@ -8,12 +8,14 @@ import {
 } from "../interfaces/competition";
 import { createMatch, GAME_TYPES } from "../interfaces/match";
 import { defaultX01MatchConfig } from "../interfaces/x01MatchConfig";
+import type { PlayerStats } from "../interfaces/stats";
 import { createPlayerStats } from "../interfaces/stats";
 import {
   getEditionMatchWinner,
   isEditionComplete,
   sortPlayerIds,
 } from "../utils/rivalry";
+import { calculateThreeDartAverage } from "../utils/averages";
 import type { Match } from "../interfaces/match";
 import type { x01MatchConfig } from "../interfaces/x01MatchConfig";
 import { toRaw } from "vue";
@@ -128,6 +130,67 @@ export function useCompetitionEditions() {
     return savedMatch;
   };
 
+  const ensureEditionPlayerStats = async (
+    edition: CompetitionEdition,
+  ): Promise<CompetitionEdition> => {
+    if (edition.playerStats.length >= edition.playerIds.length) {
+      return edition;
+    }
+
+    const editionToSave = cloneCompetitionEdition(edition);
+    const statsIds = await Promise.all(
+      edition.playerIds.map((playerId) =>
+        createPlayerStats({ playerId }).then((stats) => stats.id),
+      ),
+    );
+    editionToSave.playerStats = statsIds;
+    return await saveEdition(editionToSave);
+  };
+
+  const updateEditionPlayerStatsAverages = async (
+    edition: CompetitionEdition,
+    matches: Match[],
+  ): Promise<void> => {
+    const { getPlayerStatsById, savePlayerStats } = usePlayerStats();
+    const { getScoresForMatch } = useScores();
+    const editionMatchIds = new Set(edition.matches);
+
+    for (const statsId of edition.playerStats) {
+      const stat = await getPlayerStatsById(statsId);
+      if (!stat) continue;
+
+      const allScores = (
+        await Promise.all(
+          matches
+            .filter((match) => editionMatchIds.has(match.id))
+            .map((match) => getScoresForMatch(match.id)),
+        )
+      )
+        .flat()
+        .filter((score) => score.playerId === stat.playerId);
+
+      stat.average = calculateThreeDartAverage(allScores);
+      await savePlayerStats(stat);
+    }
+  };
+
+  const loadEditionPlayerStats = async (
+    edition: CompetitionEdition,
+    matches: Match[],
+  ): Promise<PlayerStats[]> => {
+    const editionWithStats = await ensureEditionPlayerStats(edition);
+    await updateEditionPlayerStatsAverages(editionWithStats, matches);
+
+    const { getPlayerStatsById } = usePlayerStats();
+    return (
+      await Promise.all(
+        editionWithStats.playerStats.map((statsId) =>
+          getPlayerStatsById(statsId),
+        ),
+      )
+    ).filter((stat): stat is PlayerStats => stat !== undefined);
+  };
+
   const onEditionMatchFinished = async (match: Match): Promise<{
     editionComplete: boolean;
     competitionId?: string;
@@ -152,7 +215,9 @@ export function useCompetitionEditions() {
       }
     }
 
-    await saveEdition(editionToSave);
+    const savedEdition = await saveEdition(editionToSave);
+    const editionWithStats = await ensureEditionPlayerStats(savedEdition);
+    await updateEditionPlayerStatsAverages(editionWithStats, matches);
     await competitionService.upsert(cloneCompetition(competition));
 
     return {
@@ -170,6 +235,7 @@ export function useCompetitionEditions() {
     findHead2HeadCompetitionForPair,
     startNewEdition,
     createH2HMatch,
+    loadEditionPlayerStats,
     onEditionMatchFinished,
   };
 }
