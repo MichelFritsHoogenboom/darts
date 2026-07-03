@@ -1,4 +1,4 @@
-import { ref, readonly } from "vue";
+import { ref, readonly, shallowReadonly } from "vue";
 import { CompetitionService } from "../database/CompetitionService";
 import { CompetitionEditionService } from "../database/CompetitionEditionService";
 import { MatchService } from "../database/MatchService";
@@ -14,6 +14,7 @@ const editionService = new CompetitionEditionService();
 const matchService = new MatchService();
 
 export function useCompetitions() {
+  const { getPlayerStatsForCompetitionEdition } = usePlayerStats();
   const competitions = ref<Competition[]>([]);
   const head2HeadOverview = ref<Head2HeadOverviewItem[]>([]);
   const loading = ref(false);
@@ -62,7 +63,17 @@ export function useCompetitions() {
         const matches = await matchService.getMatchesForCompetitionEdition(
           edition
         );
-        items.push(buildHead2HeadOverviewItem(competition, edition, matches));
+        const editionStats = await getPlayerStatsForCompetitionEdition(
+          edition.id,
+        );
+        items.push(
+          buildHead2HeadOverviewItem(
+            competition,
+            edition,
+            matches,
+            editionStats,
+          ),
+        );
       }
 
       items.sort(
@@ -81,7 +92,7 @@ export function useCompetitions() {
 
   return {
     competitions: readonly(competitions),
-    head2HeadOverview: readonly(head2HeadOverview),
+    head2HeadOverview: shallowReadonly(head2HeadOverview),
     loading: readonly(loading),
     error: readonly(error),
     saveCompetition,

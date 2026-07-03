@@ -1,5 +1,6 @@
 import type { Match } from "~/interfaces/match";
 import type { PlayerStats } from "~/interfaces/stats";
+import { getPlayerIdsFromStats } from "~/utils/player";
 
 export const useGame = (match: Match) => {
   //composables
@@ -80,7 +81,7 @@ export const useGame = (match: Match) => {
     }
 
     // Load players using playerIds from PlayerStats (maintaining order)
-    const playerIds = playerStats.value.map((stat) => stat.playerId);
+    const playerIds = getPlayerIdsFromStats(playerStats.value);
     if (playerIds.length > 0) {
       await loadPlayers(playerIds);
     }

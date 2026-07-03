@@ -10,6 +10,7 @@ import type { Score } from "~/interfaces/leg";
 
 // utils
 import { getPlayerWinnerCount } from "~/utils/match";
+import { getPlayerIdsFromStats } from "~/utils/player";
 
 //factories
 import { createSet } from "~/interfaces/set";
@@ -134,8 +135,7 @@ export const useX01Game = (
   const matchGame = ref<Set[] | Leg[]>([]);
 
   const playerIds = computed(() => {
-    // Use playerStats to get playerIds (loaded in onBeforeMount, so always available)
-    return playerStats?.value?.map((stat) => stat.playerId) ?? [];
+    return getPlayerIdsFromStats(playerStats?.value ?? []);
   });
 
   const isValidScore = computed(() => {

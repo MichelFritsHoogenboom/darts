@@ -1,4 +1,5 @@
 import type { Player } from "~/interfaces/player";
+import type { PlayerStats } from "~/interfaces/stats";
 
 const DEFAULT_PLAYER_SILHOUETTES = [
   "https://images.gc.pdcservices.co.uk/fit-in/600x600/7843dbf0-f21a-11f0-a2b2-337f630ef140.png",
@@ -13,6 +14,12 @@ export function getPlayerSilhouetteUrl(silhouetteIndex: number): string {
   return (
     DEFAULT_PLAYER_SILHOUETTES[silhouetteIndex] ?? DEFAULT_PLAYER_SILHOUETTES[0]
   );
+}
+
+export function getPlayerIdsFromStats(
+  playerStats: readonly Pick<PlayerStats, "playerId">[],
+): string[] {
+  return playerStats.map((stat) => stat.playerId);
 }
 
 /**

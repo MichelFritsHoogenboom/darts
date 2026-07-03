@@ -131,6 +131,30 @@ export const usePlayerStats = () => {
     }
   };
 
+  const getPlayerStatsForCompetitionEdition = async (
+    competitionEditionId: string,
+  ): Promise<PlayerStats[]> => {
+    loading.value = true;
+    error.value = null;
+    try {
+      return await playerStatsService.getPlayerStatsForCompetitionEdition(
+        competitionEditionId,
+      );
+    } catch (err) {
+      error.value =
+        err instanceof Error
+          ? err.message
+          : "Failed to load player stats for competition edition";
+      console.error(
+        "Error loading player stats for competition edition:",
+        err,
+      );
+      return [];
+    } finally {
+      loading.value = false;
+    }
+  };
+
   const savePlayerStats = async (
     stats: PlayerStats
   ): Promise<PlayerStats | null> => {
@@ -184,6 +208,7 @@ export const usePlayerStats = () => {
     getPlayerStatsForPlayer,
     getPlayerStatsForMatch,
     getPlayerStatsForSet,
+    getPlayerStatsForCompetitionEdition,
     savePlayerStats,
     deletePlayerStats,
   };

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { defaultX01MatchConfig } from "~/interfaces/x01MatchConfig";
 import type { Player } from "~/interfaces/player";
-import { getPlayerFullName } from "~/utils/player";
+import type { PlayerStats } from "~/interfaces/stats";
+import { getPlayerFullName, getPlayerIdsFromStats } from "~/utils/player";
 
 definePageMeta({
   layout: false,
@@ -12,11 +13,12 @@ const competitionId = computed(() => route.params.competitionId as string);
 
 const { getCompetition } = useCompetitions();
 const { getCurrentEdition, createH2HMatch } = useCompetitionEditions();
+const { getPlayerStatsForCompetitionEdition } = usePlayerStats();
 const { loadPlayers, players } = usePlayers();
 
 const matchConfig = ref({ ...defaultX01MatchConfig });
 const saving = ref(false);
-const editionPlayerIds = ref<string[]>([]);
+const editionPlayerStats = ref<PlayerStats[]>([]);
 
 onBeforeMount(async () => {
   const competition = await getCompetition(competitionId.value);
@@ -31,14 +33,16 @@ onBeforeMount(async () => {
     return;
   }
 
-  editionPlayerIds.value = [...edition.playerIds];
-  await loadPlayers(editionPlayerIds.value);
+  editionPlayerStats.value = await getPlayerStatsForCompetitionEdition(
+    edition.id,
+  );
+  await loadPlayers(getPlayerIdsFromStats(editionPlayerStats.value));
 });
 
 const editionPlayers = computed(() =>
-  editionPlayerIds.value
+  getPlayerIdsFromStats(editionPlayerStats.value)
     .map((id) => (players.value as Player[]).find((p) => p.id === id))
-    .filter((p): p is Player => p !== undefined)
+    .filter((p): p is Player => p !== undefined),
 );
 
 const startMatch = async () => {

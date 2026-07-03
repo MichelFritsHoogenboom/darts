@@ -4,6 +4,7 @@ import type { Player } from "~/interfaces/player";
 import type { PlayerStats } from "~/interfaces/stats";
 import type { CompetitionEdition } from "~/interfaces/competition";
 import { canStartNewMatch, computeEditionStandings } from "~/utils/rivalry";
+import { getPlayerIdsFromStats } from "~/utils/player";
 
 definePageMeta({
   layout: false,
@@ -48,14 +49,14 @@ const loadDetail = async () => {
   matches.value = await getMatchesByIds([...current.matches]);
   matches.value.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
 
-  await loadPlayers([...current.playerIds]);
-  rivalryPlayers.value = (players.value as Player[]).filter((p) =>
-    current.playerIds.includes(p.id),
-  );
-
   const loaded = await loadEditionPlayerStats(edition.value, matches.value);
-  edition.value.playerStats = loaded.map((s) => s.id);
   loadedEditionPlayerStats.value = loaded;
+
+  const playerIds = getPlayerIdsFromStats(loaded);
+  await loadPlayers([...playerIds]);
+  rivalryPlayers.value = (players.value as Player[]).filter((p) =>
+    playerIds.includes(p.id),
+  );
 };
 
 onBeforeMount(async () => {
@@ -71,7 +72,11 @@ onBeforeMount(async () => {
 
 const standings = computed(() => {
   if (!edition.value) return {};
-  return computeEditionStandings(edition.value, matches.value);
+  return computeEditionStandings(
+    edition.value,
+    matches.value,
+    getPlayerIdsFromStats(loadedEditionPlayerStats.value),
+  );
 });
 
 const unfinishedMatches = computed(() =>
@@ -96,7 +101,7 @@ const showStartEdition = computed(() => !!edition.value?.winner);
 
 const winsDisplay = computed(() => {
   if (!edition.value || rivalryPlayers.value.length < 2) return "0 - 0";
-  const [a, b] = edition.value.playerIds;
+  const [a, b] = getPlayerIdsFromStats(loadedEditionPlayerStats.value);
   return `${standings.value[a] ?? 0} - ${standings.value[b] ?? 0}`;
 });
 

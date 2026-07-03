@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Player } from "~/interfaces/player";
+import { getPlayerIdsFromStats } from "~/utils/player";
 
 definePageMeta({
   layout: false,
@@ -15,7 +16,7 @@ onBeforeMount(async () => {
   await loadHead2HeadOverview();
   const ids = new Set<string>();
   for (const item of head2HeadOverview.value) {
-    for (const id of item.edition.playerIds) {
+    for (const id of getPlayerIdsFromStats(item.playerStats)) {
       ids.add(id);
     }
   }
@@ -28,7 +29,7 @@ onBeforeMount(async () => {
 watch(head2HeadOverview, async () => {
   const ids = new Set<string>();
   for (const item of head2HeadOverview.value) {
-    for (const id of item.edition.playerIds) {
+    for (const id of getPlayerIdsFromStats(item.playerStats)) {
       ids.add(id);
     }
   }

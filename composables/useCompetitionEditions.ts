@@ -9,12 +9,15 @@ import {
 import { createMatch, GAME_TYPES } from "../interfaces/match";
 import { defaultX01MatchConfig } from "../interfaces/x01MatchConfig";
 import type { PlayerStats } from "../interfaces/stats";
-import { createPlayerStats } from "../interfaces/stats";
+import {
+  createPlayerStats,
+  createEditionPlayerStats,
+} from "../interfaces/stats";
 import {
   getEditionMatchWinner,
   isEditionComplete,
-  sortPlayerIds,
 } from "../utils/rivalry";
+import { getPlayerIdsFromStats } from "../utils/player";
 import { calculateThreeDartAverage } from "../utils/averages";
 import type { Match } from "../interfaces/match";
 import type { x01MatchConfig } from "../interfaces/x01MatchConfig";
@@ -30,6 +33,7 @@ const competitionService = new CompetitionService();
 const matchService = new MatchService();
 
 export function useCompetitionEditions() {
+  const { getPlayerStatsForCompetitionEdition } = usePlayerStats();
   const loading = ref(false);
   const error = ref<string | null>(null);
 
@@ -65,6 +69,16 @@ export function useCompetitionEditions() {
     );
   };
 
+  const loadEditionPlayerStatsRecords = async (
+    edition: CompetitionEdition,
+  ): Promise<PlayerStats[]> => {
+    const stats = await getPlayerStatsForCompetitionEdition(edition.id);
+    const byId = new Map(stats.map((stat) => [stat.id, stat]));
+    return edition.playerStats
+      .map((statsId) => byId.get(statsId))
+      .filter((stat): stat is PlayerStats => stat !== undefined);
+  };
+
   const startNewEdition = async (
     competitionId: string,
     previousEdition: CompetitionEdition
@@ -77,12 +91,16 @@ export function useCompetitionEditions() {
       0
     );
 
+    const previousStats = await loadEditionPlayerStatsRecords(previousEdition);
+    const playerIds = getPlayerIdsFromStats(previousStats);
+
     const edition = createCompetitionEdition({
       competitionId,
       editionNumber: maxNumber + 1,
-      playerIds: [...previousEdition.playerIds],
       competitionConfig: { ...previousEdition.competitionConfig },
     });
+
+    edition.playerStats = await createEditionPlayerStats(edition.id, playerIds);
 
     return await saveEdition(edition);
   };
@@ -108,13 +126,14 @@ export function useCompetitionEditions() {
       competitionEditionId: edition.id,
     });
 
+    const editionStats = await loadEditionPlayerStatsRecords(edition);
     match.playerStats = await Promise.all(
-      edition.playerIds.map(async (playerId) => {
-        const stats = await createPlayerStats({
-          playerId,
+      editionStats.map(async (stat) => {
+        const matchStats = await createPlayerStats({
+          playerId: stat.playerId,
           matchId: match.id,
         });
-        return stats.id;
+        return matchStats.id;
       })
     );
 
@@ -128,23 +147,6 @@ export function useCompetitionEditions() {
     await competitionService.upsert(cloneCompetition(competition));
 
     return savedMatch;
-  };
-
-  const ensureEditionPlayerStats = async (
-    edition: CompetitionEdition,
-  ): Promise<CompetitionEdition> => {
-    if (edition.playerStats.length >= edition.playerIds.length) {
-      return edition;
-    }
-
-    const editionToSave = cloneCompetitionEdition(edition);
-    const statsIds = await Promise.all(
-      edition.playerIds.map((playerId) =>
-        createPlayerStats({ playerId }).then((stats) => stats.id),
-      ),
-    );
-    editionToSave.playerStats = statsIds;
-    return await saveEdition(editionToSave);
   };
 
   const updateEditionPlayerStatsAverages = async (
@@ -178,17 +180,9 @@ export function useCompetitionEditions() {
     edition: CompetitionEdition,
     matches: Match[],
   ): Promise<PlayerStats[]> => {
-    const editionWithStats = await ensureEditionPlayerStats(edition);
-    await updateEditionPlayerStatsAverages(editionWithStats, matches);
-
-    const { getPlayerStatsById } = usePlayerStats();
-    return (
-      await Promise.all(
-        editionWithStats.playerStats.map((statsId) =>
-          getPlayerStatsById(statsId),
-        ),
-      )
-    ).filter((stat): stat is PlayerStats => stat !== undefined);
+    const stats = await loadEditionPlayerStatsRecords(edition);
+    await updateEditionPlayerStatsAverages(edition, matches);
+    return stats;
   };
 
   const onEditionMatchFinished = async (match: Match): Promise<{
@@ -206,18 +200,23 @@ export function useCompetitionEditions() {
     if (!competition) return { editionComplete: false };
 
     const matches = await matchService.getMatchesForCompetitionEdition(edition);
+    const editionStats = await loadEditionPlayerStatsRecords(edition);
+    const playerIds = getPlayerIdsFromStats(editionStats);
 
     const editionToSave = cloneCompetitionEdition(edition);
     if (isEditionComplete(editionToSave, matches) && !editionToSave.winner) {
-      const championId = getEditionMatchWinner(editionToSave, matches);
+      const championId = getEditionMatchWinner(
+        editionToSave,
+        matches,
+        playerIds,
+      );
       if (championId) {
         editionToSave.winner = championId;
       }
     }
 
     const savedEdition = await saveEdition(editionToSave);
-    const editionWithStats = await ensureEditionPlayerStats(savedEdition);
-    await updateEditionPlayerStatsAverages(editionWithStats, matches);
+    await updateEditionPlayerStatsAverages(savedEdition, matches);
     await competitionService.upsert(cloneCompetition(competition));
 
     return {

@@ -6,6 +6,7 @@ import {
 import { defaultX01MatchConfig } from "~/interfaces/x01MatchConfig";
 import type { Player } from "~/interfaces/player";
 import { sortPlayerIds } from "~/utils/rivalry";
+import { createEditionPlayerStats } from "~/interfaces/stats";
 import { GAME_TYPES } from "~/interfaces/match";
 
 definePageMeta({
@@ -89,7 +90,6 @@ const createRivalry = async () => {
     const edition = createCompetitionEdition({
       competitionId: competition.id,
       editionNumber: 1,
-      playerIds: sortedIds,
       competitionConfig: {
         amountMatches: amountMatches.value,
         matchConfig: useFixedConfig.value
@@ -98,6 +98,10 @@ const createRivalry = async () => {
         gameType: GAME_TYPES.x01,
       },
     });
+    edition.playerStats = await createEditionPlayerStats(
+      edition.id,
+      sortedIds,
+    );
 
     await saveEdition(edition);
     await navigateTo("/head2head");

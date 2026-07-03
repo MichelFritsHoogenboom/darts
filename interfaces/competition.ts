@@ -1,6 +1,7 @@
 import { v4 as uuid } from "uuid";
 import type { GameType, Match } from "./match";
 import type { x01MatchConfig } from "./x01MatchConfig";
+import type { PlayerStats } from "./stats";
 
 export const COMPETITION_TYPES = {
   head2head: "head2head",
@@ -30,7 +31,6 @@ export interface CompetitionEdition {
   editionNumber: number;
   createdAt: Date;
   updatedAt: Date;
-  playerIds: string[];
   competitionConfig: CompetitionConfig;
   playerStats: string[];
   matches: string[];
@@ -41,6 +41,7 @@ export interface Head2HeadOverviewItem {
   competition: Competition;
   edition: CompetitionEdition;
   matches: Match[];
+  playerStats: PlayerStats[];
   standings: Record<string, number>;
   lastActiveAt: Date;
 }
@@ -61,7 +62,6 @@ export function createCompetitionEdition(
   overrides: Partial<CompetitionEdition> & {
     competitionId: string;
     competitionConfig: CompetitionConfig;
-    playerIds: string[];
   }
 ): CompetitionEdition {
   return {

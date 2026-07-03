@@ -42,6 +42,7 @@ export interface PlayerStats {
   matchId?: string;
   setId?: string;
   playerLegId?: string;
+  competitionEditionId?: string;
   average: number;
   scoringDartsAverage: number;
   scores: ScoreRanges;
@@ -118,4 +119,17 @@ export async function createPlayerStats(
   }
 
   return playerStats;
+}
+
+export async function createEditionPlayerStats(
+  editionId: string,
+  playerIds: string[],
+): Promise<string[]> {
+  return Promise.all(
+    playerIds.map((playerId) =>
+      createPlayerStats({ playerId, competitionEditionId: editionId }).then(
+        (stats) => stats.id,
+      ),
+    ),
+  );
 }

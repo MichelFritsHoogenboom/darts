@@ -1,25 +1,27 @@
 <script setup lang="ts">
 import type { Head2HeadOverviewItem } from "~/interfaces/competition";
 import type { Player } from "~/interfaces/player";
-import { getPlayerFullName } from "~/utils/player";
+import { getPlayerFullName, getPlayerIdsFromStats } from "~/utils/player";
 
 const props = defineProps<{
   item: Head2HeadOverviewItem;
   players: Player[];
 }>();
 
+const playerIds = computed(() => getPlayerIdsFromStats(props.item.playerStats));
+
 const playerA = computed(() =>
-  props.players.find((p) => p.id === props.item.edition.playerIds[0]),
+  props.players.find((p) => p.id === playerIds.value[0]),
 );
 const playerB = computed(() =>
-  props.players.find((p) => p.id === props.item.edition.playerIds[1]),
+  props.players.find((p) => p.id === playerIds.value[1]),
 );
 
 const winsA = computed(
-  () => props.item.standings[props.item.edition.playerIds[0]] ?? 0,
+  () => props.item.standings[playerIds.value[0]] ?? 0,
 );
 const winsB = computed(
-  () => props.item.standings[props.item.edition.playerIds[1]] ?? 0,
+  () => props.item.standings[playerIds.value[1]] ?? 0,
 );
 
 const playedCount = computed(
@@ -62,7 +64,7 @@ const title = computed(() => {
         v-if="playerA && playerB"
         size="medium"
         :players="[playerA, playerB]"
-        :player-stats="[]"
+        :player-stats="item.playerStats"
         :show-badge="false"
       >
         <span

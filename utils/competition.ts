@@ -29,7 +29,6 @@ export function cloneCompetitionEdition(
     editionNumber: raw.editionNumber,
     createdAt: raw.createdAt,
     updatedAt: new Date(),
-    playerIds: [...toRaw(raw.playerIds)],
     matches: [...toRaw(raw.matches)],
     playerStats: [...toRaw(raw.playerStats)],
     winner: raw.winner,
