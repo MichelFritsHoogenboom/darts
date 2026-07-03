@@ -6,29 +6,47 @@ type ModalOption = {
   value: ModalOptionValue;
 };
 
-withDefaults(
-  defineProps<{
-    visible: boolean;
-    title: string;
-    description: string;
-    options: ModalOption[];
-    optionButtonClass?: string;
-    showUndo?: boolean;
-    undoLabel?: string;
-    undoTitle?: string;
-  }>(),
-  {
-    optionButtonClass: "btn-gray w-full py-3",
-    showUndo: true,
-    undoLabel: "Undo",
-    undoTitle: "Laatste worp ongedaan maken (Ctrl+Z)",
-  },
-);
+const {
+  visible,
+  title,
+  description,
+  options,
+  optionButtonClass = "btn-gray w-full py-3",
+  showUndo = true,
+  undoLabel = "Undo",
+  undoTitle = "Laatste worp ongedaan maken (Ctrl+Z)",
+} = defineProps<{
+  visible: boolean;
+  title: string;
+  description: string;
+  options: ModalOption[];
+  optionButtonClass?: string;
+  showUndo?: boolean;
+  undoLabel?: string;
+  undoTitle?: string;
+}>();
 
 defineEmits<{
   select: [value: ModalOptionValue];
   undo: [];
 }>();
+
+const firstButtonRef = ref<HTMLButtonElement | null>(null);
+
+const setFirstButtonRef = (el: Element | ComponentPublicInstance | null) => {
+  firstButtonRef.value = el instanceof HTMLButtonElement ? el : null;
+};
+
+watch(
+  () => visible,
+  (isVisible) => {
+    if (isVisible) {
+      nextTick(() => {
+        firstButtonRef.value?.focus();
+      });
+    }
+  },
+);
 </script>
 
 <template>
@@ -41,8 +59,9 @@ defineEmits<{
       <p class="text-gray-300 mb-6">{{ description }}</p>
       <div class="flex flex-col gap-3">
         <button
-          v-for="option in options"
+          v-for="(option, index) in options"
           :key="option.label"
+          :ref="index === 0 ? setFirstButtonRef : undefined"
           type="button"
           :class="optionButtonClass"
           @click="$emit('select', option.value)"
