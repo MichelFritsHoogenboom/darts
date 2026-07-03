@@ -15,12 +15,11 @@ defineEmits<{
 <template>
   <div
     class="home-mode-card"
-    :class="[
-      'card-panel',
-      actionable ? 'card-panel--actionable' : '',
-    ]"
+    :class="['card-panel', actionable ? 'card-panel--actionable' : '']"
   >
-    <h2 class="title">{{ title }}</h2>
+    <UiDisplayHeader tag-size="h2" display-size="h2">
+      {{ title }}
+    </UiDisplayHeader>
     <p class="text-gray-300 mb-8 grow">{{ description }}</p>
     <button
       :disabled="disabled"
@@ -36,14 +35,5 @@ defineEmits<{
 .home-mode-card {
   @apply font-barlow-condensed font-bold;
   @apply flex-1 flex flex-col p-8 text-center mb-8;
-
-  .title {
-    @apply font-oswald inline-block text-logo;
-    @apply text-2xl mb-6;
-
-    transform: skewX(-8deg);
-    text-transform: uppercase;
-    letter-spacing: -1px;
-  }
 }
 </style>

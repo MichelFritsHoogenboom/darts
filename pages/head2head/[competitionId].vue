@@ -144,34 +144,47 @@ const beginNewEdition = async () => {
     </div>
 
     <div v-else-if="edition" class="max-w-4xl mx-auto">
-      <div
-        class="grid grid-cols-[40%_20%_40%] items-center mb-6 card-panel"
-      >
+      <div class="card-panel rivalry-header">
         <div v-if="rivalryPlayers.length >= 2" class="flex justify-center">
           <img
             :src="getPlayerImageUrl(0)"
             :alt="getPlayerFullName(rivalryPlayers[0])"
-            class="h-64 w-auto object-contain"
+            class="player-image"
           />
         </div>
 
         <div class="text-center">
-          <p class="text-gray-400 text-sm mb-2">
-            Seizoen {{ edition.editionNumber }} · {{ finishedCount }} /
-            {{ amountMatches }} wedstrijden
-          </p>
+          <div class="text-gray-400 text-sm mb-2">
+            Seizoen {{ edition.editionNumber }}
+          </div>
+          <div class="text-gray-400 text-sm mb-2">
+            {{ finishedCount }} / {{ amountMatches }} wedstrijden
+          </div>
+
           <span
             class="inline-block px-4 py-2 bg-gray-400/50 font-bold rounded text-2xl"
           >
             {{ winsDisplay }}
           </span>
+          <div class="mt-4 justify-center flex gap-4">
+            <FormButton
+              v-if="showStartMatch"
+              :disabled="startingMatch"
+              @click="startMatch"
+            >
+              Nieuwe wedstrijd
+            </FormButton>
+            <FormButton v-if="showStartEdition" @click="beginNewEdition">
+              Nieuw seizoen
+            </FormButton>
+          </div>
         </div>
 
-        <div v-if="rivalryPlayers.length >= 2" class="flex justify-center">
+        <div class="flex justify-center">
           <img
             :src="getPlayerImageUrl(1)"
             :alt="getPlayerFullName(rivalryPlayers[1])"
-            class="h-64 w-auto object-contain"
+            class="player-image"
           />
         </div>
       </div>
@@ -196,18 +209,7 @@ const beginNewEdition = async () => {
           </div>
         </template>
       </UiSummaryCardLayout>
-      <div class="mb-6 justify-center flex gap-4">
-        <FormButton
-          v-if="showStartMatch"
-          :disabled="startingMatch"
-          @click="startMatch"
-        >
-          Nieuwe wedstrijd
-        </FormButton>
-        <FormButton v-if="showStartEdition" @click="beginNewEdition">
-          Nieuw seizoen
-        </FormButton>
-      </div>
+
       <Head2headEditionChampionOverlay
         v-model="showChampionOverlay"
         :winner="championPlayer"
@@ -216,3 +218,16 @@ const beginNewEdition = async () => {
     </div>
   </NuxtLayout>
 </template>
+
+<style scoped lang="scss">
+.rivalry-header {
+  @apply grid grid-cols-[40%_20%_40%] items-center mb-6;
+  position: relative;
+
+  .player-image {
+    @apply h-56 w-auto;
+    position: absolute;
+    bottom: 0;
+  }
+}
+</style>

@@ -32,40 +32,43 @@ const gamePlayedInOptions = Object.entries(X01_GAME_PLAYED_IN).map(
   ([key, value]) => ({
     value: value,
     label: value.charAt(0).toUpperCase() + value.slice(1),
-  })
+  }),
 );
 
 const winDefinitionOptions = Object.entries(GAME_WIN_DEFINITION).map(
   ([key, value]) => ({
     value: value,
     label: value,
-  })
+  }),
 );
 
 const setsToWinOptions = Object.entries(SETS_TO_WIN_OPTIONS).map(
   ([key, value]) => ({
     value: value,
     label: `${value} sets`,
-  })
+  }),
 );
 
 const legsToWinSetOptions = Object.entries(LEGS_TO_WIN_SET_OPTIONS).map(
   ([key, value]) => ({
     value: value,
     label: `${value} legs`,
-  })
+  }),
 );
 
 const legsToWinMatchOptions = Object.entries(LEGS_TO_WIN_MATCH_OPTIONS).map(
   ([key, value]) => ({
     value: value,
     label: `${value} legs`,
-  })
+  }),
 );
 </script>
 
 <template>
   <div class="card-panel rounded-lg p-8">
+    <UiDisplayHeader tag-size="h2" display-size="h3">
+      Match setup
+    </UiDisplayHeader>
     <!-- Game Type Selection -->
     <div class="mb-6">
       <FormSelect v-model="config.gameType" :options="gameTypeOptions">

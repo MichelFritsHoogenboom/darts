@@ -69,7 +69,9 @@ defineExpose({
 
 <template>
   <div class="card-panel rounded-lg p-8 mb-6">
-    <h2 class="text-2xl font-bold mb-6">Players</h2>
+    <UiDisplayHeader tag-size="h2" display-size="h3">
+      Player setup
+    </UiDisplayHeader>
 
     <!-- Loading State -->
     <div v-if="loading" class="text-center text-gray-400 mt-4">
@@ -93,6 +95,7 @@ defineExpose({
             :disabled="selectedPlayers.length >= 2"
             variant="dark"
           >
+            <template #label>Selected players</template>
           </FormSelect>
         </div>
       </div>

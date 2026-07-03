@@ -55,13 +55,17 @@ onBeforeMount(async () => {
     </div>
     <div class="flex flex-col gap-6">
       <div v-if="unfinishedMatches.length > 0">
-        <h2 class="text-lg font-bold mb-2">Continue match</h2>
+        <UiDisplayHeader tag-size="h2" display-size="h3">
+          Continue match
+        </UiDisplayHeader>
         <div v-for="match in unfinishedMatches" :key="match.id" class="mb-4">
           <StatsMatchSummary :match="match" />
         </div>
       </div>
       <div v-if="matches.length > 0">
-        <h2 class="text-lg font-bold mb-2">Last 5 matches</h2>
+        <UiDisplayHeader tag-size="h2" display-size="h3">
+          Last 5 matches
+        </UiDisplayHeader>
         <div v-for="match in matches" :key="match.id" class="mb-4">
           <StatsMatchSummary :match="match" />
         </div>
