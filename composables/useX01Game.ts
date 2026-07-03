@@ -52,6 +52,10 @@ export const useX01Game = (
 
   const pendingLegWin = ref<{ score: Score } | null>(null);
   const pendingGoldenCamel = ref<{ score: Score } | null>(null);
+  const head2headReturn = ref<{
+    competitionId: string;
+    editionComplete: boolean;
+  } | null>(null);
   const { saveMatch } = useMatches();
   // factory functions
   const createNewSet = async (
@@ -560,11 +564,10 @@ export const useX01Game = (
       const { onEditionMatchFinished } = useCompetitionEditions();
       const result = await onEditionMatchFinished(match);
       if (result.competitionId) {
-        const query = result.editionComplete ? { editionComplete: "1" } : {};
-        await navigateTo({
-          path: `/head2head/${result.competitionId}`,
-          query,
-        });
+        head2headReturn.value = {
+          competitionId: result.competitionId,
+          editionComplete: result.editionComplete,
+        };
       }
     }
   };
@@ -749,6 +752,7 @@ export const useX01Game = (
     undoLastTurn,
     pendingLegWin: readonly(pendingLegWin),
     pendingGoldenCamel: readonly(pendingGoldenCamel),
+    head2headReturn: readonly(head2headReturn),
     confirmLegFinish,
     confirmGoldenCamel,
     matchGame,

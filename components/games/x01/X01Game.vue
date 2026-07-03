@@ -44,6 +44,7 @@ const {
   pendingGoldenCamel,
   confirmLegFinish,
   confirmGoldenCamel,
+  head2headReturn,
 } = useX01Game(match, gameState);
 
 const { getScoresForMatch } = useScores();
@@ -256,6 +257,19 @@ watch(
 
 const resetGame = () => {
   emit("game-reset");
+};
+
+const returnToHead2Head = async () => {
+  if (!head2headReturn.value) return;
+
+  const query = head2headReturn.value.editionComplete
+    ? { editionComplete: "1" }
+    : {};
+
+  await navigateTo({
+    path: `/head2head/${head2headReturn.value.competitionId}`,
+    query,
+  });
 };
 
 // Initialize match after players are loaded (onMounted runs after onBeforeMount)
@@ -503,7 +517,7 @@ onMounted(async () => {
           <StatsMatchSummary :match="match" :open-details="true" />
           <div class="flex gap-2 py-4 justify-end">
             <button
-              v-if="currentLeg"
+              v-if="currentLeg && !head2headReturn"
               @click="undoLastTurn"
               :disabled="!canUndo"
               class="dartboard-button undo-button disabled:bg-gray-600 disabled:cursor-not-allowed"
@@ -512,7 +526,14 @@ onMounted(async () => {
               Undo
             </button>
             <button
-              v-if="currentLeg"
+              v-if="head2headReturn"
+              @click="returnToHead2Head"
+              class="dartboard-button"
+            >
+              Terug naar Head 2 Head overzicht
+            </button>
+            <button
+              v-else-if="currentLeg"
               @click="resetGame"
               class="dartboard-button"
             >

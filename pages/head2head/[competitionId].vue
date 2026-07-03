@@ -118,6 +118,14 @@ const startMatch = async () => {
   }
 };
 
+const DEFAULT_PLAYER_IMAGES = [
+  "https://images.gc.pdcservices.co.uk/fit-in/600x600/7843dbf0-f21a-11f0-a2b2-337f630ef140.png",
+  "https://images.gc.pdcservices.co.uk/fit-in/600x600/f62e2ac0-f233-11f0-b992-c9679735a32e.png",
+] as const;
+
+const getPlayerImageUrl = (index: number) =>
+  DEFAULT_PLAYER_IMAGES[index] ?? DEFAULT_PLAYER_IMAGES[0];
+
 const beginNewEdition = async () => {
   if (!edition.value) return;
   await startNewEdition(competitionId.value, edition.value);
@@ -136,48 +144,41 @@ const beginNewEdition = async () => {
     </div>
 
     <div v-else-if="edition" class="max-w-4xl mx-auto">
-      <UiSummaryCardLayout wrapper-class="mb-6">
-        <template #left>
-          <p class="text-gray-400 text-sm">
+      <div class="grid grid-cols-[40%_20%_40%] items-center mb-6">
+        <div v-if="rivalryPlayers.length >= 2" class="flex justify-center">
+          <img
+            :src="getPlayerImageUrl(0)"
+            :alt="getPlayerFullName(rivalryPlayers[0])"
+            class="h-64 w-auto object-contain"
+          />
+        </div>
+
+        <div class="text-center">
+          <p class="text-gray-400 text-sm mb-2">
             Seizoen {{ edition.editionNumber }} · {{ finishedCount }} /
             {{ amountMatches }} wedstrijden
           </p>
-        </template>
-        <template #center>
-          <StatsPlayersWithCenter
-            v-if="rivalryPlayers.length >= 2"
-            size="xlarge"
-            :players="[rivalryPlayers[0], rivalryPlayers[1]]"
-            :player-stats="[]"
-            :show-badge="false"
+          <span
+            class="inline-block px-4 py-2 bg-gray-400/50 font-bold rounded text-2xl"
           >
-            <span
-              class="inline-block px-4 py-2 bg-gray-400/50 font-bold rounded text-2xl"
-            >
-              {{ winsDisplay }}
-            </span>
-          </StatsPlayersWithCenter>
-        </template>
-      </UiSummaryCardLayout>
+            {{ winsDisplay }}
+          </span>
+        </div>
+
+        <div v-if="rivalryPlayers.length >= 2" class="flex justify-center">
+          <img
+            :src="getPlayerImageUrl(1)"
+            :alt="getPlayerFullName(rivalryPlayers[1])"
+            class="h-64 w-auto object-contain"
+          />
+        </div>
+      </div>
 
       <div v-if="unfinishedMatches.length > 0" class="mb-6">
         <h2 class="text-lg font-bold mb-2">Wedstrijd hervatten</h2>
         <div v-for="match in unfinishedMatches" :key="match.id" class="mb-4">
           <StatsMatchSummary :match="match" />
         </div>
-      </div>
-
-      <div class="mb-6 flex gap-4">
-        <FormButton
-          v-if="showStartMatch"
-          :disabled="startingMatch"
-          @click="startMatch"
-        >
-          Nieuwe wedstrijd
-        </FormButton>
-        <FormButton v-if="showStartEdition" @click="beginNewEdition">
-          Nieuw seizoen
-        </FormButton>
       </div>
 
       <div v-if="finishedMatches.length > 0">
@@ -193,7 +194,18 @@ const beginNewEdition = async () => {
           </div>
         </template>
       </UiSummaryCardLayout>
-
+      <div class="mb-6 justify-center flex gap-4">
+        <FormButton
+          v-if="showStartMatch"
+          :disabled="startingMatch"
+          @click="startMatch"
+        >
+          Nieuwe wedstrijd
+        </FormButton>
+        <FormButton v-if="showStartEdition" @click="beginNewEdition">
+          Nieuw seizoen
+        </FormButton>
+      </div>
       <Head2headEditionChampionOverlay
         v-model="showChampionOverlay"
         :winner="championPlayer"

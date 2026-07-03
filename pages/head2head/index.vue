@@ -46,12 +46,6 @@ watch(head2HeadOverview, async () => {
     </template>
 
     <div class="max-w-4xl mx-auto">
-      <div class="flex justify-end mb-6">
-        <NuxtLink to="/head2head/create" class="dartboard-button px-6 py-2">
-          Nieuwe rivalry
-        </NuxtLink>
-      </div>
-
       <div v-if="loading" class="text-center text-gray-400">Laden...</div>
       <div v-else-if="error" class="text-center text-red-400">{{ error }}</div>
       <UiSummaryCardLayout v-else-if="head2HeadOverview.length === 0">
@@ -69,6 +63,11 @@ watch(head2HeadOverview, async () => {
           :item="item"
           :players="overviewPlayers"
         />
+      </div>
+      <div class="flex justify-center mb-6">
+        <NuxtLink to="/head2head/create" class="dartboard-button px-6 py-2">
+          Nieuwe rivalry
+        </NuxtLink>
       </div>
     </div>
   </NuxtLayout>
