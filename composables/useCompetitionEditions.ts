@@ -6,7 +6,8 @@ import type { Competition, CompetitionEdition } from "../interfaces/competition"
 import {
   createCompetitionEdition,
 } from "../interfaces/competition";
-import { createMatch, GAME_TYPES } from "../interfaces/match";
+import { createMatch } from "../interfaces/match";
+import { GAME_TYPES } from "../constants/match";
 import { defaultX01MatchConfig } from "../interfaces/x01MatchConfig";
 import type { PlayerStats } from "../interfaces/stats";
 import {

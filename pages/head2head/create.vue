@@ -7,7 +7,7 @@ import { defaultX01MatchConfig } from "~/interfaces/x01MatchConfig";
 import type { Player } from "~/interfaces/player";
 import { sortPlayerIds } from "~/utils/rivalry";
 import { createEditionPlayerStats } from "~/interfaces/stats";
-import { GAME_TYPES } from "~/interfaces/match";
+import { GAME_TYPES } from "~/constants/match";
 
 definePageMeta({
   layout: false,
