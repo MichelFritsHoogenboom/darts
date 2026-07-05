@@ -52,11 +52,9 @@ const startMatch = async () => {
     const edition = await getCurrentEdition(competitionId.value);
     if (!competition || !edition) return;
 
-    const saved = await createH2HMatch(
-      edition,
-      competition,
-      { ...matchConfig.value }
-    );
+    const saved = await createH2HMatch(edition, competition, {
+      ...matchConfig.value,
+    });
     await navigateTo(`/match/${saved.id}`);
   } finally {
     saving.value = false;
@@ -79,7 +77,9 @@ const startMatch = async () => {
             :key="player.id"
             class="bg-gray-700 p-4"
           >
-            <p class="text-white font-medium">{{ getPlayerFullName(player) }}</p>
+            <p class="text-white font-medium">
+              {{ getPlayerFullName(player) }}
+            </p>
           </div>
         </div>
       </div>

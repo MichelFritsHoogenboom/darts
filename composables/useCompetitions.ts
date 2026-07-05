@@ -5,6 +5,7 @@ import type {
   Competition,
   Head2HeadOverviewItem,
 } from "../interfaces/competition";
+import type { PlayerStats } from "../interfaces/stats";
 import { buildHead2HeadOverviewItem } from "../utils/rivalry";
 import { cloneCompetition } from "../utils/competition";
 
@@ -61,9 +62,11 @@ export function useCompetitions() {
 
         const matches =
           await matchService.getMatchesForCompetitionEdition(edition);
-        const editionStats = await getPlayerStatsForCompetitionEdition(
-          edition.id,
-        );
+        const stats = await getPlayerStatsForCompetitionEdition(edition.id);
+        const byId = new Map(stats.map((stat) => [stat.id, stat]));
+        const editionStats = edition.playerStats
+          .map((statsId) => byId.get(statsId))
+          .filter((stat): stat is PlayerStats => stat !== undefined);
         items.push(
           buildHead2HeadOverviewItem(
             competition,

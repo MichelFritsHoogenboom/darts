@@ -98,10 +98,7 @@ const createRivalry = async () => {
         gameType: GAME_TYPES.x01,
       },
     });
-    edition.playerStats = await createEditionPlayerStats(
-      edition.id,
-      sortedIds,
-    );
+    edition.playerStats = await createEditionPlayerStats(edition.id, sortedIds);
 
     await saveEdition(edition);
     await navigateTo("/head2head");

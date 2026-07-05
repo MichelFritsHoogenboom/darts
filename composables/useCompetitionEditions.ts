@@ -2,10 +2,11 @@ import { ref, readonly } from "vue";
 import { CompetitionEditionService } from "../database/CompetitionEditionService";
 import { CompetitionService } from "../database/CompetitionService";
 import { MatchService } from "../database/MatchService";
-import type { Competition, CompetitionEdition } from "../interfaces/competition";
-import {
-  createCompetitionEdition,
+import type {
+  Competition,
+  CompetitionEdition,
 } from "../interfaces/competition";
+import { createCompetitionEdition } from "../interfaces/competition";
 import { createMatch } from "../interfaces/match";
 import { GAME_TYPES } from "../constants/match";
 import { defaultX01MatchConfig } from "../interfaces/x01MatchConfig";
@@ -14,10 +15,7 @@ import {
   createPlayerStats,
   createEditionPlayerStats,
 } from "../interfaces/stats";
-import {
-  getEditionMatchWinner,
-  isEditionComplete,
-} from "../utils/rivalry";
+import { getEditionMatchWinner, isEditionComplete } from "../utils/rivalry";
 import { getPlayerIdsFromStats } from "../utils/player";
 import { calculateThreeDartAverage } from "../utils/averages";
 import type { Match } from "../interfaces/match";
@@ -62,11 +60,11 @@ export function useCompetitionEditions() {
 
   const findHead2HeadCompetitionForPair = async (
     playerId1: string,
-    playerId2: string
+    playerId2: string,
   ) => {
     return await editionService.findHead2HeadCompetitionForPair(
       playerId1,
-      playerId2
+      playerId2,
     );
   };
 
@@ -82,14 +80,13 @@ export function useCompetitionEditions() {
 
   const startNewEdition = async (
     competitionId: string,
-    previousEdition: CompetitionEdition
+    previousEdition: CompetitionEdition,
   ): Promise<CompetitionEdition> => {
-    const editions = await editionService.getEditionsForCompetition(
-      competitionId
-    );
+    const editions =
+      await editionService.getEditionsForCompetition(competitionId);
     const maxNumber = editions.reduce(
       (max, e) => Math.max(max, e.editionNumber),
-      0
+      0,
     );
 
     const previousStats = await loadEditionPlayerStatsRecords(previousEdition);
@@ -109,15 +106,11 @@ export function useCompetitionEditions() {
   const createH2HMatch = async (
     edition: CompetitionEdition,
     competition: Competition,
-    matchConfigOverride?: x01MatchConfig
+    matchConfigOverride?: x01MatchConfig,
   ): Promise<Match> => {
-    const config = cloneCompetitionConfig(
-      toRaw(edition).competitionConfig
-    );
+    const config = cloneCompetitionConfig(toRaw(edition).competitionConfig);
     const matchConfig =
-      matchConfigOverride ??
-      config.matchConfig ??
-      defaultX01MatchConfig;
+      matchConfigOverride ?? config.matchConfig ?? defaultX01MatchConfig;
 
     const gameType = config.gameType ?? GAME_TYPES.x01;
 
@@ -135,7 +128,7 @@ export function useCompetitionEditions() {
           matchId: match.id,
         });
         return matchStats.id;
-      })
+      }),
     );
 
     const { saveMatch } = useMatches();
@@ -210,7 +203,9 @@ export function useCompetitionEditions() {
     await saveEdition(updatedEdition);
   };
 
-  const onEditionMatchFinished = async (match: Match): Promise<{
+  const onEditionMatchFinished = async (
+    match: Match,
+  ): Promise<{
     editionComplete: boolean;
     competitionId?: string;
   }> => {
