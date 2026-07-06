@@ -233,10 +233,6 @@ const beginNewEdition = async () => {
   @apply text-center text-gray-400;
 }
 
-.page-content {
-  @apply max-w-4xl mx-auto;
-}
-
 .section {
   @apply mb-6;
 }
