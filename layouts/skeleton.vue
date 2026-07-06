@@ -30,6 +30,6 @@
 .main-background {
   @apply bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900;
   min-width: 1300px;
-  width: 100%;
+  width: 100dvw;
 }
 </style>

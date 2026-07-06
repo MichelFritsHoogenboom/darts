@@ -137,10 +137,14 @@ const beginNewEdition = async () => {
 </script>
 
 <template>
-  <NuxtLayout name="default">
+  <NuxtLayout name="full-width-sidebars">
     <template #title>
       <h1 class="page-title">{{ pageTitle }}</h1>
     </template>
+
+    <template #left> </template>
+
+    <template #right> </template>
 
     <div v-if="editionLoading && !edition" class="loading">Laden...</div>
 
