@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { Score } from "~/interfaces/leg";
+
 definePageMeta({
   layout: false,
 });
@@ -17,9 +19,17 @@ const {
   loadLastFinishedMatches,
   loadUnfinishedMatches,
 } = useMatches();
+const { getCheckouts } = useScores();
+
+const highestCheckouts = ref<Score[]>([]);
 
 onBeforeMount(async () => {
-  await Promise.all([loadLastFinishedMatches(5), loadUnfinishedMatches()]);
+  const [, , checkouts] = await Promise.all([
+    loadLastFinishedMatches(5),
+    loadUnfinishedMatches(),
+    getCheckouts(10),
+  ]);
+  highestCheckouts.value = checkouts;
 });
 </script>
 
@@ -82,6 +92,12 @@ onBeforeMount(async () => {
         </template>
       </UiSummaryCardLayout>
     </template>
-    <template #sidebar> highest checkouts </template>
+    <template #sidebar>
+      <UiDisplayHeader tag-size="h2" display-size="h3">
+        Highest Checkouts
+      </UiDisplayHeader>
+
+      <StatsHighestCheckouts :scores="highestCheckouts" />
+    </template>
   </NuxtLayout>
 </template>

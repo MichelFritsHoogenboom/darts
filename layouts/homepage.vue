@@ -12,7 +12,7 @@
       <div class="flex flex-col gap-6">
         <slot />
       </div>
-      <aside class="w-64 shrink-0 flex flex-col items-center gap-0 pt-4">
+      <aside class="w-64 shrink-0 flex flex-col gap-0">
         <slot name="sidebar" />
       </aside>
     </div>
