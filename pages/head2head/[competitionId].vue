@@ -137,7 +137,7 @@ const beginNewEdition = async () => {
 </script>
 
 <template>
-  <NuxtLayout name="full-width-sidebars">
+  <NuxtLayout name="default">
     <template #title>
       <h1 class="page-title">{{ pageTitle }}</h1>
     </template>
