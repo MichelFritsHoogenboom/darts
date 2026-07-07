@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { faMedal } from "@fortawesome/free-solid-svg-icons";
+import { faMedal, faTrophy } from "@fortawesome/free-solid-svg-icons";
 import type { Score } from "~/interfaces/leg";
 import { createPlayerNameGetter } from "~/utils/player";
 import { isWithinLastWeek } from "~/utils/date";
@@ -28,7 +28,13 @@ onMounted(async () => {
     <ol v-else class="list">
       <li v-for="(score, index) in scores" :key="score.id" class="row">
         <span class="rank">
-          <FontAwesomeIcon v-if="index < 3" :icon="faMedal" class="medal" />
+          <FontAwesomeIcon v-if="index === 0" :icon="faTrophy" class="trophy" />
+
+          <FontAwesomeIcon
+            v-else-if="index < 3"
+            :icon="faMedal"
+            class="medal"
+          />
           <template v-else>{{ index + 1 }}</template>
         </span>
 
@@ -55,6 +61,8 @@ onMounted(async () => {
 </template>
 
 <style scoped lang="scss">
+@use "~/assets/css/glow" as *;
+
 .leaderboard {
   @apply w-full overflow-hidden rounded-lg border border-gray-600/30 bg-gray-800/40 backdrop-blur-sm;
 }
@@ -81,31 +89,29 @@ onMounted(async () => {
   }
 
   &:nth-child(-n + 3) {
-    @apply bg-gradient-to-r from-white/[0.04] to-transparent;
+    @apply bg-gradient-to-r from-gray-700/25 to-transparent;
   }
 
   &:nth-child(1) .rank {
-    @apply bg-amber-500/20 ring-1 ring-amber-400/40;
+    @apply bg-gray-700/35 ring-1 ring-gray-600/40;
+    @include glow-gold(0.3, 0.4);
   }
 
-  &:nth-child(1) .medal {
-    @apply text-amber-300;
+  &:nth-child(1) .trophy {
+    @apply text-amber-200/75;
   }
 
-  &:nth-child(2) .rank {
-    @apply bg-gray-400/15 ring-1 ring-gray-300/30;
+  &:nth-child(2) .rank,
+  &:nth-child(3) .rank {
+    @apply bg-gray-600/20 ring-1 ring-gray-500/35;
   }
 
   &:nth-child(2) .medal {
-    @apply text-gray-200;
-  }
-
-  &:nth-child(3) .rank {
-    @apply bg-orange-500/15 ring-1 ring-orange-400/30;
+    @apply text-gray-300/80;
   }
 
   &:nth-child(3) .medal {
-    @apply text-orange-300;
+    @apply text-amber-500/60;
   }
 
   &:nth-child(1) :deep(.score) {
@@ -118,7 +124,8 @@ onMounted(async () => {
   @apply bg-gray-700/80 text-xs font-bold tabular-nums text-gray-300;
 }
 
-.medal {
+.medal,
+.trophy {
   @apply h-3.5 w-3.5;
 }
 
@@ -134,9 +141,8 @@ onMounted(async () => {
   @apply shrink-0 text-xs text-gray-500 whitespace-nowrap;
 
   &.recent {
-    @apply rounded px-1.5 py-0.5 font-medium text-sky-200;
-    background: rgb(56 189 248 / 0.12);
-    box-shadow: 0 0 12px rgb(125 211 252 / 0.35);
+    @apply font-medium text-sky-200;
+    @include glow-sky;
   }
 }
 </style>
