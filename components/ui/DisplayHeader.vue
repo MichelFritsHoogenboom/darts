@@ -1,14 +1,17 @@
 <script setup lang="ts">
 type HeaderLevel = "h1" | "h2" | "h3" | "h4";
+type HeaderTag = HeaderLevel | "span";
 
 const {
   tagSize = "h2",
   displaySize = "h2",
   emphasize = false,
+  compact = false,
 } = defineProps<{
-  tagSize?: HeaderLevel;
+  tagSize?: HeaderTag;
   displaySize?: HeaderLevel;
   emphasize?: boolean;
+  compact?: boolean;
 }>();
 </script>
 
@@ -16,7 +19,7 @@ const {
   <component
     :is="tagSize"
     class="display-header"
-    :class="[displaySize, { emphasized: emphasize }]"
+    :class="[displaySize, { emphasized: emphasize, compact }]"
   >
     <slot />
   </component>
@@ -26,10 +29,14 @@ const {
 .display-header {
   &.h1,
   &.h2 {
-    @apply font-oswald font-bold inline-block text-logo mb-6;
+    @apply font-oswald font-bold inline-block text-logo;
     text-transform: uppercase;
     letter-spacing: -1px;
     transform: skewX(-8deg);
+
+    &:not(.compact) {
+      @apply mb-6;
+    }
   }
 
   &.h3,
