@@ -1,0 +1,29 @@
+@mixin text-glow($color, $intensity: 1, $spread: 1) {
+  text-shadow:
+    0 0 #{8px * $spread} rgba($color, 0.75 * $intensity),
+    0 0 #{18px * $spread} rgba($color, 0.45 * $intensity),
+    0 0 #{32px * $spread} rgba($color, 0.25 * $intensity);
+}
+
+@mixin icon-glow($color, $intensity: 1, $spread: 1) {
+  filter:
+    drop-shadow(0 0 #{8px * $spread} rgba($color, 0.75 * $intensity))
+    drop-shadow(0 0 #{18px * $spread} rgba($color, 0.45 * $intensity))
+    drop-shadow(0 0 #{32px * $spread} rgba($color, 0.25 * $intensity));
+}
+
+@mixin glow-sky($intensity: 1, $spread: 1) {
+  @include text-glow(#7dd3fc, $intensity, $spread);
+}
+
+@mixin glow-gold($intensity: 1, $spread: 1) {
+  @include icon-glow(#fbbf24, $intensity, $spread);
+}
+
+@mixin glow-silver($intensity: 0.6, $spread: 0.7) {
+  @include icon-glow(#d1d5db, $intensity, $spread);
+}
+
+@mixin glow-bronze($intensity: 0.45, $spread: 0.55) {
+  @include icon-glow(#f59e0b, $intensity, $spread);
+}

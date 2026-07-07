@@ -4,6 +4,8 @@ import type {
   CompetitionEdition,
   Head2HeadOverviewItem,
 } from "../interfaces/competition";
+import type { PlayerStats } from "../interfaces/stats";
+import { getPlayerIdsFromStats } from "./player";
 
 export function sortPlayerIds(ids: string[]): [string, string] {
   const sorted = [...ids].sort();
@@ -24,10 +26,11 @@ export function playerIdsMatch(
 
 export function computeEditionStandings(
   edition: CompetitionEdition,
-  matches: Match[]
+  matches: Match[],
+  playerIds: string[],
 ): Record<string, number> {
   const standings: Record<string, number> = {};
-  for (const playerId of edition.playerIds) {
+  for (const playerId of playerIds) {
     standings[playerId] = 0;
   }
 
@@ -83,15 +86,16 @@ export function getEditionLastActiveAt(
 
 export function getEditionMatchWinner(
   edition: CompetitionEdition,
-  matches: Match[]
+  matches: Match[],
+  playerIds: string[],
 ): string | undefined {
   if (!isEditionComplete(edition, matches)) return undefined;
 
-  const standings = computeEditionStandings(edition, matches);
+  const standings = computeEditionStandings(edition, matches, playerIds);
   let bestId: string | undefined;
   let bestWins = -1;
 
-  for (const playerId of edition.playerIds) {
+  for (const playerId of playerIds) {
     const wins = standings[playerId] ?? 0;
     if (wins > bestWins) {
       bestWins = wins;
@@ -105,13 +109,16 @@ export function getEditionMatchWinner(
 export function buildHead2HeadOverviewItem(
   competition: Competition,
   edition: CompetitionEdition,
-  matches: Match[]
+  matches: Match[],
+  playerStats: PlayerStats[],
 ): Head2HeadOverviewItem {
+  const playerIds = getPlayerIdsFromStats(playerStats);
   return {
     competition,
     edition,
     matches,
-    standings: computeEditionStandings(edition, matches),
+    playerStats,
+    standings: computeEditionStandings(edition, matches, playerIds),
     lastActiveAt: getEditionLastActiveAt(edition, matches),
   };
 }
@@ -120,10 +127,13 @@ export function findHead2HeadCompetitionFromEditions(
   editions: CompetitionEdition[],
   competitions: Competition[],
   playerId1: string,
-  playerId2: string
+  playerId2: string,
+  editionPlayerIds: Map<string, string[]>,
 ): Competition | undefined {
   const sorted = sortPlayerIds([playerId1, playerId2]);
-  const edition = editions.find((e) => playerIdsMatch(e.playerIds, sorted));
+  const edition = editions.find((e) =>
+    playerIdsMatch(editionPlayerIds.get(e.id) ?? [], sorted),
+  );
   if (!edition) return undefined;
 
   return competitions.find((c) => c.id === edition.competitionId);

@@ -1,4 +1,10 @@
 <script setup lang="ts">
+import type { Score } from "~/interfaces/leg";
+
+definePageMeta({
+  layout: false,
+});
+
 const startNewGame = () => {
   navigateTo("/setup");
 };
@@ -13,17 +19,23 @@ const {
   loadLastFinishedMatches,
   loadUnfinishedMatches,
 } = useMatches();
+const { getCheckouts } = useScores();
+
+const highestCheckouts = ref<Score[]>([]);
 
 onBeforeMount(async () => {
-  // Load both in parallel for better performance
-  await Promise.all([loadLastFinishedMatches(5), loadUnfinishedMatches()]);
+  const [, , checkouts] = await Promise.all([
+    loadLastFinishedMatches(5),
+    loadUnfinishedMatches(),
+    getCheckouts(10),
+  ]);
+  highestCheckouts.value = checkouts;
 });
 </script>
+
 <template>
-  <div
-    class="max-w-6xl mx-auto grid grid-cols-[minmax(0,1fr)_16rem] gap-6 items-start"
-  >
-    <div class="flex gap-4 items-stretch col-span-2">
+  <NuxtLayout name="homepage">
+    <template #fullWidth>
       <UiHomeModeCard
         title="X01 Friendly"
         description="Set up your players and start a friendly game of darts."
@@ -52,28 +64,40 @@ onBeforeMount(async () => {
         button-label="Start training"
         disabled
       />
-    </div>
-    <div class="flex flex-col gap-6">
+    </template>
+    <template #default>
       <div v-if="unfinishedMatches.length > 0">
-        <h2 class="text-lg font-bold mb-2">Continue match</h2>
+        <UiDisplayHeader tag-size="h2" display-size="h3">
+          Continue match
+        </UiDisplayHeader>
         <div v-for="match in unfinishedMatches" :key="match.id" class="mb-4">
-          <StatsMatchSummary :match="match" />
+          <StatsMatchSummary :match="match" @deleted="loadUnfinishedMatches" />
         </div>
       </div>
       <div v-if="matches.length > 0">
-        <h2 class="text-lg font-bold mb-2">Last 5 matches</h2>
+        <UiDisplayHeader tag-size="h2" display-size="h3">
+          Last 5 matches
+        </UiDisplayHeader>
         <div v-for="match in matches" :key="match.id" class="mb-4">
           <StatsMatchSummary :match="match" />
         </div>
       </div>
-      <UiSummaryCardLayout v-else>
+      <UiSummaryCardLayout
+        v-if="unfinishedMatches.length === 0 && matches.length === 0"
+      >
         <template #center>
           <div class="text-gray-400 text-sm text-center">
             Nog geen wedstrijden gespeeld.
           </div>
         </template>
       </UiSummaryCardLayout>
-    </div>
-    <aside class="w-64 shrink-0 flex flex-col items-center gap-0 pt-4"></aside>
-  </div>
+    </template>
+    <template #sidebar>
+      <UiDisplayHeader tag-size="h2" display-size="h3">
+        Highest Checkouts
+      </UiDisplayHeader>
+
+      <StatsHighestCheckouts :scores="highestCheckouts" />
+    </template>
+  </NuxtLayout>
 </template>

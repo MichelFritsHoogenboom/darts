@@ -22,9 +22,19 @@ export class PlayerStatsService extends BaseService<PlayerStats> {
   }
 
   async getPlayerStatsForPlayerLeg(
-    playerLegId: string
+    playerLegId: string,
   ): Promise<PlayerStats[]> {
     const table = await this.getTable();
     return await table.where("playerLegId").equals(playerLegId).toArray();
+  }
+
+  async getPlayerStatsForCompetitionEdition(
+    competitionEditionId: string,
+  ): Promise<PlayerStats[]> {
+    const table = await this.getTable();
+    return await table
+      .where("competitionEditionId")
+      .equals(competitionEditionId)
+      .toArray();
   }
 }

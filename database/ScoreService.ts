@@ -1,5 +1,6 @@
 import { BaseService } from "./BaseService";
 import type { Score } from "~/interfaces/leg";
+import { isCheckoutScore } from "~/utils/score";
 
 export class ScoreService extends BaseService<Score> {
   protected getTableName(): string {
@@ -10,17 +11,24 @@ export class ScoreService extends BaseService<Score> {
    * Sort scores by createdAt to ensure chronological order
    */
   private sortScoresByCreatedAt(scores: Score[]): Score[] {
-    return scores.sort((a: Score, b: Score) => {
-      const dateA =
-        a.createdAt instanceof Date
-          ? a.createdAt.getTime()
-          : new Date(a.createdAt).getTime();
-      const dateB =
-        b.createdAt instanceof Date
-          ? b.createdAt.getTime()
-          : new Date(b.createdAt).getTime();
-      return dateA - dateB;
+    return scores.sort(
+      (a: Score, b: Score) => a.createdAt.getTime() - b.createdAt.getTime(),
+    );
+  }
+
+  async getCheckouts(limit?: number): Promise<Score[]> {
+    const table = await this.getTable();
+    const checkouts = await table
+      .filter((score: Score) => isCheckoutScore(score))
+      .toArray();
+
+    checkouts.sort((a: Score, b: Score) => {
+      const scoreDiff = b.totalScore - a.totalScore;
+      if (scoreDiff !== 0) return scoreDiff;
+      return b.createdAt.getTime() - a.createdAt.getTime();
     });
+
+    return limit !== undefined ? checkouts.slice(0, limit) : checkouts;
   }
 
   async getScoresForPlayerLeg(playerLegId: string): Promise<Score[]> {

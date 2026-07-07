@@ -6,7 +6,8 @@ import {
 import { defaultX01MatchConfig } from "~/interfaces/x01MatchConfig";
 import type { Player } from "~/interfaces/player";
 import { sortPlayerIds } from "~/utils/rivalry";
-import { GAME_TYPES } from "~/interfaces/match";
+import { createEditionPlayerStats } from "~/interfaces/stats";
+import { GAME_TYPES } from "~/constants/match";
 
 definePageMeta({
   layout: false,
@@ -24,7 +25,7 @@ const { saveEdition, findHead2HeadCompetitionForPair } =
 
 const selectedPlayers = ref<string[]>([]);
 const amountMatches = ref(7);
-const useFixedConfig = ref(false);
+const useFixedConfig = ref(true);
 const matchConfig = ref({ ...defaultX01MatchConfig });
 const showPlayerForm = ref(false);
 const playerSelectorRef = ref<{ resetDropdown: () => void } | null>(null);
@@ -89,7 +90,6 @@ const createRivalry = async () => {
     const edition = createCompetitionEdition({
       competitionId: competition.id,
       editionNumber: 1,
-      playerIds: sortedIds,
       competitionConfig: {
         amountMatches: amountMatches.value,
         matchConfig: useFixedConfig.value
@@ -98,6 +98,7 @@ const createRivalry = async () => {
         gameType: GAME_TYPES.x01,
       },
     });
+    edition.playerStats = await createEditionPlayerStats(edition.id, sortedIds);
 
     await saveEdition(edition);
     await navigateTo("/head2head");
@@ -127,21 +128,25 @@ const createRivalry = async () => {
         @remove-player="removePlayer"
       />
 
-      <div class="player-card inactive rounded-lg p-8 mb-6">
+      <div class="card-panel rounded-lg p-8 mb-6">
         <FormSelect v-model="amountMatches" :options="AMOUNT_MATCH_OPTIONS">
           <template #label>Aantal wedstrijden</template>
         </FormSelect>
       </div>
 
-      <div class="player-card inactive rounded-lg p-8 mb-6">
-        <FormCheckbox v-model="useFixedConfig">
+      <div class="card-panel rounded-lg p-8 mb-6">
+        <FormCheckbox v-model="useFixedConfig" disabled>
           <template #label
             >Vaste wedstrijdinstellingen voor dit seizoen</template
           >
         </FormCheckbox>
       </div>
 
-      <SetupX01MatchSetup v-if="useFixedConfig" v-model="matchConfig" />
+      <SetupX01MatchSetup
+        v-if="useFixedConfig"
+        v-model="matchConfig"
+        class="mb-6"
+      />
 
       <div
         v-if="duplicateCompetition"

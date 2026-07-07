@@ -81,17 +81,13 @@ const startGame = async () => {
           playerId: playerId,
           matchId: match.id,
         }).then((playerStats) => playerStats.id);
-      })
+      }),
     );
 
-    // Save match to database
     const savedMatch = await saveMatch(toRaw(match));
-
-    // Navigate to match page with match ID
-    navigateTo(`/match/${savedMatch.id}`);
+    await navigateTo(`/match/${savedMatch.id}`);
   } catch (err) {
     console.error("Failed to save match:", err);
-    // You could show a toast notification here
   }
 };
 
@@ -100,13 +96,11 @@ const handlePlayerSubmit = async (playerData: Player) => {
   try {
     const savedPlayer = await savePlayer(playerData);
     showPlayerForm.value = false;
-    // Add the newly created player to the match
     if (savedPlayer && savedPlayer.id) {
       addPlayerToMatch(savedPlayer.id);
     }
   } catch (err) {
     console.error("Failed to save player:", err);
-    // You could show a toast notification here
   }
 };
 
@@ -116,7 +110,6 @@ const addPlayerToMatch = (playerId: string) => {
   if (player && !selectedPlayers.value.find((id) => id === playerId)) {
     selectedPlayers.value.push(playerId);
   }
-  // Reset dropdown to empty value
   playerSelectorRef.value?.resetDropdown();
 };
 

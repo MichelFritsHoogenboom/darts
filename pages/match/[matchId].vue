@@ -46,7 +46,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <NuxtLayout name="default">
+  <NuxtLayout name="skeleton">
     <template #title>
       <span class="text-right font-normal" v-if="match">
         {{ match.matchConfig.gameType }} •

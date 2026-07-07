@@ -10,6 +10,7 @@ import type { Score } from "~/interfaces/leg";
 
 // utils
 import { getPlayerWinnerCount } from "~/utils/match";
+import { getPlayerIdsFromStats } from "~/utils/player";
 
 //factories
 import { createSet } from "~/interfaces/set";
@@ -52,6 +53,10 @@ export const useX01Game = (
 
   const pendingLegWin = ref<{ score: Score } | null>(null);
   const pendingGoldenCamel = ref<{ score: Score } | null>(null);
+  const head2headReturn = ref<{
+    competitionId: string;
+    editionComplete: boolean;
+  } | null>(null);
   const { saveMatch } = useMatches();
   // factory functions
   const createNewSet = async (
@@ -130,8 +135,7 @@ export const useX01Game = (
   const matchGame = ref<Set[] | Leg[]>([]);
 
   const playerIds = computed(() => {
-    // Use playerStats to get playerIds (loaded in onBeforeMount, so always available)
-    return playerStats?.value?.map((stat) => stat.playerId) ?? [];
+    return getPlayerIdsFromStats(playerStats?.value ?? []);
   });
 
   const isValidScore = computed(() => {
@@ -440,17 +444,21 @@ export const useX01Game = (
   };
 
   // Async initialization function
-  const initializeMatch = async () => {
+  const initializeMatch = async (startingPlayerId?: string) => {
     // Initialize currentSet if needed
     await loadMatchGame();
 
     if (matchGame.value.length === 0) {
+      if (!startingPlayerId) return;
+
+      currentPlayerId.value = startingPlayerId;
+
       if (match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets) {
-        currentSet.value = await createNewSet();
+        currentSet.value = await createNewSet(startingPlayerId);
       }
 
       // Initialize currentLeg
-      currentLeg.value = await createNewleg();
+      currentLeg.value = await createNewleg(startingPlayerId);
 
       // Push IDs to match.game (which stores IDs)
       match.game.push(
@@ -560,11 +568,10 @@ export const useX01Game = (
       const { onEditionMatchFinished } = useCompetitionEditions();
       const result = await onEditionMatchFinished(match);
       if (result.competitionId) {
-        const query = result.editionComplete ? { editionComplete: "1" } : {};
-        await navigateTo({
-          path: `/head2head/${result.competitionId}`,
-          query,
-        });
+        head2headReturn.value = {
+          competitionId: result.competitionId,
+          editionComplete: result.editionComplete,
+        };
       }
     }
   };
@@ -749,6 +756,7 @@ export const useX01Game = (
     undoLastTurn,
     pendingLegWin: readonly(pendingLegWin),
     pendingGoldenCamel: readonly(pendingGoldenCamel),
+    head2headReturn: readonly(head2headReturn),
     confirmLegFinish,
     confirmGoldenCamel,
     matchGame,
