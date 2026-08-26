@@ -16,7 +16,9 @@
           <div>
             <slot name="title" />
           </div>
-          <div></div>
+          <div class="flex justify-end items-center">
+            <UiAppHeaderMenu />
+          </div>
         </div>
       </div>
     </header>
