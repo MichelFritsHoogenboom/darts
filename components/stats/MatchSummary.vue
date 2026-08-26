@@ -1,10 +1,14 @@
 <script lang="ts" setup>
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faPlay } from "~/assets/icons/faPlay";
 import type { Match } from "~/interfaces/match";
 import type { Set } from "~/interfaces/set";
 import type { Leg, PlayerLeg, Score } from "~/interfaces/leg";
 import type { PlayerStats } from "~/interfaces/stats";
 import { X01_GAME_PLAYED_IN } from "~/interfaces/x01MatchConfig";
 import { getPlayerWinnerCount } from "~/utils/match";
+import { MATCH_TYPE_META } from "~/constants/match";
 import { useToggle } from "@vueuse/core";
 import LegSummary from "./LegSummary.vue";
 import SetSummary from "./SetSummary.vue";
@@ -14,6 +18,10 @@ const { match, openDetails = false } = defineProps<{
   openDetails?: boolean;
 }>();
 
+const emit = defineEmits<{
+  deleted: [matchId: string];
+}>();
+
 const gameState = useGame(match);
 const { players } = gameState;
 const { matchGame, loadMatchGame } = useX01Game(match, gameState);
@@ -21,8 +29,16 @@ const { matchGame, loadMatchGame } = useX01Game(match, gameState);
 const { getLegsForSet, getLegsForMatch } = useLegs();
 const { getSetsForMatch } = useSets();
 const { getPlayerLegsForLeg } = usePlayerLegs();
-const { getScoresForPlayerLeg } = useScores();
+const { getScoresForPlayerLeg, getScoresForMatch } = useScores();
 const { getPlayerStatsForMatch } = usePlayerStats();
+const { deleteMatch } = useMatches();
+
+const deleting = ref(false);
+const hasScores = ref(true);
+
+const matchTypeMeta = computed(
+  () => MATCH_TYPE_META[match.competitionEditionId ? "head2head" : "friendly"],
+);
 
 // Load player stats for the match
 const matchPlayerStats = ref<PlayerStats[]>([]);
@@ -112,9 +128,27 @@ const loadLegsData = async () => {
   }
 };
 
+const deleteEmptyMatch = async () => {
+  if (hasScores.value || deleting.value) return;
+
+  deleting.value = true;
+  try {
+    await deleteMatch(match.id);
+    emit("deleted", match.id);
+  } catch (err) {
+    console.error("Failed to delete match:", err);
+  } finally {
+    deleting.value = false;
+  }
+};
+
 // Load data when component mounts
 onBeforeMount(async () => {
-  await loadLegsData();
+  const [scores] = await Promise.all([
+    getScoresForMatch(match.id),
+    loadLegsData(),
+  ]);
+  hasScores.value = scores.length > 0;
   matchPlayerStats.value = await getPlayerStatsForMatch(match.id);
 });
 </script>
@@ -122,23 +156,30 @@ onBeforeMount(async () => {
 <template>
   <UiSummaryCardLayout>
     <template #left>
-      <div>
-        <span class="text-xs font-normal">
-          {{ match.updatedAt.toLocaleDateString() }}
-        </span>
-        <div class="text-sm">
-          {{ match.matchConfig.gameType }}
-          {{ match.matchConfig.gameWinDefinition }}
-          <template
-            v-if="match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets"
-          >
-            {{ match.matchConfig.setsToWin }}
-          </template>
-          <template v-else>
-            {{ match.matchConfig.legsToWinParent }}
-          </template>
+      <div class="match-meta" :title="matchTypeMeta.title">
+        <FontAwesomeIcon
+          :icon="matchTypeMeta.icon"
+          :aria-label="matchTypeMeta.title"
+          class="w-3.5 h-3.5 shrink-0"
+        />
+        <div>
+          <span class="flex items-center gap-1.5 text-xs font-normal">
+            {{ match.updatedAt.toLocaleDateString() }}
+          </span>
+          <div class="text-sm">
+            {{ match.matchConfig.gameType }}
+            {{ match.matchConfig.gameWinDefinition }}
+            <template
+              v-if="match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets"
+            >
+              {{ match.matchConfig.setsToWin }}
+            </template>
+            <template v-else>
+              {{ match.matchConfig.legsToWinParent }}
+            </template>
 
-          {{ match.matchConfig.gamePlayedIn }}
+            {{ match.matchConfig.gamePlayedIn }}
+          </div>
         </div>
       </div>
     </template>
@@ -151,7 +192,9 @@ onBeforeMount(async () => {
         :winner-id="match.winner"
         :show-badge="false"
       >
-        <span class="inline-block px-2 bg-gray-400/50 font-small font-bold rounded">
+        <span
+          class="inline-block px-2 bg-gray-400/50 font-small font-bold rounded"
+        >
           {{ players[0] ? getPlayerWinnerCount(players[0].id, matchGame) : 0 }}
           -
           {{ players[1] ? getPlayerWinnerCount(players[1].id, matchGame) : 0 }}
@@ -170,18 +213,20 @@ onBeforeMount(async () => {
       <NuxtLink
         v-if="!match.winner"
         :to="`/match/${match.id}`"
-        class="btn-gray flex items-center gap-2 min-h-[1.75rem]"
+        class="btn-gray flex items-center gap-2"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 640 640"
-          class="w-4 h-4 fill-current"
-        >
-          <path
-            d="M471.1 297.4C483.6 309.9 483.6 330.2 471.1 342.7L279.1 534.7C266.6 547.2 246.3 547.2 233.8 534.7C221.3 522.2 221.3 501.9 233.8 489.4L403.2 320L233.9 150.6C221.4 138.1 221.4 117.8 233.9 105.3C246.4 92.8 266.7 92.8 279.2 105.3L471.2 297.3z"
-          />
-        </svg>
+        <FontAwesomeIcon :icon="faPlay" class="w-4 h-4" />
       </NuxtLink>
+      <button
+        v-if="!hasScores"
+        type="button"
+        class="btn-gray"
+        :disabled="deleting"
+        title="Verwijderen"
+        @click="deleteEmptyMatch"
+      >
+        <FontAwesomeIcon :icon="faTrash" class="w-4 h-4" />
+      </button>
     </template>
 
     <!-- Display sets with their legs when in sets mode -->
@@ -210,3 +255,9 @@ onBeforeMount(async () => {
     </div>
   </UiSummaryCardLayout>
 </template>
+
+<style scoped lang="scss">
+.match-meta {
+  @apply flex items-center gap-6;
+}
+</style>

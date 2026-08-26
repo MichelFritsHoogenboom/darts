@@ -1,4 +1,3 @@
-import { ref, readonly } from "vue";
 import { CompetitionService } from "../database/CompetitionService";
 import { CompetitionEditionService } from "../database/CompetitionEditionService";
 import { MatchService } from "../database/MatchService";
@@ -6,6 +5,7 @@ import type {
   Competition,
   Head2HeadOverviewItem,
 } from "../interfaces/competition";
+import type { PlayerStats } from "../interfaces/stats";
 import { buildHead2HeadOverviewItem } from "../utils/rivalry";
 import { cloneCompetition } from "../utils/competition";
 
@@ -14,6 +14,7 @@ const editionService = new CompetitionEditionService();
 const matchService = new MatchService();
 
 export function useCompetitions() {
+  const { getPlayerStatsForCompetitionEdition } = usePlayerStats();
   const competitions = ref<Competition[]>([]);
   const head2HeadOverview = ref<Head2HeadOverviewItem[]>([]);
   const loading = ref(false);
@@ -24,7 +25,7 @@ export function useCompetitions() {
     error.value = null;
     try {
       const saved = await competitionService.upsert(
-        cloneCompetition(competition)
+        cloneCompetition(competition),
       );
       const index = competitions.value.findIndex((c) => c.id === saved.id);
       if (index > -1) {
@@ -59,20 +60,31 @@ export function useCompetitions() {
         const edition = await editionService.getCurrentEdition(competition.id);
         if (!edition) continue;
 
-        const matches = await matchService.getMatchesForCompetitionEdition(
-          edition
+        const matches =
+          await matchService.getMatchesForCompetitionEdition(edition);
+        const stats = await getPlayerStatsForCompetitionEdition(edition.id);
+        const byId = new Map(stats.map((stat) => [stat.id, stat]));
+        const editionStats = edition.playerStats
+          .map((statsId) => byId.get(statsId))
+          .filter((stat): stat is PlayerStats => stat !== undefined);
+        items.push(
+          buildHead2HeadOverviewItem(
+            competition,
+            edition,
+            matches,
+            editionStats,
+          ),
         );
-        items.push(buildHead2HeadOverviewItem(competition, edition, matches));
       }
 
-      items.sort(
-        (a, b) => b.lastActiveAt.getTime() - a.lastActiveAt.getTime()
-      );
+      items.sort((a, b) => b.lastActiveAt.getTime() - a.lastActiveAt.getTime());
 
       head2HeadOverview.value = items;
     } catch (err) {
       error.value =
-        err instanceof Error ? err.message : "Failed to load head2head overview";
+        err instanceof Error
+          ? err.message
+          : "Failed to load head2head overview";
       console.error(err);
     } finally {
       loading.value = false;
@@ -81,7 +93,7 @@ export function useCompetitions() {
 
   return {
     competitions: readonly(competitions),
-    head2HeadOverview: readonly(head2HeadOverview),
+    head2HeadOverview: shallowReadonly(head2HeadOverview),
     loading: readonly(loading),
     error: readonly(error),
     saveCompetition,

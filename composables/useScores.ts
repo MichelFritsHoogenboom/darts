@@ -144,6 +144,21 @@ export const useScores = () => {
     }
   };
 
+  const getCheckouts = async (limit?: number): Promise<Score[]> => {
+    loading.value = true;
+    error.value = null;
+    try {
+      return await scoreService.getCheckouts(limit);
+    } catch (err) {
+      error.value =
+        err instanceof Error ? err.message : "Failed to load checkouts";
+      console.error("Error loading checkouts:", err);
+      return [];
+    } finally {
+      loading.value = false;
+    }
+  };
+
   return {
     scores: readonly(scores),
     loading: readonly(loading),
@@ -155,5 +170,6 @@ export const useScores = () => {
     getScoresForPlayer,
     getScoresForMatch,
     getScoresForSet,
+    getCheckouts,
   };
 };

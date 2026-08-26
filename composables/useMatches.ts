@@ -8,7 +8,7 @@ const matchService = new MatchService();
 const { getSetsForMatch, deleteSet } = useSets();
 const { getLegsForMatch, deleteLeg } = useLegs();
 const { getScoresForMatch } = useScores();
-const { getPlayerStatsForMatch, savePlayerStats } = usePlayerStats();
+const { getPlayerStatsForMatch, savePlayerStats, deletePlayerStats } = usePlayerStats();
 
 export function useMatches() {
   const matches = ref<Match[]>([]);
@@ -91,6 +91,16 @@ export function useMatches() {
         for (const leg of legs) {
           await deleteLeg(leg.id);
         }
+      }
+
+      const matchStats = await getPlayerStatsForMatch(id);
+      for (const stat of matchStats) {
+        await deletePlayerStats(stat.id);
+      }
+
+      if (match.competitionEditionId) {
+        const { removeMatchFromEdition } = useCompetitionEditions();
+        await removeMatchFromEdition(match);
       }
 
       // Then delete the match itself

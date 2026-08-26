@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import type { Match } from "~/interfaces/match";
 import type { Player } from "~/interfaces/player";
+import type { PlayerStats } from "~/interfaces/stats";
 import type { CompetitionEdition } from "~/interfaces/competition";
 import { canStartNewMatch, computeEditionStandings } from "~/utils/rivalry";
-import { getPlayerFullName } from "~/utils/player";
+import { getPlayerIdsFromStats } from "~/utils/player";
 
 definePageMeta({
   layout: false,
@@ -17,6 +18,7 @@ const {
   getCurrentEdition,
   createH2HMatch,
   startNewEdition,
+  loadEditionPlayerStats,
   loading: editionLoading,
 } = useCompetitionEditions();
 const { getMatchesByIds } = useMatches();
@@ -26,6 +28,7 @@ const competition = ref<Awaited<ReturnType<typeof getCompetition>>>();
 const edition = ref<CompetitionEdition>();
 const matches = ref<Match[]>([]);
 const rivalryPlayers = ref<Player[]>([]);
+const loadedEditionPlayerStats = ref<PlayerStats[]>([]);
 const showChampionOverlay = ref(false);
 const startingMatch = ref(false);
 
@@ -46,9 +49,13 @@ const loadDetail = async () => {
   matches.value = await getMatchesByIds([...current.matches]);
   matches.value.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
 
-  await loadPlayers([...current.playerIds]);
+  const loaded = await loadEditionPlayerStats(edition.value, matches.value);
+  loadedEditionPlayerStats.value = loaded;
+
+  const playerIds = getPlayerIdsFromStats(loaded);
+  await loadPlayers([...playerIds]);
   rivalryPlayers.value = (players.value as Player[]).filter((p) =>
-    current.playerIds.includes(p.id),
+    playerIds.includes(p.id),
   );
 };
 
@@ -65,7 +72,11 @@ onBeforeMount(async () => {
 
 const standings = computed(() => {
   if (!edition.value) return {};
-  return computeEditionStandings(edition.value, matches.value);
+  return computeEditionStandings(
+    edition.value,
+    matches.value,
+    getPlayerIdsFromStats(loadedEditionPlayerStats.value),
+  );
 });
 
 const unfinishedMatches = computed(() =>
@@ -90,7 +101,7 @@ const showStartEdition = computed(() => !!edition.value?.winner);
 
 const winsDisplay = computed(() => {
   if (!edition.value || rivalryPlayers.value.length < 2) return "0 - 0";
-  const [a, b] = edition.value.playerIds;
+  const [a, b] = getPlayerIdsFromStats(loadedEditionPlayerStats.value);
   return `${standings.value[a] ?? 0} - ${standings.value[b] ?? 0}`;
 });
 
@@ -128,69 +139,83 @@ const beginNewEdition = async () => {
 <template>
   <NuxtLayout name="default">
     <template #title>
-      <h1 class="text-xl font-bold text-white mb-2">{{ pageTitle }}</h1>
+      <h1 class="page-title">{{ pageTitle }}</h1>
     </template>
 
-    <div v-if="editionLoading && !edition" class="text-center text-gray-400">
-      Laden...
-    </div>
+    <template #left> </template>
 
-    <div v-else-if="edition" class="max-w-4xl mx-auto">
-      <UiSummaryCardLayout wrapper-class="mb-6">
-        <template #left>
-          <p class="text-gray-400 text-sm">
-            Seizoen {{ edition.editionNumber }} · {{ finishedCount }} /
-            {{ amountMatches }} wedstrijden
-          </p>
-        </template>
-        <template #center>
+    <template #right> </template>
+
+    <div v-if="editionLoading && !edition" class="loading">Laden...</div>
+
+    <div v-else-if="edition" class="page-content">
+      <div class="card-panel rivalry-header">
+        <div v-if="rivalryPlayers.length >= 2" class="side">
+          <PlayerImage :player="rivalryPlayers[0]" :silhouette-index="0" />
+        </div>
+
+        <div class="content">
+          <UiDisplayHeader tag-size="h1" display-size="h1" emphasize>
+            Seizoen {{ edition.editionNumber }}
+          </UiDisplayHeader>
+          <UiDisplayHeader tag-size="h2" display-size="h4">
+            {{ finishedCount }} / {{ amountMatches }} wedstrijden gespeeld
+          </UiDisplayHeader>
+
           <StatsPlayersWithCenter
             v-if="rivalryPlayers.length >= 2"
+            class="stats"
             size="xlarge"
-            :players="[rivalryPlayers[0], rivalryPlayers[1]]"
-            :player-stats="[]"
-            :show-badge="false"
+            :players="rivalryPlayers"
+            :player-stats="loadedEditionPlayerStats"
+            :winner-id="edition.winner"
+            :show-badge="true"
           >
-            <span
-              class="inline-block px-4 py-2 bg-gray-400/50 font-bold rounded text-2xl"
-            >
-              {{ winsDisplay }}
-            </span>
+            <span class="wins">{{ winsDisplay }}</span>
           </StatsPlayersWithCenter>
-        </template>
-      </UiSummaryCardLayout>
+          <div class="actions">
+            <FormButton
+              v-if="showStartMatch"
+              :disabled="startingMatch"
+              @click="startMatch"
+            >
+              Nieuwe wedstrijd
+            </FormButton>
+            <FormButton v-if="showStartEdition" @click="beginNewEdition">
+              Nieuw seizoen
+            </FormButton>
+          </div>
+        </div>
 
-      <div v-if="unfinishedMatches.length > 0" class="mb-6">
-        <h2 class="text-lg font-bold mb-2">Wedstrijd hervatten</h2>
-        <div v-for="match in unfinishedMatches" :key="match.id" class="mb-4">
-          <StatsMatchSummary :match="match" />
+        <div v-if="rivalryPlayers.length >= 2" class="side">
+          <PlayerImage :player="rivalryPlayers[1]" :silhouette-index="1" />
         </div>
       </div>
 
-      <div class="mb-6 flex gap-4">
-        <FormButton
-          v-if="showStartMatch"
-          :disabled="startingMatch"
-          @click="startMatch"
+      <div v-if="unfinishedMatches.length > 0" class="section">
+        <h2 class="section-title">Wedstrijd hervatten</h2>
+        <div
+          v-for="match in unfinishedMatches"
+          :key="match.id"
+          class="match-item"
         >
-          Nieuwe wedstrijd
-        </FormButton>
-        <FormButton v-if="showStartEdition" @click="beginNewEdition">
-          Nieuw seizoen
-        </FormButton>
+          <StatsMatchSummary :match="match" @deleted="loadDetail" />
+        </div>
       </div>
 
       <div v-if="finishedMatches.length > 0">
-        <h2 class="text-lg font-bold mb-2">Wedstrijden</h2>
-        <div v-for="match in finishedMatches" :key="match.id" class="mb-4">
+        <h2 class="section-title">Wedstrijden</h2>
+        <div
+          v-for="match in finishedMatches"
+          :key="match.id"
+          class="match-item"
+        >
           <StatsMatchSummary :match="match" />
         </div>
       </div>
       <UiSummaryCardLayout v-else>
         <template #center>
-          <div class="text-gray-400 text-sm text-center">
-            Nog geen wedstrijden afgerond.
-          </div>
+          <div class="empty-state">Nog geen wedstrijden afgerond.</div>
         </template>
       </UiSummaryCardLayout>
 
@@ -202,3 +227,90 @@ const beginNewEdition = async () => {
     </div>
   </NuxtLayout>
 </template>
+
+<style scoped lang="scss">
+.page-title {
+  @apply text-xl font-bold text-white mb-2;
+}
+
+.loading {
+  @apply text-center text-gray-400;
+}
+
+.section {
+  @apply mb-6;
+}
+
+.section-title {
+  @apply text-lg font-bold mb-2;
+}
+
+.match-item {
+  @apply mb-4;
+}
+
+.empty-state {
+  @apply text-gray-400 text-sm text-center;
+}
+
+.rivalry-header {
+  @apply grid grid-cols-[25%_50%_25%] items-center mb-6 py-0 relative mt-6 w-[90%] mx-auto;
+  @apply backdrop-blur-sm border-gray-600/25 shadow-md shadow-black/20;
+  background-color: rgb(31 41 55 / 0.7);
+  background-image: linear-gradient(
+    -45deg,
+    rgb(55 65 81 / 0.04) 0%,
+    rgb(55 65 81 / 0.01) 20%,
+    rgb(156 163 175 / 0.12) 50%,
+    rgb(55 65 81 / 0.01) 80%,
+    rgb(55 65 81 / 0.04) 100%
+  );
+  background-size: 300% 300%;
+  animation: rivalry-header-shift 20s ease-in-out infinite;
+
+  .side {
+    @apply flex justify-center;
+  }
+
+  :deep(.player-image) {
+    @apply absolute bottom-0;
+  }
+
+  .content {
+    @apply text-center relative -top-6;
+  }
+
+  .stats {
+    @apply my-7;
+  }
+
+  .wins {
+    @apply inline-block px-4 py-2 bg-gray-400/50 font-bold rounded text-2xl;
+  }
+
+  .actions {
+    @apply mt-4 justify-center flex gap-4;
+  }
+
+  :deep(.display-header.h1) {
+    @apply mb-3;
+  }
+}
+
+@keyframes rivalry-header-shift {
+  0%,
+  100% {
+    background-position: -100% 0%;
+  }
+
+  50% {
+    background-position: 200% 0%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rivalry-header {
+    animation: none;
+  }
+}
+</style>

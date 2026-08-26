@@ -1,12 +1,7 @@
 import { v4 as uuid } from "uuid";
+import { GAME_TYPES } from "~/constants/match";
 import type { x01MatchConfig } from "./x01MatchConfig";
 import { defaultX01MatchConfig } from "./x01MatchConfig";
-
-export const GAME_TYPES = {
-  x01: "x01",
-  tactics: "tactics",
-  halveIt: "halve-it",
-};
 
 export type GameType = (typeof GAME_TYPES)[keyof typeof GAME_TYPES];
 

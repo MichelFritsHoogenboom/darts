@@ -14,13 +14,12 @@ defineEmits<{
 
 <template>
   <div
-    class="home-mode-card flex-1 flex flex-col p-8 text-center mb-8 rounded-lg"
-    :class="[
-      'player-card inactive',
-      actionable ? 'player-card--actionable' : '',
-    ]"
+    class="home-mode-card"
+    :class="['card-panel', actionable ? 'card-panel--actionable' : '']"
   >
-    <h2 class="home-mode-card__title text-2xl font-bold mb-6">{{ title }}</h2>
+    <UiDisplayHeader tag-size="h2" display-size="h2">
+      {{ title }}
+    </UiDisplayHeader>
     <p class="text-gray-300 mb-8 grow">{{ description }}</p>
     <button
       :disabled="disabled"
@@ -31,3 +30,10 @@ defineEmits<{
     </button>
   </div>
 </template>
+
+<style scoped lang="scss">
+.home-mode-card {
+  @apply font-barlow-condensed font-bold;
+  @apply flex-1 flex flex-col p-8 text-center mb-8;
+}
+</style>

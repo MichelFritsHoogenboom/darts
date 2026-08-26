@@ -4,7 +4,7 @@ import type { Score } from "~/interfaces/leg";
 
 import { X01_GAME_PLAYED_IN } from "~/interfaces/x01MatchConfig";
 import { getPlayerWinnerCount } from "~/utils/match";
-import { getPlayerDisplayName } from "~/utils/player";
+import { getPlayerDisplayName, getPlayerFullName } from "~/utils/player";
 
 import PlayerComponent from "~/components/games/x01/PlayerComponent.vue";
 const { match } = defineProps<{ match: Match }>();
@@ -45,10 +45,16 @@ const {
   pendingGoldenCamel,
   confirmLegFinish,
   confirmGoldenCamel,
+  head2headReturn,
 } = useX01Game(match, gameState);
 
 const { getScoresForMatch } = useScores();
+const { deleteMatch } = useMatches();
+const { getEditionSetupPath } = useCompetitionEditions();
 const { $listen, $unlisten } = useNuxtApp();
+
+const pendingStartingPlayer = ref(false);
+const setupBackPath = ref("/setup");
 
 const camelLeaderPlayerId = ref<string | null>(null);
 
@@ -80,7 +86,10 @@ const refreshCamelLeader = async () => {
 };
 
 const scoreInputBlocked = computed(
-  () => !!pendingLegWin.value || !!pendingGoldenCamel.value,
+  () =>
+    pendingStartingPlayer.value ||
+    !!pendingLegWin.value ||
+    !!pendingGoldenCamel.value,
 );
 
 const pendingLegWinnerName = computed(() =>
@@ -99,6 +108,26 @@ const goldenCamelOptions = [
   { label: "Ja, gouden kameel", value: true },
   { label: "Nee", value: false },
 ];
+
+const startingPlayerOptions = computed(() =>
+  players.value.map((player) => ({
+    label: getPlayerFullName(player),
+    value: player.id,
+  })),
+);
+
+const handleStartingPlayerSelect = async (value: string | number | boolean) => {
+  if (typeof value !== "string") return;
+
+  pendingStartingPlayer.value = false;
+  await initializeMatch(value);
+};
+
+const handleStartingPlayerBack = async () => {
+  pendingStartingPlayer.value = false;
+  await deleteMatch(match.id);
+  await navigateTo(setupBackPath.value);
+};
 
 const handleLegFinishSelect = (value: string | number | boolean) => {
   if (value === 1 || value === 2 || value === 3) {
@@ -259,12 +288,39 @@ const resetGame = () => {
   emit("game-reset");
 };
 
+const returnToHead2Head = async () => {
+  if (!head2headReturn.value) return;
+
+  const query = head2headReturn.value.editionComplete
+    ? { editionComplete: "1" }
+    : {};
+
+  await navigateTo({
+    path: `/head2head/${head2headReturn.value.competitionId}`,
+    query,
+  });
+};
+
 // Initialize match after players are loaded (onMounted runs after onBeforeMount)
+onBeforeMount(async () => {
+  if (match.competitionEditionId) {
+    const path = await getEditionSetupPath(match.competitionEditionId);
+    if (path) {
+      setupBackPath.value = path;
+    }
+  }
+});
+
 onMounted(async () => {
-  await initializeMatch();
-  await refreshCamelLeader();
-  await nextTick();
-  scoreInput.value?.focus();
+  await loadMatchGame();
+  if (matchGame.value.length === 0) {
+    pendingStartingPlayer.value = true;
+  } else {
+    await initializeMatch();
+    await refreshCamelLeader();
+    await nextTick();
+    scoreInput.value?.focus();
+  }
 });
 </script>
 
@@ -307,8 +363,8 @@ onMounted(async () => {
             <div
               class="flex-1 text-center font-oswald flex flex-wrap justify-center content-center self-stretch"
               :class="[
-                'player-card relative rounded-xl',
-                currentPlayerId === players[0]?.id ? 'active' : 'inactive',
+                'card-panel relative rounded-xl',
+                currentPlayerId === players[0]?.id ? 'active' : '',
               ]"
             >
               <div class="text-5xl font-bold text-white">
@@ -321,7 +377,7 @@ onMounted(async () => {
                   match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets
                 "
               >
-                <div class="player-card rounded-xl inactive text-3xl font-bold">
+                <div class="card-panel rounded-xl text-3xl font-bold">
                   {{ getPlayerWinnerCount(players[0]?.id, matchGame) }}
                 </div>
                 <div
@@ -329,12 +385,12 @@ onMounted(async () => {
                 >
                   Sets
                 </div>
-                <div class="player-card rounded-xl inactive text-3xl font-bold">
+                <div class="card-panel rounded-xl text-3xl font-bold">
                   {{ getPlayerWinnerCount(players[1]?.id, matchGame) }}
                 </div>
               </template>
               <div
-                class="player-card rounded-xl inactive text-3xl font-bold flex items-center justify-center"
+                class="card-panel rounded-xl text-3xl font-bold flex items-center justify-center"
               >
                 {{ getPlayerWinnerCount(players[0]?.id, legsToDisplay) }}
               </div>
@@ -344,7 +400,7 @@ onMounted(async () => {
                 Legs
               </div>
               <div
-                class="player-card rounded-xl inactive text-3xl font-bold flex items-center justify-center"
+                class="card-panel rounded-xl text-3xl font-bold flex items-center justify-center"
               >
                 {{ getPlayerWinnerCount(players[1]?.id, legsToDisplay) }}
               </div>
@@ -352,8 +408,8 @@ onMounted(async () => {
             <div
               class="flex-1 text-center font-oswald flex flex-wrap justify-center content-center self-stretch"
               :class="[
-                'player-card relative rounded-xl',
-                currentPlayerId === players[1]?.id ? 'active' : 'inactive',
+                'card-panel relative rounded-xl',
+                currentPlayerId === players[1]?.id ? 'active' : '',
               ]"
             >
               <div class="text-5xl font-bold text-white mb-2">
@@ -475,6 +531,16 @@ onMounted(async () => {
       <!-- Current Scores -->
 
       <GamesX01DecisionModal
+        :visible="pendingStartingPlayer"
+        title="Start wedstrijd"
+        description="Wie heeft de bull gewonnen?"
+        :options="startingPlayerOptions"
+        undo-label="Terug"
+        @select="handleStartingPlayerSelect"
+        @undo="handleStartingPlayerBack"
+      />
+
+      <GamesX01DecisionModal
         :visible="!!pendingLegWin"
         :title="`${pendingLegWinnerName} wint de leg!`"
         description="Hoeveel pijlen?"
@@ -506,7 +572,7 @@ onMounted(async () => {
           <StatsMatchSummary :match="match" :open-details="true" />
           <div class="flex gap-2 py-4 justify-end">
             <button
-              v-if="currentLeg"
+              v-if="currentLeg && !head2headReturn"
               @click="undoLastTurn"
               :disabled="!canUndo"
               class="dartboard-button undo-button disabled:bg-gray-600 disabled:cursor-not-allowed"
@@ -515,7 +581,14 @@ onMounted(async () => {
               Undo
             </button>
             <button
-              v-if="currentLeg"
+              v-if="head2headReturn"
+              @click="returnToHead2Head"
+              class="dartboard-button"
+            >
+              Terug naar Head 2 Head overzicht
+            </button>
+            <button
+              v-else-if="currentLeg"
               @click="resetGame"
               class="dartboard-button"
             >
@@ -534,7 +607,7 @@ onMounted(async () => {
 }
 .score-card-container {
   max-height: 510px;
-  overflow: scroll;
+  overflow: auto;
 }
 
 .total-darts {
@@ -575,7 +648,7 @@ onMounted(async () => {
   background-color: #5a6fa0;
 }
 
-.score-board .player-card {
+.score-board .card-panel {
   line-height: unset;
 }
 
