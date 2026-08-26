@@ -21,6 +21,7 @@ const {
   currentPlayerId,
   currentPlayer,
   players,
+  scoreInput,
 } = gameState;
 
 // Pass game state to useX01Game
@@ -317,6 +318,8 @@ onMounted(async () => {
   } else {
     await initializeMatch();
     await refreshCamelLeader();
+    await nextTick();
+    scoreInput.value?.focus();
   }
 });
 </script>
@@ -479,7 +482,7 @@ onMounted(async () => {
                   class="score-input w-full border-2 text-lg py-2 disabled:cursor-not-allowed disabled:opacity-60"
                   placeholder="Enter score"
                   :disabled="scoreInputBlocked"
-                  @keyup.enter="submitScore"
+                  @keydown.enter.prevent="submitScore"
                   @keydown.ctrl.z.prevent="undoLastTurn"
                   @input="validateScore"
                 />

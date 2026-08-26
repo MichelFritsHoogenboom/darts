@@ -6,45 +6,51 @@ type ModalOption = {
   value: ModalOptionValue;
 };
 
-const {
-  visible,
-  title,
-  description,
-  options,
-  optionButtonClass = "btn-gray w-full py-3",
-  showUndo = true,
-  undoLabel = "Undo",
-  undoTitle = "Laatste worp ongedaan maken (Ctrl+Z)",
-} = defineProps<{
-  visible: boolean;
-  title: string;
-  description: string;
-  options: ModalOption[];
-  optionButtonClass?: string;
-  showUndo?: boolean;
-  undoLabel?: string;
-  undoTitle?: string;
-}>();
+const props = withDefaults(
+  defineProps<{
+    visible: boolean;
+    title: string;
+    description: string;
+    options: ModalOption[];
+    optionButtonClass?: string;
+    showUndo?: boolean;
+    undoLabel?: string;
+    undoTitle?: string;
+  }>(),
+  {
+    optionButtonClass: "btn-gray w-full py-3",
+    showUndo: true,
+    undoLabel: "Undo",
+    undoTitle: "Laatste worp ongedaan maken (Ctrl+Z)",
+  },
+);
 
 defineEmits<{
   select: [value: ModalOptionValue];
   undo: [];
 }>();
 
-const firstButtonRef = ref<HTMLButtonElement | null>(null);
+const optionRefs = ref<HTMLButtonElement[]>([]);
 
-const setFirstButtonRef = (el: Element | ComponentPublicInstance | null) => {
-  firstButtonRef.value = el instanceof HTMLButtonElement ? el : null;
+const setOptionRef = (el: unknown, index: number) => {
+  if (el instanceof HTMLButtonElement) {
+    optionRefs.value[index] = el;
+  }
+};
+
+const focusOption = (index: number) => {
+  const count = props.options.length;
+  if (count === 0) return;
+  const nextIndex = (index + count) % count;
+  optionRefs.value[nextIndex]?.focus();
 };
 
 watch(
-  () => visible,
-  (isVisible) => {
-    if (isVisible) {
-      nextTick(() => {
-        firstButtonRef.value?.focus();
-      });
-    }
+  () => props.visible,
+  async (visible) => {
+    if (!visible) return;
+    await nextTick();
+    focusOption(0);
   },
 );
 </script>
@@ -61,10 +67,12 @@ watch(
         <button
           v-for="(option, index) in options"
           :key="option.label"
-          :ref="index === 0 ? setFirstButtonRef : undefined"
+          :ref="(el) => setOptionRef(el, index)"
           type="button"
           :class="optionButtonClass"
           @click="$emit('select', option.value)"
+          @keydown.down.prevent="focusOption(index + 1)"
+          @keydown.up.prevent="focusOption(index - 1)"
         >
           {{ option.label }}
         </button>
