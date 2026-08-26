@@ -85,10 +85,6 @@ export const useGame = (match: Match) => {
       await loadPlayers(playerIds);
     }
   });
-  // Focus score input on page load
-  onMounted(() => {
-    scoreInput.value?.focus();
-  });
 
   return {
     scoreInput,

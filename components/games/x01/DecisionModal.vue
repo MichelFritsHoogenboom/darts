@@ -6,7 +6,7 @@ type ModalOption = {
   value: ModalOptionValue;
 };
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     visible: boolean;
     title: string;
@@ -29,6 +29,30 @@ defineEmits<{
   select: [value: ModalOptionValue];
   undo: [];
 }>();
+
+const optionRefs = ref<HTMLButtonElement[]>([]);
+
+const setOptionRef = (el: unknown, index: number) => {
+  if (el instanceof HTMLButtonElement) {
+    optionRefs.value[index] = el;
+  }
+};
+
+const focusOption = (index: number) => {
+  const count = props.options.length;
+  if (count === 0) return;
+  const nextIndex = (index + count) % count;
+  optionRefs.value[nextIndex]?.focus();
+};
+
+watch(
+  () => props.visible,
+  async (visible) => {
+    if (!visible) return;
+    await nextTick();
+    focusOption(0);
+  },
+);
 </script>
 
 <template>
@@ -41,11 +65,14 @@ defineEmits<{
       <p class="text-gray-300 mb-6">{{ description }}</p>
       <div class="flex flex-col gap-3">
         <button
-          v-for="option in options"
+          v-for="(option, index) in options"
           :key="option.label"
+          :ref="(el) => setOptionRef(el, index)"
           type="button"
           :class="optionButtonClass"
           @click="$emit('select', option.value)"
+          @keydown.down.prevent="focusOption(index + 1)"
+          @keydown.up.prevent="focusOption(index - 1)"
         >
           {{ option.label }}
         </button>
