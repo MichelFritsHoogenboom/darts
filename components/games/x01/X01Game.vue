@@ -22,6 +22,7 @@ const {
   currentPlayer,
   players,
   scoreInput,
+  resetScore,
 } = gameState;
 
 // Pass game state to useX01Game
@@ -121,6 +122,8 @@ const handleStartingPlayerSelect = async (value: string | number | boolean) => {
 
   pendingStartingPlayer.value = false;
   await initializeMatch(value);
+
+  resetScore();
 };
 
 const handleStartingPlayerBack = async () => {
@@ -314,6 +317,7 @@ onBeforeMount(async () => {
 onMounted(async () => {
   await loadMatchGame();
   if (matchGame.value.length === 0) {
+    await nextTick();
     pendingStartingPlayer.value = true;
   } else {
     await initializeMatch();
