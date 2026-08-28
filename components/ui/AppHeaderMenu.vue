@@ -135,11 +135,11 @@ const handleImportSelect = async (value: string | number | boolean) => {
 }
 
 .toggle {
-  @apply inline-flex items-center justify-center rounded p-2 text-white;
+  @apply inline-flex items-center justify-center rounded px-2 py-1 text-white;
   @apply hover:bg-white/10 transition-colors;
 
   .icon {
-    @apply h-6 w-6;
+    @apply h-5 w-5;
   }
 }
 

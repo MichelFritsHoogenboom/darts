@@ -38,7 +38,7 @@ const isWinner = computed(() => playerId === winnerId);
     <span class="player-name-with-badge__name">{{
       getPlayerName(playerId)
     }}</span>
-    <span class="text-xs text-gray-400 font-oswald" title="3 dart average">
+    <span class="text-base text-gray-400 font-oswald" title="3 dart average">
       {{ average.toFixed(2) }}
     </span>
     <span
