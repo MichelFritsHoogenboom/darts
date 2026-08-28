@@ -42,15 +42,18 @@ const focusOption = (index: number) => {
   const count = props.options.length;
   if (count === 0) return;
   const nextIndex = (index + count) % count;
-  optionRefs.value[nextIndex]?.focus();
+  optionRefs.value[nextIndex]?.focus({ focusVisible: true });
 };
 
 watch(
-  () => props.visible,
-  async (visible) => {
-    if (!visible) return;
-    await nextTick();
-    focusOption(0);
+  () => [props.visible, props.options.length] as const,
+  ([visible, optionCount]) => {
+    if (!visible || optionCount === 0) {
+      if (!visible) optionRefs.value = [];
+      return;
+    }
+
+    requestAnimationFrame(() => focusOption(0));
   },
 );
 </script>

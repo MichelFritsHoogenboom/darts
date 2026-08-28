@@ -277,9 +277,9 @@ onBeforeUnmount(() => {
         />
       </div>
     </div>
-    <div class="stat-well">
+    <div class="stat-well checkout-well">
       <strong>Mogelijke uitgooi:</strong>
-      <GamesX01CheckoutSuggestions :score="realTimeScore" class="col-span-2" />
+      <GamesX01CheckoutSuggestions :score="realTimeScore" />
     </div>
     <div class="stat-well" v-if="matchPlayerStats">
       <GamesX01ScoreCounts
@@ -310,10 +310,15 @@ onBeforeUnmount(() => {
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 :deep(.player-name-with-badge__name) {
   @apply font-oswald font-bold inline-block text-logo;
   transform: skewX(-8deg);
   letter-spacing: -1px;
+}
+
+.checkout-well {
+  grid-template-columns: minmax(0, 6.5rem) 1fr;
+  @apply gap-x-3;
 }
 </style>

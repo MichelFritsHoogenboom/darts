@@ -17,9 +17,9 @@ const checkoutStatus = computed(() => {
     <div
       v-for="(suggestion, index) in checkoutStatus.suggestions"
       :key="index"
-      class="bg-gray-500 text-center rounded py-1 px-2 flex items-center"
+      class="bg-gray-500 text-center rounded py-1 px-1 flex items-center"
     >
-      <span class="font-mono font-bold text-xs">{{ suggestion }}</span>
+      <span class="font-mono font-bold text-sm">{{ suggestion }}</span>
     </div>
   </div>
   <div v-else>Onmogelijk</div>

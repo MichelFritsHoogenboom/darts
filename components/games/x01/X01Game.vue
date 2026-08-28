@@ -22,6 +22,7 @@ const {
   currentPlayer,
   players,
   scoreInput,
+  resetScore,
 } = gameState;
 
 // Pass game state to useX01Game
@@ -121,6 +122,8 @@ const handleStartingPlayerSelect = async (value: string | number | boolean) => {
 
   pendingStartingPlayer.value = false;
   await initializeMatch(value);
+
+  resetScore();
 };
 
 const handleStartingPlayerBack = async () => {
@@ -314,6 +317,7 @@ onBeforeMount(async () => {
 onMounted(async () => {
   await loadMatchGame();
   if (matchGame.value.length === 0) {
+    await nextTick();
     pendingStartingPlayer.value = true;
   } else {
     await initializeMatch();
@@ -440,19 +444,19 @@ onMounted(async () => {
                   ]"
                 >
                   <span
-                    class="total-darts text-gray-400 text-xs"
+                    class="total-darts text-gray-400 text-sm"
                     title="Total darts"
                     >{{ (index + 1) * 3 }}</span
                   >
 
                   <span
-                    class="font-bold text-sm start-score text-center"
+                    class="font-bold text-base start-score text-center"
                     title="Start score"
                     >({{ score.startScore }})
                   </span>
 
                   <span
-                    class="font-bold text-lg flex-1 total-score text-center"
+                    class="font-bold text-xl flex-1 total-score text-center"
                     title="Total score thrown this turn"
                     >{{ score.totalScore }}</span
                   >
@@ -601,7 +605,7 @@ onMounted(async () => {
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .x01-game {
   margin-top: -1.25rem;
 }
@@ -650,6 +654,10 @@ onMounted(async () => {
 
 .score-board .card-panel {
   line-height: unset;
+}
+
+.score-board .card-panel.active {
+  @apply border-dartboard-red-dark bg-dartboard-red/90 backdrop-blur-sm;
 }
 
 .score-input-track {
