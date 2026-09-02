@@ -174,9 +174,8 @@ export function useCompetitionEditions() {
     edition: CompetitionEdition,
     matches: Match[],
   ): Promise<PlayerStats[]> => {
-    const stats = await loadEditionPlayerStatsRecords(edition);
     await updateEditionPlayerStatsAverages(edition, matches);
-    return stats;
+    return loadEditionPlayerStatsRecords(edition);
   };
 
   const getEdition = async (editionId: string) => {
@@ -208,6 +207,7 @@ export function useCompetitionEditions() {
   ): Promise<{
     editionComplete: boolean;
     competitionId?: string;
+    editionNumber?: number;
   }> => {
     if (!match.competitionEditionId) {
       return { editionComplete: false };
@@ -242,6 +242,7 @@ export function useCompetitionEditions() {
     return {
       editionComplete: !!editionToSave.winner,
       competitionId: editionToSave.competitionId,
+      editionNumber: editionToSave.editionNumber,
     };
   };
 

@@ -299,7 +299,7 @@ const returnToHead2Head = async () => {
     : {};
 
   await navigateTo({
-    path: `/head2head/${head2headReturn.value.competitionId}`,
+    path: `/head2head/${head2headReturn.value.competitionId}/season/${head2headReturn.value.editionNumber}`,
     query,
   });
 };

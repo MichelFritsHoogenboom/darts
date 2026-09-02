@@ -12,10 +12,14 @@ definePageMeta({
 
 const route = useRoute();
 const competitionId = computed(() => route.params.competitionId as string);
+const editionNumberParam = computed(() =>
+  Number(route.params.editionNumber),
+);
 
 const { getCompetition } = useCompetitions();
 const {
   getCurrentEdition,
+  getEditionsForCompetition,
   createH2HMatch,
   startNewEdition,
   loadEditionPlayerStats,
@@ -26,11 +30,36 @@ const { loadPlayers, players } = usePlayers();
 
 const competition = ref<Awaited<ReturnType<typeof getCompetition>>>();
 const edition = ref<CompetitionEdition>();
+const currentEdition = ref<CompetitionEdition>();
+const editions = ref<CompetitionEdition[]>([]);
 const matches = ref<Match[]>([]);
 const rivalryPlayers = ref<Player[]>([]);
 const loadedEditionPlayerStats = ref<PlayerStats[]>([]);
 const showChampionOverlay = ref(false);
 const startingMatch = ref(false);
+
+const seasonPath = (editionNumber: number) =>
+  `/head2head/${competitionId.value}/season/${editionNumber}`;
+
+const isCurrentSeason = computed(() => {
+  if (!edition.value || !currentEdition.value) return false;
+  return edition.value.id === currentEdition.value.id;
+});
+
+const seasonOptions = computed(() =>
+  editions.value.map((e) => ({
+    value: e.editionNumber,
+    label: String(e.editionNumber),
+  })),
+);
+
+const selectedSeason = computed({
+  get: () => edition.value?.editionNumber ?? editionNumberParam.value,
+  set: (value: number) => {
+    if (value === edition.value?.editionNumber) return;
+    navigateTo(seasonPath(value));
+  },
+});
 
 const loadDetail = async () => {
   competition.value = await getCompetition(competitionId.value);
@@ -39,14 +68,31 @@ const loadDetail = async () => {
     return;
   }
 
+  const allEditions = await getEditionsForCompetition(competitionId.value);
+  editions.value = allEditions;
+
   const current = await getCurrentEdition(competitionId.value);
   if (!current) {
     await navigateTo("/head2head");
     return;
   }
+  currentEdition.value = current;
 
-  edition.value = current;
-  matches.value = await getMatchesByIds([...current.matches]);
+  if (!Number.isFinite(editionNumberParam.value)) {
+    await navigateTo(seasonPath(current.editionNumber), { replace: true });
+    return;
+  }
+
+  const selected = allEditions.find(
+    (e) => e.editionNumber === editionNumberParam.value,
+  );
+  if (!selected) {
+    await navigateTo(seasonPath(current.editionNumber), { replace: true });
+    return;
+  }
+
+  edition.value = selected;
+  matches.value = await getMatchesByIds([...selected.matches]);
   matches.value.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
 
   const loaded = await loadEditionPlayerStats(edition.value, matches.value);
@@ -58,6 +104,15 @@ const loadDetail = async () => {
     playerIds.includes(p.id),
   );
 };
+
+watch(
+  () => [competitionId.value, editionNumberParam.value] as const,
+  async (next, prev) => {
+    if (!prev) return;
+    if (next[0] === prev[0] && next[1] === prev[1]) return;
+    await loadDetail();
+  },
+);
 
 onBeforeMount(async () => {
   await loadDetail();
@@ -79,9 +134,10 @@ const standings = computed(() => {
   );
 });
 
-const unfinishedMatches = computed(() =>
-  matches.value.filter((m) => !m.winner),
-);
+const unfinishedMatches = computed(() => {
+  if (!isCurrentSeason.value) return [];
+  return matches.value.filter((m) => !m.winner);
+});
 const finishedMatches = computed(() => matches.value.filter((m) => !!m.winner));
 
 const finishedCount = computed(
@@ -93,11 +149,13 @@ const amountMatches = computed(
 );
 
 const showStartMatch = computed(() => {
-  if (!edition.value) return false;
+  if (!edition.value || !isCurrentSeason.value) return false;
   return canStartNewMatch(edition.value, matches.value);
 });
 
-const showStartEdition = computed(() => !!edition.value?.winner);
+const showStartEdition = computed(
+  () => isCurrentSeason.value && !!edition.value?.winner,
+);
 
 const winsDisplay = computed(() => {
   if (!edition.value || rivalryPlayers.value.length < 2) return "0 - 0";
@@ -115,7 +173,7 @@ const championPlayer = computed(() => {
 });
 
 const startMatch = async () => {
-  if (!edition.value || !competition.value) return;
+  if (!edition.value || !competition.value || !isCurrentSeason.value) return;
   if (edition.value.competitionConfig.matchConfig) {
     startingMatch.value = true;
     try {
@@ -130,9 +188,9 @@ const startMatch = async () => {
 };
 
 const beginNewEdition = async () => {
-  if (!edition.value) return;
-  await startNewEdition(competitionId.value, edition.value);
-  await loadDetail();
+  if (!edition.value || !isCurrentSeason.value) return;
+  const created = await startNewEdition(competitionId.value, edition.value);
+  await navigateTo(seasonPath(created.editionNumber));
 };
 </script>
 
@@ -155,8 +213,33 @@ const beginNewEdition = async () => {
         </div>
 
         <div class="content">
-          <UiDisplayHeader tag-size="h1" display-size="h1" emphasize>
-            Seizoen {{ edition.editionNumber }}
+          <UiDisplayHeader
+            tag-size="h1"
+            display-size="h1"
+            emphasize
+            class="season-header"
+          >
+            <span>Seizoen</span>
+            <select
+              v-if="seasonOptions.length > 1"
+              class="season-select"
+              :value="selectedSeason"
+              aria-label="Seizoen"
+              @change="
+                selectedSeason = Number(
+                  ($event.target as HTMLSelectElement).value,
+                )
+              "
+            >
+              <option
+                v-for="option in seasonOptions"
+                :key="option.value"
+                :value="option.value"
+              >
+                {{ option.label }}
+              </option>
+            </select>
+            <span v-else>{{ edition.editionNumber }}</span>
           </UiDisplayHeader>
           <UiDisplayHeader tag-size="h2" display-size="h4">
             {{ finishedCount }} / {{ amountMatches }} wedstrijden gespeeld
@@ -294,6 +377,26 @@ const beginNewEdition = async () => {
 
   :deep(.display-header.h1) {
     @apply mb-3;
+  }
+
+  :deep(.season-header) {
+    @apply inline-flex items-baseline justify-center gap-2;
+  }
+
+  .season-select {
+    @apply appearance-none bg-transparent border-0 border-b-2 border-current;
+    @apply text-inherit uppercase cursor-pointer;
+    @apply px-1 py-0 text-center outline-none;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    letter-spacing: -1px;
+    background-image: none;
+
+    option {
+      @apply text-base normal-case text-black;
+      letter-spacing: normal;
+    }
   }
 }
 

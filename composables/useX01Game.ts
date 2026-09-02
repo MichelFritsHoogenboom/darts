@@ -55,6 +55,7 @@ export const useX01Game = (
   const pendingGoldenCamel = ref<{ score: Score } | null>(null);
   const head2headReturn = ref<{
     competitionId: string;
+    editionNumber: number;
     editionComplete: boolean;
   } | null>(null);
   const { saveMatch } = useMatches();
@@ -567,9 +568,10 @@ export const useX01Game = (
     if (match.competitionEditionId) {
       const { onEditionMatchFinished } = useCompetitionEditions();
       const result = await onEditionMatchFinished(match);
-      if (result.competitionId) {
+      if (result.competitionId && result.editionNumber != null) {
         head2headReturn.value = {
           competitionId: result.competitionId,
+          editionNumber: result.editionNumber,
           editionComplete: result.editionComplete,
         };
       }

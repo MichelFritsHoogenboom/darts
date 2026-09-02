@@ -25,7 +25,7 @@ const highestCheckouts = ref<Score[]>([]);
 
 onBeforeMount(async () => {
   const [, , checkouts] = await Promise.all([
-    loadLastFinishedMatches(5),
+    loadLastFinishedMatches(10),
     loadUnfinishedMatches(),
     getCheckouts(10),
   ]);
@@ -76,7 +76,7 @@ onBeforeMount(async () => {
       </div>
       <div v-if="matches.length > 0">
         <UiDisplayHeader tag-size="h2" display-size="h3">
-          Last 5 matches
+          Last 10 matches
         </UiDisplayHeader>
         <div v-for="match in matches" :key="match.id" class="mb-4">
           <StatsMatchSummary :match="match" />

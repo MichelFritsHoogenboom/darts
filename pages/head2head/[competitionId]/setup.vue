@@ -19,6 +19,7 @@ const { loadPlayers, players } = usePlayers();
 const matchConfig = ref({ ...defaultX01MatchConfig });
 const saving = ref(false);
 const editionPlayerStats = ref<PlayerStats[]>([]);
+const currentEditionNumber = ref<number>();
 
 onBeforeMount(async () => {
   const competition = await getCompetition(competitionId.value);
@@ -29,15 +30,26 @@ onBeforeMount(async () => {
 
   const edition = await getCurrentEdition(competitionId.value);
   if (!edition || edition.winner) {
-    await navigateTo(`/head2head/${competitionId.value}`);
+    await navigateTo(
+      edition
+        ? `/head2head/${competitionId.value}/season/${edition.editionNumber}`
+        : "/head2head",
+    );
     return;
   }
 
+  currentEditionNumber.value = edition.editionNumber;
   editionPlayerStats.value = await getPlayerStatsForCompetitionEdition(
     edition.id,
   );
   await loadPlayers(getPlayerIdsFromStats(editionPlayerStats.value));
 });
+
+const cancelPath = computed(() =>
+  currentEditionNumber.value != null
+    ? `/head2head/${competitionId.value}/season/${currentEditionNumber.value}`
+    : "/head2head",
+);
 
 const editionPlayers = computed(() =>
   getPlayerIdsFromStats(editionPlayerStats.value)
@@ -87,10 +99,7 @@ const startMatch = async () => {
       <SetupX01MatchSetup v-model="matchConfig">
         <template #footer>
           <div class="flex gap-4 justify-end w-full">
-            <NuxtLink
-              :to="`/head2head/${competitionId}`"
-              class="btn-gray px-6 py-2"
-            >
+            <NuxtLink :to="cancelPath" class="btn-gray px-6 py-2">
               Annuleren
             </NuxtLink>
             <FormButton :disabled="saving" @click="startMatch">
