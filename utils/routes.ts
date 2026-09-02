@@ -1,7 +1,7 @@
 export const routes = {
   home: "/",
   setup: "/setup",
-  match: (matchId: string) => `/match/${matchId}`,
+  matchDetail: (matchId: string) => `/match/${matchId}`,
   head2head: {
     index: "/head2head",
     create: "/head2head/create",

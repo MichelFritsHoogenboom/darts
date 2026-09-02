@@ -38,7 +38,7 @@ const handleGameReset = () => {
 // Load match on mount
 onMounted(() => {
   if (!matchId) {
-    navigateTo(routes.setup);
+    handleGameReset();
     return;
   }
 
@@ -74,7 +74,7 @@ onMounted(() => {
       Error: {{ error }}
       <br />
       <button
-        @click="navigateTo(routes.setup)"
+        @click="handleGameReset"
         class="mt-4 px-4 py-2 bg-blue-600 text-white"
       >
         Back to Setup

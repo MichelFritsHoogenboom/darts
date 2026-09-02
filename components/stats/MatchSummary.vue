@@ -213,7 +213,7 @@ onBeforeMount(async () => {
       </button>
       <NuxtLink
         v-if="!match.winner"
-        :to="routes.match(match.id)"
+        :to="routes.matchDetail(match.id)"
         class="btn-gray flex items-center gap-2"
       >
         <FontAwesomeIcon :icon="faPlay" class="w-4 h-4" />

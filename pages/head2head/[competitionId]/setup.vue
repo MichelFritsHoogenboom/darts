@@ -68,7 +68,7 @@ const startMatch = async () => {
     const saved = await createH2HMatch(edition, competition, {
       ...matchConfig.value,
     });
-    await navigateTo(routes.match(saved.id));
+    await navigateTo(routes.matchDetail(saved.id));
   } finally {
     saving.value = false;
   }

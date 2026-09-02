@@ -106,14 +106,9 @@ const loadDetail = async () => {
   );
 };
 
-watch(
-  () => [competitionId.value, editionNumberParam.value] as const,
-  async (next, prev) => {
-    if (!prev) return;
-    if (next[0] === prev[0] && next[1] === prev[1]) return;
-    await loadDetail();
-  },
-);
+onBeforeRouteUpdate(async () => {
+  await loadDetail();
+});
 
 onBeforeMount(async () => {
   await loadDetail();
@@ -179,7 +174,7 @@ const startMatch = async () => {
     startingMatch.value = true;
     try {
       const saved = await createH2HMatch(edition.value, competition.value);
-      await navigateTo(routes.match(saved.id));
+      await navigateTo(routes.matchDetail(saved.id));
     } finally {
       startingMatch.value = false;
     }
