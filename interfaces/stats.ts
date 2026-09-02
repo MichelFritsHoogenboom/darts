@@ -45,6 +45,7 @@ export interface PlayerStats {
   competitionEditionId?: string;
   average: number;
   scoringDartsAverage: number;
+  firstNineAverage: number;
   scores: ScoreRanges;
   checkouts: CheckoutRanges;
   highestCheckout: number;
@@ -104,6 +105,7 @@ export async function createPlayerStats(
     updatedAt: new Date(),
     average: 0,
     scoringDartsAverage: 0,
+    firstNineAverage: 0,
     scores: createScoreRanges(),
     checkouts: createCheckoutRanges(),
     highestCheckout: 0,

@@ -1,6 +1,10 @@
 import type { PlayerStats } from "~/interfaces/stats";
 import type { PlayerLeg } from "~/interfaces/leg";
-import { calculateThreeDartAverage } from "~/utils/averages";
+import {
+  calculateFirstNineAverage,
+  calculateScoringDartsAverage,
+  calculateThreeDartAverage,
+} from "~/utils/averages";
 
 const { getScoresForMatch, getScoresForPlayerLeg, getScoresForSet } =
   useScores();
@@ -37,6 +41,8 @@ export const useAverages = () => {
     );
 
     playerStat.average = calculateThreeDartAverage(scores);
+    playerStat.scoringDartsAverage = calculateScoringDartsAverage(scores);
+    playerStat.firstNineAverage = calculateFirstNineAverage(scores);
 
     // Save the updated playerStats
     await savePlayerStats(playerStat);
@@ -76,6 +82,8 @@ export const useAverages = () => {
     const scores = await getScoresForPlayerLeg(playerLeg.id);
 
     playerStats.average = calculateThreeDartAverage(scores);
+    playerStats.scoringDartsAverage = calculateScoringDartsAverage(scores);
+    playerStats.firstNineAverage = calculateFirstNineAverage(scores);
 
     // Save the updated playerStats
     await savePlayerStats(playerStats);
@@ -121,6 +129,8 @@ export const useAverages = () => {
     );
 
     playerStat.average = calculateThreeDartAverage(scores);
+    playerStat.scoringDartsAverage = calculateScoringDartsAverage(scores);
+    playerStat.firstNineAverage = calculateFirstNineAverage(scores);
 
     // Save the updated playerStats
     await savePlayerStats(playerStat);

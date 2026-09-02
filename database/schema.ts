@@ -183,6 +183,7 @@ export class DartsDatabase extends Dexie {
                 competitionEditionId: edition.id,
                 average: 0,
                 scoringDartsAverage: 0,
+                firstNineAverage: 0,
                 scores: {
                   "0-9": 0,
                   "10-19": 0,

@@ -99,10 +99,8 @@
     @apply hover:from-gray-700/95 hover:via-gray-700/85 hover:to-gray-800/95;
     @apply hover:border-gray-500/40;
     @apply hover:shadow-lg hover:shadow-black/20;
-    @apply px-4 py-2 text-left grid grid-cols-3 w-full ; 
-      line-height: 1.5;
-      text-align: start;
-    
-    
+    @apply relative z-0 origin-top px-4 py-2 text-left grid grid-cols-3 w-full;
+    @apply text-[15px] leading-[1.35];
+    @apply hover:z-10 hover:scale-[1.2];
   }
 }

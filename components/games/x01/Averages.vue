@@ -3,6 +3,8 @@ const {
   matchAverage = 0,
   legAverage = 0,
   setAverage = 0,
+  firstNineAverage = 0,
+  scoringDartsAverage = 0,
   lastLegAverage = 0,
   lastLegWinAverage = 0,
   lastSetAverage = 0,
@@ -13,6 +15,8 @@ const {
   matchAverage: number;
   legAverage: number;
   setAverage: number;
+  firstNineAverage: number;
+  scoringDartsAverage: number;
   lastLegAverage: number;
   lastLegWinAverage: number;
   lastSetAverage: number;
@@ -45,9 +49,15 @@ const formatOptionalOneDartAverage = (average: number) =>
     <div>{{ oneDartAverage(setAverage) }}</div>
   </template>
 
-  <div>Wedstrijd</div>
+  <!-- <div>Wedstrijd</div>
   <div>{{ formatAverage(matchAverage) }}</div>
-  <div>{{ oneDartAverage(matchAverage) }}</div>
+  <div>{{ oneDartAverage(matchAverage) }}</div> -->
+  <div>Eerste 9 darts</div>
+  <div>{{ formatOptionalAverage(firstNineAverage) }}</div>
+  <div>{{ formatOptionalOneDartAverage(firstNineAverage) }}</div>
+  <div>Scorende darts (> 170)</div>
+  <div>{{ formatOptionalAverage(scoringDartsAverage) }}</div>
+  <div>{{ formatOptionalOneDartAverage(scoringDartsAverage) }}</div>
   <div>Laatste leg winst</div>
   <div>{{ formatOptionalAverage(lastLegWinAverage) }}</div>
   <div>{{ formatOptionalOneDartAverage(lastLegWinAverage) }}</div>
