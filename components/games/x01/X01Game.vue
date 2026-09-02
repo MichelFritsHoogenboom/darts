@@ -354,7 +354,7 @@ onMounted(async () => {
           </span>
         </div>
       </div>
-      <div class="flex-1 grid grid-cols-3 gap-4 pb-4 px-2">
+      <div class="flex-1 grid grid-cols-3 gap-10 pb-4 px-2">
         <PlayerComponent
           v-if="players[0]?.id"
           side="left"
@@ -663,7 +663,51 @@ onMounted(async () => {
 }
 
 .score-board .card-panel.active {
-  @apply border-dartboard-red-dark bg-dartboard-red/90 backdrop-blur-sm;
+  @apply border-dartboard-red-dark overflow-hidden;
+  background-color: #a12929;
+}
+
+.score-board .card-panel.active > * {
+  @apply relative z-10;
+}
+
+.score-board .card-panel.active::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.035) 0px,
+      rgba(255, 255, 255, 0.035) 1px,
+      transparent 1px,
+      transparent 12px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.035) 0px,
+      rgba(255, 255, 255, 0.035) 1px,
+      transparent 1px,
+      transparent 12px
+    );
+  -webkit-mask-image: radial-gradient(
+    ellipse 72% 68% at 50% 50%,
+    transparent 0%,
+    transparent 28%,
+    rgba(0, 0, 0, 0.55) 48%,
+    rgba(0, 0, 0, 0.75) 62%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    ellipse 72% 68% at 50% 50%,
+    transparent 0%,
+    transparent 28%,
+    rgba(0, 0, 0, 0.55) 48%,
+    rgba(0, 0, 0, 0.75) 62%,
+    transparent 100%
+  );
 }
 
 .score-input-track {

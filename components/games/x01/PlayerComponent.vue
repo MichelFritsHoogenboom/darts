@@ -279,7 +279,7 @@ onBeforeUnmount(() => {
     :class="side === 'right' ? 'player-stats--right' : 'player-stats--left'"
   >
     <div class="pb-2 text-center">
-      <div class="font-oswald text-3xl">
+      <div class="font-oswald text-4xl">
         <StatsPlayerNameWithBadge
           :playerId="player.id"
           :players="[player]"
@@ -324,6 +324,11 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped lang="scss">
+.player-stats {
+  margin-top: -20px;
+  position: relative;
+}
+
 :deep(.player-name-with-badge__name) {
   @apply font-oswald font-bold inline-block text-logo;
   transform: skewX(-8deg);
