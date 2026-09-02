@@ -104,6 +104,53 @@
     @apply hover:z-10 hover:scale-[1.2];
   }
 
+  /* Data/footer rows: soft band every other row (bg only, equal row height) */
+  .stat-well:not(.checkout-well) > *:nth-child(6n + 4):not(.score-counts__header),
+  .stat-well:not(.checkout-well) > *:nth-child(6n + 5):not(.score-counts__header),
+  .stat-well:not(.checkout-well) > *:nth-child(6n + 6):not(.score-counts__header) {
+    @apply relative z-0;
+  }
+  .stat-well:not(.checkout-well) > *:nth-child(6n + 4):not(.score-counts__header)::before,
+  .stat-well:not(.checkout-well) > *:nth-child(6n + 5):not(.score-counts__header)::before,
+  .stat-well:not(.checkout-well) > *:nth-child(6n + 6):not(.score-counts__header)::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    -webkit-mask-image: linear-gradient(
+      180deg,
+      transparent,
+      #000 12%,
+      #000 88%,
+      transparent
+    );
+    mask-image: linear-gradient(
+      180deg,
+      transparent,
+      #000 12%,
+      #000 88%,
+      transparent
+    );
+  }
+  .stat-well:not(.checkout-well) > *:nth-child(6n + 4):not(.score-counts__header)::before {
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.04) 55%
+    );
+  }
+  .stat-well:not(.checkout-well) > *:nth-child(6n + 5):not(.score-counts__header)::before {
+    background-color: rgba(255, 255, 255, 0.04);
+  }
+  .stat-well:not(.checkout-well) > *:nth-child(6n + 6):not(.score-counts__header)::before {
+    background-image: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.04) 45%,
+      transparent
+    );
+  }
+
   /* Grow toward board center: left player → right, right player → left */
   .player-stats--left .stat-well {
     @apply origin-top-left;
