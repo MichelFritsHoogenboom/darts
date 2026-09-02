@@ -9,6 +9,7 @@ import type { PlayerStats } from "~/interfaces/stats";
 import { X01_GAME_PLAYED_IN } from "~/interfaces/x01MatchConfig";
 import { getPlayerWinnerCount } from "~/utils/match";
 import { MATCH_TYPE_META } from "~/constants/match";
+import { routes } from "~/utils/routes";
 import { useToggle } from "@vueuse/core";
 import LegSummary from "./LegSummary.vue";
 import SetSummary from "./SetSummary.vue";
@@ -212,7 +213,7 @@ onBeforeMount(async () => {
       </button>
       <NuxtLink
         v-if="!match.winner"
-        :to="`/match/${match.id}`"
+        :to="routes.match(match.id)"
         class="btn-gray flex items-center gap-2"
       >
         <FontAwesomeIcon :icon="faPlay" class="w-4 h-4" />

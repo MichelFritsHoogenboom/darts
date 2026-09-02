@@ -5,6 +5,7 @@ import type { Score } from "~/interfaces/leg";
 import { X01_GAME_PLAYED_IN } from "~/interfaces/x01MatchConfig";
 import { getPlayerWinnerCount } from "~/utils/match";
 import { getPlayerDisplayName, getPlayerFullName } from "~/utils/player";
+import { routes } from "~/utils/routes";
 
 import PlayerComponent from "~/components/games/x01/PlayerComponent.vue";
 const { match } = defineProps<{ match: Match }>();
@@ -55,7 +56,7 @@ const { getEditionSetupPath } = useCompetitionEditions();
 const { $listen, $unlisten } = useNuxtApp();
 
 const pendingStartingPlayer = ref(false);
-const setupBackPath = ref("/setup");
+const setupBackPath = ref(routes.setup);
 
 const camelLeaderPlayerId = ref<string | null>(null);
 
@@ -299,7 +300,10 @@ const returnToHead2Head = async () => {
     : {};
 
   await navigateTo({
-    path: `/head2head/${head2headReturn.value.competitionId}/season/${head2headReturn.value.editionNumber}`,
+    path: routes.head2head.season(
+      head2headReturn.value.competitionId,
+      head2headReturn.value.editionNumber,
+    ),
     query,
   });
 };

@@ -6,6 +6,7 @@ import {
 import { defaultX01MatchConfig } from "~/interfaces/x01MatchConfig";
 import type { Player } from "~/interfaces/player";
 import { sortPlayerIds } from "~/utils/rivalry";
+import { routes } from "~/utils/routes";
 import { createEditionPlayerStats } from "~/interfaces/stats";
 import { GAME_TYPES } from "~/constants/match";
 
@@ -44,8 +45,11 @@ onBeforeMount(async () => {
 const canCreate = computed(() => selectedPlayers.value.length === 2);
 
 const duplicatePath = computed(() => {
-  if (!duplicateCompetition.value) return "/head2head";
-  return `/head2head/${duplicateCompetition.value.id}/season/${duplicateCompetition.value.editionNumber}`;
+  if (!duplicateCompetition.value) return routes.head2head.index;
+  return routes.head2head.season(
+    duplicateCompetition.value.id,
+    duplicateCompetition.value.editionNumber,
+  );
 });
 
 watch(
@@ -113,7 +117,7 @@ const createRivalry = async () => {
     edition.playerStats = await createEditionPlayerStats(edition.id, sortedIds);
 
     await saveEdition(edition);
-    await navigateTo("/head2head");
+    await navigateTo(routes.head2head.index);
   } catch (err) {
     submitError.value = err instanceof Error ? err.message : "Opslaan mislukt";
   } finally {
@@ -173,7 +177,7 @@ const createRivalry = async () => {
       <p v-if="submitError" class="text-red-400 mb-4">{{ submitError }}</p>
 
       <div class="flex gap-4 justify-end">
-        <NuxtLink to="/head2head" class="btn-gray px-6 py-2"
+        <NuxtLink :to="routes.head2head.index" class="btn-gray px-6 py-2"
           >Annuleren</NuxtLink
         >
         <FormButton

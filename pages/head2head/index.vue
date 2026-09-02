@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Player } from "~/interfaces/player";
 import { getPlayerIdsFromStats } from "~/utils/player";
+import { routes } from "~/utils/routes";
 
 definePageMeta({
   layout: false,
@@ -66,7 +67,7 @@ watch(head2HeadOverview, async () => {
         />
       </div>
       <div class="flex justify-center mb-6">
-        <NuxtLink to="/head2head/create" class="dartboard-button px-6 py-2">
+        <NuxtLink :to="routes.head2head.create" class="dartboard-button px-6 py-2">
           Nieuwe rivalry
         </NuxtLink>
       </div>

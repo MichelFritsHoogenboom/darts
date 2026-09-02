@@ -2,6 +2,7 @@
 import type { Head2HeadOverviewItem } from "~/interfaces/competition";
 import type { Player } from "~/interfaces/player";
 import { getPlayerIdsFromStats } from "~/utils/player";
+import { routes } from "~/utils/routes";
 
 const props = defineProps<{
   item: Head2HeadOverviewItem;
@@ -32,9 +33,11 @@ const amountMatches = computed(
   () => props.item.edition.competitionConfig.amountMatches,
 );
 
-const rivalryPath = computed(
-  () =>
-    `/head2head/${props.item.competition.id}/season/${props.item.edition.editionNumber}`,
+const rivalryPath = computed(() =>
+  routes.head2head.season(
+    props.item.competition.id,
+    props.item.edition.editionNumber,
+  ),
 );
 </script>
 

@@ -1,10 +1,14 @@
+<script setup lang="ts">
+import { routes } from "~/utils/routes";
+</script>
+
 <template>
   <div class="min-h-screen main-background">
     <header class="text-center bg-gray-950 mb-3">
       <div class="mx-auto px-4 py-1">
         <div class="grid grid-cols-3">
           <div>
-            <NuxtLink to="/">
+            <NuxtLink :to="routes.home">
               <img
                 src="~/assets/images/logo.svg"
                 alt="ADL Amateur Darts League Logo"

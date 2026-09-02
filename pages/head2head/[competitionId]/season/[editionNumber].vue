@@ -5,6 +5,7 @@ import type { PlayerStats } from "~/interfaces/stats";
 import type { CompetitionEdition } from "~/interfaces/competition";
 import { canStartNewMatch, computeEditionStandings } from "~/utils/rivalry";
 import { getPlayerIdsFromStats } from "~/utils/player";
+import { routes } from "~/utils/routes";
 
 definePageMeta({
   layout: false,
@@ -39,7 +40,7 @@ const showChampionOverlay = ref(false);
 const startingMatch = ref(false);
 
 const seasonPath = (editionNumber: number) =>
-  `/head2head/${competitionId.value}/season/${editionNumber}`;
+  routes.head2head.season(competitionId.value, editionNumber);
 
 const isCurrentSeason = computed(() => {
   if (!edition.value || !currentEdition.value) return false;
@@ -64,7 +65,7 @@ const selectedSeason = computed({
 const loadDetail = async () => {
   competition.value = await getCompetition(competitionId.value);
   if (!competition.value) {
-    await navigateTo("/head2head");
+    await navigateTo(routes.head2head.index);
     return;
   }
 
@@ -73,7 +74,7 @@ const loadDetail = async () => {
 
   const current = await getCurrentEdition(competitionId.value);
   if (!current) {
-    await navigateTo("/head2head");
+    await navigateTo(routes.head2head.index);
     return;
   }
   currentEdition.value = current;
@@ -178,12 +179,12 @@ const startMatch = async () => {
     startingMatch.value = true;
     try {
       const saved = await createH2HMatch(edition.value, competition.value);
-      await navigateTo(`/match/${saved.id}`);
+      await navigateTo(routes.match(saved.id));
     } finally {
       startingMatch.value = false;
     }
   } else {
-    await navigateTo(`/head2head/${competitionId.value}/setup`);
+    await navigateTo(routes.head2head.setup(competitionId.value));
   }
 };
 

@@ -11,6 +11,7 @@ import { createMatch } from "../interfaces/match";
 import { GAME_TYPES } from "../constants/match";
 import { defaultX01MatchConfig } from "../interfaces/x01MatchConfig";
 import type { PlayerStats } from "../interfaces/stats";
+import { routes } from "../utils/routes";
 import {
   createPlayerStats,
   createEditionPlayerStats,
@@ -186,7 +187,7 @@ export function useCompetitionEditions() {
     const edition = await getEdition(editionId);
     if (!edition) return undefined;
 
-    return `/head2head/${edition.competitionId}/setup`;
+    return routes.head2head.setup(edition.competitionId);
   };
 
   const removeMatchFromEdition = async (match: Match) => {

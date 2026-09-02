@@ -1,16 +1,17 @@
 <script setup lang="ts">
 import type { Score } from "~/interfaces/leg";
+import { routes } from "~/utils/routes";
 
 definePageMeta({
   layout: false,
 });
 
 const startNewGame = () => {
-  navigateTo("/setup");
+  navigateTo(routes.setup);
 };
 
 const startHead2Head = () => {
-  navigateTo("/head2head");
+  navigateTo(routes.head2head.index);
 };
 
 const {
