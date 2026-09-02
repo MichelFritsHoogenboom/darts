@@ -95,12 +95,20 @@
     @apply bg-gradient-to-br from-gray-700/55 via-gray-700/45 to-gray-800/55;
     @apply backdrop-blur-sm;
     @apply border border-gray-600/25;
-    @apply transition-all duration-300;
+    @apply transition-[background-color,border-color,box-shadow,transform,z-index] duration-300;
     @apply hover:from-gray-700/95 hover:via-gray-700/85 hover:to-gray-800/95;
     @apply hover:border-gray-500/40;
     @apply hover:shadow-lg hover:shadow-black/20;
     @apply relative z-0 origin-top px-4 py-2 text-left grid grid-cols-3 w-full;
     @apply text-[15px] leading-[1.35];
     @apply hover:z-10 hover:scale-[1.2];
+  }
+
+  /* Grow toward board center: left player → right, right player → left */
+  .player-stats--left .stat-well {
+    @apply origin-top-left;
+  }
+  .player-stats--right .stat-well {
+    @apply origin-top-right;
   }
 }

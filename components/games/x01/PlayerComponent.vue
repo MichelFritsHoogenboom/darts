@@ -9,17 +9,25 @@ import {
 import type { Set } from "~/interfaces/set";
 
 const { $listen, $unlisten } = useNuxtApp();
-const { player, currentPlayerId, currentLeg, currentSet, showGoldenCamel } =
-  defineProps<{
-    player: Player;
-    currentPlayerId: string;
-    realTimeScore: number;
-    currentLeg?: Leg | null;
-    currentSet?: Set | null;
-    matchGame: Set[];
-    currentSetGame?: Leg[];
-    showGoldenCamel?: boolean;
-  }>();
+const {
+  player,
+  currentPlayerId,
+  currentLeg,
+  currentSet,
+  showGoldenCamel,
+  side = "left",
+} = defineProps<{
+  player: Player;
+  currentPlayerId: string;
+  realTimeScore: number;
+  currentLeg?: Leg | null;
+  currentSet?: Set | null;
+  matchGame: Set[];
+  currentSetGame?: Leg[];
+  showGoldenCamel?: boolean;
+  /** Board side: left player scales toward center (right), right player toward center (left). */
+  side?: "left" | "right";
+}>();
 
 const {
   getPlayerStatsForMatch,
@@ -266,7 +274,10 @@ onBeforeUnmount(() => {
 });
 </script>
 <template>
-  <div class="flex flex-col items-center justify-start gap-4">
+  <div
+    class="player-stats flex flex-col items-center justify-start gap-4"
+    :class="side === 'right' ? 'player-stats--right' : 'player-stats--left'"
+  >
     <div class="pb-2 text-center">
       <div class="font-oswald text-3xl">
         <StatsPlayerNameWithBadge

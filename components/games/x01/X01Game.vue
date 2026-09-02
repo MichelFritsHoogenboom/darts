@@ -357,6 +357,7 @@ onMounted(async () => {
       <div class="flex-1 grid grid-cols-3 gap-4 pb-4 px-2">
         <PlayerComponent
           v-if="players[0]?.id"
+          side="left"
           :player="players[0]"
           :realTimeScore="realTimePlayerScore(players[0].id)"
           :currentPlayerId="currentPlayerId"
@@ -523,6 +524,7 @@ onMounted(async () => {
         </div>
         <PlayerComponent
           v-if="players[1]?.id"
+          side="right"
           :player="players[1]"
           :realTimeScore="realTimePlayerScore(players[1].id)"
           :currentPlayerId="currentPlayerId"
