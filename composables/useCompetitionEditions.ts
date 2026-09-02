@@ -11,6 +11,7 @@ import { createMatch } from "../interfaces/match";
 import { GAME_TYPES } from "../constants/match";
 import { defaultX01MatchConfig } from "../interfaces/x01MatchConfig";
 import type { PlayerStats } from "../interfaces/stats";
+import { routes } from "../utils/routes";
 import {
   createPlayerStats,
   createEditionPlayerStats,
@@ -174,9 +175,8 @@ export function useCompetitionEditions() {
     edition: CompetitionEdition,
     matches: Match[],
   ): Promise<PlayerStats[]> => {
-    const stats = await loadEditionPlayerStatsRecords(edition);
     await updateEditionPlayerStatsAverages(edition, matches);
-    return stats;
+    return loadEditionPlayerStatsRecords(edition);
   };
 
   const getEdition = async (editionId: string) => {
@@ -187,7 +187,7 @@ export function useCompetitionEditions() {
     const edition = await getEdition(editionId);
     if (!edition) return undefined;
 
-    return `/head2head/${edition.competitionId}/setup`;
+    return routes.head2head.setup(edition.competitionId);
   };
 
   const removeMatchFromEdition = async (match: Match) => {
@@ -208,6 +208,7 @@ export function useCompetitionEditions() {
   ): Promise<{
     editionComplete: boolean;
     competitionId?: string;
+    editionNumber?: number;
   }> => {
     if (!match.competitionEditionId) {
       return { editionComplete: false };
@@ -242,6 +243,7 @@ export function useCompetitionEditions() {
     return {
       editionComplete: !!editionToSave.winner,
       competitionId: editionToSave.competitionId,
+      editionNumber: editionToSave.editionNumber,
     };
   };
 

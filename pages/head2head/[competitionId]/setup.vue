@@ -3,6 +3,7 @@ import { defaultX01MatchConfig } from "~/interfaces/x01MatchConfig";
 import type { Player } from "~/interfaces/player";
 import type { PlayerStats } from "~/interfaces/stats";
 import { getPlayerFullName, getPlayerIdsFromStats } from "~/utils/player";
+import { routes } from "~/utils/routes";
 
 definePageMeta({
   layout: false,
@@ -19,25 +20,37 @@ const { loadPlayers, players } = usePlayers();
 const matchConfig = ref({ ...defaultX01MatchConfig });
 const saving = ref(false);
 const editionPlayerStats = ref<PlayerStats[]>([]);
+const currentEditionNumber = ref<number>();
 
 onBeforeMount(async () => {
   const competition = await getCompetition(competitionId.value);
   if (!competition) {
-    await navigateTo("/head2head");
+    await navigateTo(routes.head2head.index);
     return;
   }
 
   const edition = await getCurrentEdition(competitionId.value);
   if (!edition || edition.winner) {
-    await navigateTo(`/head2head/${competitionId.value}`);
+    await navigateTo(
+      edition
+        ? routes.head2head.season(competitionId.value, edition.editionNumber)
+        : routes.head2head.index,
+    );
     return;
   }
 
+  currentEditionNumber.value = edition.editionNumber;
   editionPlayerStats.value = await getPlayerStatsForCompetitionEdition(
     edition.id,
   );
   await loadPlayers(getPlayerIdsFromStats(editionPlayerStats.value));
 });
+
+const cancelPath = computed(() =>
+  currentEditionNumber.value != null
+    ? routes.head2head.season(competitionId.value, currentEditionNumber.value)
+    : routes.head2head.index,
+);
 
 const editionPlayers = computed(() =>
   getPlayerIdsFromStats(editionPlayerStats.value)
@@ -55,7 +68,7 @@ const startMatch = async () => {
     const saved = await createH2HMatch(edition, competition, {
       ...matchConfig.value,
     });
-    await navigateTo(`/match/${saved.id}`);
+    await navigateTo(routes.matchDetail(saved.id));
   } finally {
     saving.value = false;
   }
@@ -87,10 +100,7 @@ const startMatch = async () => {
       <SetupX01MatchSetup v-model="matchConfig">
         <template #footer>
           <div class="flex gap-4 justify-end w-full">
-            <NuxtLink
-              :to="`/head2head/${competitionId}`"
-              class="btn-gray px-6 py-2"
-            >
+            <NuxtLink :to="cancelPath" class="btn-gray px-6 py-2">
               Annuleren
             </NuxtLink>
             <FormButton :disabled="saving" @click="startMatch">

@@ -6,6 +6,7 @@ import {
 import { defaultX01MatchConfig } from "~/interfaces/x01MatchConfig";
 import type { Player } from "~/interfaces/player";
 import { sortPlayerIds } from "~/utils/rivalry";
+import { routes } from "~/utils/routes";
 import { createEditionPlayerStats } from "~/interfaces/stats";
 import { GAME_TYPES } from "~/constants/match";
 
@@ -20,7 +21,7 @@ const AMOUNT_MATCH_OPTIONS = [3, 7, 9, 11, 13, 15, 17, 19, 21].map((n) => ({
 
 const { players, loading, error, savePlayer, loadPlayers } = usePlayers();
 const { saveCompetition } = useCompetitions();
-const { saveEdition, findHead2HeadCompetitionForPair } =
+const { saveEdition, findHead2HeadCompetitionForPair, getCurrentEdition } =
   useCompetitionEditions();
 
 const selectedPlayers = ref<string[]>([]);
@@ -30,7 +31,10 @@ const matchConfig = ref({ ...defaultX01MatchConfig });
 const showPlayerForm = ref(false);
 const playerSelectorRef = ref<{ resetDropdown: () => void } | null>(null);
 
-const duplicateCompetition = ref<{ id: string } | null>(null);
+const duplicateCompetition = ref<{
+  id: string;
+  editionNumber: number;
+} | null>(null);
 const submitError = ref<string | null>(null);
 const saving = ref(false);
 
@@ -40,6 +44,14 @@ onBeforeMount(async () => {
 
 const canCreate = computed(() => selectedPlayers.value.length === 2);
 
+const duplicatePath = computed(() => {
+  if (!duplicateCompetition.value) return routes.head2head.index;
+  return routes.head2head.season(
+    duplicateCompetition.value.id,
+    duplicateCompetition.value.editionNumber,
+  );
+});
+
 watch(
   selectedPlayers,
   async (ids) => {
@@ -47,7 +59,11 @@ watch(
     if (ids.length === 2) {
       const existing = await findHead2HeadCompetitionForPair(ids[0], ids[1]);
       if (existing) {
-        duplicateCompetition.value = { id: existing.id };
+        const edition = await getCurrentEdition(existing.id);
+        duplicateCompetition.value = {
+          id: existing.id,
+          editionNumber: edition?.editionNumber ?? 1,
+        };
       }
     }
   },
@@ -101,7 +117,7 @@ const createRivalry = async () => {
     edition.playerStats = await createEditionPlayerStats(edition.id, sortedIds);
 
     await saveEdition(edition);
-    await navigateTo("/head2head");
+    await navigateTo(routes.head2head.index);
   } catch (err) {
     submitError.value = err instanceof Error ? err.message : "Opslaan mislukt";
   } finally {
@@ -153,10 +169,7 @@ const createRivalry = async () => {
         class="mb-6 p-4 bg-yellow-900/40 border border-yellow-700 rounded-lg text-yellow-100"
       >
         Deze spelers hebben al een rivalry.
-        <NuxtLink
-          :to="`/head2head/${duplicateCompetition.id}`"
-          class="underline font-semibold ml-1"
-        >
+        <NuxtLink :to="duplicatePath" class="underline font-semibold ml-1">
           Bekijk bestaande rivalry
         </NuxtLink>
       </div>
@@ -164,7 +177,7 @@ const createRivalry = async () => {
       <p v-if="submitError" class="text-red-400 mb-4">{{ submitError }}</p>
 
       <div class="flex gap-4 justify-end">
-        <NuxtLink to="/head2head" class="btn-gray px-6 py-2"
+        <NuxtLink :to="routes.head2head.index" class="btn-gray px-6 py-2"
           >Annuleren</NuxtLink
         >
         <FormButton

@@ -3,6 +3,7 @@ import X01Game from "../../components/games/x01/X01Game.vue";
 import { useMatches } from "../../composables/useMatches";
 import type { Match } from "../../interfaces/match";
 import { X01_GAME_PLAYED_IN } from "../../interfaces/x01MatchConfig";
+import { routes } from "~/utils/routes";
 
 // Get match ID from route
 const route = useRoute();
@@ -31,13 +32,13 @@ const loadMatch = async () => {
 
 // Handle game reset
 const handleGameReset = () => {
-  navigateTo("/setup");
+  navigateTo(routes.setup);
 };
 
 // Load match on mount
 onMounted(() => {
   if (!matchId) {
-    navigateTo("/setup");
+    handleGameReset();
     return;
   }
 
@@ -73,7 +74,7 @@ onMounted(() => {
       Error: {{ error }}
       <br />
       <button
-        @click="navigateTo('/setup')"
+        @click="handleGameReset"
         class="mt-4 px-4 py-2 bg-blue-600 text-white"
       >
         Back to Setup

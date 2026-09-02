@@ -42,6 +42,7 @@
 import { createMatch } from "../interfaces/match";
 import type { Player } from "../interfaces/player";
 import { createPlayerStats } from "../interfaces/stats";
+import { routes } from "~/utils/routes";
 
 definePageMeta({
   layout: false,
@@ -85,7 +86,7 @@ const startGame = async () => {
     );
 
     const savedMatch = await saveMatch(toRaw(match));
-    await navigateTo(`/match/${savedMatch.id}`);
+    await navigateTo(routes.matchDetail(savedMatch.id));
   } catch (err) {
     console.error("Failed to save match:", err);
   }

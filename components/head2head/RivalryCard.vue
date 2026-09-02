@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { Head2HeadOverviewItem } from "~/interfaces/competition";
 import type { Player } from "~/interfaces/player";
-import { getPlayerFullName, getPlayerIdsFromStats } from "~/utils/player";
+import { getPlayerIdsFromStats } from "~/utils/player";
+import { routes } from "~/utils/routes";
 
 const props = defineProps<{
   item: Head2HeadOverviewItem;
@@ -32,21 +33,18 @@ const amountMatches = computed(
   () => props.item.edition.competitionConfig.amountMatches,
 );
 
-const title = computed(() => {
-  if (props.item.competition.name) {
-    return props.item.competition.name;
-  }
-  if (playerA.value && playerB.value) {
-    return `${getPlayerFullName(playerA.value)} vs ${getPlayerFullName(playerB.value)}`;
-  }
-  return "Head to Head";
-});
+const rivalryPath = computed(() =>
+  routes.head2head.season(
+    props.item.competition.id,
+    props.item.edition.editionNumber,
+  ),
+);
 </script>
 
 <template>
   <UiSummaryCardLayout
     :show-average="false"
-    :to="`/head2head/${item.competition.id}`"
+    :to="rivalryPath"
     wrapper-class="mb-4"
   >
     <template #left>
@@ -75,10 +73,7 @@ const title = computed(() => {
       </StatsPlayersWithCenter>
     </template>
     <template #actions>
-      <NuxtLink
-        :to="`/head2head/${item.competition.id}`"
-        class="btn-gray btn-gray-500"
-      >
+      <NuxtLink :to="rivalryPath" class="btn-gray btn-gray-500">
         Show details
       </NuxtLink>
     </template>
