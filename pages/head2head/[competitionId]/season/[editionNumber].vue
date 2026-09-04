@@ -16,9 +16,7 @@ definePageMeta({
 
 const route = useRoute();
 const competitionId = computed(() => route.params.competitionId as string);
-const editionNumberParam = computed(() =>
-  Number(route.params.editionNumber),
-);
+const editionNumberParam = computed(() => Number(route.params.editionNumber));
 
 const { getCompetition } = useCompetitions();
 const {
@@ -254,7 +252,7 @@ const beginNewEdition = async () => {
 </script>
 
 <template>
-  <NuxtLayout name="default">
+  <NuxtLayout name="default" mode="medium">
     <template #title>
       <h1 class="page-title">{{ pageTitle }}</h1>
     </template>
