@@ -18,7 +18,7 @@ import {
 } from "../interfaces/stats";
 import { getEditionMatchWinner, isEditionComplete } from "../utils/rivalry";
 import { getPlayerIdsFromStats } from "../utils/player";
-import { buildEditionPlayerStatMetrics, buildEditionBestAverages } from "../utils/editionPlayerStats";
+import { buildEditionPlayerStatMetrics, buildEditionBestAverages, tallyCamelMatchWins } from "../utils/editionPlayerStats";
 import type { EditionBestAverages } from "../utils/editionPlayerStats";
 import type { Match } from "../interfaces/match";
 import type { Score } from "../interfaces/leg";
@@ -252,6 +252,34 @@ export function useCompetitionEditions() {
     });
   };
 
+  const queryEditionCamelMatchWins = async (
+    playerIds: string[],
+    matches: Match[],
+  ): Promise<Record<string, number>> => {
+    const { getPlayerStatsForMatch } = usePlayerStats();
+    const finishedMatches = matches.filter((match) => !!match.winner);
+    const matchCamelCounts: Array<Record<string, number>> = [];
+
+    for (const match of finishedMatches) {
+      const matchStats = await getPlayerStatsForMatch(match.id);
+      const counts: Record<string, number> = {};
+      for (const playerId of playerIds) {
+        const playerMatchStats = matchStats.find(
+          (stat) => stat.playerId === playerId,
+        );
+        counts[playerId] = playerMatchStats?.scores.goldenCamel ?? 0;
+      }
+      matchCamelCounts.push(counts);
+    }
+
+    return Object.fromEntries(
+      playerIds.map((playerId) => [
+        playerId,
+        tallyCamelMatchWins(playerId, matchCamelCounts),
+      ]),
+    );
+  };
+
   const loadEditionPlayerStats = async (
     edition: CompetitionEdition,
     matches: Match[],
@@ -341,6 +369,7 @@ export function useCompetitionEditions() {
     createH2HMatch,
     loadEditionPlayerStats,
     queryEditionBestAverages,
+    queryEditionCamelMatchWins,
     onEditionMatchFinished,
   };
 }

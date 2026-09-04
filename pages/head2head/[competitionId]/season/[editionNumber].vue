@@ -26,6 +26,7 @@ const {
   startNewEdition,
   loadEditionPlayerStats,
   queryEditionBestAverages,
+  queryEditionCamelMatchWins,
   loading: editionLoading,
 } = useCompetitionEditions();
 const { getMatchesByIds } = useMatches();
@@ -40,6 +41,8 @@ const rivalryPlayers = ref<Player[]>([]);
 const loadedEditionPlayerStats = ref<PlayerStats[]>([]);
 const leftBestAverages = ref<EditionBestAverages>(emptyEditionBestAverages());
 const rightBestAverages = ref<EditionBestAverages>(emptyEditionBestAverages());
+const leftCamelMatchWins = ref(0);
+const rightCamelMatchWins = ref(0);
 const showChampionOverlay = ref(false);
 const startingMatch = ref(false);
 const activeTab = ref<"matches" | "stats">("matches");
@@ -104,6 +107,8 @@ const loadDetail = async () => {
   bestAveragesLoaded.value = false;
   leftBestAverages.value = emptyEditionBestAverages();
   rightBestAverages.value = emptyEditionBestAverages();
+  leftCamelMatchWins.value = 0;
+  rightCamelMatchWins.value = 0;
   matches.value = await getMatchesByIds([...selected.matches]);
   matches.value.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
 
@@ -126,12 +131,15 @@ const loadBestAverages = async () => {
   loadingBestAverages.value = true;
   try {
     const finished = matches.value.filter((match) => !!match.winner);
-    const [leftBest, rightBest] = await Promise.all([
+    const [leftBest, rightBest, camelWins] = await Promise.all([
       queryEditionBestAverages(leftId, finished),
       queryEditionBestAverages(rightId, finished),
+      queryEditionCamelMatchWins([leftId, rightId], finished),
     ]);
     leftBestAverages.value = leftBest;
     rightBestAverages.value = rightBest;
+    leftCamelMatchWins.value = camelWins[leftId] ?? 0;
+    rightCamelMatchWins.value = camelWins[rightId] ?? 0;
     bestAveragesLoaded.value = true;
   } finally {
     loadingBestAverages.value = false;
@@ -387,6 +395,8 @@ const beginNewEdition = async () => {
           :right="rightEditionStats"
           :left-best="leftBestAverages"
           :right-best="rightBestAverages"
+          :left-camel-wins="leftCamelMatchWins"
+          :right-camel-wins="rightCamelMatchWins"
           :is-set-match="isSetMatchSeason"
         />
       </div>

@@ -86,3 +86,20 @@ export const buildEditionBestAverages = (input: {
   bestSetAverage: maxAverage(input.wonSetAverages),
   bestMatchAverage: maxAverage(input.matchAverages),
 });
+
+/** Per finished match: player with strictly most golden camels wins that match. */
+export const tallyCamelMatchWins = (
+  playerId: string,
+  matchCamelCounts: Array<Readonly<Record<string, number>>>,
+): number => {
+  let wins = 0;
+  for (const counts of matchCamelCounts) {
+    const own = counts[playerId] ?? 0;
+    const others = Object.entries(counts)
+      .filter(([id]) => id !== playerId)
+      .map(([, count]) => count);
+    if (!others.length) continue;
+    if (own > Math.max(...others)) wins += 1;
+  }
+  return wins;
+};

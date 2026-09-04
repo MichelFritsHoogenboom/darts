@@ -7,18 +7,24 @@ import type {
 } from "~/interfaces/stats";
 import type { EditionBestAverages } from "~/utils/editionPlayerStats";
 import { emptyEditionBestAverages } from "~/utils/editionPlayerStats";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { faCamel } from "~/assets/icons/faCamel";
 
 const {
   left,
   right,
   leftBest = emptyEditionBestAverages(),
   rightBest = emptyEditionBestAverages(),
+  leftCamelWins = 0,
+  rightCamelWins = 0,
   isSetMatch = false,
 } = defineProps<{
   left: PlayerStats;
   right: PlayerStats;
   leftBest?: EditionBestAverages;
   rightBest?: EditionBestAverages;
+  leftCamelWins?: number;
+  rightCamelWins?: number;
   isSetMatch?: boolean;
 }>();
 
@@ -30,6 +36,7 @@ type NumberRow = {
   left: number;
   right: number;
   format?: "average" | "int";
+  showCamels?: boolean;
 };
 
 type CheckoutRow = {
@@ -149,13 +156,18 @@ const sections = computed((): Section[] => {
     format: "average",
   });
 
-  const scoreKeys: Array<{ key: keyof ScoreRanges; label: string }> = [
+  const scoreKeys: Array<{
+    key: keyof ScoreRanges;
+    label: string;
+    showCamels?: boolean;
+  }> = [
     { key: "180", label: "180's" },
     { key: "162-179", label: "162–179" },
     { key: "126-161", label: "126–161" },
     { key: "90-125", label: "90–125" },
     { key: "66-89", label: "66–89" },
     { key: "54-65", label: "54–65" },
+    { key: "goldenCamel", label: "Gouden kamelen", showCamels: true },
   ];
 
   const checkoutKeys: Array<{ key: keyof CheckoutRanges; label: string }> = [
@@ -169,12 +181,13 @@ const sections = computed((): Section[] => {
     { title: "Gemiddelden", rows: averageRows },
     {
       title: "Scores",
-      rows: scoreKeys.map(({ key, label }) => ({
+      rows: scoreKeys.map(({ key, label, showCamels }) => ({
         kind: "number" as const,
         label,
         left: scoreValue(left, key),
         right: scoreValue(right, key),
         format: "int" as const,
+        showCamels,
       })),
     },
     {
@@ -209,6 +222,29 @@ const displayNumber = (row: NumberRow, side: "left" | "right") => {
   return row.format === "average" ? formatAverage(value) : formatInt(value);
 };
 
+const camelSlots = (count: number) =>
+  Array.from({ length: Math.max(0, count) }, (_, index) => index);
+
+const leftSmallCamels = computed(() => {
+  const seasonBonus =
+    left.scores.goldenCamel > right.scores.goldenCamel ? 1 : 0;
+  return leftCamelWins + seasonBonus;
+});
+
+const rightSmallCamels = computed(() => {
+  const seasonBonus =
+    right.scores.goldenCamel > left.scores.goldenCamel ? 1 : 0;
+  return rightCamelWins + seasonBonus;
+});
+
+const leftHasLargeCamel = computed(
+  () => leftSmallCamels.value > rightSmallCamels.value,
+);
+
+const rightHasLargeCamel = computed(
+  () => rightSmallCamels.value > leftSmallCamels.value,
+);
+
 const isHighlighted = (
   row: NumberRow | CheckoutRow,
   side: "left" | "right",
@@ -235,8 +271,34 @@ const isHighlighted = (
       >
         <div class="season-comparison__row">
           <div class="season-comparison__value season-comparison__value--left">
+            <div
+              v-if="row.kind === 'number' && row.showCamels"
+              class="season-comparison__camels"
+              aria-hidden="true"
+            >
+              <UiIconSparkle
+                v-if="leftHasLargeCamel"
+                class="season-comparison__camel season-comparison__camel--large"
+                title="Gouden kameel winnaar dit seizoen"
+              >
+                <FontAwesomeIcon :icon="faCamel" />
+              </UiIconSparkle>
+              <UiIconSparkle
+                v-for="camelIndex in camelSlots(leftSmallCamels)"
+                :key="`left-camel-${camelIndex}`"
+                class="season-comparison__camel"
+                :title="
+                  camelIndex < leftCamelWins
+                    ? 'Kameel-wedstrijd gewonnen'
+                    : 'Meeste gouden kamelen dit seizoen'
+                "
+                :style="{ animationDelay: `${camelIndex * 0.15}s` }"
+              >
+                <FontAwesomeIcon :icon="faCamel" />
+              </UiIconSparkle>
+            </div>
             <UiStatWellValue
-              size="medium"
+              size="large"
               :highlighted="isHighlighted(row, 'left')"
             >
               <template v-if="row.kind === 'number'">
@@ -253,7 +315,7 @@ const isHighlighted = (
           <div class="season-comparison__label">{{ row.label }}</div>
           <div class="season-comparison__value season-comparison__value--right">
             <UiStatWellValue
-              size="medium"
+              size="large"
               :highlighted="isHighlighted(row, 'right')"
             >
               <template v-if="row.kind === 'number'">
@@ -266,6 +328,32 @@ const isHighlighted = (
                 {{ formatCheckoutHitThrown(row.right) }}
               </span>
             </UiStatWellValue>
+            <div
+              v-if="row.kind === 'number' && row.showCamels"
+              class="season-comparison__camels"
+              aria-hidden="true"
+            >
+              <UiIconSparkle
+                v-for="camelIndex in camelSlots(rightSmallCamels)"
+                :key="`right-camel-${camelIndex}`"
+                class="season-comparison__camel"
+                :title="
+                  camelIndex < rightCamelWins
+                    ? 'Kameel-wedstrijd gewonnen'
+                    : 'Meeste gouden kamelen dit seizoen'
+                "
+                :style="{ animationDelay: `${camelIndex * 0.15}s` }"
+              >
+                <FontAwesomeIcon :icon="faCamel" />
+              </UiIconSparkle>
+              <UiIconSparkle
+                v-if="rightHasLargeCamel"
+                class="season-comparison__camel season-comparison__camel--large"
+                title="Gouden kameel winnaar dit seizoen"
+              >
+                <FontAwesomeIcon :icon="faCamel" />
+              </UiIconSparkle>
+            </div>
           </div>
         </div>
       </UiSummaryCard>
@@ -287,16 +375,16 @@ const isHighlighted = (
 }
 
 .season-comparison__row {
-  @apply grid grid-cols-[1fr_auto_1fr] items-center gap-8;
+  @apply grid grid-cols-[1fr_auto_1fr] items-center gap-12;
 }
 
 .season-comparison__label {
-  @apply text-center text-gray-200 min-w-[11rem] px-4;
+  @apply text-center text-gray-200 min-w-[13rem] px-6;
   font-size: 18px;
 }
 
 .season-comparison__value {
-  @apply flex;
+  @apply flex items-center gap-2;
 }
 
 .season-comparison__value--left {
@@ -305,5 +393,30 @@ const isHighlighted = (
 
 .season-comparison__value--right {
   @apply justify-start;
+}
+
+.season-comparison__camels {
+  @apply flex flex-wrap items-center gap-1 max-w-[10rem];
+}
+
+.season-comparison__camel {
+  @apply text-amber-400;
+  font-size: 1rem;
+
+  :deep(svg) {
+    @apply h-[1em] w-[1em];
+  }
+}
+
+.season-comparison__camel--large {
+  font-size: 1.55rem;
+}
+
+.season-comparison__value--left .season-comparison__camel--large {
+  @apply mr-3;
+}
+
+.season-comparison__value--right .season-comparison__camel--large {
+  @apply ml-3;
 }
 </style>
