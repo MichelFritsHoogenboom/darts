@@ -7,6 +7,7 @@ import { canStartNewMatch, computeEditionStandings } from "~/utils/rivalry";
 import { getPlayerIdsFromStats } from "~/utils/player";
 import { routes } from "~/utils/routes";
 import { X01_GAME_PLAYED_IN } from "~/interfaces/x01MatchConfig";
+import { formatX01MatchConfigSummary } from "~/utils/match";
 import type { EditionBestAverages } from "~/utils/editionPlayerStats";
 import { emptyEditionBestAverages } from "~/utils/editionPlayerStats";
 
@@ -237,6 +238,11 @@ const isSetMatchSeason = computed(
     X01_GAME_PLAYED_IN.sets,
 );
 
+const matchConfigSummary = computed(() => {
+  const config = edition.value?.competitionConfig.matchConfig;
+  return config ? formatX01MatchConfigSummary(config) : "";
+});
+
 const startMatch = async () => {
   if (!edition.value || !competition.value || !isCurrentSeason.value) return;
   if (edition.value.competitionConfig.matchConfig) {
@@ -306,8 +312,15 @@ const beginNewEdition = async () => {
             </select>
             <span v-else>{{ edition.editionNumber }}</span>
           </UiDisplayHeader>
-          <UiDisplayHeader tag-size="h2" display-size="h4">
-            {{ finishedCount }} / {{ amountMatches }} wedstrijden gespeeld
+          <UiDisplayHeader tag-size="h2" display-size="h4" class="season-meta">
+            <template v-if="matchConfigSummary">
+              <span>{{ matchConfigSummary }}</span>
+              <span class="season-meta__sep" aria-hidden="true">•</span>
+            </template>
+            <span
+              >{{ finishedCount }} / {{ amountMatches }} wedstrijden
+              gespeeld</span
+            >
           </UiDisplayHeader>
 
           <StatsPlayersWithCenter
@@ -468,6 +481,10 @@ const beginNewEdition = async () => {
 
   .stats {
     @apply my-7;
+
+    :deep(.font-oswald) {
+      @apply text-lg;
+    }
   }
 
   .wins {
@@ -484,6 +501,10 @@ const beginNewEdition = async () => {
 
   :deep(.season-header) {
     @apply inline-flex items-baseline justify-center gap-2;
+  }
+
+  :deep(.season-meta) {
+    @apply inline-flex flex-wrap items-baseline justify-center gap-x-2 mb-0;
   }
 
   .season-select {
