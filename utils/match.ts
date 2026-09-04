@@ -9,16 +9,22 @@ import { X01_GAME_PLAYED_IN } from "~/interfaces/x01MatchConfig";
  * @param games - Array of Sets or Legs with a winner property
  * @returns The number of games won by the player
  */
-export function getPlayerWinnerCount(
+export const getPlayerWinnerCount = (
   playerId: string,
-  games: Array<Set | Leg>
-): number {
-  return games?.filter((game) => game.winner === playerId).length || 0;
-}
+  games: Array<Set | Leg>,
+): number =>
+  games?.filter((game) => game.winner === playerId).length || 0;
 
-/** e.g. "501 • First to 2 sets • 3 legs to win set" */
-export function formatX01MatchConfigSummary(config: x01MatchConfig): string {
+/** Full: "501 • First to 2 sets • 3 legs to win set". Compact: "501 First to 2 sets" */
+export const formatX01MatchConfigSummary = (
+  config: x01MatchConfig,
+  compact = false,
+): string => {
   if (config.gamePlayedIn === X01_GAME_PLAYED_IN.sets) {
+    if (compact) {
+      return `${config.gameType} ${config.gameWinDefinition} ${config.setsToWin} ${config.gamePlayedIn}`;
+    }
+
     return [
       `${config.gameType}`,
       `${config.gameWinDefinition} ${config.setsToWin} sets`,
@@ -26,13 +32,12 @@ export function formatX01MatchConfigSummary(config: x01MatchConfig): string {
     ].join(" • ");
   }
 
+  if (compact) {
+    return `${config.gameType} ${config.gameWinDefinition} ${config.legsToWinParent} ${config.gamePlayedIn}`;
+  }
+
   return [
     `${config.gameType}`,
     `${config.gameWinDefinition} ${config.legsToWinParent} legs`,
   ].join(" • ");
-}
-
-// Default export for compatibility
-export default {
-  getPlayerWinnerCount,
 };
