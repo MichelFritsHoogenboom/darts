@@ -18,6 +18,7 @@ const {
   leftCamelWins = 0,
   rightCamelWins = 0,
   isSetMatch = false,
+  seasonComplete = false,
 } = defineProps<{
   left: PlayerStats;
   right: PlayerStats;
@@ -26,6 +27,7 @@ const {
   leftCamelWins?: number;
   rightCamelWins?: number;
   isSetMatch?: boolean;
+  seasonComplete?: boolean;
 }>();
 
 type CompareSide = "left" | "right" | null;
@@ -227,22 +229,28 @@ const camelSlots = (count: number) =>
 
 const leftSmallCamels = computed(() => {
   const seasonBonus =
-    left.scores.goldenCamel > right.scores.goldenCamel ? 1 : 0;
+    seasonComplete && left.scores.goldenCamel > right.scores.goldenCamel
+      ? 1
+      : 0;
   return leftCamelWins + seasonBonus;
 });
 
 const rightSmallCamels = computed(() => {
   const seasonBonus =
-    right.scores.goldenCamel > left.scores.goldenCamel ? 1 : 0;
+    seasonComplete && right.scores.goldenCamel > left.scores.goldenCamel
+      ? 1
+      : 0;
   return rightCamelWins + seasonBonus;
 });
 
 const leftHasLargeCamel = computed(
-  () => leftSmallCamels.value > rightSmallCamels.value,
+  () =>
+    seasonComplete && leftSmallCamels.value > rightSmallCamels.value,
 );
 
 const rightHasLargeCamel = computed(
-  () => rightSmallCamels.value > leftSmallCamels.value,
+  () =>
+    seasonComplete && rightSmallCamels.value > leftSmallCamels.value,
 );
 
 const isHighlighted = (

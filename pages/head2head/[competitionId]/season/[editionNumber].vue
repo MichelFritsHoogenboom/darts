@@ -411,6 +411,7 @@ const beginNewEdition = async () => {
           :left-camel-wins="leftCamelMatchWins"
           :right-camel-wins="rightCamelMatchWins"
           :is-set-match="isSetMatchSeason"
+          :season-complete="!!edition.winner"
         />
       </div>
 
