@@ -6,6 +6,9 @@ import type { CompetitionEdition } from "~/interfaces/competition";
 import { canStartNewMatch, computeEditionStandings } from "~/utils/rivalry";
 import { getPlayerIdsFromStats } from "~/utils/player";
 import { routes } from "~/utils/routes";
+import { X01_GAME_PLAYED_IN } from "~/interfaces/x01MatchConfig";
+import type { EditionBestAverages } from "~/utils/editionPlayerStats";
+import { emptyEditionBestAverages } from "~/utils/editionPlayerStats";
 
 definePageMeta({
   layout: false,
@@ -24,6 +27,7 @@ const {
   createH2HMatch,
   startNewEdition,
   loadEditionPlayerStats,
+  queryEditionBestAverages,
   loading: editionLoading,
 } = useCompetitionEditions();
 const { getMatchesByIds } = useMatches();
@@ -36,8 +40,13 @@ const editions = ref<CompetitionEdition[]>([]);
 const matches = ref<Match[]>([]);
 const rivalryPlayers = ref<Player[]>([]);
 const loadedEditionPlayerStats = ref<PlayerStats[]>([]);
+const leftBestAverages = ref<EditionBestAverages>(emptyEditionBestAverages());
+const rightBestAverages = ref<EditionBestAverages>(emptyEditionBestAverages());
 const showChampionOverlay = ref(false);
 const startingMatch = ref(false);
+const activeTab = ref<"matches" | "stats">("matches");
+const loadingBestAverages = ref(false);
+const bestAveragesLoaded = ref(false);
 
 const seasonPath = (editionNumber: number) =>
   routes.head2head.season(competitionId.value, editionNumber);
@@ -93,6 +102,10 @@ const loadDetail = async () => {
   }
 
   edition.value = selected;
+  activeTab.value = "matches";
+  bestAveragesLoaded.value = false;
+  leftBestAverages.value = emptyEditionBestAverages();
+  rightBestAverages.value = emptyEditionBestAverages();
   matches.value = await getMatchesByIds([...selected.matches]);
   matches.value.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
 
@@ -101,9 +114,37 @@ const loadDetail = async () => {
 
   const playerIds = getPlayerIdsFromStats(loaded);
   await loadPlayers([...playerIds]);
-  rivalryPlayers.value = (players.value as Player[]).filter((p) =>
-    playerIds.includes(p.id),
-  );
+  rivalryPlayers.value = playerIds
+    .map((id) => (players.value as Player[]).find((p) => p.id === id))
+    .filter((player): player is Player => player !== undefined);
+};
+
+const loadBestAverages = async () => {
+  if (bestAveragesLoaded.value || loadingBestAverages.value) return;
+  const leftId = rivalryPlayers.value[0]?.id;
+  const rightId = rivalryPlayers.value[1]?.id;
+  if (!leftId || !rightId) return;
+
+  loadingBestAverages.value = true;
+  try {
+    const finished = matches.value.filter((match) => !!match.winner);
+    const [leftBest, rightBest] = await Promise.all([
+      queryEditionBestAverages(leftId, finished),
+      queryEditionBestAverages(rightId, finished),
+    ]);
+    leftBestAverages.value = leftBest;
+    rightBestAverages.value = rightBest;
+    bestAveragesLoaded.value = true;
+  } finally {
+    loadingBestAverages.value = false;
+  }
+};
+
+const selectTab = async (tab: "matches" | "stats") => {
+  activeTab.value = tab;
+  if (tab === "stats") {
+    await loadBestAverages();
+  }
 };
 
 onBeforeRouteUpdate(async () => {
@@ -167,6 +208,28 @@ const championPlayer = computed(() => {
   if (!edition.value?.winner) return undefined;
   return rivalryPlayers.value.find((p) => p.id === edition.value?.winner);
 });
+
+const leftEditionStats = computed(() => {
+  const playerId = rivalryPlayers.value[0]?.id;
+  if (!playerId) return undefined;
+  return loadedEditionPlayerStats.value.find(
+    (stat) => stat.playerId === playerId,
+  );
+});
+
+const rightEditionStats = computed(() => {
+  const playerId = rivalryPlayers.value[1]?.id;
+  if (!playerId) return undefined;
+  return loadedEditionPlayerStats.value.find(
+    (stat) => stat.playerId === playerId,
+  );
+});
+
+const isSetMatchSeason = computed(
+  () =>
+    edition.value?.competitionConfig.matchConfig?.gamePlayedIn ===
+    X01_GAME_PLAYED_IN.sets,
+);
 
 const startMatch = async () => {
   if (!edition.value || !competition.value || !isCurrentSeason.value) return;
@@ -282,21 +345,53 @@ const beginNewEdition = async () => {
         </div>
       </div>
 
-      <div v-if="finishedMatches.length > 0">
-        <h2 class="section-title">Wedstrijden</h2>
-        <div
-          v-for="match in finishedMatches"
-          :key="match.id"
-          class="match-item"
+      <div class="tabs">
+        <button
+          type="button"
+          class="btn-gray"
+          :class="{ 'bg-gray-500': activeTab === 'matches' }"
+          @click="selectTab('matches')"
         >
-          <StatsMatchSummary :match="match" />
-        </div>
+          Wedstrijden
+        </button>
+        <button
+          type="button"
+          class="btn-gray"
+          :class="{ 'bg-gray-500': activeTab === 'stats' }"
+          @click="selectTab('stats')"
+        >
+          Statistieken
+        </button>
       </div>
-      <UiSummaryCardLayout v-else>
-        <template #center>
-          <div class="empty-state">Nog geen wedstrijden afgerond.</div>
-        </template>
-      </UiSummaryCardLayout>
+
+      <div v-if="activeTab === 'matches'">
+        <div v-if="finishedMatches.length > 0">
+          <div
+            v-for="match in finishedMatches"
+            :key="match.id"
+            class="match-item"
+          >
+            <StatsMatchSummary :match="match" />
+          </div>
+        </div>
+        <UiSummaryCardLayout v-else>
+          <template #center>
+            <div class="empty-state">Nog geen wedstrijden afgerond.</div>
+          </template>
+        </UiSummaryCardLayout>
+      </div>
+
+      <div v-else-if="leftEditionStats && rightEditionStats" class="section">
+        <div v-if="loadingBestAverages" class="empty-state">Laden...</div>
+        <StatsSeasonComparison
+          v-else
+          :left="leftEditionStats"
+          :right="rightEditionStats"
+          :left-best="leftBestAverages"
+          :right-best="rightBestAverages"
+          :is-set-match="isSetMatchSeason"
+        />
+      </div>
 
       <Head2headEditionChampionOverlay
         v-model="showChampionOverlay"
@@ -322,6 +417,10 @@ const beginNewEdition = async () => {
 
 .section-title {
   @apply text-lg font-bold mb-2;
+}
+
+.tabs {
+  @apply flex gap-2 mb-4;
 }
 
 .match-item {

@@ -11,12 +11,7 @@ withDefaults(
 </script>
 
 <template>
-  <component
-    :is="to ? 'NuxtLink' : 'div'"
-    :to="to"
-    class="stat-well flex flex-col gap-2 py-2 px-6 border border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-200"
-    :class="wrapperClass"
-  >
+  <UiSummaryCard :to="to" :wrapper-class="wrapperClass">
     <h3
       class="grid grid-cols-[20%_1fr_20%] font-bold flex justify-between items-center"
     >
@@ -31,5 +26,5 @@ withDefaults(
       </div>
     </h3>
     <slot />
-  </component>
+  </UiSummaryCard>
 </template>

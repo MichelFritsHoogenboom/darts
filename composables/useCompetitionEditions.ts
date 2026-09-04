@@ -18,9 +18,12 @@ import {
 } from "../interfaces/stats";
 import { getEditionMatchWinner, isEditionComplete } from "../utils/rivalry";
 import { getPlayerIdsFromStats } from "../utils/player";
-import { calculateThreeDartAverage } from "../utils/averages";
+import { buildEditionPlayerStatMetrics, buildEditionBestAverages } from "../utils/editionPlayerStats";
+import type { EditionBestAverages } from "../utils/editionPlayerStats";
 import type { Match } from "../interfaces/match";
+import type { Score } from "../interfaces/leg";
 import type { x01MatchConfig } from "../interfaces/x01MatchConfig";
+import { X01_GAME_PLAYED_IN } from "../interfaces/x01MatchConfig";
 import { toRaw } from "vue";
 import {
   cloneCompetition,
@@ -144,38 +147,116 @@ export function useCompetitionEditions() {
     return savedMatch;
   };
 
-  const updateEditionPlayerStatsAverages = async (
+  const updateEditionPlayerStats = async (
     edition: CompetitionEdition,
     matches: Match[],
   ): Promise<void> => {
-    const { getPlayerStatsById, savePlayerStats } = usePlayerStats();
+    const { getPlayerStatsById, getPlayerStatsForMatch, savePlayerStats } =
+      usePlayerStats();
     const { getScoresForMatch } = useScores();
+
     const editionMatchIds = new Set(edition.matches);
+    const finishedMatches = matches.filter(
+      (match) => editionMatchIds.has(match.id) && !!match.winner,
+    );
 
     for (const statsId of edition.playerStats) {
       const stat = await getPlayerStatsById(statsId);
       if (!stat) continue;
 
-      const allScores = (
-        await Promise.all(
-          matches
-            .filter((match) => editionMatchIds.has(match.id))
-            .map((match) => getScoresForMatch(match.id)),
-        )
-      )
-        .flat()
-        .filter((score) => score.playerId === stat.playerId);
+      const playerId = stat.playerId;
+      const allScores: Score[] = [];
+      const matchStatsForPlayer: PlayerStats[] = [];
 
-      stat.average = calculateThreeDartAverage(allScores);
+      for (const match of finishedMatches) {
+        const [scores, matchStats] = await Promise.all([
+          getScoresForMatch(match.id),
+          getPlayerStatsForMatch(match.id),
+        ]);
+
+        allScores.push(
+          ...scores.filter((score) => score.playerId === playerId),
+        );
+
+        const playerMatchStats = matchStats.find(
+          (matchStat) => matchStat.playerId === playerId,
+        );
+        if (playerMatchStats) {
+          matchStatsForPlayer.push(playerMatchStats);
+        }
+      }
+
+      Object.assign(
+        stat,
+        buildEditionPlayerStatMetrics({
+          scores: allScores,
+          matchStats: matchStatsForPlayer,
+        }),
+      );
       await savePlayerStats(stat);
     }
+  };
+
+  const queryEditionBestAverages = async (
+    playerId: string,
+    matches: Match[],
+  ): Promise<EditionBestAverages> => {
+    const {
+      getPlayerStatsForMatch,
+      getPlayerStatsForSet,
+      getPlayerStatsByPlayerLegId,
+    } = usePlayerStats();
+    const { getLegsForMatch } = useLegs();
+    const { getSetsForMatch } = useSets();
+    const { getPlayerLegsForLeg } = usePlayerLegs();
+
+    const finishedMatches = matches.filter((match) => !!match.winner);
+    const wonLegAverages: number[] = [];
+    const wonSetAverages: number[] = [];
+    const matchAverages: number[] = [];
+
+    for (const match of finishedMatches) {
+      const matchStats = await getPlayerStatsForMatch(match.id);
+      const playerMatchStats = matchStats.find(
+        (matchStat) => matchStat.playerId === playerId,
+      );
+      if (playerMatchStats) {
+        matchAverages.push(playerMatchStats.average);
+      }
+
+      const legs = await getLegsForMatch(match.id);
+      for (const leg of legs.filter((l) => l.winner === playerId)) {
+        const playerLegs = await getPlayerLegsForLeg(leg.id);
+        const playerLeg = playerLegs.find((pl) => pl.playerId === playerId);
+        if (!playerLeg) continue;
+        const legStats = await getPlayerStatsByPlayerLegId(playerLeg.id);
+        if (legStats) wonLegAverages.push(legStats.average);
+      }
+
+      if (match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets) {
+        const sets = await getSetsForMatch(match.id);
+        for (const set of sets.filter((s) => s.winner === playerId)) {
+          const setStats = await getPlayerStatsForSet(set.id);
+          const playerSetStats = setStats.find(
+            (setStat) => setStat.playerId === playerId,
+          );
+          if (playerSetStats) wonSetAverages.push(playerSetStats.average);
+        }
+      }
+    }
+
+    return buildEditionBestAverages({
+      wonLegAverages,
+      wonSetAverages,
+      matchAverages,
+    });
   };
 
   const loadEditionPlayerStats = async (
     edition: CompetitionEdition,
     matches: Match[],
   ): Promise<PlayerStats[]> => {
-    await updateEditionPlayerStatsAverages(edition, matches);
+    await updateEditionPlayerStats(edition, matches);
     return loadEditionPlayerStatsRecords(edition);
   };
 
@@ -237,7 +318,7 @@ export function useCompetitionEditions() {
     }
 
     const savedEdition = await saveEdition(editionToSave);
-    await updateEditionPlayerStatsAverages(savedEdition, matches);
+    await updateEditionPlayerStats(savedEdition, matches);
     await competitionService.upsert(cloneCompetition(competition));
 
     return {
@@ -259,6 +340,7 @@ export function useCompetitionEditions() {
     startNewEdition,
     createH2HMatch,
     loadEditionPlayerStats,
+    queryEditionBestAverages,
     onEditionMatchFinished,
   };
 }

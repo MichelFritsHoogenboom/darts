@@ -193,13 +193,11 @@ onBeforeMount(async () => {
         :winner-id="match.winner"
         :show-badge="false"
       >
-        <span
-          class="inline-block px-2 bg-gray-400/50 font-small font-bold rounded"
-        >
+        <UiStatWellValue>
           {{ players[0] ? getPlayerWinnerCount(players[0].id, matchGame) : 0 }}
           -
           {{ players[1] ? getPlayerWinnerCount(players[1].id, matchGame) : 0 }}
-        </span>
+        </UiStatWellValue>
       </StatsPlayersWithCenter>
     </template>
 
