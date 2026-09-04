@@ -32,9 +32,9 @@ const isWinner = computed(() => playerId === winnerId);
     class="player-name-with-badge"
     :class="{ 'player-name-with-badge--badge-first': badgeFirst }"
   >
-    <UiIconSparkle v-if="showGoldenCamel" title="Meeste gouden kamelen">
-      <FontAwesomeIcon :icon="faCamel" class="golden-camel-icon" />
-    </UiIconSparkle>
+    <UiIconGolden v-if="showGoldenCamel" title="Meeste gouden kamelen">
+      <FontAwesomeIcon :icon="faCamel" />
+    </UiIconGolden>
     <span class="player-name-with-badge__name">{{
       getPlayerName(playerId)
     }}</span>
@@ -57,9 +57,5 @@ const isWinner = computed(() => playerId === winnerId);
   &--badge-first .player-name-with-badge__badge {
     order: -1;
   }
-}
-
-.golden-camel-icon {
-  @apply h-[0.80em] w-[0.80em] text-amber-400;
 }
 </style>

@@ -10,6 +10,9 @@ import { X01_GAME_PLAYED_IN } from "~/interfaces/x01MatchConfig";
 import { formatX01MatchConfigSummary } from "~/utils/match";
 import type { EditionBestAverages } from "~/utils/editionPlayerStats";
 import { emptyEditionBestAverages } from "~/utils/editionPlayerStats";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { faTrophy } from "@fortawesome/free-solid-svg-icons";
+import { faCamel } from "~/assets/icons/faCamel";
 
 definePageMeta({
   layout: false,
@@ -28,6 +31,7 @@ const {
   loadEditionPlayerStats,
   queryEditionBestAverages,
   queryEditionCamelMatchWins,
+  queryRivalryCamelSeasonWins,
   loading: editionLoading,
 } = useCompetitionEditions();
 const { getMatchesByIds } = useMatches();
@@ -44,6 +48,7 @@ const leftBestAverages = ref<EditionBestAverages>(emptyEditionBestAverages());
 const rightBestAverages = ref<EditionBestAverages>(emptyEditionBestAverages());
 const leftCamelMatchWins = ref(0);
 const rightCamelMatchWins = ref(0);
+const camelSeasonWinsByPlayer = ref<Record<string, number>>({});
 const showChampionOverlay = ref(false);
 const startingMatch = ref(false);
 const activeTab = ref<"matches" | "stats">("matches");
@@ -110,6 +115,7 @@ const loadDetail = async () => {
   rightBestAverages.value = emptyEditionBestAverages();
   leftCamelMatchWins.value = 0;
   rightCamelMatchWins.value = 0;
+  camelSeasonWinsByPlayer.value = {};
   matches.value = await getMatchesByIds([...selected.matches]);
   matches.value.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
 
@@ -121,6 +127,11 @@ const loadDetail = async () => {
   rivalryPlayers.value = playerIds
     .map((id) => (players.value as Player[]).find((p) => p.id === id))
     .filter((player): player is Player => player !== undefined);
+
+  camelSeasonWinsByPlayer.value = await queryRivalryCamelSeasonWins(
+    playerIds,
+    allEditions,
+  );
 };
 
 const loadBestAverages = async () => {
@@ -243,6 +254,26 @@ const matchConfigSummary = computed(() => {
   return config ? formatX01MatchConfigSummary(config) : "";
 });
 
+const seasonWinsByPlayer = computed(() => {
+  const counts: Record<string, number> = {};
+  for (const player of rivalryPlayers.value) {
+    counts[player.id] = 0;
+  }
+  for (const competitionEdition of editions.value) {
+    const winnerId = competitionEdition.winner;
+    if (winnerId && counts[winnerId] !== undefined) {
+      counts[winnerId] += 1;
+    }
+  }
+  return counts;
+});
+
+const seasonWinsFor = (playerId: string | undefined) =>
+  playerId ? (seasonWinsByPlayer.value[playerId] ?? 0) : 0;
+
+const camelSeasonWinsFor = (playerId: string | undefined) =>
+  playerId ? (camelSeasonWinsByPlayer.value[playerId] ?? 0) : 0;
+
 const startMatch = async () => {
   if (!edition.value || !competition.value || !isCurrentSeason.value) return;
   if (edition.value.competitionConfig.matchConfig) {
@@ -281,6 +312,22 @@ const beginNewEdition = async () => {
       <div class="card-panel rivalry-header">
         <div v-if="rivalryPlayers.length >= 2" class="side">
           <PlayerImage :player="rivalryPlayers[0]" :silhouette-index="0" />
+          <div
+            class="season-titles stat-well"
+            :title="`${seasonWinsFor(rivalryPlayers[0]?.id)} seizoenen gewonnen · ${camelSeasonWinsFor(rivalryPlayers[0]?.id)} kameel-seizoenen`"
+          >
+            <FontAwesomeIcon
+              :icon="faTrophy"
+              class="season-titles__trophy"
+            />
+            <span class="season-titles__count">{{
+              seasonWinsFor(rivalryPlayers[0]?.id)
+            }}</span>
+            <FontAwesomeIcon :icon="faCamel" class="season-titles__camel" />
+            <span class="season-titles__count">{{
+              camelSeasonWinsFor(rivalryPlayers[0]?.id)
+            }}</span>
+          </div>
         </div>
 
         <div class="content">
@@ -350,6 +397,22 @@ const beginNewEdition = async () => {
 
         <div v-if="rivalryPlayers.length >= 2" class="side">
           <PlayerImage :player="rivalryPlayers[1]" :silhouette-index="1" />
+          <div
+            class="season-titles stat-well"
+            :title="`${seasonWinsFor(rivalryPlayers[1]?.id)} seizoenen gewonnen · ${camelSeasonWinsFor(rivalryPlayers[1]?.id)} kameel-seizoenen`"
+          >
+            <FontAwesomeIcon
+              :icon="faTrophy"
+              class="season-titles__trophy"
+            />
+            <span class="season-titles__count">{{
+              seasonWinsFor(rivalryPlayers[1]?.id)
+            }}</span>
+            <FontAwesomeIcon :icon="faCamel" class="season-titles__camel" />
+            <span class="season-titles__count">{{
+              camelSeasonWinsFor(rivalryPlayers[1]?.id)
+            }}</span>
+          </div>
         </div>
       </div>
 
@@ -469,11 +532,52 @@ const beginNewEdition = async () => {
   animation: rivalry-header-shift 20s ease-in-out infinite;
 
   .side {
-    @apply flex justify-center;
+    @apply flex justify-center relative self-stretch min-h-[12rem];
   }
 
   :deep(.player-image) {
     @apply absolute bottom-0;
+  }
+
+  .season-titles {
+    @apply absolute bottom-3 z-10 flex items-center justify-center gap-1 w-auto;
+    @apply font-bold text-gray-400 px-10 py-1 border-0;
+    font-size: 13px;
+    display: flex;
+    grid-template-columns: none;
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      transparent,
+      #000 18%,
+      #000 82%,
+      transparent
+    );
+    mask-image: linear-gradient(
+      90deg,
+      transparent,
+      #000 18%,
+      #000 82%,
+      transparent
+    );
+
+    &:hover {
+      @apply from-gray-700/55 via-gray-700/45 to-gray-800/55 border-gray-600/25 shadow-none;
+    }
+  }
+
+  .season-titles__trophy,
+  .season-titles__camel {
+    @apply text-amber-200/75;
+    height: 0.9375rem;
+    width: 0.9375rem;
+  }
+
+  .season-titles__camel {
+    @apply ml-2.5;
+  }
+
+  .season-titles__count {
+    @apply tabular-nums;
   }
 
   .content {

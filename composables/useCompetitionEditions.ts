@@ -18,7 +18,7 @@ import {
 } from "../interfaces/stats";
 import { getEditionMatchWinner, isEditionComplete } from "../utils/rivalry";
 import { getPlayerIdsFromStats } from "../utils/player";
-import { buildEditionPlayerStatMetrics, buildEditionBestAverages, tallyCamelMatchWins } from "../utils/editionPlayerStats";
+import { buildEditionPlayerStatMetrics, buildEditionBestAverages, tallyCamelMatchWins, sumCamelCountsByPlayer, camelSeasonWinnerId } from "../utils/editionPlayerStats";
 import type { EditionBestAverages } from "../utils/editionPlayerStats";
 import type { Match } from "../interfaces/match";
 import type { Score } from "../interfaces/leg";
@@ -252,10 +252,10 @@ export function useCompetitionEditions() {
     });
   };
 
-  const queryEditionCamelMatchWins = async (
+  const collectMatchCamelCounts = async (
     playerIds: string[],
     matches: Match[],
-  ): Promise<Record<string, number>> => {
+  ): Promise<Array<Record<string, number>>> => {
     const { getPlayerStatsForMatch } = usePlayerStats();
     const finishedMatches = matches.filter((match) => !!match.winner);
     const matchCamelCounts: Array<Record<string, number>> = [];
@@ -272,12 +272,53 @@ export function useCompetitionEditions() {
       matchCamelCounts.push(counts);
     }
 
+    return matchCamelCounts;
+  };
+
+  const queryEditionCamelMatchWins = async (
+    playerIds: string[],
+    matches: Match[],
+  ): Promise<Record<string, number>> => {
+    const matchCamelCounts = await collectMatchCamelCounts(playerIds, matches);
     return Object.fromEntries(
       playerIds.map((playerId) => [
         playerId,
         tallyCamelMatchWins(playerId, matchCamelCounts),
       ]),
     );
+  };
+
+  const queryRivalryCamelSeasonWins = async (
+    playerIds: string[],
+    competitionEditions: CompetitionEdition[],
+  ): Promise<Record<string, number>> => {
+    const wins = Object.fromEntries(playerIds.map((id) => [id, 0]));
+
+    for (const competitionEdition of competitionEditions) {
+      if (!competitionEdition.winner) continue;
+
+      const editionMatches =
+        await matchService.getMatchesForCompetitionEdition(competitionEdition);
+      const matchCamelCounts = await collectMatchCamelCounts(
+        playerIds,
+        editionMatches,
+      );
+      const camelMatchWins = Object.fromEntries(
+        playerIds.map((playerId) => [
+          playerId,
+          tallyCamelMatchWins(playerId, matchCamelCounts),
+        ]),
+      );
+      const seasonCamelTotals = sumCamelCountsByPlayer(matchCamelCounts);
+      const winnerId = camelSeasonWinnerId(
+        playerIds,
+        camelMatchWins,
+        seasonCamelTotals,
+      );
+      if (winnerId) wins[winnerId] += 1;
+    }
+
+    return wins;
   };
 
   const loadEditionPlayerStats = async (
@@ -370,6 +411,7 @@ export function useCompetitionEditions() {
     loadEditionPlayerStats,
     queryEditionBestAverages,
     queryEditionCamelMatchWins,
+    queryRivalryCamelSeasonWins,
     onEditionMatchFinished,
   };
 }

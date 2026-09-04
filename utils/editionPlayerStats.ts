@@ -103,3 +103,41 @@ export const tallyCamelMatchWins = (
   }
   return wins;
 };
+
+export const sumCamelCountsByPlayer = (
+  matchCamelCounts: Array<Readonly<Record<string, number>>>,
+): Record<string, number> => {
+  const totals: Record<string, number> = {};
+  for (const counts of matchCamelCounts) {
+    for (const [playerId, count] of Object.entries(counts)) {
+      totals[playerId] = (totals[playerId] ?? 0) + count;
+    }
+  }
+  return totals;
+};
+
+/** Season camel champion: most small camels (match wins + season total bonus). */
+export const camelSeasonWinnerId = (
+  playerIds: string[],
+  camelMatchWins: Readonly<Record<string, number>>,
+  seasonCamelTotals: Readonly<Record<string, number>>,
+): string | undefined => {
+  const smallCounts = playerIds.map((playerId) => {
+    const ownTotal = seasonCamelTotals[playerId] ?? 0;
+    const otherTotals = playerIds
+      .filter((id) => id !== playerId)
+      .map((id) => seasonCamelTotals[id] ?? 0);
+    const seasonBonus =
+      otherTotals.length && ownTotal > Math.max(...otherTotals) ? 1 : 0;
+    return {
+      playerId,
+      count: (camelMatchWins[playerId] ?? 0) + seasonBonus,
+    };
+  });
+
+  const max = Math.max(0, ...smallCounts.map((entry) => entry.count));
+  if (max === 0) return undefined;
+
+  const winners = smallCounts.filter((entry) => entry.count === max);
+  return winners.length === 1 ? winners[0].playerId : undefined;
+};
