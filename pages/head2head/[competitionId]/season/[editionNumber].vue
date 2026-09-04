@@ -567,7 +567,7 @@ const beginNewEdition = async () => {
 
   .season-titles__trophy,
   .season-titles__camel {
-    @apply text-amber-200/75;
+    @apply text-gray-400;
     height: 0.9375rem;
     width: 0.9375rem;
   }
