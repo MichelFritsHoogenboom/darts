@@ -284,14 +284,14 @@ const isHighlighted = (
               class="season-comparison__camels"
               aria-hidden="true"
             >
-              <UiIconGolden
+              <UiIconSparkle
                 v-if="leftHasLargeCamel"
                 class="season-comparison__camel season-comparison__camel--large"
                 title="Gouden kameel winnaar dit seizoen"
               >
                 <FontAwesomeIcon :icon="faCamel" />
-              </UiIconGolden>
-              <UiIconGolden
+              </UiIconSparkle>
+              <UiIconSparkle
                 v-for="camelIndex in camelSlots(leftSmallCamels)"
                 :key="`left-camel-${camelIndex}`"
                 class="season-comparison__camel"
@@ -303,7 +303,7 @@ const isHighlighted = (
                 :style="{ animationDelay: `${camelIndex * 0.15}s` }"
               >
                 <FontAwesomeIcon :icon="faCamel" />
-              </UiIconGolden>
+              </UiIconSparkle>
             </div>
             <UiStatWellValue
               size="large"
@@ -341,7 +341,7 @@ const isHighlighted = (
               class="season-comparison__camels"
               aria-hidden="true"
             >
-              <UiIconGolden
+              <UiIconSparkle
                 v-for="camelIndex in camelSlots(rightSmallCamels)"
                 :key="`right-camel-${camelIndex}`"
                 class="season-comparison__camel"
@@ -353,14 +353,14 @@ const isHighlighted = (
                 :style="{ animationDelay: `${camelIndex * 0.15}s` }"
               >
                 <FontAwesomeIcon :icon="faCamel" />
-              </UiIconGolden>
-              <UiIconGolden
+              </UiIconSparkle>
+              <UiIconSparkle
                 v-if="rightHasLargeCamel"
                 class="season-comparison__camel season-comparison__camel--large"
                 title="Gouden kameel winnaar dit seizoen"
               >
                 <FontAwesomeIcon :icon="faCamel" />
-              </UiIconGolden>
+              </UiIconSparkle>
             </div>
           </div>
         </div>
@@ -408,7 +408,12 @@ const isHighlighted = (
 }
 
 .season-comparison__camel {
+  @apply text-amber-400;
   font-size: 1rem;
+
+  :deep(svg) {
+    @apply h-[1em] w-[1em];
+  }
 }
 
 .season-comparison__camel--large {
