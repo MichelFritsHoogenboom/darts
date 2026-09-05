@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { formatAverageDisplay } from "~/utils/stats";
+
 const {
   matchAverage = 0,
   legAverage = 0,
@@ -28,12 +30,12 @@ const {
 const formatAverage = (average: number) => average.toFixed(2);
 
 const formatOptionalAverage = (average: number) =>
-  average ? formatAverage(average) : "—";
+  formatAverageDisplay(average, 2);
 
 const oneDartAverage = (value: number) => (value / 3).toFixed(2);
 
 const formatOptionalOneDartAverage = (average: number) =>
-  average ? oneDartAverage(average) : "—";
+  average > 0 ? (average / 3).toFixed(2) : "—";
 </script>
 <template>
   <div class="score-counts__header"></div>

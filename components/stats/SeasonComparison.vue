@@ -1,20 +1,32 @@
 <script setup lang="ts">
-import type {
-  CheckoutRanges,
-  DartsThrownHit,
-  PlayerStats,
-  ScoreRanges,
-} from "~/interfaces/stats";
-import type { EditionBestAverages } from "~/utils/editionPlayerStats";
-import { emptyEditionBestAverages } from "~/utils/editionPlayerStats";
+import type { DartsThrownHit, PlayerStats } from "~/interfaces/stats";
+import type { BestAverages } from "~/interfaces/stats";
+import { emptyBestAverages } from "~/utils/averages";
+import {
+  betterCheckout,
+  betterNumber,
+  checkoutsAboveLabel,
+  formatAverageDisplay,
+  formatCheckoutHitThrown,
+  formatCheckoutPercentage,
+  formatCheckoutRangeKey,
+  formatScoreRangeLabel,
+  formatStatCount,
+  scoreRangeValue,
+  sumCheckoutsAbove,
+} from "~/utils/stats";
+import {
+  CHECKOUT_KEYS_UP_TO_100,
+  SEASON_SCORE_COMPARE_KEYS,
+} from "~/constants/stats";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faCamel } from "~/assets/icons/faCamel";
 
 const {
   left,
   right,
-  leftBest = emptyEditionBestAverages(),
-  rightBest = emptyEditionBestAverages(),
+  leftBest = emptyBestAverages(),
+  rightBest = emptyBestAverages(),
   leftCamelWins = 0,
   rightCamelWins = 0,
   isSetMatch = false,
@@ -22,15 +34,13 @@ const {
 } = defineProps<{
   left: PlayerStats;
   right: PlayerStats;
-  leftBest?: EditionBestAverages;
-  rightBest?: EditionBestAverages;
+  leftBest?: BestAverages;
+  rightBest?: BestAverages;
   leftCamelWins?: number;
   rightCamelWins?: number;
   isSetMatch?: boolean;
   seasonComplete?: boolean;
 }>();
-
-type CompareSide = "left" | "right" | null;
 
 type NumberRow = {
   kind: "number";
@@ -38,7 +48,6 @@ type NumberRow = {
   left: number;
   right: number;
   format?: "average" | "int";
-  showCamels?: boolean;
 };
 
 type CheckoutRow = {
@@ -48,65 +57,19 @@ type CheckoutRow = {
   right: DartsThrownHit;
 };
 
+type CamelRow = {
+  kind: "camel";
+  label: string;
+  left: number;
+  right: number;
+};
+
+type CompareRow = NumberRow | CheckoutRow | CamelRow;
+
 type Section = {
   title: string;
-  rows: Array<NumberRow | CheckoutRow>;
+  rows: CompareRow[];
 };
-
-const formatAverage = (value: number) =>
-  value > 0 ? value.toFixed(1) : "—";
-
-const formatInt = (value: number) => (value > 0 ? String(value) : "0");
-
-const formatCheckoutHitThrown = (value: DartsThrownHit) =>
-  `${value.hit}/${value.thrown}`;
-
-const formatCheckoutPct = (value: DartsThrownHit) => {
-  if (!value.thrown) return "—";
-  const pct = Math.round((value.hit / value.thrown) * 1000) / 10;
-  return `${pct}%`;
-};
-
-const betterNumber = (a: number, b: number): CompareSide => {
-  if (a === b) return null;
-  return a > b ? "left" : "right";
-};
-
-const checkoutPct = (value: DartsThrownHit) =>
-  value.thrown > 0 ? value.hit / value.thrown : undefined;
-
-const betterCheckout = (
-  a: DartsThrownHit,
-  b: DartsThrownHit,
-): CompareSide => {
-  const pctA = checkoutPct(a);
-  const pctB = checkoutPct(b);
-  if (pctA !== undefined && pctB !== undefined) {
-    if (pctA === pctB) {
-      if (a.hit === b.hit) return null;
-      return a.hit > b.hit ? "left" : "right";
-    }
-    return pctA > pctB ? "left" : "right";
-  }
-  if (pctA !== undefined) return "left";
-  if (pctB !== undefined) return "right";
-  if (a.hit === b.hit) return null;
-  return a.hit > b.hit ? "left" : "right";
-};
-
-const sumAbove100 = (checkouts: CheckoutRanges): DartsThrownHit => {
-  const keys: (keyof CheckoutRanges)[] = ["101-130", "131-150", "151-170"];
-  return keys.reduce(
-    (acc, key) => ({
-      thrown: acc.thrown + checkouts[key].thrown,
-      hit: acc.hit + checkouts[key].hit,
-    }),
-    { thrown: 0, hit: 0 },
-  );
-};
-
-const scoreValue = (stats: PlayerStats, key: keyof ScoreRanges) =>
-  stats.scores[key] ?? 0;
 
 const sections = computed((): Section[] => {
   const averageRows: NumberRow[] = [
@@ -134,8 +97,8 @@ const sections = computed((): Section[] => {
     {
       kind: "number",
       label: "Beste leg",
-      left: leftBest.bestLegAverage,
-      right: rightBest.bestLegAverage,
+      left: leftBest.bestLegAverage ?? 0,
+      right: rightBest.bestLegAverage ?? 0,
       format: "average",
     },
   ];
@@ -144,8 +107,8 @@ const sections = computed((): Section[] => {
     averageRows.push({
       kind: "number",
       label: "Beste set",
-      left: leftBest.bestSetAverage,
-      right: rightBest.bestSetAverage,
+      left: leftBest.bestSetAverage ?? 0,
+      right: rightBest.bestSetAverage ?? 0,
       format: "average",
     });
   }
@@ -153,45 +116,32 @@ const sections = computed((): Section[] => {
   averageRows.push({
     kind: "number",
     label: "Beste wedstrijd",
-    left: leftBest.bestMatchAverage,
-    right: rightBest.bestMatchAverage,
+    left: leftBest.bestMatchAverage ?? 0,
+    right: rightBest.bestMatchAverage ?? 0,
     format: "average",
   });
 
-  const scoreKeys: Array<{
-    key: keyof ScoreRanges;
-    label: string;
-    showCamels?: boolean;
-  }> = [
-    { key: "180", label: "180's" },
-    { key: "162-179", label: "162–179" },
-    { key: "126-161", label: "126–161" },
-    { key: "90-125", label: "90–125" },
-    { key: "66-89", label: "66–89" },
-    { key: "54-65", label: "54–65" },
-    { key: "goldenCamel", label: "Gouden kamelen", showCamels: true },
-  ];
-
-  const checkoutKeys: Array<{ key: keyof CheckoutRanges; label: string }> = [
-    { key: "0-40", label: "0–40" },
-    { key: "41-60", label: "41–60" },
-    { key: "61-80", label: "61–80" },
-    { key: "81-100", label: "81–100" },
-  ];
+  const scoreRows: CompareRow[] = SEASON_SCORE_COMPARE_KEYS.map((key) => {
+    if (key === "goldenCamel") {
+      return {
+        kind: "camel" as const,
+        label: formatScoreRangeLabel(key),
+        left: scoreRangeValue(left.scores, key),
+        right: scoreRangeValue(right.scores, key),
+      };
+    }
+    return {
+      kind: "number" as const,
+      label: formatScoreRangeLabel(key),
+      left: scoreRangeValue(left.scores, key),
+      right: scoreRangeValue(right.scores, key),
+      format: "int" as const,
+    };
+  });
 
   return [
     { title: "Gemiddelden", rows: averageRows },
-    {
-      title: "Scores",
-      rows: scoreKeys.map(({ key, label, showCamels }) => ({
-        kind: "number" as const,
-        label,
-        left: scoreValue(left, key),
-        right: scoreValue(right, key),
-        format: "int" as const,
-        showCamels,
-      })),
-    },
+    { title: "Scores", rows: scoreRows },
     {
       title: "Checkouts",
       rows: [
@@ -202,27 +152,25 @@ const sections = computed((): Section[] => {
           right: right.highestCheckout,
           format: "int",
         },
-        ...checkoutKeys.map(({ key, label }) => ({
+        ...CHECKOUT_KEYS_UP_TO_100.map((key) => ({
           kind: "checkout" as const,
-          label,
+          label: formatCheckoutRangeKey(key),
           left: left.checkouts[key],
           right: right.checkouts[key],
         })),
         {
           kind: "checkout",
-          label: "101–170",
-          left: sumAbove100(left.checkouts),
-          right: sumAbove100(right.checkouts),
+          label: checkoutsAboveLabel(left.checkouts),
+          left: sumCheckoutsAbove(left.checkouts),
+          right: sumCheckoutsAbove(right.checkouts),
         },
       ],
     },
   ];
 });
 
-const displayNumber = (row: NumberRow, side: "left" | "right") => {
-  const value = side === "left" ? row.left : row.right;
-  return row.format === "average" ? formatAverage(value) : formatInt(value);
-};
+const displayNumber = (value: number, format?: "average" | "int") =>
+  format === "average" ? formatAverageDisplay(value) : formatStatCount(value);
 
 const camelSlots = (count: number) =>
   Array.from({ length: Math.max(0, count) }, (_, index) => index);
@@ -244,49 +192,39 @@ const rightSmallCamels = computed(() => {
 });
 
 const leftHasLargeCamel = computed(
-  () =>
-    seasonComplete && leftSmallCamels.value > rightSmallCamels.value,
+  () => seasonComplete && leftSmallCamels.value > rightSmallCamels.value,
 );
 
 const rightHasLargeCamel = computed(
-  () =>
-    seasonComplete && rightSmallCamels.value > leftSmallCamels.value,
+  () => seasonComplete && rightSmallCamels.value > leftSmallCamels.value,
 );
 
-const isHighlighted = (
-  row: NumberRow | CheckoutRow,
-  side: "left" | "right",
-) => {
-  const better =
-    row.kind === "number"
-      ? betterNumber(row.left, row.right)
-      : betterCheckout(row.left, row.right);
-  return better === side;
+const isHighlighted = (row: CompareRow, side: "left" | "right") => {
+  if (row.kind === "checkout") {
+    return betterCheckout(row.left, row.right) === side;
+  }
+  return betterNumber(row.left, row.right) === side;
 };
 </script>
 
 <template>
   <div class="season-comparison">
-    <section
-      v-for="section in sections"
-      :key="section.title"
-      class="season-comparison__section"
-    >
-      <h3 class="season-comparison__title">{{ section.title }}</h3>
+    <section v-for="section in sections" :key="section.title" class="section">
+      <h3 class="title">{{ section.title }}</h3>
       <UiSummaryCard
         v-for="(row, index) in section.rows"
         :key="`${section.title}-${row.label}-${index}`"
       >
-        <div class="season-comparison__row">
-          <div class="season-comparison__value season-comparison__value--left">
+        <div class="row">
+          <div class="value left">
             <div
-              v-if="row.kind === 'number' && row.showCamels"
-              class="season-comparison__camels"
+              v-if="row.kind === 'camel'"
+              class="camels"
               aria-hidden="true"
             >
               <UiIconSparkle
                 v-if="leftHasLargeCamel"
-                class="season-comparison__camel season-comparison__camel--large"
+                class="camel large"
                 title="Gouden kameel winnaar dit seizoen"
               >
                 <FontAwesomeIcon :icon="faCamel" />
@@ -294,7 +232,7 @@ const isHighlighted = (
               <UiIconSparkle
                 v-for="camelIndex in camelSlots(leftSmallCamels)"
                 :key="`left-camel-${camelIndex}`"
-                class="season-comparison__camel"
+                class="camel"
                 :title="
                   camelIndex < leftCamelWins
                     ? 'Kameel-wedstrijd gewonnen'
@@ -309,42 +247,46 @@ const isHighlighted = (
               size="large"
               :highlighted="isHighlighted(row, 'left')"
             >
-              <template v-if="row.kind === 'number'">
-                {{ displayNumber(row, "left") }}
+              <template v-if="row.kind === 'checkout'">
+                <span :title="formatCheckoutPercentage(row.left, 1)">
+                  {{ formatCheckoutHitThrown(row.left) }}
+                </span>
               </template>
-              <span
-                v-else
-                :title="formatCheckoutPct(row.left)"
-              >
-                {{ formatCheckoutHitThrown(row.left) }}
-              </span>
+              <template v-else-if="row.kind === 'camel'">
+                {{ formatStatCount(row.left) }}
+              </template>
+              <template v-else>
+                {{ displayNumber(row.left, row.format) }}
+              </template>
             </UiStatWellValue>
           </div>
-          <div class="season-comparison__label">{{ row.label }}</div>
-          <div class="season-comparison__value season-comparison__value--right">
+          <div class="label">{{ row.label }}</div>
+          <div class="value right">
             <UiStatWellValue
               size="large"
               :highlighted="isHighlighted(row, 'right')"
             >
-              <template v-if="row.kind === 'number'">
-                {{ displayNumber(row, "right") }}
+              <template v-if="row.kind === 'checkout'">
+                <span :title="formatCheckoutPercentage(row.right, 1)">
+                  {{ formatCheckoutHitThrown(row.right) }}
+                </span>
               </template>
-              <span
-                v-else
-                :title="formatCheckoutPct(row.right)"
-              >
-                {{ formatCheckoutHitThrown(row.right) }}
-              </span>
+              <template v-else-if="row.kind === 'camel'">
+                {{ formatStatCount(row.right) }}
+              </template>
+              <template v-else>
+                {{ displayNumber(row.right, row.format) }}
+              </template>
             </UiStatWellValue>
             <div
-              v-if="row.kind === 'number' && row.showCamels"
-              class="season-comparison__camels"
+              v-if="row.kind === 'camel'"
+              class="camels"
               aria-hidden="true"
             >
               <UiIconSparkle
                 v-for="camelIndex in camelSlots(rightSmallCamels)"
                 :key="`right-camel-${camelIndex}`"
-                class="season-comparison__camel"
+                class="camel"
                 :title="
                   camelIndex < rightCamelWins
                     ? 'Kameel-wedstrijd gewonnen'
@@ -356,7 +298,7 @@ const isHighlighted = (
               </UiIconSparkle>
               <UiIconSparkle
                 v-if="rightHasLargeCamel"
-                class="season-comparison__camel season-comparison__camel--large"
+                class="camel large"
                 title="Gouden kameel winnaar dit seizoen"
               >
                 <FontAwesomeIcon :icon="faCamel" />
@@ -372,59 +314,59 @@ const isHighlighted = (
 <style scoped lang="scss">
 .season-comparison {
   @apply w-full;
-}
 
-.season-comparison__section {
-  @apply mb-6 flex flex-col gap-2;
-}
-
-.season-comparison__title {
-  @apply text-sm font-bold uppercase tracking-wide text-gray-400 mb-1 text-center;
-}
-
-.season-comparison__row {
-  @apply grid grid-cols-[1fr_auto_1fr] items-center gap-12;
-}
-
-.season-comparison__label {
-  @apply text-center text-gray-200 min-w-[13rem] px-6;
-  font-size: 18px;
-}
-
-.season-comparison__value {
-  @apply flex items-center gap-2;
-}
-
-.season-comparison__value--left {
-  @apply justify-end;
-}
-
-.season-comparison__value--right {
-  @apply justify-start;
-}
-
-.season-comparison__camels {
-  @apply flex flex-wrap items-center gap-1 max-w-[10rem];
-}
-
-.season-comparison__camel {
-  @apply text-amber-400;
-  font-size: 1rem;
-
-  :deep(svg) {
-    @apply h-[1em] w-[1em];
+  .section {
+    @apply mb-6 flex flex-col gap-2;
   }
-}
 
-.season-comparison__camel--large {
-  font-size: 1.55rem;
-}
+  .title {
+    @apply text-sm font-bold uppercase tracking-wide text-gray-400 mb-1 text-center;
+  }
 
-.season-comparison__value--left .season-comparison__camel--large {
-  @apply mr-3;
-}
+  .row {
+    @apply grid grid-cols-[1fr_auto_1fr] items-center gap-12;
+  }
 
-.season-comparison__value--right .season-comparison__camel--large {
-  @apply ml-3;
+  .label {
+    @apply text-center text-gray-200 min-w-[13rem] px-6;
+    font-size: 18px;
+  }
+
+  .value {
+    @apply flex items-center gap-2;
+
+    &.left {
+      @apply justify-end;
+    }
+
+    &.right {
+      @apply justify-start;
+    }
+  }
+
+  .camels {
+    @apply flex flex-wrap items-center gap-1 max-w-[10rem];
+  }
+
+  .camel {
+    @apply text-amber-400;
+    font-size: 1rem;
+
+    :deep(svg) {
+      @apply h-[1em] w-[1em];
+    }
+
+    &.large {
+      font-size: 1.55rem;
+    }
+  }
+
+  .value.left .camel.large {
+    @apply mr-3;
+  }
+
+  .value.right .camel.large {
+    @apply ml-3;
+  }
 }
 </style>

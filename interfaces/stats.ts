@@ -34,6 +34,17 @@ export interface DartsThrownHit {
   hit: number;
 }
 
+/** Best averages for whatever scope is relevant (leg / set / match). Omit unused keys. */
+export type BestAverages = {
+  bestLegAverage?: number;
+  bestSetAverage?: number;
+  bestMatchAverage?: number;
+};
+
+export type CompareSide = "left" | "right" | null;
+
+export type RangeBounds = { key: string; min: number; max: number };
+
 export interface PlayerStats {
   id: string;
   createdAt: Date;

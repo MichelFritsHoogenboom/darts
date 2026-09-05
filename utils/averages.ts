@@ -1,7 +1,32 @@
 import type { Score } from "~/interfaces/leg";
+import type { BestAverages } from "~/interfaces/stats";
 
 export const getDartsThrownForScore = (score: Score): number =>
   score.dartsThrown ?? 3;
+
+export const maxAverage = (averages: number[]) =>
+  averages.length ? Math.max(...averages) : 0;
+
+export const emptyBestAverages = (): BestAverages => ({});
+
+/** Only includes keys for which an averages list was provided. */
+export const buildBestAverages = (input: {
+  wonLegAverages?: number[];
+  wonSetAverages?: number[];
+  matchAverages?: number[];
+}): BestAverages => {
+  const result: BestAverages = {};
+  if (input.wonLegAverages) {
+    result.bestLegAverage = maxAverage(input.wonLegAverages);
+  }
+  if (input.wonSetAverages) {
+    result.bestSetAverage = maxAverage(input.wonSetAverages);
+  }
+  if (input.matchAverages) {
+    result.bestMatchAverage = maxAverage(input.matchAverages);
+  }
+  return result;
+};
 
 export const calculateThreeDartAverage = (scores: Score[]): number => {
   if (scores.length === 0) return 0;

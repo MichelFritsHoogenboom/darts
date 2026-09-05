@@ -4,10 +4,15 @@ import { createScoreRanges, type ScoreRanges } from "~/interfaces/stats";
 import type { Score } from "~/interfaces/leg";
 import type { PlayerStats } from "~/interfaces/stats";
 import { faCamel } from "~/assets/icons/faCamel";
+import {
+  formatScoreRangeLabel,
+  getScoreRangeKey,
+  sumLowScores,
+} from "~/utils/stats";
+import { MATCH_SCORE_COUNT_KEYS } from "~/constants/stats";
 
 const matchId = inject<string>("matchId");
 
-// Get event listener from plugin
 const { $listen, $unlisten } = useNuxtApp();
 
 const { getLegsForMatch } = useLegs();
@@ -20,7 +25,6 @@ const { playerScores, playerStats } = defineProps<{
 
 const playerStatsRef = ref<PlayerStats>(playerStats);
 
-// Watch the prop and sync with local ref
 watch(
   () => playerStats,
   (newStats) => {
@@ -33,57 +37,24 @@ watch(
 
 const legsPlayed = ref(0);
 
-// Create a cached mapping of score ranges from the interface
-const scoreRangeMapping = (() => {
-  const sampleRanges = createScoreRanges();
-  const keys = Object.keys(sampleRanges) as Array<keyof ScoreRanges>;
-
-  return keys
-    .filter((key) => key !== "goldenCamel")
-    .map((key) => {
-      if (key === "180") {
-        return { key, min: 180, max: 180 };
-      }
-      const [min, max] = key.split("-").map(Number);
-      return { key, min, max };
-    })
-    .sort((a, b) => b.min - a.min); // Sort descending by min value
-})();
-
-// Helper function to map totalScore to ScoreRanges key using interface keys dynamically
-const getScoreRangeKey = (totalScore: number): keyof ScoreRanges => {
-  for (const { key, min, max } of scoreRangeMapping) {
-    if (totalScore >= min && totalScore <= max) {
-      return key;
-    }
-  }
-  return "0-9"; // Fallback (should never happen if ranges cover all scores)
-};
-
 const updatePlayerMatchScoreCounts = async () => {
-  // Use existing scores or create new ScoreRanges
   const scoreRanges: ScoreRanges = createScoreRanges();
 
-  // Update score ranges based on totalScore
   playerScores.forEach((score) => {
     const rangeKey = getScoreRangeKey(score.totalScore);
-    scoreRanges[rangeKey] = (scoreRanges[rangeKey] || 0) + 1;
+    scoreRanges[rangeKey] += 1;
   });
 
   scoreRanges.goldenCamel = playerScores.filter(
     (score) => score.totalScore === 26 && score.isGoldenCamel,
   ).length;
 
-  // Update playerStatsRef with new scores
   playerStatsRef.value.scores = scoreRanges;
-
-  // Save the updated stats
   await savePlayerStats(playerStatsRef.value);
 };
 
 const updateLegsPlayed = async () => {
   const legs = await getLegsForMatch(matchId!);
-
   legsPlayed.value = legs.length;
 };
 
@@ -92,7 +63,6 @@ const handleUndoLastTurn = async () => {
   await updatePlayerMatchScoreCounts();
 };
 
-// Watch playerScores changes and update counts (only when scores actually change)
 watch(
   () => playerScores,
   () => {
@@ -102,17 +72,14 @@ watch(
 );
 
 onMounted(async () => {
-  // Initialize data
   await updateLegsPlayed();
   await updatePlayerMatchScoreCounts();
 
-  // Listen for score submission events
   $listen("leg-finished", updateLegsPlayed);
   $listen("undo-last-turn", handleUndoLastTurn);
 });
 
 onBeforeUnmount(() => {
-  // Clean up event listeners
   $unlisten("leg-finished", updateLegsPlayed);
   $unlisten("undo-last-turn", handleUndoLastTurn);
 });
@@ -122,51 +89,30 @@ const averagePerLeg = (value: number) => {
   return (value / legsPlayed.value).toFixed(3);
 };
 
-const lowScoresSum = computed(() => {
-  if (!playerStatsRef.value) return 0;
-  return (
-    (playerStatsRef.value.scores["0-9"] || 0) +
-    (playerStatsRef.value.scores["10-19"] || 0)
-  );
-});
+const lowScoresSum = computed(() =>
+  playerStatsRef.value ? sumLowScores(playerStatsRef.value.scores) : 0,
+);
 </script>
 <template>
   <template v-if="playerStatsRef">
+    <!-- class names used by assets/css/main.css zebra selectors -->
     <div class="score-counts__header"></div>
     <div class="score-counts__header">Aantal</div>
     <div class="score-counts__header">Aantal per leg</div>
 
-    <div>180's</div>
-    <div>{{ playerStatsRef.scores["180"] }}</div>
-    <div>{{ averagePerLeg(playerStatsRef.scores["180"]) }}</div>
-    <div>162 - 179</div>
-    <div>{{ playerStatsRef.scores["162-179"] }}</div>
-    <div>{{ averagePerLeg(playerStatsRef.scores["162-179"]) }}</div>
-    <div>126 - 161</div>
-    <div>{{ playerStatsRef.scores["126-161"] }}</div>
-    <div>{{ averagePerLeg(playerStatsRef.scores["126-161"]) }}</div>
-    <div>90 - 125</div>
-    <div>{{ playerStatsRef.scores["90-125"] }}</div>
-    <div>{{ averagePerLeg(playerStatsRef.scores["90-125"]) }}</div>
-    <div>66 - 89</div>
-    <div>{{ playerStatsRef.scores["66-89"] }}</div>
-    <div>{{ averagePerLeg(playerStatsRef.scores["66-89"]) }}</div>
-    <div>54 - 65</div>
-    <div>{{ playerStatsRef.scores["54-65"] }}</div>
-    <div>{{ averagePerLeg(playerStatsRef.scores["54-65"]) }}</div>
-    <div>40 - 53</div>
-    <div>{{ playerStatsRef.scores["40-53"] }}</div>
-    <div>{{ averagePerLeg(playerStatsRef.scores["40-53"]) }}</div>
-    <div>30 - 39</div>
-    <div>{{ playerStatsRef.scores["30-39"] }}</div>
-    <div>{{ averagePerLeg(playerStatsRef.scores["30-39"]) }}</div>
-    <div>20 - 29</div>
+    <template v-for="key in MATCH_SCORE_COUNT_KEYS" :key="key">
+      <div>{{ formatScoreRangeLabel(key) }}</div>
+      <div>{{ playerStatsRef.scores[key] }}</div>
+      <div>{{ averagePerLeg(playerStatsRef.scores[key]) }}</div>
+    </template>
+
+    <div>{{ formatScoreRangeLabel("20-29") }}</div>
     <div class="inline-flex flex-wrap items-center gap-x-1">
       <span>{{ playerStatsRef.scores["20-29"] }}</span>
-      <span class="score-counts__camel-count" title="Gouden kamelen">
-        (<FontAwesomeIcon
+      <span class="camel-count" title="Gouden kamelen">
+        <FontAwesomeIcon
           :icon="faCamel"
-          class="score-counts__camel-icon"
+          class="camel-icon"
           title="Gouden kamelen"
         />
         {{ playerStatsRef.scores.goldenCamel }})
@@ -174,10 +120,10 @@ const lowScoresSum = computed(() => {
     </div>
     <div class="inline-flex flex-wrap items-center gap-x-1">
       <span>{{ averagePerLeg(playerStatsRef.scores["20-29"]) }}</span>
-      <span class="score-counts__camel-count" title="Gouden kamelen per leg">
-        (<FontAwesomeIcon
+      <span class="camel-count" title="Gouden kamelen per leg">
+        <FontAwesomeIcon
           :icon="faCamel"
-          class="score-counts__camel-icon"
+          class="camel-icon"
           title="Gouden kamelen per leg"
         />
         {{ averagePerLeg(playerStatsRef.scores.goldenCamel) }})
@@ -199,15 +145,15 @@ const lowScoresSum = computed(() => {
   @apply font-bold;
 }
 
-.score-counts__camel-count {
+.camel-count {
   @apply inline-flex items-center gap-0.5;
 }
 
-.score-counts__camel-icon {
+.camel-icon {
   @apply inline-block h-3.5 w-3.5 shrink-0 align-middle text-gray-300;
 }
 
-.score-counts__camel-icon :deep(svg) {
+.camel-icon :deep(svg) {
   @apply h-full w-full;
 }
 </style>

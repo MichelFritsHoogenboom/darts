@@ -18,8 +18,16 @@ import {
 } from "../interfaces/stats";
 import { getEditionMatchWinner, isEditionComplete } from "../utils/rivalry";
 import { getPlayerIdsFromStats } from "../utils/player";
-import { buildEditionPlayerStatMetrics, buildEditionBestAverages, tallyCamelMatchWins, sumCamelCountsByPlayer, camelSeasonWinnerId } from "../utils/editionPlayerStats";
-import type { EditionBestAverages } from "../utils/editionPlayerStats";
+import {
+  buildEditionPlayerStatMetrics,
+  tallyCamelMatchWins,
+  sumCamelCountsByPlayer,
+  camelSeasonWinnerId,
+} from "../utils/editionPlayerStats";
+import {
+  buildBestAverages,
+} from "../utils/averages";
+import type { BestAverages } from "../interfaces/stats";
 import type { Match } from "../interfaces/match";
 import type { Score } from "../interfaces/leg";
 import type { x01MatchConfig } from "../interfaces/x01MatchConfig";
@@ -200,7 +208,7 @@ export function useCompetitionEditions() {
   const queryEditionBestAverages = async (
     playerId: string,
     matches: Match[],
-  ): Promise<EditionBestAverages> => {
+  ): Promise<BestAverages> => {
     const {
       getPlayerStatsForMatch,
       getPlayerStatsForSet,
@@ -245,9 +253,9 @@ export function useCompetitionEditions() {
       }
     }
 
-    return buildEditionBestAverages({
+    return buildBestAverages({
       wonLegAverages,
-      wonSetAverages,
+      ...(wonSetAverages.length ? { wonSetAverages } : {}),
       matchAverages,
     });
   };
