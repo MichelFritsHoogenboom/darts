@@ -34,6 +34,27 @@ export interface DartsThrownHit {
   hit: number;
 }
 
+/** Best averages for whatever scope is relevant (leg / set / match). Omit unused keys. */
+export type BestAverages = {
+  bestLegAverage?: number;
+  bestSetAverage?: number;
+  bestMatchAverage?: number;
+};
+
+export type CompareSide = "left" | "right" | null;
+
+export type RangeBounds = { key: string; min: number; max: number };
+
+/** One or more stored buckets shown as a single UI row. */
+export type DisplayRange<TRanges extends object> = {
+  keys: (keyof TRanges)[];
+};
+
+export type ScoreDisplayRange = DisplayRange<ScoreRanges> & {
+  /** Show golden-camel counts next to this row (match score board). */
+  showCamel?: boolean;
+};
+
 export interface PlayerStats {
   id: string;
   createdAt: Date;

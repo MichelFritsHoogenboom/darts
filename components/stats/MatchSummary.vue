@@ -7,7 +7,7 @@ import type { Set } from "~/interfaces/set";
 import type { Leg, PlayerLeg, Score } from "~/interfaces/leg";
 import type { PlayerStats } from "~/interfaces/stats";
 import { X01_GAME_PLAYED_IN } from "~/interfaces/x01MatchConfig";
-import { getPlayerWinnerCount } from "~/utils/match";
+import { getPlayerWinnerCount, formatX01MatchConfigSummary } from "~/utils/match";
 import { MATCH_TYPE_META } from "~/constants/match";
 import { routes } from "~/utils/routes";
 import { useToggle } from "@vueuse/core";
@@ -168,18 +168,7 @@ onBeforeMount(async () => {
             {{ match.updatedAt.toLocaleDateString() }}
           </span>
           <div class="text-sm">
-            {{ match.matchConfig.gameType }}
-            {{ match.matchConfig.gameWinDefinition }}
-            <template
-              v-if="match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets"
-            >
-              {{ match.matchConfig.setsToWin }}
-            </template>
-            <template v-else>
-              {{ match.matchConfig.legsToWinParent }}
-            </template>
-
-            {{ match.matchConfig.gamePlayedIn }}
+            {{ formatX01MatchConfigSummary(match.matchConfig, true) }}
           </div>
         </div>
       </div>
@@ -193,13 +182,11 @@ onBeforeMount(async () => {
         :winner-id="match.winner"
         :show-badge="false"
       >
-        <span
-          class="inline-block px-2 bg-gray-400/50 font-small font-bold rounded"
-        >
+        <UiStatWellValue size="large">
           {{ players[0] ? getPlayerWinnerCount(players[0].id, matchGame) : 0 }}
           -
           {{ players[1] ? getPlayerWinnerCount(players[1].id, matchGame) : 0 }}
-        </span>
+        </UiStatWellValue>
       </StatsPlayersWithCenter>
     </template>
 
