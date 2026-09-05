@@ -52,6 +52,13 @@ export const formatAverageDisplay = (
   fractionDigits = 1,
 ): string => (value > 0 ? value.toFixed(fractionDigits) : "—");
 
+/** 1-dart average from a 3-dart average; `—` when missing/zero. */
+export const formatOneDartAverage = (
+  threeDartAverage: number,
+  fractionDigits = 2,
+): string =>
+  formatAverageDisplay(threeDartAverage / 3, fractionDigits);
+
 export const formatStatCount = (value: number) =>
   value > 0 ? String(value) : "0";
 
