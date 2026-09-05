@@ -2,12 +2,10 @@
 import type { PlayerStats } from "~/interfaces/stats";
 import type { Score } from "~/interfaces/leg";
 import {
-  checkoutsAboveLabel,
   formatCheckoutPercentage,
-  formatCheckoutRangeKey,
-  sumCheckoutsAbove,
+  resolveCheckoutDisplayRange,
 } from "~/utils/stats";
-import { CHECKOUT_KEYS_UP_TO_100 } from "~/constants/stats";
+import { CHECKOUT_DISPLAY_RANGES } from "~/constants/stats";
 
 const { playerStats, playerCheckouts } = defineProps<{
   playerStats: PlayerStats;
@@ -18,12 +16,10 @@ const bestCheckouts = computed(() =>
   [...playerCheckouts].sort((a, b) => b.totalScore - a.totalScore).slice(0, 5),
 );
 
-const checkoutsAbove100 = computed(() =>
-  sumCheckoutsAbove(playerStats.checkouts),
-);
-
-const checkoutsAbove100Label = computed(() =>
-  checkoutsAboveLabel(playerStats.checkouts),
+const checkoutRows = computed(() =>
+  CHECKOUT_DISPLAY_RANGES.map((range) =>
+    resolveCheckoutDisplayRange(playerStats.checkouts, range),
+  ),
 );
 </script>
 <template>
@@ -31,15 +27,11 @@ const checkoutsAbove100Label = computed(() =>
   <div class="score-counts__header">Pogingen</div>
   <div class="score-counts__header">Percentage</div>
 
-  <template v-for="key in CHECKOUT_KEYS_UP_TO_100" :key="key">
-    <div>{{ formatCheckoutRangeKey(key) }}</div>
-    <div>{{ playerStats.checkouts[key].thrown }}</div>
-    <div>{{ formatCheckoutPercentage(playerStats.checkouts[key]) }}</div>
+  <template v-for="row in checkoutRows" :key="row.label">
+    <div>{{ row.label }}</div>
+    <div>{{ row.stats.thrown }}</div>
+    <div>{{ formatCheckoutPercentage(row.stats) }}</div>
   </template>
-
-  <div>{{ checkoutsAbove100Label }}</div>
-  <div>{{ checkoutsAbove100.thrown }}</div>
-  <div>{{ formatCheckoutPercentage(checkoutsAbove100) }}</div>
 
   <div class="score-counts__footer">Hoogste checkouts</div>
   <div class="score-counts__footer col-span-2">

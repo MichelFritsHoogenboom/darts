@@ -5,11 +5,10 @@ import type { Score } from "~/interfaces/leg";
 import type { PlayerStats } from "~/interfaces/stats";
 import { faCamel } from "~/assets/icons/faCamel";
 import {
-  formatScoreRangeLabel,
   getScoreRangeKey,
-  sumLowScores,
+  resolveScoreDisplayRange,
 } from "~/utils/stats";
-import { MATCH_SCORE_COUNT_KEYS } from "~/constants/stats";
+import { MATCH_SCORE_DISPLAY_RANGES } from "~/constants/stats";
 
 const matchId = inject<string>("matchId");
 
@@ -89,9 +88,14 @@ const averagePerLeg = (value: number) => {
   return (value / legsPlayed.value).toFixed(3);
 };
 
-const lowScoresSum = computed(() =>
-  playerStatsRef.value ? sumLowScores(playerStatsRef.value.scores) : 0,
-);
+const scoreRows = computed(() => {
+  if (!playerStatsRef.value) return [];
+  return MATCH_SCORE_DISPLAY_RANGES.map((range) => ({
+    ...resolveScoreDisplayRange(playerStatsRef.value.scores, range),
+    showCamel: !!range.showCamel,
+    camelCount: playerStatsRef.value.scores.goldenCamel,
+  }));
+});
 </script>
 <template>
   <template v-if="playerStatsRef">
@@ -100,38 +104,39 @@ const lowScoresSum = computed(() =>
     <div class="score-counts__header">Aantal</div>
     <div class="score-counts__header">Aantal per leg</div>
 
-    <template v-for="key in MATCH_SCORE_COUNT_KEYS" :key="key">
-      <div>{{ formatScoreRangeLabel(key) }}</div>
-      <div>{{ playerStatsRef.scores[key] }}</div>
-      <div>{{ averagePerLeg(playerStatsRef.scores[key]) }}</div>
-    </template>
-
-    <div>{{ formatScoreRangeLabel("20-29") }}</div>
-    <div class="inline-flex flex-wrap items-center gap-x-1">
-      <span>{{ playerStatsRef.scores["20-29"] }}</span>
-      <span class="camel-count" title="Gouden kamelen">
-        <FontAwesomeIcon
-          :icon="faCamel"
-          class="camel-icon"
+    <template v-for="row in scoreRows" :key="row.label">
+      <div>{{ row.label }}</div>
+      <div class="inline-flex flex-wrap items-center gap-x-1">
+        <span>{{ row.value }}</span>
+        <span
+          v-if="row.showCamel"
+          class="camel-count"
           title="Gouden kamelen"
-        />
-        {{ playerStatsRef.scores.goldenCamel }})
-      </span>
-    </div>
-    <div class="inline-flex flex-wrap items-center gap-x-1">
-      <span>{{ averagePerLeg(playerStatsRef.scores["20-29"]) }}</span>
-      <span class="camel-count" title="Gouden kamelen per leg">
-        <FontAwesomeIcon
-          :icon="faCamel"
-          class="camel-icon"
+        >
+          <FontAwesomeIcon
+            :icon="faCamel"
+            class="camel-icon"
+            title="Gouden kamelen"
+          />
+          {{ row.camelCount }})
+        </span>
+      </div>
+      <div class="inline-flex flex-wrap items-center gap-x-1">
+        <span>{{ averagePerLeg(row.value) }}</span>
+        <span
+          v-if="row.showCamel"
+          class="camel-count"
           title="Gouden kamelen per leg"
-        />
-        {{ averagePerLeg(playerStatsRef.scores.goldenCamel) }})
-      </span>
-    </div>
-    <div>0 - 19</div>
-    <div>{{ lowScoresSum }}</div>
-    <div>{{ averagePerLeg(lowScoresSum) }}</div>
+        >
+          <FontAwesomeIcon
+            :icon="faCamel"
+            class="camel-icon"
+            title="Gouden kamelen per leg"
+          />
+          {{ averagePerLeg(row.camelCount) }})
+        </span>
+      </div>
+    </template>
 
     <div class="score-counts__footer">Totaal aantal legs</div>
     <div class="score-counts__footer">{{ legsPlayed }}</div>

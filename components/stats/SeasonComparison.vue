@@ -5,19 +5,18 @@ import { emptyBestAverages } from "~/utils/averages";
 import {
   betterCheckout,
   betterNumber,
-  checkoutsAboveLabel,
   formatAverageDisplay,
   formatCheckoutHitThrown,
   formatCheckoutPercentage,
-  formatCheckoutRangeKey,
-  formatScoreRangeLabel,
+  formatCheckoutDisplayRangeLabel,
+  formatScoreDisplayRangeLabel,
   formatStatCount,
-  scoreRangeValue,
-  sumCheckoutsAbove,
+  sumCheckoutDisplayRange,
+  sumScoreDisplayRange,
 } from "~/utils/stats";
 import {
-  CHECKOUT_KEYS_UP_TO_100,
-  SEASON_SCORE_COMPARE_KEYS,
+  CHECKOUT_DISPLAY_RANGES,
+  SEASON_SCORE_DISPLAY_RANGES,
 } from "~/constants/stats";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faCamel } from "~/assets/icons/faCamel";
@@ -121,20 +120,25 @@ const sections = computed((): Section[] => {
     format: "average",
   });
 
-  const scoreRows: CompareRow[] = SEASON_SCORE_COMPARE_KEYS.map((key) => {
-    if (key === "goldenCamel") {
+  const scoreRows: CompareRow[] = SEASON_SCORE_DISPLAY_RANGES.map((range) => {
+    const label = formatScoreDisplayRangeLabel(range);
+    const leftValue = sumScoreDisplayRange(left.scores, range);
+    const rightValue = sumScoreDisplayRange(right.scores, range);
+
+    if (range.keys.length === 1 && range.keys[0] === "goldenCamel") {
       return {
         kind: "camel" as const,
-        label: formatScoreRangeLabel(key),
-        left: scoreRangeValue(left.scores, key),
-        right: scoreRangeValue(right.scores, key),
+        label,
+        left: leftValue,
+        right: rightValue,
       };
     }
+
     return {
       kind: "number" as const,
-      label: formatScoreRangeLabel(key),
-      left: scoreRangeValue(left.scores, key),
-      right: scoreRangeValue(right.scores, key),
+      label,
+      left: leftValue,
+      right: rightValue,
       format: "int" as const,
     };
   });
@@ -152,18 +156,12 @@ const sections = computed((): Section[] => {
           right: right.highestCheckout,
           format: "int",
         },
-        ...CHECKOUT_KEYS_UP_TO_100.map((key) => ({
+        ...CHECKOUT_DISPLAY_RANGES.map((range) => ({
           kind: "checkout" as const,
-          label: formatCheckoutRangeKey(key),
-          left: left.checkouts[key],
-          right: right.checkouts[key],
+          label: formatCheckoutDisplayRangeLabel(range),
+          left: sumCheckoutDisplayRange(left.checkouts, range),
+          right: sumCheckoutDisplayRange(right.checkouts, range),
         })),
-        {
-          kind: "checkout",
-          label: checkoutsAboveLabel(left.checkouts),
-          left: sumCheckoutsAbove(left.checkouts),
-          right: sumCheckoutsAbove(right.checkouts),
-        },
       ],
     },
   ];

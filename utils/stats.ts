@@ -2,7 +2,9 @@ import type {
   CheckoutRanges,
   CompareSide,
   DartsThrownHit,
+  DisplayRange,
   RangeBounds,
+  ScoreDisplayRange,
   ScoreRanges,
 } from "~/interfaces/stats";
 import {
@@ -16,6 +18,13 @@ export const parseRangeKey = (key: string): { min: number; max: number } => {
   return { min, max };
 };
 
+const formatMergedRangeLabel = (keys: string[]): string => {
+  const bounds = keys.map(parseRangeKey);
+  const min = Math.min(...bounds.map((bound) => bound.min));
+  const max = Math.max(...bounds.map((bound) => bound.max));
+  return `${min} - ${max}`;
+};
+
 export const formatScoreRangeLabel = (key: keyof ScoreRanges): string => {
   if (key === "180") return "180's";
   if (key === "goldenCamel") return "Gouden kamelen";
@@ -24,6 +33,53 @@ export const formatScoreRangeLabel = (key: keyof ScoreRanges): string => {
 
 export const formatCheckoutRangeKey = (key: keyof CheckoutRanges) =>
   key.replace("-", " - ");
+
+export const formatScoreDisplayRangeLabel = (
+  range: ScoreDisplayRange,
+): string => {
+  if (range.keys.length === 1) return formatScoreRangeLabel(range.keys[0]);
+  return formatMergedRangeLabel(range.keys);
+};
+
+export const formatCheckoutDisplayRangeLabel = (
+  range: DisplayRange<CheckoutRanges>,
+): string => {
+  if (range.keys.length === 1) return formatCheckoutRangeKey(range.keys[0]);
+  return formatMergedRangeLabel(range.keys);
+};
+
+export const sumScoreDisplayRange = (
+  scores: ScoreRanges,
+  range: ScoreDisplayRange,
+): number => range.keys.reduce((sum, key) => sum + scores[key], 0);
+
+export const sumCheckoutDisplayRange = (
+  checkouts: CheckoutRanges,
+  range: DisplayRange<CheckoutRanges>,
+): DartsThrownHit =>
+  range.keys.reduce(
+    (acc, key) => ({
+      thrown: acc.thrown + checkouts[key].thrown,
+      hit: acc.hit + checkouts[key].hit,
+    }),
+    { thrown: 0, hit: 0 },
+  );
+
+export const resolveCheckoutDisplayRange = (
+  checkouts: CheckoutRanges,
+  range: DisplayRange<CheckoutRanges>,
+) => ({
+  label: formatCheckoutDisplayRangeLabel(range),
+  stats: sumCheckoutDisplayRange(checkouts, range),
+});
+
+export const resolveScoreDisplayRange = (
+  scores: ScoreRanges,
+  range: ScoreDisplayRange,
+) => ({
+  label: formatScoreDisplayRangeLabel(range),
+  value: sumScoreDisplayRange(scores, range),
+});
 
 const scoreRangeBounds = (): RangeBounds[] => {
   const keys = Object.keys(createScoreRanges()) as (keyof ScoreRanges)[];
@@ -56,8 +112,7 @@ export const formatAverageDisplay = (
 export const formatOneDartAverage = (
   threeDartAverage: number,
   fractionDigits = 2,
-): string =>
-  formatAverageDisplay(threeDartAverage / 3, fractionDigits);
+): string => formatAverageDisplay(threeDartAverage / 3, fractionDigits);
 
 export const formatStatCount = (value: number) =>
   value > 0 ? String(value) : "0";
@@ -102,45 +157,6 @@ export const betterCheckout = (
   if (a.hit === b.hit) return null;
   return a.hit > b.hit ? "left" : "right";
 };
-
-/** Aggregate checkout buckets whose range min is above `minExclusive`. */
-export const sumCheckoutsAbove = (
-  checkouts: CheckoutRanges,
-  minExclusive = 100,
-): DartsThrownHit => {
-  let thrown = 0;
-  let hit = 0;
-
-  for (const key of Object.keys(checkouts) as (keyof CheckoutRanges)[]) {
-    if (Number(key.split("-")[0]) <= minExclusive) continue;
-    thrown += checkouts[key].thrown;
-    hit += checkouts[key].hit;
-  }
-
-  return { thrown, hit };
-};
-
-export const checkoutsAboveLabel = (
-  checkouts: CheckoutRanges,
-  minExclusive = 100,
-): string => {
-  const above = (Object.keys(checkouts) as (keyof CheckoutRanges)[]).filter(
-    (key) => Number(key.split("-")[0]) > minExclusive,
-  );
-  if (!above.length) return `${minExclusive}+`;
-
-  const min = Math.min(...above.map((key) => Number(key.split("-")[0])));
-  const max = Math.max(...above.map((key) => Number(key.split("-")[1])));
-  return `${min} - ${max}`;
-};
-
-export const scoreRangeValue = (
-  scores: ScoreRanges,
-  key: keyof ScoreRanges,
-): number => scores[key];
-
-export const sumLowScores = (scores: ScoreRanges): number =>
-  scores["0-9"] + scores["10-19"];
 
 export const sumScoreRanges = (ranges: ScoreRanges[]): ScoreRanges => {
   const result = createScoreRanges();

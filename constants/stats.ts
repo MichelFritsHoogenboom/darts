@@ -1,31 +1,39 @@
-import type { CheckoutRanges, ScoreRanges } from "~/interfaces/stats";
+import type {
+  CheckoutRanges,
+  DisplayRange,
+  ScoreDisplayRange,
+} from "~/interfaces/stats";
 
-/** Match board score rows (high → mid), before the special 20–29 + camel and 0–19 rows. */
-export const MATCH_SCORE_COUNT_KEYS: (keyof ScoreRanges)[] = [
-  "180",
-  "162-179",
-  "126-161",
-  "90-125",
-  "66-89",
-  "54-65",
-  "40-53",
-  "30-39",
+/** Match board score rows (high → low), including merged 0–19 and camel on 20–29. */
+export const MATCH_SCORE_DISPLAY_RANGES: ScoreDisplayRange[] = [
+  { keys: ["180"] },
+  { keys: ["162-179"] },
+  { keys: ["126-161"] },
+  { keys: ["90-125"] },
+  { keys: ["66-89"] },
+  { keys: ["54-65"] },
+  { keys: ["40-53"] },
+  { keys: ["30-39"] },
+  { keys: ["20-29"], showCamel: true },
+  { keys: ["0-9", "10-19"] },
 ];
 
-/** Season comparison score rows (includes golden camel as its own row). */
-export const SEASON_SCORE_COMPARE_KEYS: (keyof ScoreRanges)[] = [
-  "180",
-  "162-179",
-  "126-161",
-  "90-125",
-  "66-89",
-  "54-65",
-  "goldenCamel",
+/** Season comparison score rows (golden camel as its own row). */
+export const SEASON_SCORE_DISPLAY_RANGES: ScoreDisplayRange[] = [
+  { keys: ["180"] },
+  { keys: ["162-179"] },
+  { keys: ["126-161"] },
+  { keys: ["90-125"] },
+  { keys: ["66-89"] },
+  { keys: ["54-65"] },
+  { keys: ["goldenCamel"] },
 ];
 
-export const CHECKOUT_KEYS_UP_TO_100: (keyof CheckoutRanges)[] = [
-  "0-40",
-  "41-60",
-  "61-80",
-  "81-100",
+/** Checkout rows: single buckets plus merged 101–170. */
+export const CHECKOUT_DISPLAY_RANGES: DisplayRange<CheckoutRanges>[] = [
+  { keys: ["0-40"] },
+  { keys: ["41-60"] },
+  { keys: ["61-80"] },
+  { keys: ["81-100"] },
+  { keys: ["101-130", "131-150", "151-170"] },
 ];
