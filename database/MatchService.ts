@@ -1,5 +1,9 @@
 import { BaseService } from "./BaseService";
+import { PlayerStatsService } from "./PlayerStatsService";
 import type { Match } from "../interfaces/match";
+import type { PlayerStats } from "../interfaces/stats";
+
+const playerStatsService = new PlayerStatsService();
 
 /**
  * Match-specific database operations
@@ -58,9 +62,9 @@ export class MatchService extends BaseService<Match> {
     return matches.filter((m): m is Match => m !== undefined);
   }
 
-  async getMatchesForCompetitionEdition(
-    edition: { matches: string[] }
-  ): Promise<Match[]> {
+  async getMatchesForCompetitionEdition(edition: {
+    matches: string[];
+  }): Promise<Match[]> {
     return await this.getMatchesByIds([...edition.matches]);
   }
 
@@ -83,5 +87,32 @@ export class MatchService extends BaseService<Match> {
     return recentMatches
       .filter((match: Match) => !!match.winner)
       .slice(0, limit);
+  }
+
+  /** Top match-level averages from finished matches only. */
+  async getTopMatchAverages(limit?: number): Promise<PlayerStats[]> {
+    const finishedMatchIds = new Set(
+      (await this.getAll())
+        .filter((match) => !!match.winner)
+        .map((match) => match.id),
+    );
+
+    const matchStats = (await playerStatsService.getAll()).filter(
+      (stats) =>
+        !!stats.matchId &&
+        finishedMatchIds.has(stats.matchId) &&
+        !stats.playerLegId &&
+        !stats.setId &&
+        !stats.competitionEditionId &&
+        stats.average > 0,
+    );
+
+    matchStats.sort((a, b) => {
+      const averageDiff = b.average - a.average;
+      if (averageDiff !== 0) return averageDiff;
+      return b.updatedAt.getTime() - a.updatedAt.getTime();
+    });
+
+    return limit !== undefined ? matchStats.slice(0, limit) : matchStats;
   }
 }

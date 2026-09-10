@@ -161,6 +161,23 @@ export function useMatches() {
     return await matchService.getMatchesByIds(ids);
   };
 
+  const getTopMatchAverages = async (limit?: number) => {
+    try {
+      loading.value = true;
+      error.value = null;
+      return await matchService.getTopMatchAverages(limit);
+    } catch (err) {
+      error.value =
+        err instanceof Error
+          ? err.message
+          : "Failed to load top match averages";
+      console.error("Failed to load top match averages:", err);
+      return [];
+    } finally {
+      loading.value = false;
+    }
+  };
+
   return {
     matches: readonly(matches),
     unfinishedMatches: readonly(unfinishedMatches),
@@ -175,5 +192,6 @@ export function useMatches() {
     loadLastFinishedMatches,
     loadUnfinishedMatches,
     getMatchesByIds,
+    getTopMatchAverages,
   };
 }

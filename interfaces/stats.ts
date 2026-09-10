@@ -41,6 +41,14 @@ export type BestAverages = {
   bestMatchAverage?: number;
 };
 
+/** Ranked highlight row (checkout, match average, …). */
+export type LeaderboardEntry = {
+  id: string;
+  playerId: string;
+  value: number;
+  date: Date;
+};
+
 export type CompareSide = "player1" | "player2" | null;
 
 export type ComparePair<T> = {

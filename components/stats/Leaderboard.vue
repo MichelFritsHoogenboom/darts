@@ -1,12 +1,22 @@
 <script setup lang="ts">
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faMedal, faTrophy } from "@fortawesome/free-solid-svg-icons";
-import type { Score } from "~/interfaces/leg";
+import type { LeaderboardEntry } from "~/interfaces/stats";
 import { createPlayerNameGetter } from "~/utils/player";
 import { isWithinLastWeek } from "~/utils/date";
+import {
+  formatLeaderboardValue,
+  type LeaderboardValueFormat,
+} from "~/utils/stats";
 
-const { scores } = defineProps<{
-  scores: Score[];
+const {
+  entries,
+  emptyText = "Nog geen resultaten.",
+  valueFormat = "int",
+} = defineProps<{
+  entries: LeaderboardEntry[];
+  emptyText?: string;
+  valueFormat?: LeaderboardValueFormat;
 }>();
 
 const { loadPlayers, players } = usePlayers();
@@ -15,18 +25,22 @@ const getPlayerName = computed(() =>
   createPlayerNameGetter([...players.value]),
 );
 
-onMounted(async () => {
-  const playerIds = [...new Set(scores.map((score) => score.playerId))];
-  await loadPlayers(playerIds);
-});
+watch(
+  () => entries.map((entry) => entry.playerId).join(","),
+  async () => {
+    const playerIds = [...new Set(entries.map((entry) => entry.playerId))];
+    if (playerIds.length) await loadPlayers(playerIds);
+  },
+  { immediate: true },
+);
 </script>
 
 <template>
   <div class="leaderboard">
-    <p v-if="scores.length === 0" class="empty">Nog geen checkouts.</p>
+    <p v-if="entries.length === 0" class="empty">{{ emptyText }}</p>
 
     <ol v-else class="list">
-      <li v-for="(score, index) in scores" :key="score.id" class="row">
+      <li v-for="(entry, index) in entries" :key="entry.id" class="row">
         <span class="rank">
           <FontAwesomeIcon v-if="index === 0" :icon="faTrophy" class="trophy" />
 
@@ -44,16 +58,16 @@ onMounted(async () => {
           compact
           class="score"
         >
-          {{ score.totalScore }}
+          {{ formatLeaderboardValue(entry.value, valueFormat) }}
         </UiDisplayHeader>
 
-        <span class="player">{{ getPlayerName(score.playerId) }}</span>
+        <span class="player">{{ getPlayerName(entry.playerId) }}</span>
         <time
           class="date"
-          :class="{ recent: isWithinLastWeek(score.createdAt) }"
-          :datetime="score.createdAt.toISOString()"
+          :class="{ recent: isWithinLastWeek(entry.date) }"
+          :datetime="entry.date.toISOString()"
         >
-          {{ score.createdAt.toLocaleDateString() }}
+          {{ entry.date.toLocaleDateString() }}
         </time>
       </li>
     </ol>
@@ -127,10 +141,6 @@ onMounted(async () => {
 .medal,
 .trophy {
   @apply h-3.5 w-3.5;
-}
-
-.details {
-  @apply flex min-w-0 flex-col gap-0.5;
 }
 
 .player {
