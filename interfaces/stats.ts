@@ -41,6 +41,22 @@ export type BestAverages = {
   bestMatchAverage?: number;
 };
 
+/** Ranked highlight row (checkout, match average, …). */
+export type LeaderboardEntry = {
+  id: string;
+  playerId: string;
+  value: number;
+  date: Date;
+  /** Match average from a lost match — muted in the UI. */
+  lost?: boolean;
+};
+
+/** Match-level average with win/loss for homepage highlights. */
+export type TopMatchAverage = {
+  stats: PlayerStats;
+  won: boolean;
+};
+
 export type CompareSide = "player1" | "player2" | null;
 
 export type ComparePair<T> = {

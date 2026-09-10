@@ -3,14 +3,18 @@ import type {
   CompareSide,
   DartsThrownHit,
   DisplayRange,
+  LeaderboardEntry,
+  PlayerStats,
   RangeBounds,
   ScoreDisplayRange,
   ScoreRanges,
+  TopMatchAverage,
 } from "~/interfaces/stats";
 import {
   createCheckoutRanges,
   createScoreRanges,
 } from "~/interfaces/stats";
+import type { Score } from "~/interfaces/leg";
 
 export const parseRangeKey = (key: string): { min: number; max: number } => {
   if (key === "180") return { min: 180, max: 180 };
@@ -116,6 +120,31 @@ export const formatOneDartAverage = (
 
 export const formatStatCount = (value: number) =>
   value > 0 ? String(value) : "0";
+
+export type LeaderboardValueFormat = "average" | "int";
+
+export const formatLeaderboardValue = (
+  value: number,
+  format: LeaderboardValueFormat = "int",
+): string =>
+  format === "average" ? formatAverageDisplay(value) : formatStatCount(value);
+
+export const leaderboardEntryFromCheckout = (score: Score): LeaderboardEntry => ({
+  id: score.id,
+  playerId: score.playerId,
+  value: score.totalScore,
+  date: score.createdAt,
+});
+
+export const leaderboardEntryFromMatchAverage = (
+  average: TopMatchAverage,
+): LeaderboardEntry => ({
+  id: average.stats.id,
+  playerId: average.stats.playerId,
+  value: average.stats.average,
+  date: average.stats.updatedAt,
+  lost: !average.won,
+});
 
 export const formatCheckoutHitThrown = (value: DartsThrownHit) =>
   `${value.hit}/${value.thrown}`;

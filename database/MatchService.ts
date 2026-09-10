@@ -1,5 +1,9 @@
 import { BaseService } from "./BaseService";
+import { PlayerStatsService } from "./PlayerStatsService";
 import type { Match } from "../interfaces/match";
+import type { TopMatchAverage } from "../interfaces/stats";
+
+const playerStatsService = new PlayerStatsService();
 
 /**
  * Match-specific database operations
@@ -58,9 +62,9 @@ export class MatchService extends BaseService<Match> {
     return matches.filter((m): m is Match => m !== undefined);
   }
 
-  async getMatchesForCompetitionEdition(
-    edition: { matches: string[] }
-  ): Promise<Match[]> {
+  async getMatchesForCompetitionEdition(edition: {
+    matches: string[];
+  }): Promise<Match[]> {
     return await this.getMatchesByIds([...edition.matches]);
   }
 
@@ -83,5 +87,38 @@ export class MatchService extends BaseService<Match> {
     return recentMatches
       .filter((match: Match) => !!match.winner)
       .slice(0, limit);
+  }
+
+  /** Top match-level averages from finished matches only. */
+  async getTopMatchAverages(limit?: number): Promise<TopMatchAverage[]> {
+    const finishedMatches = (await this.getAll()).filter(
+      (match) => !!match.winner,
+    );
+    const winnerByMatchId = new Map(
+      finishedMatches.map((match) => [match.id, match.winner!]),
+    );
+
+    const matchAverages = (await playerStatsService.getAll())
+      .filter(
+        (stats) =>
+          !!stats.matchId &&
+          winnerByMatchId.has(stats.matchId) &&
+          !stats.playerLegId &&
+          !stats.setId &&
+          !stats.competitionEditionId &&
+          stats.average > 0,
+      )
+      .map((stats) => ({
+        stats,
+        won: winnerByMatchId.get(stats.matchId!) === stats.playerId,
+      }));
+
+    matchAverages.sort((a, b) => {
+      const averageDiff = b.stats.average - a.stats.average;
+      if (averageDiff !== 0) return averageDiff;
+      return b.stats.updatedAt.getTime() - a.stats.updatedAt.getTime();
+    });
+
+    return limit !== undefined ? matchAverages.slice(0, limit) : matchAverages;
   }
 }
