@@ -1,22 +1,13 @@
 import type { Score } from "~/interfaces/leg";
-import type { BestAverages, PlayerStats } from "~/interfaces/stats";
+import type { PlayerStats } from "~/interfaces/stats";
 import { isCheckoutScore } from "~/utils/score";
 import {
-  buildBestAverages,
   calculateFirstNineAverage,
   calculateScoringDartsAverage,
   calculateThreeDartAverage,
-  emptyBestAverages,
   maxAverage,
 } from "~/utils/averages";
 import { sumCheckoutRanges, sumScoreRanges } from "~/utils/stats";
-
-/** @deprecated Prefer BestAverages from ~/interfaces/stats */
-export type EditionBestAverages = BestAverages;
-/** @deprecated Prefer emptyBestAverages from ~/utils/averages */
-export const emptyEditionBestAverages = emptyBestAverages;
-/** @deprecated Prefer buildBestAverages from ~/utils/averages */
-export const buildEditionBestAverages = buildBestAverages;
 
 export const highestCheckoutFromScores = (scores: Score[]): number => {
   const checkouts = scores.filter(isCheckoutScore);
