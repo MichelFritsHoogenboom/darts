@@ -40,7 +40,12 @@ watch(
     <p v-if="entries.length === 0" class="empty">{{ emptyText }}</p>
 
     <ol v-else class="list">
-      <li v-for="(entry, index) in entries" :key="entry.id" class="row">
+      <li
+        v-for="(entry, index) in entries"
+        :key="entry.id"
+        class="row"
+        :title="entry.lost ? 'Wedstrijd verloren' : undefined"
+      >
         <span class="rank">
           <FontAwesomeIcon v-if="index === 0" :icon="faTrophy" class="trophy" />
 
@@ -57,11 +62,14 @@ watch(
           display-size="h2"
           compact
           class="score"
+          :class="{ lost: entry.lost }"
         >
           {{ formatLeaderboardValue(entry.value, valueFormat) }}
         </UiDisplayHeader>
 
-        <span class="player">{{ getPlayerName(entry.playerId) }}</span>
+        <span class="player" :class="{ lost: entry.lost }">{{
+          getPlayerName(entry.playerId)
+        }}</span>
         <time
           class="date"
           :class="{ recent: isWithinLastWeek(entry.date) }"
@@ -145,6 +153,11 @@ watch(
 
 .player {
   @apply truncate text-sm text-gray-300;
+}
+
+.score.lost,
+.player.lost {
+  @apply opacity-50;
 }
 
 .date {

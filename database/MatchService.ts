@@ -1,7 +1,7 @@
 import { BaseService } from "./BaseService";
 import { PlayerStatsService } from "./PlayerStatsService";
 import type { Match } from "../interfaces/match";
-import type { PlayerStats } from "../interfaces/stats";
+import type { TopMatchAverage } from "../interfaces/stats";
 
 const playerStatsService = new PlayerStatsService();
 
@@ -90,29 +90,35 @@ export class MatchService extends BaseService<Match> {
   }
 
   /** Top match-level averages from finished matches only. */
-  async getTopMatchAverages(limit?: number): Promise<PlayerStats[]> {
-    const finishedMatchIds = new Set(
-      (await this.getAll())
-        .filter((match) => !!match.winner)
-        .map((match) => match.id),
+  async getTopMatchAverages(limit?: number): Promise<TopMatchAverage[]> {
+    const finishedMatches = (await this.getAll()).filter(
+      (match) => !!match.winner,
+    );
+    const winnerByMatchId = new Map(
+      finishedMatches.map((match) => [match.id, match.winner!]),
     );
 
-    const matchStats = (await playerStatsService.getAll()).filter(
-      (stats) =>
-        !!stats.matchId &&
-        finishedMatchIds.has(stats.matchId) &&
-        !stats.playerLegId &&
-        !stats.setId &&
-        !stats.competitionEditionId &&
-        stats.average > 0,
-    );
+    const matchAverages = (await playerStatsService.getAll())
+      .filter(
+        (stats) =>
+          !!stats.matchId &&
+          winnerByMatchId.has(stats.matchId) &&
+          !stats.playerLegId &&
+          !stats.setId &&
+          !stats.competitionEditionId &&
+          stats.average > 0,
+      )
+      .map((stats) => ({
+        stats,
+        won: winnerByMatchId.get(stats.matchId!) === stats.playerId,
+      }));
 
-    matchStats.sort((a, b) => {
-      const averageDiff = b.average - a.average;
+    matchAverages.sort((a, b) => {
+      const averageDiff = b.stats.average - a.stats.average;
       if (averageDiff !== 0) return averageDiff;
-      return b.updatedAt.getTime() - a.updatedAt.getTime();
+      return b.stats.updatedAt.getTime() - a.stats.updatedAt.getTime();
     });
 
-    return limit !== undefined ? matchStats.slice(0, limit) : matchStats;
+    return limit !== undefined ? matchAverages.slice(0, limit) : matchAverages;
   }
 }

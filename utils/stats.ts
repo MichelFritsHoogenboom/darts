@@ -8,6 +8,7 @@ import type {
   RangeBounds,
   ScoreDisplayRange,
   ScoreRanges,
+  TopMatchAverage,
 } from "~/interfaces/stats";
 import {
   createCheckoutRanges,
@@ -136,12 +137,13 @@ export const leaderboardEntryFromCheckout = (score: Score): LeaderboardEntry => 
 });
 
 export const leaderboardEntryFromMatchAverage = (
-  stats: PlayerStats,
+  average: TopMatchAverage,
 ): LeaderboardEntry => ({
-  id: stats.id,
-  playerId: stats.playerId,
-  value: stats.average,
-  date: stats.updatedAt,
+  id: average.stats.id,
+  playerId: average.stats.playerId,
+  value: average.stats.average,
+  date: average.stats.updatedAt,
+  lost: !average.won,
 });
 
 export const formatCheckoutHitThrown = (value: DartsThrownHit) =>

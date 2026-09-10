@@ -47,6 +47,14 @@ export type LeaderboardEntry = {
   playerId: string;
   value: number;
   date: Date;
+  /** Match average from a lost match — muted in the UI. */
+  lost?: boolean;
+};
+
+/** Match-level average with win/loss for homepage highlights. */
+export type TopMatchAverage = {
+  stats: PlayerStats;
+  won: boolean;
 };
 
 export type CompareSide = "player1" | "player2" | null;
