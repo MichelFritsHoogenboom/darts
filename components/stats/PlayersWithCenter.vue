@@ -26,7 +26,7 @@ const sizeClasses = computed(() => {
     small: "text-sm",
     medium: "text-base",
     large: "text-lg",
-    xlarge: "text-2xl",
+    xlarge: "text-3xl",
   };
   return sizes[size];
 });

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { formatAverageDisplay, formatOneDartAverage } from "~/utils/stats";
+
 const {
   matchAverage = 0,
   legAverage = 0,
@@ -24,16 +26,6 @@ const {
   bestSetAverage: number;
   isSetMatch?: boolean;
 }>();
-
-const formatAverage = (average: number) => average.toFixed(2);
-
-const formatOptionalAverage = (average: number) =>
-  average ? formatAverage(average) : "—";
-
-const oneDartAverage = (value: number) => (value / 3).toFixed(2);
-
-const formatOptionalOneDartAverage = (average: number) =>
-  average ? oneDartAverage(average) : "—";
 </script>
 <template>
   <div class="score-counts__header"></div>
@@ -41,48 +33,48 @@ const formatOptionalOneDartAverage = (average: number) =>
   <div class="score-counts__header">1 dart gem.</div>
 
   <div>Leg</div>
-  <div>{{ formatAverage(legAverage) }}</div>
-  <div>{{ oneDartAverage(legAverage) }}</div>
+  <div>{{ formatAverageDisplay(legAverage, 2) }}</div>
+  <div>{{ formatOneDartAverage(legAverage) }}</div>
   <template v-if="isSetMatch">
     <div>Set</div>
-    <div>{{ formatAverage(setAverage) }}</div>
-    <div>{{ oneDartAverage(setAverage) }}</div>
+    <div>{{ formatAverageDisplay(setAverage, 2) }}</div>
+    <div>{{ formatOneDartAverage(setAverage) }}</div>
   </template>
 
   <!-- <div>Wedstrijd</div>
-  <div>{{ formatAverage(matchAverage) }}</div>
-  <div>{{ oneDartAverage(matchAverage) }}</div> -->
+  <div>{{ formatAverageDisplay(matchAverage, 2) }}</div>
+  <div>{{ formatOneDartAverage(matchAverage) }}</div> -->
   <div>Eerste 9 darts</div>
-  <div>{{ formatOptionalAverage(firstNineAverage) }}</div>
-  <div>{{ formatOptionalOneDartAverage(firstNineAverage) }}</div>
+  <div>{{ formatAverageDisplay(firstNineAverage, 2) }}</div>
+  <div>{{ formatOneDartAverage(firstNineAverage) }}</div>
   <div>Scorende darts (> 170)</div>
-  <div>{{ formatOptionalAverage(scoringDartsAverage) }}</div>
-  <div>{{ formatOptionalOneDartAverage(scoringDartsAverage) }}</div>
+  <div>{{ formatAverageDisplay(scoringDartsAverage, 2) }}</div>
+  <div>{{ formatOneDartAverage(scoringDartsAverage) }}</div>
   <div>Laatste leg winst</div>
-  <div>{{ formatOptionalAverage(lastLegWinAverage) }}</div>
-  <div>{{ formatOptionalOneDartAverage(lastLegWinAverage) }}</div>
+  <div>{{ formatAverageDisplay(lastLegWinAverage, 2) }}</div>
+  <div>{{ formatOneDartAverage(lastLegWinAverage) }}</div>
   <div>Laatste leg</div>
-  <div>{{ formatOptionalAverage(lastLegAverage) }}</div>
-  <div>{{ formatOptionalOneDartAverage(lastLegAverage) }}</div>
+  <div>{{ formatAverageDisplay(lastLegAverage, 2) }}</div>
+  <div>{{ formatOneDartAverage(lastLegAverage) }}</div>
   <template v-if="isSetMatch">
     <div>Laatste set</div>
-    <div>{{ formatOptionalAverage(lastSetAverage) }}</div>
-    <div>{{ formatOptionalOneDartAverage(lastSetAverage) }}</div>
+    <div>{{ formatAverageDisplay(lastSetAverage, 2) }}</div>
+    <div>{{ formatOneDartAverage(lastSetAverage) }}</div>
   </template>
   <div class="score-counts__footer">Beste leg winst</div>
   <div class="score-counts__footer">
-    {{ formatOptionalAverage(bestLegAverage) }}
+    {{ formatAverageDisplay(bestLegAverage, 2) }}
   </div>
   <div class="score-counts__footer">
-    {{ formatOptionalOneDartAverage(bestLegAverage) }}
+    {{ formatOneDartAverage(bestLegAverage) }}
   </div>
   <template v-if="isSetMatch">
     <div class="score-counts__footer">Beste set winst</div>
     <div class="score-counts__footer">
-      {{ formatOptionalAverage(bestSetAverage) }}
+      {{ formatAverageDisplay(bestSetAverage, 2) }}
     </div>
     <div class="score-counts__footer">
-      {{ formatOptionalOneDartAverage(bestSetAverage) }}
+      {{ formatOneDartAverage(bestSetAverage) }}
     </div>
   </template>
 </template>

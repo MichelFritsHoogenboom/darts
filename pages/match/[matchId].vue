@@ -2,7 +2,7 @@
 import X01Game from "../../components/games/x01/X01Game.vue";
 import { useMatches } from "../../composables/useMatches";
 import type { Match } from "../../interfaces/match";
-import { X01_GAME_PLAYED_IN } from "../../interfaces/x01MatchConfig";
+import { formatX01MatchConfigSummary } from "~/utils/match";
 import { routes } from "~/utils/routes";
 
 // Get match ID from route
@@ -50,17 +50,7 @@ onMounted(() => {
   <NuxtLayout name="skeleton">
     <template #title>
       <span class="text-right font-normal" v-if="match">
-        {{ match.matchConfig.gameType }} •
-        {{ match.matchConfig.gameWinDefinition }}
-        <template
-          v-if="match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets"
-        >
-          {{ match.matchConfig.setsToWin }} sets •
-          {{ match.matchConfig.legsToWinParent }} legs to win set
-        </template>
-        <template v-else>
-          {{ match.matchConfig.legsToWinParent }} legs
-        </template>
+        {{ formatX01MatchConfigSummary(match.matchConfig) }}
       </span>
     </template>
 

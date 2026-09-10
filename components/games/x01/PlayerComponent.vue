@@ -7,6 +7,9 @@ import {
   type PlayerStats,
 } from "~/interfaces/stats";
 import type { Set } from "~/interfaces/set";
+import { maxAverage } from "~/utils/averages";
+import { isCheckoutScore } from "~/utils/score";
+import { parseRangeKey } from "~/utils/stats";
 
 const { $listen, $unlisten } = useNuxtApp();
 const {
@@ -57,11 +60,9 @@ const lastLegWinAverage = ref<number>(0);
 const bestLegAverage = ref<number>(0);
 const bestSetAverage = ref<number>(0);
 const playerCheckouts = computed(() =>
-  playerScores.value.filter((score) => score.startScore === score.totalScore),
+  playerScores.value.filter(isCheckoutScore),
 );
 const isSetMatch = computed(() => !!currentSet);
-const maxAverage = (averages: number[]) =>
-  averages.length ? Math.max(...averages) : 0;
 
 const getWonAverages = async <T extends { winner?: string }>(
   items: T[],
@@ -229,25 +230,18 @@ const updateStats = async () => {
   await updatePlayerCheckouts();
 };
 
-const parseCheckoutRange = (key: keyof CheckoutRanges) => {
-  const [min, max] = key.split("-").map(Number);
-  return { min, max };
-};
-
 const updatePlayerCheckouts = async () => {
   if (!matchPlayerStats.value) return;
 
   const checkouts = createCheckoutRanges();
 
   for (const currentKey of Object.keys(checkouts) as (keyof CheckoutRanges)[]) {
-    const { min, max } = parseCheckoutRange(currentKey);
+    const { min, max } = parseRangeKey(currentKey);
     const inRange = playerScores.value.filter(
       (score) => score.startScore >= min && score.startScore <= max,
     );
     checkouts[currentKey].thrown = inRange.length;
-    checkouts[currentKey].hit = inRange.filter(
-      (score) => score.startScore === score.totalScore,
-    ).length;
+    checkouts[currentKey].hit = inRange.filter(isCheckoutScore).length;
   }
 
   matchPlayerStats.value.checkouts = checkouts;
