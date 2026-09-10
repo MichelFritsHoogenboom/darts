@@ -41,7 +41,38 @@ export type BestAverages = {
   bestMatchAverage?: number;
 };
 
-export type CompareSide = "left" | "right" | null;
+export type CompareSide = "player1" | "player2" | null;
+
+export type ComparePair<T> = {
+  label: string;
+  player1: T;
+  player2: T;
+};
+
+export type SeasonCompareKind = "number" | "checkout" | "camel";
+
+export type SeasonCompareNumberRow = ComparePair<number> & {
+  kind: Extract<SeasonCompareKind, "number">;
+  format?: "average" | "int";
+};
+
+export type SeasonCompareCheckoutRow = ComparePair<DartsThrownHit> & {
+  kind: Extract<SeasonCompareKind, "checkout">;
+};
+
+export type SeasonCompareCamelRow = ComparePair<number> & {
+  kind: Extract<SeasonCompareKind, "camel">;
+};
+
+export type SeasonCompareRow =
+  | SeasonCompareNumberRow
+  | SeasonCompareCheckoutRow
+  | SeasonCompareCamelRow;
+
+export type SeasonCompareSection = {
+  title: string;
+  rows: SeasonCompareRow[];
+};
 
 export type RangeBounds = { key: string; min: number; max: number };
 

@@ -2,7 +2,16 @@ import type {
   CheckoutRanges,
   DisplayRange,
   ScoreDisplayRange,
+  SeasonCompareKind,
 } from "~/interfaces/stats";
+
+export const SEASON_COMPARE_KIND: {
+  [K in SeasonCompareKind]: K;
+} = {
+  number: "number",
+  checkout: "checkout",
+  camel: "camel",
+};
 
 /** Match board score rows (high → low), including merged 0–19 and camel on 20–29. */
 export const MATCH_SCORE_DISPLAY_RANGES: ScoreDisplayRange[] = [

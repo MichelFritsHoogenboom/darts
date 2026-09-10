@@ -1,6 +1,12 @@
 <script setup lang="ts">
-import type { DartsThrownHit, PlayerStats } from "~/interfaces/stats";
-import type { BestAverages } from "~/interfaces/stats";
+import type {
+  BestAverages,
+  CompareSide,
+  PlayerStats,
+  SeasonCompareNumberRow,
+  SeasonCompareRow,
+  SeasonCompareSection,
+} from "~/interfaces/stats";
 import { emptyBestAverages } from "~/utils/averages";
 import {
   betterCheckout,
@@ -16,132 +22,106 @@ import {
 } from "~/utils/stats";
 import {
   CHECKOUT_DISPLAY_RANGES,
+  SEASON_COMPARE_KIND,
   SEASON_SCORE_DISPLAY_RANGES,
 } from "~/constants/stats";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faCamel } from "~/assets/icons/faCamel";
 
 const {
-  left,
-  right,
-  leftBest = emptyBestAverages(),
-  rightBest = emptyBestAverages(),
-  leftCamelWins = 0,
-  rightCamelWins = 0,
+  player1Stats,
+  player2Stats,
+  player1Best = emptyBestAverages(),
+  player2Best = emptyBestAverages(),
+  player1CamelWins = 0,
+  player2CamelWins = 0,
   isSetMatch = false,
   seasonComplete = false,
 } = defineProps<{
-  left: PlayerStats;
-  right: PlayerStats;
-  leftBest?: BestAverages;
-  rightBest?: BestAverages;
-  leftCamelWins?: number;
-  rightCamelWins?: number;
+  player1Stats: PlayerStats;
+  player2Stats: PlayerStats;
+  player1Best?: BestAverages;
+  player2Best?: BestAverages;
+  player1CamelWins?: number;
+  player2CamelWins?: number;
   isSetMatch?: boolean;
   seasonComplete?: boolean;
 }>();
 
-type NumberRow = {
-  kind: "number";
-  label: string;
-  left: number;
-  right: number;
-  format?: "average" | "int";
-};
-
-type CheckoutRow = {
-  kind: "checkout";
-  label: string;
-  left: DartsThrownHit;
-  right: DartsThrownHit;
-};
-
-type CamelRow = {
-  kind: "camel";
-  label: string;
-  left: number;
-  right: number;
-};
-
-type CompareRow = NumberRow | CheckoutRow | CamelRow;
-
-type Section = {
-  title: string;
-  rows: CompareRow[];
-};
-
-const sections = computed((): Section[] => {
-  const averageRows: NumberRow[] = [
+const sections = computed((): SeasonCompareSection[] => {
+  const averageRows: SeasonCompareNumberRow[] = [
     {
-      kind: "number",
+      kind: SEASON_COMPARE_KIND.number,
       label: "Gemiddelde",
-      left: left.average,
-      right: right.average,
+      player1: player1Stats.average,
+      player2: player2Stats.average,
       format: "average",
     },
     {
-      kind: "number",
+      kind: SEASON_COMPARE_KIND.number,
       label: "Eerste 9",
-      left: left.firstNineAverage,
-      right: right.firstNineAverage,
+      player1: player1Stats.firstNineAverage,
+      player2: player2Stats.firstNineAverage,
       format: "average",
     },
     {
-      kind: "number",
+      kind: SEASON_COMPARE_KIND.number,
       label: "Scorend gemiddelde",
-      left: left.scoringDartsAverage,
-      right: right.scoringDartsAverage,
+      player1: player1Stats.scoringDartsAverage,
+      player2: player2Stats.scoringDartsAverage,
       format: "average",
     },
     {
-      kind: "number",
+      kind: SEASON_COMPARE_KIND.number,
       label: "Beste leg",
-      left: leftBest.bestLegAverage ?? 0,
-      right: rightBest.bestLegAverage ?? 0,
+      player1: player1Best.bestLegAverage ?? 0,
+      player2: player2Best.bestLegAverage ?? 0,
       format: "average",
     },
   ];
 
   if (isSetMatch) {
     averageRows.push({
-      kind: "number",
+      kind: SEASON_COMPARE_KIND.number,
       label: "Beste set",
-      left: leftBest.bestSetAverage ?? 0,
-      right: rightBest.bestSetAverage ?? 0,
+      player1: player1Best.bestSetAverage ?? 0,
+      player2: player2Best.bestSetAverage ?? 0,
       format: "average",
     });
   }
 
   averageRows.push({
-    kind: "number",
+    kind: SEASON_COMPARE_KIND.number,
     label: "Beste wedstrijd",
-    left: leftBest.bestMatchAverage ?? 0,
-    right: rightBest.bestMatchAverage ?? 0,
+    player1: player1Best.bestMatchAverage ?? 0,
+    player2: player2Best.bestMatchAverage ?? 0,
     format: "average",
   });
 
-  const scoreRows: CompareRow[] = SEASON_SCORE_DISPLAY_RANGES.map((range) => {
-    const label = formatScoreDisplayRangeLabel(range);
-    const leftValue = sumScoreDisplayRange(left.scores, range);
-    const rightValue = sumScoreDisplayRange(right.scores, range);
+  const scoreRows: SeasonCompareRow[] = SEASON_SCORE_DISPLAY_RANGES.map(
+    (range) => {
+      const label = formatScoreDisplayRangeLabel(range);
+      const player1Value = sumScoreDisplayRange(player1Stats.scores, range);
+      const player2Value = sumScoreDisplayRange(player2Stats.scores, range);
 
-    if (range.keys.length === 1 && range.keys[0] === "goldenCamel") {
+      if (range.keys.length === 1 && range.keys[0] === "goldenCamel") {
+        return {
+          kind: SEASON_COMPARE_KIND.camel,
+          label,
+          player1: player1Value,
+          player2: player2Value,
+        };
+      }
+
       return {
-        kind: "camel" as const,
+        kind: SEASON_COMPARE_KIND.number,
         label,
-        left: leftValue,
-        right: rightValue,
+        player1: player1Value,
+        player2: player2Value,
+        format: "int",
       };
-    }
-
-    return {
-      kind: "number" as const,
-      label,
-      left: leftValue,
-      right: rightValue,
-      format: "int" as const,
-    };
-  });
+    },
+  );
 
   return [
     { title: "Gemiddelden", rows: averageRows },
@@ -150,17 +130,17 @@ const sections = computed((): Section[] => {
       title: "Checkouts",
       rows: [
         {
-          kind: "number",
+          kind: SEASON_COMPARE_KIND.number,
           label: "Hoogste checkout",
-          left: left.highestCheckout,
-          right: right.highestCheckout,
+          player1: player1Stats.highestCheckout,
+          player2: player2Stats.highestCheckout,
           format: "int",
         },
         ...CHECKOUT_DISPLAY_RANGES.map((range) => ({
-          kind: "checkout" as const,
+          kind: SEASON_COMPARE_KIND.checkout,
           label: formatCheckoutDisplayRangeLabel(range),
-          left: sumCheckoutDisplayRange(left.checkouts, range),
-          right: sumCheckoutDisplayRange(right.checkouts, range),
+          player1: sumCheckoutDisplayRange(player1Stats.checkouts, range),
+          player2: sumCheckoutDisplayRange(player2Stats.checkouts, range),
         })),
       ],
     },
@@ -173,35 +153,32 @@ const displayNumber = (value: number, format?: "average" | "int") =>
 const camelSlots = (count: number) =>
   Array.from({ length: Math.max(0, count) }, (_, index) => index);
 
-const leftSmallCamels = computed(() => {
-  const seasonBonus =
-    seasonComplete && left.scores.goldenCamel > right.scores.goldenCamel
-      ? 1
-      : 0;
-  return leftCamelWins + seasonBonus;
+const camels = computed(() => {
+  const player1Golden = player1Stats.scores.goldenCamel;
+  const player2Golden = player2Stats.scores.goldenCamel;
+  const player1Small =
+    player1CamelWins +
+    (seasonComplete && player1Golden > player2Golden ? 1 : 0);
+  const player2Small =
+    player2CamelWins +
+    (seasonComplete && player2Golden > player1Golden ? 1 : 0);
+
+  return {
+    player1Small,
+    player2Small,
+    player1HasLarge: seasonComplete && player1Small > player2Small,
+    player2HasLarge: seasonComplete && player2Small > player1Small,
+  };
 });
 
-const rightSmallCamels = computed(() => {
-  const seasonBonus =
-    seasonComplete && right.scores.goldenCamel > left.scores.goldenCamel
-      ? 1
-      : 0;
-  return rightCamelWins + seasonBonus;
-});
-
-const leftHasLargeCamel = computed(
-  () => seasonComplete && leftSmallCamels.value > rightSmallCamels.value,
-);
-
-const rightHasLargeCamel = computed(
-  () => seasonComplete && rightSmallCamels.value > leftSmallCamels.value,
-);
-
-const isHighlighted = (row: CompareRow, side: "left" | "right") => {
-  if (row.kind === "checkout") {
-    return betterCheckout(row.left, row.right) === side;
+const isHighlighted = (
+  row: SeasonCompareRow,
+  side: NonNullable<CompareSide>,
+) => {
+  if (row.kind === SEASON_COMPARE_KIND.checkout) {
+    return betterCheckout(row.player1, row.player2) === side;
   }
-  return betterNumber(row.left, row.right) === side;
+  return betterNumber(row.player1, row.player2) === side;
 };
 </script>
 
@@ -214,25 +191,25 @@ const isHighlighted = (row: CompareRow, side: "left" | "right") => {
         :key="`${section.title}-${row.label}-${index}`"
       >
         <div class="row">
-          <div class="value left">
+          <div class="value player1">
             <div
-              v-if="row.kind === 'camel'"
+              v-if="row.kind === SEASON_COMPARE_KIND.camel"
               class="camels"
               aria-hidden="true"
             >
               <UiIconSparkle
-                v-if="leftHasLargeCamel"
+                v-if="camels.player1HasLarge"
                 class="camel large"
                 title="Gouden kameel winnaar dit seizoen"
               >
                 <FontAwesomeIcon :icon="faCamel" />
               </UiIconSparkle>
               <UiIconSparkle
-                v-for="camelIndex in camelSlots(leftSmallCamels)"
-                :key="`left-camel-${camelIndex}`"
+                v-for="camelIndex in camelSlots(camels.player1Small)"
+                :key="`player1-camel-${camelIndex}`"
                 class="camel"
                 :title="
-                  camelIndex < leftCamelWins
+                  camelIndex < player1CamelWins
                     ? 'Kameel-wedstrijd gewonnen'
                     : 'Meeste gouden kamelen dit seizoen'
                 "
@@ -243,50 +220,50 @@ const isHighlighted = (row: CompareRow, side: "left" | "right") => {
             </div>
             <UiStatWellValue
               size="large"
-              :highlighted="isHighlighted(row, 'left')"
+              :highlighted="isHighlighted(row, 'player1')"
             >
-              <template v-if="row.kind === 'checkout'">
-                <span :title="formatCheckoutPercentage(row.left, 1)">
-                  {{ formatCheckoutHitThrown(row.left) }}
+              <template v-if="row.kind === SEASON_COMPARE_KIND.checkout">
+                <span :title="formatCheckoutPercentage(row.player1, 1)">
+                  {{ formatCheckoutHitThrown(row.player1) }}
                 </span>
               </template>
-              <template v-else-if="row.kind === 'camel'">
-                {{ formatStatCount(row.left) }}
+              <template v-else-if="row.kind === SEASON_COMPARE_KIND.camel">
+                {{ formatStatCount(row.player1) }}
               </template>
               <template v-else>
-                {{ displayNumber(row.left, row.format) }}
+                {{ displayNumber(row.player1, row.format) }}
               </template>
             </UiStatWellValue>
           </div>
           <div class="label">{{ row.label }}</div>
-          <div class="value right">
+          <div class="value player2">
             <UiStatWellValue
               size="large"
-              :highlighted="isHighlighted(row, 'right')"
+              :highlighted="isHighlighted(row, 'player2')"
             >
-              <template v-if="row.kind === 'checkout'">
-                <span :title="formatCheckoutPercentage(row.right, 1)">
-                  {{ formatCheckoutHitThrown(row.right) }}
+              <template v-if="row.kind === SEASON_COMPARE_KIND.checkout">
+                <span :title="formatCheckoutPercentage(row.player2, 1)">
+                  {{ formatCheckoutHitThrown(row.player2) }}
                 </span>
               </template>
-              <template v-else-if="row.kind === 'camel'">
-                {{ formatStatCount(row.right) }}
+              <template v-else-if="row.kind === SEASON_COMPARE_KIND.camel">
+                {{ formatStatCount(row.player2) }}
               </template>
               <template v-else>
-                {{ displayNumber(row.right, row.format) }}
+                {{ displayNumber(row.player2, row.format) }}
               </template>
             </UiStatWellValue>
             <div
-              v-if="row.kind === 'camel'"
+              v-if="row.kind === SEASON_COMPARE_KIND.camel"
               class="camels"
               aria-hidden="true"
             >
               <UiIconSparkle
-                v-for="camelIndex in camelSlots(rightSmallCamels)"
-                :key="`right-camel-${camelIndex}`"
+                v-for="camelIndex in camelSlots(camels.player2Small)"
+                :key="`player2-camel-${camelIndex}`"
                 class="camel"
                 :title="
-                  camelIndex < rightCamelWins
+                  camelIndex < player2CamelWins
                     ? 'Kameel-wedstrijd gewonnen'
                     : 'Meeste gouden kamelen dit seizoen'
                 "
@@ -295,7 +272,7 @@ const isHighlighted = (row: CompareRow, side: "left" | "right") => {
                 <FontAwesomeIcon :icon="faCamel" />
               </UiIconSparkle>
               <UiIconSparkle
-                v-if="rightHasLargeCamel"
+                v-if="camels.player2HasLarge"
                 class="camel large"
                 title="Gouden kameel winnaar dit seizoen"
               >
@@ -333,11 +310,11 @@ const isHighlighted = (row: CompareRow, side: "left" | "right") => {
   .value {
     @apply flex items-center gap-2;
 
-    &.left {
+    &.player1 {
       @apply justify-end;
     }
 
-    &.right {
+    &.player2 {
       @apply justify-start;
     }
   }
@@ -359,11 +336,11 @@ const isHighlighted = (row: CompareRow, side: "left" | "right") => {
     }
   }
 
-  .value.left .camel.large {
+  .value.player1 .camel.large {
     @apply mr-3;
   }
 
-  .value.right .camel.large {
+  .value.player2 .camel.large {
     @apply ml-3;
   }
 }

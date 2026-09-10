@@ -136,7 +136,7 @@ export const checkoutRate = (value: DartsThrownHit): number | undefined =>
 
 export const betterNumber = (a: number, b: number): CompareSide => {
   if (a === b) return null;
-  return a > b ? "left" : "right";
+  return a > b ? "player1" : "player2";
 };
 
 export const betterCheckout = (
@@ -148,14 +148,14 @@ export const betterCheckout = (
   if (rateA !== undefined && rateB !== undefined) {
     if (rateA === rateB) {
       if (a.hit === b.hit) return null;
-      return a.hit > b.hit ? "left" : "right";
+      return a.hit > b.hit ? "player1" : "player2";
     }
-    return rateA > rateB ? "left" : "right";
+    return rateA > rateB ? "player1" : "player2";
   }
-  if (rateA !== undefined) return "left";
-  if (rateB !== undefined) return "right";
+  if (rateA !== undefined) return "player1";
+  if (rateB !== undefined) return "player2";
   if (a.hit === b.hit) return null;
-  return a.hit > b.hit ? "left" : "right";
+  return a.hit > b.hit ? "player1" : "player2";
 };
 
 export const sumScoreRanges = (ranges: ScoreRanges[]): ScoreRanges => {

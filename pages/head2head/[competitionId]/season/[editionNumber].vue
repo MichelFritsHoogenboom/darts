@@ -44,10 +44,10 @@ const editions = ref<CompetitionEdition[]>([]);
 const matches = ref<Match[]>([]);
 const rivalryPlayers = ref<Player[]>([]);
 const loadedEditionPlayerStats = ref<PlayerStats[]>([]);
-const leftBestAverages = ref<BestAverages>(emptyBestAverages());
-const rightBestAverages = ref<BestAverages>(emptyBestAverages());
-const leftCamelMatchWins = ref(0);
-const rightCamelMatchWins = ref(0);
+const player1BestAverages = ref<BestAverages>(emptyBestAverages());
+const player2BestAverages = ref<BestAverages>(emptyBestAverages());
+const player1CamelMatchWins = ref(0);
+const player2CamelMatchWins = ref(0);
 const camelSeasonWinsByPlayer = ref<Record<string, number>>({});
 const showChampionOverlay = ref(false);
 const startingMatch = ref(false);
@@ -111,10 +111,10 @@ const loadDetail = async () => {
   edition.value = selected;
   activeTab.value = "matches";
   bestAveragesLoaded.value = false;
-  leftBestAverages.value = emptyBestAverages();
-  rightBestAverages.value = emptyBestAverages();
-  leftCamelMatchWins.value = 0;
-  rightCamelMatchWins.value = 0;
+  player1BestAverages.value = emptyBestAverages();
+  player2BestAverages.value = emptyBestAverages();
+  player1CamelMatchWins.value = 0;
+  player2CamelMatchWins.value = 0;
   camelSeasonWinsByPlayer.value = {};
   matches.value = await getMatchesByIds([...selected.matches]);
   matches.value.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
@@ -136,22 +136,22 @@ const loadDetail = async () => {
 
 const loadBestAverages = async () => {
   if (bestAveragesLoaded.value || loadingBestAverages.value) return;
-  const leftId = rivalryPlayers.value[0]?.id;
-  const rightId = rivalryPlayers.value[1]?.id;
-  if (!leftId || !rightId) return;
+  const player1Id = rivalryPlayers.value[0]?.id;
+  const player2Id = rivalryPlayers.value[1]?.id;
+  if (!player1Id || !player2Id) return;
 
   loadingBestAverages.value = true;
   try {
     const finished = matches.value.filter((match) => !!match.winner);
-    const [leftBest, rightBest, camelWins] = await Promise.all([
-      queryEditionBestAverages(leftId, finished),
-      queryEditionBestAverages(rightId, finished),
-      queryEditionCamelMatchWins([leftId, rightId], finished),
+    const [player1Best, player2Best, camelWins] = await Promise.all([
+      queryEditionBestAverages(player1Id, finished),
+      queryEditionBestAverages(player2Id, finished),
+      queryEditionCamelMatchWins([player1Id, player2Id], finished),
     ]);
-    leftBestAverages.value = leftBest;
-    rightBestAverages.value = rightBest;
-    leftCamelMatchWins.value = camelWins[leftId] ?? 0;
-    rightCamelMatchWins.value = camelWins[rightId] ?? 0;
+    player1BestAverages.value = player1Best;
+    player2BestAverages.value = player2Best;
+    player1CamelMatchWins.value = camelWins[player1Id] ?? 0;
+    player2CamelMatchWins.value = camelWins[player2Id] ?? 0;
     bestAveragesLoaded.value = true;
   } finally {
     loadingBestAverages.value = false;
@@ -227,7 +227,7 @@ const championPlayer = computed(() => {
   return rivalryPlayers.value.find((p) => p.id === edition.value?.winner);
 });
 
-const leftEditionStats = computed(() => {
+const player1EditionStats = computed(() => {
   const playerId = rivalryPlayers.value[0]?.id;
   if (!playerId) return undefined;
   return loadedEditionPlayerStats.value.find(
@@ -235,7 +235,7 @@ const leftEditionStats = computed(() => {
   );
 });
 
-const rightEditionStats = computed(() => {
+const player2EditionStats = computed(() => {
   const playerId = rivalryPlayers.value[1]?.id;
   if (!playerId) return undefined;
   return loadedEditionPlayerStats.value.find(
@@ -463,16 +463,16 @@ const beginNewEdition = async () => {
         </UiSummaryCardLayout>
       </div>
 
-      <div v-else-if="leftEditionStats && rightEditionStats" class="section">
+      <div v-else-if="player1EditionStats && player2EditionStats" class="section">
         <div v-if="loadingBestAverages" class="empty-state">Laden...</div>
         <StatsSeasonComparison
           v-else
-          :left="leftEditionStats"
-          :right="rightEditionStats"
-          :left-best="leftBestAverages"
-          :right-best="rightBestAverages"
-          :left-camel-wins="leftCamelMatchWins"
-          :right-camel-wins="rightCamelMatchWins"
+          :player1-stats="player1EditionStats"
+          :player2-stats="player2EditionStats"
+          :player1-best="player1BestAverages"
+          :player2-best="player2BestAverages"
+          :player1-camel-wins="player1CamelMatchWins"
+          :player2-camel-wins="player2CamelMatchWins"
           :is-set-match="isSetMatchSeason"
           :season-complete="!!edition.winner"
         />
