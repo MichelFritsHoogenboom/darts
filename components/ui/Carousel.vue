@@ -85,11 +85,11 @@ const resumeAutoplay = () => {
 </template>
 
 <style scoped lang="scss">
-$cube-motion: 0.7s cubic-bezier(0.4, 0, 0.2, 1);
-$title-motion: 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+$cube-motion: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+$title-motion: 0.7s cubic-bezier(0.4, 0, 0.2, 1);
 
 .carousel {
-  @apply flex w-full flex-col gap-3;
+  @apply flex w-full flex-col;
 }
 
 .title {
@@ -97,7 +97,7 @@ $title-motion: 0.9s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .stage {
-  @apply relative w-full min-w-0 overflow-hidden;
+  @apply relative z-0 w-full min-w-0 overflow-hidden;
   perspective: 1100px;
 }
 
@@ -108,12 +108,17 @@ $title-motion: 0.9s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .dots {
-  @apply flex items-center justify-center gap-2;
+  @apply relative z-10 mt-3 flex items-center justify-center gap-2;
 }
 
 .dot {
-  @apply h-1.5 w-1.5 rounded-full bg-gray-600;
+  @apply relative h-1.5 w-1.5 rounded-full border-0 bg-gray-600 p-0;
   @apply transition-[width,background-color] duration-300 ease-out;
+
+  &::before {
+    content: "";
+    @apply absolute -inset-y-3 -inset-x-1.5;
+  }
 
   &.active {
     @apply w-4 bg-gray-300;
@@ -138,6 +143,7 @@ $title-motion: 0.9s cubic-bezier(0.4, 0, 0.2, 1);
 .cube-next-leave-active,
 .cube-prev-enter-active,
 .cube-prev-leave-active {
+  pointer-events: none;
   transition: transform $cube-motion;
 }
 

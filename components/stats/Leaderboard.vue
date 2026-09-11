@@ -44,7 +44,7 @@ watch(
         v-for="(entry, index) in entries"
         :key="entry.id"
         class="row"
-        :title="entry.lost ? 'Wedstrijd verloren' : undefined"
+        :title="entry.lost ? 'Verliezend gemiddelde' : undefined"
       >
         <span class="rank">
           <FontAwesomeIcon v-if="index === 0" :icon="faTrophy" class="trophy" />
