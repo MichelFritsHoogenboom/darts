@@ -210,7 +210,7 @@ onBeforeMount(async () => {
         type="button"
         class="btn-gray"
         :disabled="deleting"
-        title="Verwijderen"
+        title="Delete"
         @click="deleteEmptyMatch"
       >
         <FontAwesomeIcon :icon="faTrash" class="w-4 h-4" />

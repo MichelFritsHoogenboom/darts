@@ -78,12 +78,12 @@ const startMatch = async () => {
 <template>
   <NuxtLayout name="default">
     <template #title>
-      <h1 class="text-xl font-bold text-white mb-2">Wedstrijd instellen</h1>
+      <h1 class="text-xl font-bold text-white mb-2">Set up match</h1>
     </template>
 
     <div class="max-w-4xl mx-auto">
       <div class="card-panel rounded-lg p-8 mb-6">
-        <h2 class="text-lg font-semibold text-white mb-4">Spelers</h2>
+        <h2 class="text-lg font-semibold text-white mb-4">Players</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div
             v-for="player in editionPlayers"
@@ -101,10 +101,10 @@ const startMatch = async () => {
         <template #footer>
           <div class="flex gap-4 justify-end w-full">
             <NuxtLink :to="cancelPath" class="btn-gray px-6 py-2">
-              Annuleren
+              Cancel
             </NuxtLink>
             <FormButton :disabled="saving" @click="startMatch">
-              Start wedstrijd
+              Start match
             </FormButton>
           </div>
         </template>

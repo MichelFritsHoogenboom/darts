@@ -101,8 +101,8 @@ const scoreRows = computed(() => {
   <template v-if="playerStatsRef">
     <!-- class names used by assets/css/main.css zebra selectors -->
     <div class="score-counts__header"></div>
-    <div class="score-counts__header">Aantal</div>
-    <div class="score-counts__header">Aantal per leg</div>
+    <div class="score-counts__header">Count</div>
+    <div class="score-counts__header">Count per leg</div>
 
     <template v-for="row in scoreRows" :key="row.label">
       <div>{{ row.label }}</div>
@@ -111,12 +111,12 @@ const scoreRows = computed(() => {
         <span
           v-if="row.showCamel"
           class="camel-count"
-          title="Gouden kamelen"
+          title="Golden camels"
         >
           <FontAwesomeIcon
             :icon="faCamel"
             class="camel-icon"
-            title="Gouden kamelen"
+            title="Golden camels"
           />
           {{ row.camelCount }})
         </span>
@@ -126,19 +126,19 @@ const scoreRows = computed(() => {
         <span
           v-if="row.showCamel"
           class="camel-count"
-          title="Gouden kamelen per leg"
+          title="Golden camels per leg"
         >
           <FontAwesomeIcon
             :icon="faCamel"
             class="camel-icon"
-            title="Gouden kamelen per leg"
+            title="Golden camels per leg"
           />
           {{ averagePerLeg(row.camelCount) }})
         </span>
       </div>
     </template>
 
-    <div class="score-counts__footer">Totaal aantal legs</div>
+    <div class="score-counts__footer">Total legs</div>
     <div class="score-counts__footer">{{ legsPlayed }}</div>
   </template>
 </template>

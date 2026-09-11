@@ -52,28 +52,28 @@ const sections = computed((): SeasonCompareSection[] => {
   const averageRows: SeasonCompareNumberRow[] = [
     {
       kind: SEASON_COMPARE_KIND.number,
-      label: "Gemiddelde",
+      label: "Average",
       player1: player1Stats.average,
       player2: player2Stats.average,
       format: "average",
     },
     {
       kind: SEASON_COMPARE_KIND.number,
-      label: "Eerste 9",
+      label: "First 9",
       player1: player1Stats.firstNineAverage,
       player2: player2Stats.firstNineAverage,
       format: "average",
     },
     {
       kind: SEASON_COMPARE_KIND.number,
-      label: "Scorend gemiddelde",
+      label: "Scoring average",
       player1: player1Stats.scoringDartsAverage,
       player2: player2Stats.scoringDartsAverage,
       format: "average",
     },
     {
       kind: SEASON_COMPARE_KIND.number,
-      label: "Beste leg",
+      label: "Best leg",
       player1: player1Best.bestLegAverage ?? 0,
       player2: player2Best.bestLegAverage ?? 0,
       format: "average",
@@ -83,7 +83,7 @@ const sections = computed((): SeasonCompareSection[] => {
   if (isSetMatch) {
     averageRows.push({
       kind: SEASON_COMPARE_KIND.number,
-      label: "Beste set",
+      label: "Best set",
       player1: player1Best.bestSetAverage ?? 0,
       player2: player2Best.bestSetAverage ?? 0,
       format: "average",
@@ -92,7 +92,7 @@ const sections = computed((): SeasonCompareSection[] => {
 
   averageRows.push({
     kind: SEASON_COMPARE_KIND.number,
-    label: "Beste wedstrijd",
+    label: "Best match",
     player1: player1Best.bestMatchAverage ?? 0,
     player2: player2Best.bestMatchAverage ?? 0,
     format: "average",
@@ -124,14 +124,14 @@ const sections = computed((): SeasonCompareSection[] => {
   );
 
   return [
-    { title: "Gemiddelden", rows: averageRows },
+    { title: "Averages", rows: averageRows },
     { title: "Scores", rows: scoreRows },
     {
       title: "Checkouts",
       rows: [
         {
           kind: SEASON_COMPARE_KIND.number,
-          label: "Hoogste checkout",
+          label: "Highest checkout",
           player1: player1Stats.highestCheckout,
           player2: player2Stats.highestCheckout,
           format: "int",
@@ -200,7 +200,7 @@ const isHighlighted = (
               <UiIconSparkle
                 v-if="camels.player1HasLarge"
                 class="camel large"
-                title="Gouden kameel winnaar dit seizoen"
+                title="Golden camel winner this season"
               >
                 <FontAwesomeIcon :icon="faCamel" />
               </UiIconSparkle>
@@ -210,8 +210,8 @@ const isHighlighted = (
                 class="camel"
                 :title="
                   camelIndex < player1CamelWins
-                    ? 'Kameel-wedstrijd gewonnen'
-                    : 'Meeste gouden kamelen dit seizoen'
+                    ? 'Camel match won'
+                    : 'Most golden camels this season'
                 "
                 :style="{ animationDelay: `${camelIndex * 0.15}s` }"
               >
@@ -264,8 +264,8 @@ const isHighlighted = (
                 class="camel"
                 :title="
                   camelIndex < player2CamelWins
-                    ? 'Kameel-wedstrijd gewonnen'
-                    : 'Meeste gouden kamelen dit seizoen'
+                    ? 'Camel match won'
+                    : 'Most golden camels this season'
                 "
                 :style="{ animationDelay: `${camelIndex * 0.15}s` }"
               >
@@ -274,7 +274,7 @@ const isHighlighted = (
               <UiIconSparkle
                 v-if="camels.player2HasLarge"
                 class="camel large"
-                title="Gouden kameel winnaar dit seizoen"
+                title="Golden camel winner this season"
               >
                 <FontAwesomeIcon :icon="faCamel" />
               </UiIconSparkle>

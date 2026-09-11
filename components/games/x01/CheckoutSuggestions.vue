@@ -22,5 +22,5 @@ const checkoutStatus = computed(() => {
       <span class="font-mono font-bold text-sm">{{ suggestion }}</span>
     </div>
   </div>
-  <div v-else>Onmogelijk</div>
+  <div v-else>Impossible</div>
 </template>

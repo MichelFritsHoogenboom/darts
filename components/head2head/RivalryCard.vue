@@ -52,8 +52,8 @@ const rivalryPath = computed(() =>
         {{ item.edition.updatedAt.toLocaleDateString() }}
       </span>
       <p class="text-sm">
-        Seizoen {{ item.edition.editionNumber }} · {{ playedCount }} /
-        {{ amountMatches }} wedstrijden
+        Season {{ item.edition.editionNumber }} · {{ playedCount }} /
+        {{ amountMatches }} matches
       </p>
     </template>
 

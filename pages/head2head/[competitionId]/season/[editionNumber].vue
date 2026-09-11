@@ -306,7 +306,7 @@ const beginNewEdition = async () => {
 
     <template #right> </template>
 
-    <div v-if="editionLoading && !edition" class="loading">Laden...</div>
+    <div v-if="editionLoading && !edition" class="loading">Loading...</div>
 
     <div v-else-if="edition" class="page-content">
       <div class="card-panel rivalry-header">
@@ -314,7 +314,7 @@ const beginNewEdition = async () => {
           <PlayerImage :player="rivalryPlayers[0]" :silhouette-index="0" />
           <div
             class="season-titles stat-well"
-            :title="`${seasonWinsFor(rivalryPlayers[0]?.id)} seizoenen gewonnen · ${camelSeasonWinsFor(rivalryPlayers[0]?.id)} kameel-seizoenen`"
+            :title="`${seasonWinsFor(rivalryPlayers[0]?.id)} seasons won · ${camelSeasonWinsFor(rivalryPlayers[0]?.id)} camel seasons`"
           >
             <FontAwesomeIcon
               :icon="faTrophy"
@@ -337,12 +337,12 @@ const beginNewEdition = async () => {
             emphasize
             class="season-header"
           >
-            <span>Seizoen</span>
+            <span>Season</span>
             <select
               v-if="seasonOptions.length > 1"
               class="season-select"
               :value="selectedSeason"
-              aria-label="Seizoen"
+              aria-label="Season"
               @change="
                 selectedSeason = Number(
                   ($event.target as HTMLSelectElement).value,
@@ -365,8 +365,8 @@ const beginNewEdition = async () => {
               <span class="season-meta__sep" aria-hidden="true">•</span>
             </template>
             <span
-              >{{ finishedCount }} / {{ amountMatches }} wedstrijden
-              gespeeld</span
+              >{{ finishedCount }} / {{ amountMatches }} matches
+              played</span
             >
           </UiDisplayHeader>
 
@@ -387,10 +387,10 @@ const beginNewEdition = async () => {
               :disabled="startingMatch"
               @click="startMatch"
             >
-              Nieuwe wedstrijd
+              New match
             </FormButton>
             <FormButton v-if="showStartEdition" @click="beginNewEdition">
-              Nieuw seizoen
+              New season
             </FormButton>
           </div>
         </div>
@@ -399,7 +399,7 @@ const beginNewEdition = async () => {
           <PlayerImage :player="rivalryPlayers[1]" :silhouette-index="1" />
           <div
             class="season-titles stat-well"
-            :title="`${seasonWinsFor(rivalryPlayers[1]?.id)} seizoenen gewonnen · ${camelSeasonWinsFor(rivalryPlayers[1]?.id)} kameel-seizoenen`"
+            :title="`${seasonWinsFor(rivalryPlayers[1]?.id)} seasons won · ${camelSeasonWinsFor(rivalryPlayers[1]?.id)} camel seasons`"
           >
             <FontAwesomeIcon
               :icon="faTrophy"
@@ -417,7 +417,7 @@ const beginNewEdition = async () => {
       </div>
 
       <div v-if="unfinishedMatches.length > 0" class="section">
-        <h2 class="section-title">Wedstrijd hervatten</h2>
+        <h2 class="section-title">Resume match</h2>
         <div
           v-for="match in unfinishedMatches"
           :key="match.id"
@@ -434,7 +434,7 @@ const beginNewEdition = async () => {
           :class="{ 'bg-gray-500': activeTab === 'matches' }"
           @click="selectTab('matches')"
         >
-          Wedstrijden
+          Matches
         </button>
         <button
           type="button"
@@ -442,7 +442,7 @@ const beginNewEdition = async () => {
           :class="{ 'bg-gray-500': activeTab === 'stats' }"
           @click="selectTab('stats')"
         >
-          Statistieken
+          Statistics
         </button>
       </div>
 
@@ -458,13 +458,13 @@ const beginNewEdition = async () => {
         </div>
         <UiSummaryCardLayout v-else>
           <template #center>
-            <div class="empty-state">Nog geen wedstrijden afgerond.</div>
+            <div class="empty-state">No matches finished yet.</div>
           </template>
         </UiSummaryCardLayout>
       </div>
 
       <div v-else-if="player1EditionStats && player2EditionStats" class="section">
-        <div v-if="loadingBestAverages" class="empty-state">Laden...</div>
+        <div v-if="loadingBestAverages" class="empty-state">Loading...</div>
         <StatsSeasonComparison
           v-else
           :player1-stats="player1EditionStats"
