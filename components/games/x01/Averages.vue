@@ -29,8 +29,8 @@ const {
 </script>
 <template>
   <div class="score-counts__header"></div>
-  <div class="score-counts__header">3 dart gem.</div>
-  <div class="score-counts__header">1 dart gem.</div>
+  <div class="score-counts__header">3-dart avg.</div>
+  <div class="score-counts__header">1-dart avg.</div>
 
   <div>Leg</div>
   <div>{{ formatAverageDisplay(legAverage, 2) }}</div>
@@ -41,27 +41,27 @@ const {
     <div>{{ formatOneDartAverage(setAverage) }}</div>
   </template>
 
-  <!-- <div>Wedstrijd</div>
+  <!-- <div>Match</div>
   <div>{{ formatAverageDisplay(matchAverage, 2) }}</div>
   <div>{{ formatOneDartAverage(matchAverage) }}</div> -->
-  <div>Eerste 9 darts</div>
+  <div>First 9 darts</div>
   <div>{{ formatAverageDisplay(firstNineAverage, 2) }}</div>
   <div>{{ formatOneDartAverage(firstNineAverage) }}</div>
-  <div>Scorende darts (> 170)</div>
+  <div>Scoring darts (> 170)</div>
   <div>{{ formatAverageDisplay(scoringDartsAverage, 2) }}</div>
   <div>{{ formatOneDartAverage(scoringDartsAverage) }}</div>
-  <div>Laatste leg winst</div>
+  <div>Last leg win</div>
   <div>{{ formatAverageDisplay(lastLegWinAverage, 2) }}</div>
   <div>{{ formatOneDartAverage(lastLegWinAverage) }}</div>
-  <div>Laatste leg</div>
+  <div>Last leg</div>
   <div>{{ formatAverageDisplay(lastLegAverage, 2) }}</div>
   <div>{{ formatOneDartAverage(lastLegAverage) }}</div>
   <template v-if="isSetMatch">
-    <div>Laatste set</div>
+    <div>Last set</div>
     <div>{{ formatAverageDisplay(lastSetAverage, 2) }}</div>
     <div>{{ formatOneDartAverage(lastSetAverage) }}</div>
   </template>
-  <div class="score-counts__footer">Beste leg winst</div>
+  <div class="score-counts__footer">Best leg win</div>
   <div class="score-counts__footer">
     {{ formatAverageDisplay(bestLegAverage, 2) }}
   </div>
@@ -69,7 +69,7 @@ const {
     {{ formatOneDartAverage(bestLegAverage) }}
   </div>
   <template v-if="isSetMatch">
-    <div class="score-counts__footer">Beste set winst</div>
+    <div class="score-counts__footer">Best set win</div>
     <div class="score-counts__footer">
       {{ formatAverageDisplay(bestSetAverage, 2) }}
     </div>

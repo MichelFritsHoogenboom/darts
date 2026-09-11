@@ -48,12 +48,12 @@ watch(head2HeadOverview, async () => {
     </template>
 
     <div class="max-w-4xl mx-auto">
-      <div v-if="loading" class="text-center text-gray-400">Laden...</div>
+      <div v-if="loading" class="text-center text-gray-400">Loading...</div>
       <div v-else-if="error" class="text-center text-red-400">{{ error }}</div>
       <UiSummaryCardLayout v-else-if="head2HeadOverview.length === 0">
         <template #center>
           <div class="text-gray-400 text-sm text-center">
-            Nog geen head to head competities aangemaakt.
+            No head to head competitions created yet.
           </div>
         </template>
       </UiSummaryCardLayout>
@@ -68,7 +68,7 @@ watch(head2HeadOverview, async () => {
       </div>
       <div class="flex justify-center mb-6">
         <NuxtLink :to="routes.head2head.create" class="dartboard-button px-6 py-2">
-          Nieuwe rivalry
+          New rivalry
         </NuxtLink>
       </div>
     </div>

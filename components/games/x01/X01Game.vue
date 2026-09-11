@@ -101,14 +101,14 @@ const pendingLegWinnerName = computed(() =>
 );
 
 const legFinishOptions = [
-  { label: "1 pijl", value: 1 },
-  { label: "2 pijlen", value: 2 },
-  { label: "3 pijlen", value: 3 },
+  { label: "1 dart", value: 1 },
+  { label: "2 darts", value: 2 },
+  { label: "3 darts", value: 3 },
 ];
 
 const goldenCamelOptions = [
-  { label: "Ja, gouden kameel", value: true },
-  { label: "Nee", value: false },
+  { label: "Yes, golden camel", value: true },
+  { label: "No", value: false },
 ];
 
 const startingPlayerOptions = computed(() =>
@@ -542,18 +542,18 @@ onMounted(async () => {
 
       <GamesX01DecisionModal
         :visible="pendingStartingPlayer"
-        title="Start wedstrijd"
-        description="Wie heeft de bull gewonnen?"
+        title="Start match"
+        description="Who won the bull?"
         :options="startingPlayerOptions"
-        undo-label="Terug"
+        undo-label="Back"
         @select="handleStartingPlayerSelect"
         @undo="handleStartingPlayerBack"
       />
 
       <GamesX01DecisionModal
         :visible="!!pendingLegWin"
-        :title="`${pendingLegWinnerName} wint de leg!`"
-        description="Hoeveel pijlen?"
+        :title="`${pendingLegWinnerName} wins the leg!`"
+        description="How many darts?"
         :options="legFinishOptions"
         @select="handleLegFinishSelect"
         @undo="undoLastTurn"
@@ -561,8 +561,8 @@ onMounted(async () => {
 
       <GamesX01DecisionModal
         :visible="!!pendingGoldenCamel"
-        title="Gouden kameel?"
-        description="Was dit 20, 1 en 5?"
+        title="Golden camel?"
+        description="Was this 20, 1 and 5?"
         :options="goldenCamelOptions"
         @select="handleGoldenCamelSelect"
         @undo="undoLastTurn"
@@ -595,7 +595,7 @@ onMounted(async () => {
               @click="returnToHead2Head"
               class="dartboard-button"
             >
-              Terug naar Head 2 Head overzicht
+              Back to Head 2 Head overview
             </button>
             <button
               v-else-if="currentLeg"

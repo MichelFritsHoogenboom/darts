@@ -21,7 +21,7 @@ const props = withDefaults(
     optionButtonClass: "btn-gray w-full py-3",
     showUndo: true,
     undoLabel: "Undo",
-    undoTitle: "Laatste worp ongedaan maken (Ctrl+Z)",
+    undoTitle: "Undo last throw (Ctrl+Z)",
   },
 );
 

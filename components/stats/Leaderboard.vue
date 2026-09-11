@@ -11,7 +11,7 @@ import {
 
 const {
   entries,
-  emptyText = "Nog geen resultaten.",
+  emptyText = "No results yet.",
   valueFormat = "int",
 } = defineProps<{
   entries: LeaderboardEntry[];
@@ -44,7 +44,7 @@ watch(
         v-for="(entry, index) in entries"
         :key="entry.id"
         class="row"
-        :title="entry.lost ? 'Verliezend gemiddelde' : undefined"
+        :title="entry.lost ? 'Losing average' : undefined"
       >
         <span class="rank">
           <FontAwesomeIcon v-if="index === 0" :icon="faTrophy" class="trophy" />

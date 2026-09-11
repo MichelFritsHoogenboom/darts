@@ -12,17 +12,17 @@ const props = defineProps<{
 
 <template>
   <UiModal v-model="model">
-    <template #title>Seizoen afgelopen</template>
+    <template #title>Season finished</template>
     <div class="text-center py-4">
       <p class="text-lg text-white mb-2">
-        Seizoen {{ editionNumber }} — kampioen
+        Season {{ editionNumber }} — champion
       </p>
       <p v-if="winner" class="text-2xl font-bold text-yellow-400">
         {{ getPlayerFullName(winner) }}
       </p>
     </div>
     <div class="flex justify-end mt-6">
-      <FormButton @click="model = false">Sluiten</FormButton>
+      <FormButton @click="model = false">Close</FormButton>
     </div>
   </UiModal>
 </template>

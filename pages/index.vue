@@ -35,13 +35,13 @@ const highlights = computed(() => [
   {
     title: "Highest Checkouts",
     entries: highestCheckouts.value,
-    emptyText: "Nog geen checkouts.",
+    emptyText: "No checkouts yet.",
     valueFormat: "int" as const,
   },
   {
-    title: "Beste wedstrijdgemiddelden",
+    title: "Best match averages",
     entries: bestMatchAverages.value,
-    emptyText: "Nog geen wedstrijdgemiddelden.",
+    emptyText: "No match averages yet.",
     valueFormat: "average" as const,
   },
 ]);
@@ -116,7 +116,7 @@ onBeforeMount(async () => {
       >
         <template #center>
           <div class="text-gray-400 text-sm text-center">
-            Nog geen wedstrijden gespeeld.
+            No matches played yet.
           </div>
         </template>
       </UiSummaryCardLayout>

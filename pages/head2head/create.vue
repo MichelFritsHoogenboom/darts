@@ -16,7 +16,7 @@ definePageMeta({
 
 const AMOUNT_MATCH_OPTIONS = [3, 7, 9, 11, 13, 15, 17, 19, 21].map((n) => ({
   value: n,
-  label: `${n} wedstrijden`,
+  label: `${n} matches`,
 }));
 
 const { players, loading, error, savePlayer, loadPlayers } = usePlayers();
@@ -119,7 +119,7 @@ const createRivalry = async () => {
     await saveEdition(edition);
     await navigateTo(routes.head2head.index);
   } catch (err) {
-    submitError.value = err instanceof Error ? err.message : "Opslaan mislukt";
+    submitError.value = err instanceof Error ? err.message : "Save failed";
   } finally {
     saving.value = false;
   }
@@ -129,7 +129,7 @@ const createRivalry = async () => {
 <template>
   <NuxtLayout name="default">
     <template #title>
-      <h1 class="text-xl font-bold text-white mb-2">Nieuwe rivalry</h1>
+      <h1 class="text-xl font-bold text-white mb-2">New rivalry</h1>
     </template>
 
     <div class="max-w-4xl mx-auto">
@@ -146,14 +146,14 @@ const createRivalry = async () => {
 
       <div class="card-panel rounded-lg p-8 mb-6">
         <FormSelect v-model="amountMatches" :options="AMOUNT_MATCH_OPTIONS">
-          <template #label>Aantal wedstrijden</template>
+          <template #label>Number of matches</template>
         </FormSelect>
       </div>
 
       <div class="card-panel rounded-lg p-8 mb-6">
         <FormCheckbox v-model="useFixedConfig" disabled>
           <template #label
-            >Vaste wedstrijdinstellingen voor dit seizoen</template
+            >Fixed match settings for this season</template
           >
         </FormCheckbox>
       </div>
@@ -168,9 +168,9 @@ const createRivalry = async () => {
         v-if="duplicateCompetition"
         class="mb-6 p-4 bg-yellow-900/40 border border-yellow-700 rounded-lg text-yellow-100"
       >
-        Deze spelers hebben al een rivalry.
+        These players already have a rivalry.
         <NuxtLink :to="duplicatePath" class="underline font-semibold ml-1">
-          Bekijk bestaande rivalry
+          View existing rivalry
         </NuxtLink>
       </div>
 
@@ -178,18 +178,18 @@ const createRivalry = async () => {
 
       <div class="flex gap-4 justify-end">
         <NuxtLink :to="routes.head2head.index" class="btn-gray px-6 py-2"
-          >Annuleren</NuxtLink
+          >Cancel</NuxtLink
         >
         <FormButton
           :disabled="!canCreate || !!duplicateCompetition || saving"
           @click="createRivalry"
         >
-          Aanmaken
+          Create
         </FormButton>
       </div>
 
       <UiModal v-model="showPlayerForm">
-        <template #title>Speler toevoegen</template>
+        <template #title>Add player</template>
         <FormPlayerForm
           @submit="handlePlayerSubmit"
           @cancel="showPlayerForm = false"

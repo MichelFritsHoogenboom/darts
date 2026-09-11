@@ -4,10 +4,7 @@ import { createScoreRanges, type ScoreRanges } from "~/interfaces/stats";
 import type { Score } from "~/interfaces/leg";
 import type { PlayerStats } from "~/interfaces/stats";
 import { faCamel } from "~/assets/icons/faCamel";
-import {
-  getScoreRangeKey,
-  resolveScoreDisplayRange,
-} from "~/utils/stats";
+import { getScoreRangeKey, resolveScoreDisplayRange } from "~/utils/stats";
 import { MATCH_SCORE_DISPLAY_RANGES } from "~/constants/stats";
 
 const matchId = inject<string>("matchId");
@@ -101,22 +98,18 @@ const scoreRows = computed(() => {
   <template v-if="playerStatsRef">
     <!-- class names used by assets/css/main.css zebra selectors -->
     <div class="score-counts__header"></div>
-    <div class="score-counts__header">Aantal</div>
-    <div class="score-counts__header">Aantal per leg</div>
+    <div class="score-counts__header">Amount</div>
+    <div class="score-counts__header">Amount per leg</div>
 
     <template v-for="row in scoreRows" :key="row.label">
       <div>{{ row.label }}</div>
       <div class="inline-flex flex-wrap items-center gap-x-1">
         <span>{{ row.value }}</span>
-        <span
-          v-if="row.showCamel"
-          class="camel-count"
-          title="Gouden kamelen"
-        >
+        <span v-if="row.showCamel" class="camel-count" title="Golden camels">
           <FontAwesomeIcon
             :icon="faCamel"
             class="camel-icon"
-            title="Gouden kamelen"
+            title="Golden camels"
           />
           {{ row.camelCount }})
         </span>
@@ -126,19 +119,19 @@ const scoreRows = computed(() => {
         <span
           v-if="row.showCamel"
           class="camel-count"
-          title="Gouden kamelen per leg"
+          title="Golden camels per leg"
         >
           <FontAwesomeIcon
             :icon="faCamel"
             class="camel-icon"
-            title="Gouden kamelen per leg"
+            title="Golden camels per leg"
           />
           {{ averagePerLeg(row.camelCount) }})
         </span>
       </div>
     </template>
 
-    <div class="score-counts__footer">Totaal aantal legs</div>
+    <div class="score-counts__footer">Total legs</div>
     <div class="score-counts__footer">{{ legsPlayed }}</div>
   </template>
 </template>

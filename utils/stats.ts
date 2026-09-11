@@ -31,7 +31,7 @@ const formatMergedRangeLabel = (keys: string[]): string => {
 
 export const formatScoreRangeLabel = (key: keyof ScoreRanges): string => {
   if (key === "180") return "180's";
-  if (key === "goldenCamel") return "Gouden kamelen";
+  if (key === "goldenCamel") return "Golden camels";
   return key.replace("-", " - ");
 };
 

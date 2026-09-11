@@ -24,7 +24,7 @@ const checkoutRows = computed(() =>
 </script>
 <template>
   <div class="score-counts__header">Checkouts</div>
-  <div class="score-counts__header">Pogingen</div>
+  <div class="score-counts__header">Attempts</div>
   <div class="score-counts__header">Percentage</div>
 
   <template v-for="row in checkoutRows" :key="row.label">
@@ -33,7 +33,7 @@ const checkoutRows = computed(() =>
     <div>{{ formatCheckoutPercentage(row.stats) }}</div>
   </template>
 
-  <div class="score-counts__footer">Hoogste checkouts</div>
+  <div class="score-counts__footer">Highest checkouts</div>
   <div class="score-counts__footer col-span-2">
     {{
       bestCheckouts.length
