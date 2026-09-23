@@ -1,13 +1,20 @@
 <script lang="ts" setup>
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { faTrash, faMagnifyingGlassChart, faClipboard } from "@fortawesome/free-solid-svg-icons";
+import {
+  faTrash,
+  faMagnifyingGlassChart,
+  faClipboard,
+} from "@fortawesome/free-solid-svg-icons";
 import { faPlay } from "~/assets/icons/faPlay";
 import type { Match, MatchPanel } from "~/interfaces/match";
 import type { Set } from "~/interfaces/set";
 import type { Leg, PlayerLeg, Score } from "~/interfaces/leg";
 import type { PlayerStats } from "~/interfaces/stats";
 import { X01_GAME_PLAYED_IN } from "~/interfaces/x01MatchConfig";
-import { getPlayerWinnerCount, formatX01MatchConfigSummary } from "~/utils/match";
+import {
+  getPlayerWinnerCount,
+  formatX01MatchConfigSummary,
+} from "~/utils/match";
 import { MATCH_PANEL, MATCH_TYPE_META } from "~/constants/match";
 import { routes } from "~/utils/routes";
 import LegSummary from "./LegSummary.vue";
@@ -197,7 +204,7 @@ onBeforeMount(async () => {
     <template #actions>
       <button
         type="button"
-        class="btn-gray px-2"
+        class="btn-gray px-1"
         :class="{ 'bg-gray-500': panel === MATCH_PANEL.scores }"
         :title="panel === MATCH_PANEL.scores ? 'Hide scores' : 'Show scores'"
         :aria-label="
@@ -209,7 +216,7 @@ onBeforeMount(async () => {
       </button>
       <button
         type="button"
-        class="btn-gray px-2"
+        class="btn-gray px-1"
         :class="{ 'bg-gray-500': panel === MATCH_PANEL.stats }"
         :title="panel === MATCH_PANEL.stats ? 'Hide stats' : 'Show stats'"
         :aria-label="panel === MATCH_PANEL.stats ? 'Hide stats' : 'Show stats'"

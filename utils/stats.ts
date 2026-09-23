@@ -142,7 +142,7 @@ export const leaderboardEntryFromMatchAverage = (
   id: average.stats.id,
   playerId: average.stats.playerId,
   value: average.stats.average,
-  date: average.stats.updatedAt,
+  date: average.stats.createdAt,
   lost: !average.won,
 });
 

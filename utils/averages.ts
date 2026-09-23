@@ -1,5 +1,5 @@
 import type { Score } from "~/interfaces/leg";
-import type { BestAverages } from "~/interfaces/stats";
+import type { BestAverages, PlayerStats } from "~/interfaces/stats";
 
 export const getDartsThrownForScore = (score: Score): number =>
   score.dartsThrown ?? 3;
@@ -8,6 +8,19 @@ export const maxAverage = (averages: number[]) =>
   averages.length ? Math.max(...averages) : 0;
 
 export const emptyBestAverages = (): BestAverages => ({});
+
+/** Legacy match stats before first-nine / scoring averages were stored. */
+export const needsMatchAverageBackfill = (
+  stats: readonly PlayerStats[],
+): boolean => {
+  const isUnset = (value: number | undefined) => value == null || value === 0;
+
+  return stats.some(
+    (stat) =>
+      stat.average > 0 &&
+      (isUnset(stat.firstNineAverage) || isUnset(stat.scoringDartsAverage)),
+  );
+};
 
 /** Only includes keys for which an averages list was provided. */
 export const buildBestAverages = (input: {

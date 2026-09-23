@@ -7,7 +7,7 @@ import type {
   StatsCompareRow,
   StatsCompareSection,
 } from "~/interfaces/stats";
-import { emptyBestAverages } from "~/utils/averages";
+import { emptyBestAverages, needsMatchAverageBackfill } from "~/utils/averages";
 import { getPlayerIdsFromStats } from "~/utils/player";
 import {
   betterCheckout,
@@ -48,14 +48,19 @@ const player2CamelWins = ref(0);
 const isSetMatch = ref(false);
 const seasonComplete = ref(false);
 
-const { getPlayerStatsForMatch, getPlayerStatsForCompetitionEdition } =
-  usePlayerStats();
+const { getPlayerStatsById } = usePlayerStats();
 const { getMatch, getMatchesByIds } = useMatches();
+const { calculateAndUpdateMatchPlayerStatAverage } = useAverages();
 const {
   getEdition,
   queryEditionBestAverages,
   queryEditionCamelMatchWins,
 } = useCompetitionEditions();
+
+const loadPlayerStatsInOrder = async (ids: readonly string[]) => {
+  const loaded = await Promise.all(ids.map((id) => getPlayerStatsById(id)));
+  return loaded.filter((stat): stat is PlayerStats => stat !== undefined);
+};
 
 const load = async () => {
   loading.value = true;
@@ -73,10 +78,15 @@ const load = async () => {
       const match = await getMatch(matchId);
       if (!match) return;
 
-      const matchStats = await getPlayerStatsForMatch(matchId);
+      const matchStats = await loadPlayerStatsInOrder(match.playerStats);
+      if (needsMatchAverageBackfill(matchStats)) {
+        for (const stat of matchStats) {
+          await calculateAndUpdateMatchPlayerStatAverage(stat);
+        }
+      }
       const [player1Id, player2Id] = getPlayerIdsFromStats(matchStats);
-      player1Stats.value = matchStats.find((stat) => stat.playerId === player1Id);
-      player2Stats.value = matchStats.find((stat) => stat.playerId === player2Id);
+      player1Stats.value = matchStats[0];
+      player2Stats.value = matchStats[1];
 
       isSetMatch.value =
         match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets;
@@ -98,12 +108,12 @@ const load = async () => {
     if (!edition) return;
 
     const [editionStats, matches] = await Promise.all([
-      getPlayerStatsForCompetitionEdition(competitionEditionId),
+      loadPlayerStatsInOrder(edition.playerStats),
       getMatchesByIds([...edition.matches]),
     ]);
     const [player1Id, player2Id] = getPlayerIdsFromStats(editionStats);
-    player1Stats.value = editionStats.find((stat) => stat.playerId === player1Id);
-    player2Stats.value = editionStats.find((stat) => stat.playerId === player2Id);
+    player1Stats.value = editionStats[0];
+    player2Stats.value = editionStats[1];
 
     isSetMatch.value =
       edition.competitionConfig.matchConfig?.gamePlayedIn ===
