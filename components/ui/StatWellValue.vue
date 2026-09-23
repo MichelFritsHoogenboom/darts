@@ -25,10 +25,12 @@ const sizeClass = computed(() => {
 
 <style scoped lang="scss">
 .stat-well-value {
-  @apply inline-block px-2 bg-gray-400/50 font-bold rounded;
+  @apply inline-block px-2 font-bold rounded text-white;
+  background-color: #6b82b5;
 }
 
 .stat-well-value--highlighted {
-  @apply bg-gray-400 border border-gray-300/40;
+  @apply border border-white/20 text-white;
+  background-color: #7d94c4;
 }
 </style>
