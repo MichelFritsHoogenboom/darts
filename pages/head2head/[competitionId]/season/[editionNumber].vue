@@ -427,55 +427,66 @@ const beginNewEdition = async () => {
         </div>
       </div>
 
-      <div class="tabs">
-        <button
-          type="button"
-          class="btn-gray"
-          :class="{ 'bg-gray-500': activeTab === 'matches' }"
-          @click="selectTab('matches')"
-        >
-          Matches
-        </button>
-        <button
-          type="button"
-          class="btn-gray"
-          :class="{ 'bg-gray-500': activeTab === 'stats' }"
-          @click="selectTab('stats')"
-        >
-          Statistics
-        </button>
-      </div>
+      <div class="main-row">
+        <div class="main-col">
+          <div class="tabs">
+            <button
+              type="button"
+              class="btn-gray"
+              :class="{ 'bg-gray-500': activeTab === 'matches' }"
+              @click="selectTab('matches')"
+            >
+              Matches
+            </button>
+            <button
+              type="button"
+              class="btn-gray"
+              :class="{ 'bg-gray-500': activeTab === 'stats' }"
+              @click="selectTab('stats')"
+            >
+              Statistics
+            </button>
+          </div>
 
-      <div v-if="activeTab === 'matches'">
-        <div v-if="finishedMatches.length > 0">
+          <div v-if="activeTab === 'matches'">
+            <div v-if="finishedMatches.length > 0">
+              <div
+                v-for="match in finishedMatches"
+                :key="match.id"
+                class="match-item"
+              >
+                <StatsMatchSummary :match="match" />
+              </div>
+            </div>
+            <UiSummaryCardLayout v-else>
+              <template #center>
+                <div class="empty-state">No matches finished yet.</div>
+              </template>
+            </UiSummaryCardLayout>
+          </div>
+
           <div
-            v-for="match in finishedMatches"
-            :key="match.id"
-            class="match-item"
+            v-else-if="player1EditionStats && player2EditionStats"
+            class="section"
           >
-            <StatsMatchSummary :match="match" />
+            <div v-if="loadingBestAverages" class="empty-state">Loading...</div>
+            <StatsSeasonComparison
+              v-else
+              :player1-stats="player1EditionStats"
+              :player2-stats="player2EditionStats"
+              :player1-best="player1BestAverages"
+              :player2-best="player2BestAverages"
+              :player1-camel-wins="player1CamelMatchWins"
+              :player2-camel-wins="player2CamelMatchWins"
+              :is-set-match="isSetMatchSeason"
+              :season-complete="!!edition.winner"
+            />
           </div>
         </div>
-        <UiSummaryCardLayout v-else>
-          <template #center>
-            <div class="empty-state">No matches finished yet.</div>
-          </template>
-        </UiSummaryCardLayout>
-      </div>
 
-      <div v-else-if="player1EditionStats && player2EditionStats" class="section">
-        <div v-if="loadingBestAverages" class="empty-state">Loading...</div>
-        <StatsSeasonComparison
-          v-else
-          :player1-stats="player1EditionStats"
-          :player2-stats="player2EditionStats"
-          :player1-best="player1BestAverages"
-          :player2-best="player2BestAverages"
-          :player1-camel-wins="player1CamelMatchWins"
-          :player2-camel-wins="player2CamelMatchWins"
-          :is-set-match="isSetMatchSeason"
-          :season-complete="!!edition.winner"
-        />
+        <aside class="highlights">
+          <StatsHighlightsLeaderboard :competition-edition="edition" />
+        </aside>
       </div>
 
       <Head2headEditionChampionOverlay
@@ -506,6 +517,19 @@ const beginNewEdition = async () => {
 
 .tabs {
   @apply flex gap-2 mb-4;
+}
+
+.main-row {
+  @apply grid grid-cols-1 gap-6 items-start;
+  @apply lg:grid-cols-[minmax(0,1fr)_16rem];
+}
+
+.main-col {
+  @apply min-w-0;
+}
+
+.highlights {
+  @apply w-full min-w-0 lg:w-64 lg:shrink-0;
 }
 
 .match-item {

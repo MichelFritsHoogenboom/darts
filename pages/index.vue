@@ -1,10 +1,5 @@
 <script setup lang="ts">
-import type { LeaderboardEntry } from "~/interfaces/stats";
 import { routes } from "~/utils/routes";
-import {
-  leaderboardEntryFromCheckout,
-  leaderboardEntryFromMatchAverage,
-} from "~/utils/stats";
 
 definePageMeta({
   layout: false,
@@ -23,42 +18,10 @@ const {
   unfinishedMatches,
   loadLastFinishedMatches,
   loadUnfinishedMatches,
-  getTopMatchAverages,
 } = useMatches();
-const { getCheckouts } = useScores();
-
-const highestCheckouts = ref<LeaderboardEntry[]>([]);
-const bestMatchAverages = ref<LeaderboardEntry[]>([]);
-const highlightIndex = ref(0);
-
-const highlights = computed(() => [
-  {
-    title: "Highest Checkouts",
-    entries: highestCheckouts.value,
-    emptyText: "No checkouts yet.",
-    valueFormat: "int" as const,
-  },
-  {
-    title: "Best match averages",
-    entries: bestMatchAverages.value,
-    emptyText: "No match averages yet.",
-    valueFormat: "average" as const,
-  },
-]);
-
-const activeHighlight = computed(
-  () => highlights.value[highlightIndex.value] ?? highlights.value[0],
-);
 
 onBeforeMount(async () => {
-  const [checkouts, matchAverages] = await Promise.all([
-    getCheckouts(10),
-    getTopMatchAverages(10),
-    loadLastFinishedMatches(10),
-    loadUnfinishedMatches(),
-  ]);
-  highestCheckouts.value = checkouts.map(leaderboardEntryFromCheckout);
-  bestMatchAverages.value = matchAverages.map(leaderboardEntryFromMatchAverage);
+  await Promise.all([loadLastFinishedMatches(10), loadUnfinishedMatches()]);
 });
 </script>
 
@@ -122,16 +85,7 @@ onBeforeMount(async () => {
       </UiSummaryCardLayout>
     </template>
     <template #sidebar>
-      <UiCarousel
-        v-model="highlightIndex"
-        :titles="highlights.map((highlight) => highlight.title)"
-      >
-        <StatsLeaderboard
-          :entries="activeHighlight.entries"
-          :empty-text="activeHighlight.emptyText"
-          :value-format="activeHighlight.valueFormat"
-        />
-      </UiCarousel>
+      <StatsHighlightsLeaderboard />
     </template>
   </NuxtLayout>
 </template>
