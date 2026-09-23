@@ -297,138 +297,142 @@ const beginNewEdition = async () => {
 </script>
 
 <template>
-  <NuxtLayout name="default" mode="medium">
+  <NuxtLayout name="with-sidebar">
     <template #title>
       <h1 class="page-title">{{ pageTitle }}</h1>
     </template>
 
-    <template #left> </template>
+    <template #fullWidth>
+      <div v-if="editionLoading && !edition" class="loading">Loading...</div>
 
-    <template #right> </template>
-
-    <div v-if="editionLoading && !edition" class="loading">Loading...</div>
-
-    <div v-else-if="edition" class="page-content">
-      <div class="card-panel rivalry-header">
-        <div v-if="rivalryPlayers.length >= 2" class="side">
-          <PlayerImage :player="rivalryPlayers[0]" :silhouette-index="0" />
-          <div
-            class="season-titles stat-well"
-            :title="`${seasonWinsFor(rivalryPlayers[0]?.id)} seasons won · ${camelSeasonWinsFor(rivalryPlayers[0]?.id)} camel seasons`"
-          >
-            <FontAwesomeIcon
-              :icon="faTrophy"
-              class="season-titles__trophy"
-            />
-            <span class="season-titles__count">{{
-              seasonWinsFor(rivalryPlayers[0]?.id)
-            }}</span>
-            <FontAwesomeIcon :icon="faCamel" class="season-titles__camel" />
-            <span class="season-titles__count">{{
-              camelSeasonWinsFor(rivalryPlayers[0]?.id)
-            }}</span>
-          </div>
-        </div>
-
-        <div class="content">
-          <UiDisplayHeader
-            tag-size="h1"
-            display-size="h1"
-            emphasize
-            class="season-header"
-          >
-            <span>Season</span>
-            <select
-              v-if="seasonOptions.length > 1"
-              class="season-select"
-              :value="selectedSeason"
-              aria-label="Season"
-              @change="
-                selectedSeason = Number(
-                  ($event.target as HTMLSelectElement).value,
-                )
-              "
+      <div v-else-if="edition" class="page-header">
+        <div class="card-panel rivalry-header">
+          <div v-if="rivalryPlayers.length >= 2" class="side">
+            <PlayerImage :player="rivalryPlayers[0]" :silhouette-index="0" />
+            <div
+              class="season-titles stat-well"
+              :title="`${seasonWinsFor(rivalryPlayers[0]?.id)} seasons won · ${camelSeasonWinsFor(rivalryPlayers[0]?.id)} camel seasons`"
             >
-              <option
-                v-for="option in seasonOptions"
-                :key="option.value"
-                :value="option.value"
+              <FontAwesomeIcon
+                :icon="faTrophy"
+                class="season-titles__trophy"
+              />
+              <span class="season-titles__count">{{
+                seasonWinsFor(rivalryPlayers[0]?.id)
+              }}</span>
+              <FontAwesomeIcon :icon="faCamel" class="season-titles__camel" />
+              <span class="season-titles__count">{{
+                camelSeasonWinsFor(rivalryPlayers[0]?.id)
+              }}</span>
+            </div>
+          </div>
+
+          <div class="content">
+            <UiDisplayHeader
+              tag-size="h1"
+              display-size="h1"
+              emphasize
+              class="season-header"
+            >
+              <span>Season</span>
+              <select
+                v-if="seasonOptions.length > 1"
+                class="season-select"
+                :value="selectedSeason"
+                aria-label="Season"
+                @change="
+                  selectedSeason = Number(
+                    ($event.target as HTMLSelectElement).value,
+                  )
+                "
               >
-                {{ option.label }}
-              </option>
-            </select>
-            <span v-else>{{ edition.editionNumber }}</span>
-          </UiDisplayHeader>
-          <UiDisplayHeader tag-size="h2" display-size="h4" class="season-meta">
-            <template v-if="matchConfigSummary">
-              <span>{{ matchConfigSummary }}</span>
-              <span class="season-meta__sep" aria-hidden="true">•</span>
-            </template>
-            <span
-              >{{ finishedCount }} / {{ amountMatches }} matches
-              played</span
+                <option
+                  v-for="option in seasonOptions"
+                  :key="option.value"
+                  :value="option.value"
+                >
+                  {{ option.label }}
+                </option>
+              </select>
+              <span v-else>{{ edition.editionNumber }}</span>
+            </UiDisplayHeader>
+            <UiDisplayHeader
+              tag-size="h2"
+              display-size="h4"
+              class="season-meta"
             >
-          </UiDisplayHeader>
+              <template v-if="matchConfigSummary">
+                <span>{{ matchConfigSummary }}</span>
+                <span class="season-meta__sep" aria-hidden="true">•</span>
+              </template>
+              <span
+                >{{ finishedCount }} / {{ amountMatches }} matches
+                played</span
+              >
+            </UiDisplayHeader>
 
-          <StatsPlayersWithCenter
-            v-if="rivalryPlayers.length >= 2"
-            class="stats"
-            size="xlarge"
-            :players="rivalryPlayers"
-            :player-stats="loadedEditionPlayerStats"
-            :winner-id="edition.winner"
-            :show-badge="true"
-          >
-            <span class="wins">{{ winsDisplay }}</span>
-          </StatsPlayersWithCenter>
-          <div class="actions">
-            <FormButton
-              v-if="showStartMatch"
-              :disabled="startingMatch"
-              @click="startMatch"
+            <StatsPlayersWithCenter
+              v-if="rivalryPlayers.length >= 2"
+              class="stats"
+              size="xlarge"
+              :players="rivalryPlayers"
+              :player-stats="loadedEditionPlayerStats"
+              :winner-id="edition.winner"
+              :show-badge="true"
             >
-              New match
-            </FormButton>
-            <FormButton v-if="showStartEdition" @click="beginNewEdition">
-              New season
-            </FormButton>
+              <span class="wins">{{ winsDisplay }}</span>
+            </StatsPlayersWithCenter>
+            <div class="actions">
+              <FormButton
+                v-if="showStartMatch"
+                :disabled="startingMatch"
+                @click="startMatch"
+              >
+                New match
+              </FormButton>
+              <FormButton v-if="showStartEdition" @click="beginNewEdition">
+                New season
+              </FormButton>
+            </div>
+          </div>
+
+          <div v-if="rivalryPlayers.length >= 2" class="side">
+            <PlayerImage :player="rivalryPlayers[1]" :silhouette-index="1" />
+            <div
+              class="season-titles stat-well"
+              :title="`${seasonWinsFor(rivalryPlayers[1]?.id)} seasons won · ${camelSeasonWinsFor(rivalryPlayers[1]?.id)} camel seasons`"
+            >
+              <FontAwesomeIcon
+                :icon="faTrophy"
+                class="season-titles__trophy"
+              />
+              <span class="season-titles__count">{{
+                seasonWinsFor(rivalryPlayers[1]?.id)
+              }}</span>
+              <FontAwesomeIcon :icon="faCamel" class="season-titles__camel" />
+              <span class="season-titles__count">{{
+                camelSeasonWinsFor(rivalryPlayers[1]?.id)
+              }}</span>
+            </div>
           </div>
         </div>
+      </div>
+    </template>
 
-        <div v-if="rivalryPlayers.length >= 2" class="side">
-          <PlayerImage :player="rivalryPlayers[1]" :silhouette-index="1" />
+    <template #default>
+      <template v-if="edition">
+        <div v-if="unfinishedMatches.length > 0" class="section">
+          <h2 class="section-title">Resume match</h2>
           <div
-            class="season-titles stat-well"
-            :title="`${seasonWinsFor(rivalryPlayers[1]?.id)} seasons won · ${camelSeasonWinsFor(rivalryPlayers[1]?.id)} camel seasons`"
+            v-for="match in unfinishedMatches"
+            :key="match.id"
+            class="match-item"
           >
-            <FontAwesomeIcon
-              :icon="faTrophy"
-              class="season-titles__trophy"
-            />
-            <span class="season-titles__count">{{
-              seasonWinsFor(rivalryPlayers[1]?.id)
-            }}</span>
-            <FontAwesomeIcon :icon="faCamel" class="season-titles__camel" />
-            <span class="season-titles__count">{{
-              camelSeasonWinsFor(rivalryPlayers[1]?.id)
-            }}</span>
+            <StatsMatchSummary :match="match" @deleted="loadDetail" />
           </div>
         </div>
-      </div>
 
-      <div v-if="unfinishedMatches.length > 0" class="section">
-        <h2 class="section-title">Resume match</h2>
-        <div
-          v-for="match in unfinishedMatches"
-          :key="match.id"
-          class="match-item"
-        >
-          <StatsMatchSummary :match="match" @deleted="loadDetail" />
-        </div>
-      </div>
-
-      <div class="main-row">
-        <div class="main-col">
+        <div class="main">
           <div class="tabs">
             <button
               type="button"
@@ -483,19 +487,23 @@ const beginNewEdition = async () => {
             />
           </div>
         </div>
+      </template>
+    </template>
 
-        <aside class="highlights">
-          <StatsHighlightsLeaderboard :competition-edition="edition" />
-        </aside>
-      </div>
-
-      <Head2headEditionChampionOverlay
-        v-model="showChampionOverlay"
-        :winner="championPlayer"
-        :edition-number="edition.editionNumber"
+    <template #sidebar>
+      <StatsHighlightsLeaderboard
+        v-if="edition"
+        :competition-edition="edition"
       />
-    </div>
+    </template>
   </NuxtLayout>
+
+  <Head2headEditionChampionOverlay
+    v-if="edition"
+    v-model="showChampionOverlay"
+    :winner="championPlayer"
+    :edition-number="edition.editionNumber"
+  />
 </template>
 
 <style scoped lang="scss">
@@ -519,19 +527,6 @@ const beginNewEdition = async () => {
   @apply flex gap-2 mb-4;
 }
 
-.main-row {
-  @apply grid grid-cols-1 gap-6 items-start;
-  @apply lg:grid-cols-[minmax(0,1fr)_16rem];
-}
-
-.main-col {
-  @apply min-w-0;
-}
-
-.highlights {
-  @apply w-full min-w-0 lg:w-64 lg:shrink-0;
-}
-
 .match-item {
   @apply mb-4;
 }
@@ -540,8 +535,12 @@ const beginNewEdition = async () => {
   @apply text-gray-400 text-sm text-center;
 }
 
+.page-header {
+  @apply w-full;
+}
+
 .rivalry-header {
-  @apply grid grid-cols-[25%_50%_25%] items-center mb-14 py-0 relative mt-6 w-[90%] mx-auto;
+  @apply grid grid-cols-[25%_50%_25%] items-center mb-14 py-0 relative mt-6 w-[85%] mx-auto;
   @apply backdrop-blur-sm border-gray-600/25 shadow-md shadow-black/20;
   background-color: rgb(31 41 55 / 0.7);
   background-image: linear-gradient(
@@ -625,15 +624,15 @@ const beginNewEdition = async () => {
   }
 
   :deep(.display-header.h1) {
-    @apply mb-3;
+    @apply mb-3 block w-full;
   }
 
   :deep(.season-header) {
-    @apply inline-flex items-baseline justify-center gap-2;
+    @apply flex items-baseline justify-center gap-2;
   }
 
   :deep(.season-meta) {
-    @apply inline-flex flex-wrap items-baseline justify-center gap-x-2 mb-0;
+    @apply flex flex-wrap items-baseline justify-center gap-x-2 mb-0 w-full;
   }
 
   .season-select {

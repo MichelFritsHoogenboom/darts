@@ -26,7 +26,7 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <NuxtLayout name="homepage">
+  <NuxtLayout name="with-sidebar">
     <template #fullWidth>
       <UiHomeModeCard
         title="X01 Friendly"

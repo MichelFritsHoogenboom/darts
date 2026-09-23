@@ -9,10 +9,10 @@
       <div class="flex gap-4 items-stretch col-span-2">
         <slot name="fullWidth" />
       </div>
-      <div class="flex flex-col gap-6">
+      <div class="flex flex-col gap-6 min-w-0">
         <slot />
       </div>
-      <aside class="w-64 shrink-0 flex flex-col gap-0">
+      <aside class="w-64 shrink-0 flex flex-col gap-0 min-w-0">
         <slot name="sidebar" />
       </aside>
     </div>

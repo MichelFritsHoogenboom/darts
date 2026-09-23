@@ -51,7 +51,7 @@ export type LeaderboardEntry = {
   lost?: boolean;
 };
 
-/** Match-level average with win/loss for homepage highlights. */
+/** Match-level average with win/loss for highlights leaderboard. */
 export type TopMatchAverage = {
   stats: PlayerStats;
   won: boolean;
