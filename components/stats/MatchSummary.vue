@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faClipboard } from "@fortawesome/free-regular-svg-icons";
 import { faPlay } from "~/assets/icons/faPlay";
 import type { Match } from "~/interfaces/match";
 import type { Set } from "~/interfaces/set";
@@ -192,11 +193,14 @@ onBeforeMount(async () => {
 
     <template #actions>
       <button
-        @click="toggleSummary()"
+        type="button"
         class="btn-gray"
         :class="{ 'bg-gray-500': showSummary }"
+        :title="showSummary ? 'Hide scores' : 'Show scores'"
+        :aria-label="showSummary ? 'Hide scores' : 'Show scores'"
+        @click="toggleSummary()"
       >
-        {{ showSummary ? "Hide" : "Show" }} Details
+        <FontAwesomeIcon :icon="faClipboard" class="w-4 h-4" />
       </button>
       <NuxtLink
         v-if="!match.winner"
@@ -246,6 +250,10 @@ onBeforeMount(async () => {
 
 <style scoped lang="scss">
 .match-meta {
-  @apply flex items-center gap-6;
+  @apply flex items-center gap-3 font-normal;
+
+  :deep(svg) {
+    @apply text-white;
+  }
 }
 </style>
