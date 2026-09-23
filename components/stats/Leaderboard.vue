@@ -86,7 +86,7 @@ watch(
 @use "~/assets/css/glow" as *;
 
 .leaderboard {
-  @apply w-full overflow-hidden rounded-lg border border-gray-600/30 bg-gray-800/40 backdrop-blur-sm;
+  @apply w-full overflow-hidden border border-gray-600/30 bg-gray-800/40 backdrop-blur-sm;
 }
 
 .empty {

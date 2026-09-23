@@ -61,7 +61,7 @@
 
 @layer components {
   .dartboard-button {
-    @apply bg-dartboard-red hover:bg-red-700 text-white font-bold py-2 px-4 transition-colors duration-200;
+    @apply bg-dartboard-red hover:bg-dartboard-red-dark text-white font-bold py-2 px-4 transition-colors duration-200;
   }
   
   .dartboard-button:disabled {
@@ -97,7 +97,7 @@
     @apply border border-gray-500/40;
     @apply shadow-lg shadow-black/20;
     @apply transition-all duration-300;
-    @apply hover:border-gray-200/70;
+   
     @apply px-4 py-2 text-left grid grid-cols-3 w-full;
     line-height: 1.5;
     text-align: start;

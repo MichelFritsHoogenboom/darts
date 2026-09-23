@@ -83,7 +83,7 @@ watch(
         <div v-if="showUndo" class="flex justify-start">
           <button
             type="button"
-            class="rounded-br-lg bg-[#43588b] hover:bg-[#5a6fa0] disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-2 px-3 mt-2 text-sm transition-colors duration-200"
+            class="rounded-br-lg bg-dartboard-blue hover:bg-dartboard-blue-dark disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-2 px-3 mt-2 text-sm transition-colors duration-200"
             :title="undoTitle"
             @click="$emit('undo')"
           >

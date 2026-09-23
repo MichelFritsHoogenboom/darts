@@ -17,8 +17,12 @@ module.exports = {
       colors: {
         dartboard: {
           red: {
-            DEFAULT: '#a12929',
-            dark: '#7a1f1f',
+            DEFAULT: '#c62828',
+            dark: '#9b1f1f',
+          },
+          blue: {
+            DEFAULT: '#5a6fa0',
+            dark: '#43588b',
           },
           green: '#16a34a',
           black: '#1f2937',
