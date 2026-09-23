@@ -183,28 +183,29 @@ const isHighlighted = (
 </script>
 
 <template>
-  <div class="season-comparison">
+  <div class="season-stats">
     <section v-for="section in sections" :key="section.title" class="section">
       <h3 class="title">{{ section.title }}</h3>
-      <UiSummaryCard
-        v-for="(row, index) in section.rows"
-        :key="`${section.title}-${row.label}-${index}`"
-      >
-        <div class="row">
+      <div class="panel">
+        <div
+          v-for="(row, index) in section.rows"
+          :key="`${section.title}-${row.label}-${index}`"
+          class="row"
+        >
           <div class="value player1">
             <div
               v-if="row.kind === SEASON_COMPARE_KIND.camel"
               class="camels"
               aria-hidden="true"
             >
-              <UiIconSparkle
+              <span
                 v-if="camels.player1HasLarge"
                 class="camel large"
                 title="Golden camel winner this season"
               >
                 <FontAwesomeIcon :icon="faCamel" />
-              </UiIconSparkle>
-              <UiIconSparkle
+              </span>
+              <span
                 v-for="camelIndex in camelSlots(camels.player1Small)"
                 :key="`player1-camel-${camelIndex}`"
                 class="camel"
@@ -213,14 +214,13 @@ const isHighlighted = (
                     ? 'Camel match won'
                     : 'Most golden camels this season'
                 "
-                :style="{ animationDelay: `${camelIndex * 0.15}s` }"
               >
                 <FontAwesomeIcon :icon="faCamel" />
-              </UiIconSparkle>
+              </span>
             </div>
-            <UiStatWellValue
-              size="large"
-              :highlighted="isHighlighted(row, 'player1')"
+            <span
+              class="chip"
+              :class="{ highlighted: isHighlighted(row, 'player1') }"
             >
               <template v-if="row.kind === SEASON_COMPARE_KIND.checkout">
                 <span :title="formatCheckoutPercentage(row.player1, 1)">
@@ -233,13 +233,13 @@ const isHighlighted = (
               <template v-else>
                 {{ displayNumber(row.player1, row.format) }}
               </template>
-            </UiStatWellValue>
+            </span>
           </div>
           <div class="label">{{ row.label }}</div>
           <div class="value player2">
-            <UiStatWellValue
-              size="large"
-              :highlighted="isHighlighted(row, 'player2')"
+            <span
+              class="chip"
+              :class="{ highlighted: isHighlighted(row, 'player2') }"
             >
               <template v-if="row.kind === SEASON_COMPARE_KIND.checkout">
                 <span :title="formatCheckoutPercentage(row.player2, 1)">
@@ -252,13 +252,13 @@ const isHighlighted = (
               <template v-else>
                 {{ displayNumber(row.player2, row.format) }}
               </template>
-            </UiStatWellValue>
+            </span>
             <div
               v-if="row.kind === SEASON_COMPARE_KIND.camel"
               class="camels"
               aria-hidden="true"
             >
-              <UiIconSparkle
+              <span
                 v-for="camelIndex in camelSlots(camels.player2Small)"
                 :key="`player2-camel-${camelIndex}`"
                 class="camel"
@@ -267,81 +267,116 @@ const isHighlighted = (
                     ? 'Camel match won'
                     : 'Most golden camels this season'
                 "
-                :style="{ animationDelay: `${camelIndex * 0.15}s` }"
               >
                 <FontAwesomeIcon :icon="faCamel" />
-              </UiIconSparkle>
-              <UiIconSparkle
+              </span>
+              <span
                 v-if="camels.player2HasLarge"
                 class="camel large"
                 title="Golden camel winner this season"
               >
                 <FontAwesomeIcon :icon="faCamel" />
-              </UiIconSparkle>
+              </span>
             </div>
           </div>
         </div>
-      </UiSummaryCard>
+      </div>
     </section>
   </div>
 </template>
 
 <style scoped lang="scss">
-.season-comparison {
+.season-stats {
+  --season-chip: #3d5a80;
+  --season-chip-hot: #1a6fe8;
   @apply w-full;
+}
 
-  .section {
-    @apply mb-6 flex flex-col gap-2;
+.section {
+  @apply mb-6;
+}
+
+.title {
+  @apply font-bold uppercase tracking-wide text-gray-200 mb-2 text-center text-lg;
+}
+
+.panel {
+  @apply px-5 py-2 backdrop-blur-md rounded-none;
+  background:
+    linear-gradient(
+      165deg,
+      rgb(75 85 99 / 0.28) 0%,
+      rgb(31 41 55 / 0.5) 45%,
+      rgb(17 24 39 / 0.62) 100%
+    );
+  border: 1px solid rgb(156 163 175 / 0.14);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.07),
+    0 10px 28px rgb(0 0 0 / 0.35);
+}
+
+.row {
+  @apply grid grid-cols-[1fr_auto_1fr] items-center gap-12 py-3;
+  border-bottom: 1px solid rgb(75 85 99 / 0.35);
+
+  &:last-child {
+    border-bottom: 0;
   }
 
-  .title {
-    @apply text-sm font-bold uppercase tracking-wide text-gray-400 mb-1 text-center;
+  &:hover {
+    background: rgb(255 255 255 / 0.02);
+  }
+}
+
+.label {
+  @apply text-center text-gray-200 min-w-[13rem] px-6;
+  font-size: 18px;
+}
+
+.value {
+  @apply flex items-center gap-2;
+
+  &.player1 {
+    @apply justify-end;
   }
 
-  .row {
-    @apply grid grid-cols-[1fr_auto_1fr] items-center gap-12;
+  &.player2 {
+    @apply justify-start;
+  }
+}
+
+.chip {
+  @apply inline-block min-w-[3rem] px-1 text-center text-lg font-bold rounded text-white/80;
+  background-color: var(--season-chip);
+
+  &.highlighted {
+    @apply text-white;
+    background-color: var(--season-chip-hot);
+  }
+}
+
+.camels {
+  @apply flex flex-wrap items-center gap-1 max-w-[10rem];
+}
+
+.camel {
+  @apply text-gray-400;
+  font-size: 1rem;
+
+  :deep(svg) {
+    @apply h-[1em] w-[1em];
   }
 
-  .label {
-    @apply text-center text-gray-200 min-w-[13rem] px-6;
-    font-size: 18px;
+  &.large {
+    font-size: 1.55rem;
   }
+}
 
-  .value {
-    @apply flex items-center gap-2;
+.value.player1 .camel.large {
+  @apply mr-3;
+}
 
-    &.player1 {
-      @apply justify-end;
-    }
-
-    &.player2 {
-      @apply justify-start;
-    }
-  }
-
-  .camels {
-    @apply flex flex-wrap items-center gap-1 max-w-[10rem];
-  }
-
-  .camel {
-    @apply text-amber-400;
-    font-size: 1rem;
-
-    :deep(svg) {
-      @apply h-[1em] w-[1em];
-    }
-
-    &.large {
-      font-size: 1.55rem;
-    }
-  }
-
-  .value.player1 .camel.large {
-    @apply mr-3;
-  }
-
-  .value.player2 .camel.large {
-    @apply ml-3;
-  }
+.value.player2 .camel.large {
+  @apply ml-3;
 }
 </style>
