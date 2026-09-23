@@ -6,10 +6,7 @@ import type { CompetitionEdition } from "~/interfaces/competition";
 import { canStartNewMatch, computeEditionStandings } from "~/utils/rivalry";
 import { getPlayerIdsFromStats } from "~/utils/player";
 import { routes } from "~/utils/routes";
-import { X01_GAME_PLAYED_IN } from "~/interfaces/x01MatchConfig";
 import { formatX01MatchConfigSummary } from "~/utils/match";
-import type { BestAverages } from "~/interfaces/stats";
-import { emptyBestAverages } from "~/utils/averages";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faTrophy } from "@fortawesome/free-solid-svg-icons";
 import { faCamel } from "~/assets/icons/faCamel";
@@ -29,8 +26,6 @@ const {
   createH2HMatch,
   startNewEdition,
   loadEditionPlayerStats,
-  queryEditionBestAverages,
-  queryEditionCamelMatchWins,
   queryRivalryCamelSeasonWins,
   loading: editionLoading,
 } = useCompetitionEditions();
@@ -44,16 +39,10 @@ const editions = ref<CompetitionEdition[]>([]);
 const matches = ref<Match[]>([]);
 const rivalryPlayers = ref<Player[]>([]);
 const loadedEditionPlayerStats = ref<PlayerStats[]>([]);
-const player1BestAverages = ref<BestAverages>(emptyBestAverages());
-const player2BestAverages = ref<BestAverages>(emptyBestAverages());
-const player1CamelMatchWins = ref(0);
-const player2CamelMatchWins = ref(0);
 const camelSeasonWinsByPlayer = ref<Record<string, number>>({});
 const showChampionOverlay = ref(false);
 const startingMatch = ref(false);
 const activeTab = ref<"matches" | "stats">("matches");
-const loadingBestAverages = ref(false);
-const bestAveragesLoaded = ref(false);
 
 const seasonPath = (editionNumber: number) =>
   routes.head2head.season(competitionId.value, editionNumber);
@@ -110,11 +99,6 @@ const loadDetail = async () => {
 
   edition.value = selected;
   activeTab.value = "matches";
-  bestAveragesLoaded.value = false;
-  player1BestAverages.value = emptyBestAverages();
-  player2BestAverages.value = emptyBestAverages();
-  player1CamelMatchWins.value = 0;
-  player2CamelMatchWins.value = 0;
   camelSeasonWinsByPlayer.value = {};
   matches.value = await getMatchesByIds([...selected.matches]);
   matches.value.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
@@ -134,35 +118,8 @@ const loadDetail = async () => {
   );
 };
 
-const loadBestAverages = async () => {
-  if (bestAveragesLoaded.value || loadingBestAverages.value) return;
-  const player1Id = rivalryPlayers.value[0]?.id;
-  const player2Id = rivalryPlayers.value[1]?.id;
-  if (!player1Id || !player2Id) return;
-
-  loadingBestAverages.value = true;
-  try {
-    const finished = matches.value.filter((match) => !!match.winner);
-    const [player1Best, player2Best, camelWins] = await Promise.all([
-      queryEditionBestAverages(player1Id, finished),
-      queryEditionBestAverages(player2Id, finished),
-      queryEditionCamelMatchWins([player1Id, player2Id], finished),
-    ]);
-    player1BestAverages.value = player1Best;
-    player2BestAverages.value = player2Best;
-    player1CamelMatchWins.value = camelWins[player1Id] ?? 0;
-    player2CamelMatchWins.value = camelWins[player2Id] ?? 0;
-    bestAveragesLoaded.value = true;
-  } finally {
-    loadingBestAverages.value = false;
-  }
-};
-
-const selectTab = async (tab: "matches" | "stats") => {
+const selectTab = (tab: "matches" | "stats") => {
   activeTab.value = tab;
-  if (tab === "stats") {
-    await loadBestAverages();
-  }
 };
 
 onBeforeRouteUpdate(async () => {
@@ -226,28 +183,6 @@ const championPlayer = computed(() => {
   if (!edition.value?.winner) return undefined;
   return rivalryPlayers.value.find((p) => p.id === edition.value?.winner);
 });
-
-const player1EditionStats = computed(() => {
-  const playerId = rivalryPlayers.value[0]?.id;
-  if (!playerId) return undefined;
-  return loadedEditionPlayerStats.value.find(
-    (stat) => stat.playerId === playerId,
-  );
-});
-
-const player2EditionStats = computed(() => {
-  const playerId = rivalryPlayers.value[1]?.id;
-  if (!playerId) return undefined;
-  return loadedEditionPlayerStats.value.find(
-    (stat) => stat.playerId === playerId,
-  );
-});
-
-const isSetMatchSeason = computed(
-  () =>
-    edition.value?.competitionConfig.matchConfig?.gamePlayedIn ===
-    X01_GAME_PLAYED_IN.sets,
-);
 
 const matchConfigSummary = computed(() => {
   const config = edition.value?.competitionConfig.matchConfig;
@@ -469,22 +404,8 @@ const beginNewEdition = async () => {
             </UiSummaryCardLayout>
           </div>
 
-          <div
-            v-else-if="player1EditionStats && player2EditionStats"
-            class="section"
-          >
-            <div v-if="loadingBestAverages" class="empty-state">Loading...</div>
-            <StatsSeasonComparison
-              v-else
-              :player1-stats="player1EditionStats"
-              :player2-stats="player2EditionStats"
-              :player1-best="player1BestAverages"
-              :player2-best="player2BestAverages"
-              :player1-camel-wins="player1CamelMatchWins"
-              :player2-camel-wins="player2CamelMatchWins"
-              :is-set-match="isSetMatchSeason"
-              :season-complete="!!edition.winner"
-            />
+          <div v-else class="section">
+            <StatsComparison :competition-edition-id="edition.id" />
           </div>
         </div>
       </template>

@@ -65,29 +65,29 @@ export type ComparePair<T> = {
   player2: T;
 };
 
-export type SeasonCompareKind = "number" | "checkout" | "camel";
+export type StatsCompareKind = "number" | "checkout" | "camel";
 
-export type SeasonCompareNumberRow = ComparePair<number> & {
-  kind: Extract<SeasonCompareKind, "number">;
+export type StatsCompareNumberRow = ComparePair<number> & {
+  kind: Extract<StatsCompareKind, "number">;
   format?: "average" | "int";
 };
 
-export type SeasonCompareCheckoutRow = ComparePair<DartsThrownHit> & {
-  kind: Extract<SeasonCompareKind, "checkout">;
+export type StatsCompareCheckoutRow = ComparePair<DartsThrownHit> & {
+  kind: Extract<StatsCompareKind, "checkout">;
 };
 
-export type SeasonCompareCamelRow = ComparePair<number> & {
-  kind: Extract<SeasonCompareKind, "camel">;
+export type StatsCompareCamelRow = ComparePair<number> & {
+  kind: Extract<StatsCompareKind, "camel">;
 };
 
-export type SeasonCompareRow =
-  | SeasonCompareNumberRow
-  | SeasonCompareCheckoutRow
-  | SeasonCompareCamelRow;
+export type StatsCompareRow =
+  | StatsCompareNumberRow
+  | StatsCompareCheckoutRow
+  | StatsCompareCamelRow;
 
-export type SeasonCompareSection = {
+export type StatsCompareSection = {
   title: string;
-  rows: SeasonCompareRow[];
+  rows: StatsCompareRow[];
 };
 
 export type RangeBounds = { key: string; min: number; max: number };

@@ -7,6 +7,12 @@ export const GAME_TYPES = {
   halveIt: "halve-it",
 } as const;
 
+export const MATCH_PANEL = {
+  none: "none",
+  scores: "scores",
+  stats: "stats",
+} as const;
+
 export const MATCH_TYPE_META = {
   friendly: { icon: faHandshake, title: "Friendly" },
   head2head: { icon: faPeopleArrows, title: "Head to Head" },

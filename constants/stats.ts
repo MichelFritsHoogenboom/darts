@@ -2,11 +2,11 @@ import type {
   CheckoutRanges,
   DisplayRange,
   ScoreDisplayRange,
-  SeasonCompareKind,
+  StatsCompareKind,
 } from "~/interfaces/stats";
 
-export const SEASON_COMPARE_KIND: {
-  [K in SeasonCompareKind]: K;
+export const STATS_COMPARE_KIND: {
+  [K in StatsCompareKind]: K;
 } = {
   number: "number",
   checkout: "checkout",

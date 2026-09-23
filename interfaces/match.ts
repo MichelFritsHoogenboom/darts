@@ -1,9 +1,11 @@
 import { v4 as uuid } from "uuid";
-import { GAME_TYPES } from "~/constants/match";
+import { GAME_TYPES, MATCH_PANEL } from "~/constants/match";
 import type { x01MatchConfig } from "./x01MatchConfig";
 import { defaultX01MatchConfig } from "./x01MatchConfig";
 
 export type GameType = (typeof GAME_TYPES)[keyof typeof GAME_TYPES];
+
+export type MatchPanel = (typeof MATCH_PANEL)[keyof typeof MATCH_PANEL];
 
 export interface Match {
   id: string;
