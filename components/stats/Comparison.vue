@@ -51,7 +51,7 @@ const player2CamelWins = ref(0);
 const isSetMatch = ref(false);
 const seasonComplete = ref(false);
 
-const { getPlayerStatsById } = usePlayerStats();
+const { getPlayerStatsInOrder } = usePlayerStats();
 const { getMatch, getMatchesByIds } = useMatches();
 const { calculateAndUpdateMatchPlayerStatAverage } = useAverages();
 const {
@@ -59,11 +59,6 @@ const {
   queryEditionBestAverages,
   queryEditionCamelMatchWins,
 } = useCompetitionEditions();
-
-const loadPlayerStatsInOrder = async (ids: readonly string[]) => {
-  const loaded = await Promise.all(ids.map((id) => getPlayerStatsById(id)));
-  return loaded.filter((stat): stat is PlayerStats => stat !== undefined);
-};
 
 const load = async () => {
   loading.value = true;
@@ -81,7 +76,7 @@ const load = async () => {
       const match = await getMatch(matchId);
       if (!match) return;
 
-      const matchStats = await loadPlayerStatsInOrder(match.playerStats);
+      const matchStats = await getPlayerStatsInOrder(match.playerStats);
       if (needsMatchAverageBackfill(matchStats)) {
         for (const stat of matchStats) {
           await calculateAndUpdateMatchPlayerStatAverage(stat);
@@ -111,7 +106,7 @@ const load = async () => {
     if (!edition) return;
 
     const [editionStats, matches] = await Promise.all([
-      loadPlayerStatsInOrder(edition.playerStats),
+      getPlayerStatsInOrder(edition.playerStats),
       getMatchesByIds([...edition.matches]),
     ]);
     const [player1Id, player2Id] = getPlayerIdsFromStats(editionStats);

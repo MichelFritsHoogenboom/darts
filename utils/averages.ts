@@ -9,7 +9,7 @@ export const maxAverage = (averages: number[]) =>
 
 export const emptyBestAverages = (): BestAverages => ({});
 
-/** Legacy match stats before first-nine / scoring averages were stored. */
+/** Legacy match stats before first-nine / scoring averages were stored.*/
 export const needsMatchAverageBackfill = (
   stats: readonly PlayerStats[],
 ): boolean => {
@@ -44,7 +44,10 @@ export const buildBestAverages = (input: {
 export const calculateThreeDartAverage = (scores: Score[]): number => {
   if (scores.length === 0) return 0;
 
-  const totalScoreSum = scores.reduce((sum, score) => sum + score.totalScore, 0);
+  const totalScoreSum = scores.reduce(
+    (sum, score) => sum + score.totalScore,
+    0,
+  );
   const totalDarts = scores.reduce(
     (sum, score) => sum + getDartsThrownForScore(score),
     0,
