@@ -454,7 +454,7 @@ const beginNewEdition = async () => {
 }
 
 .rivalry-header {
-  @apply grid grid-cols-[25%_50%_25%] items-center mb-14 py-0 relative mt-6 w-[100%] mx-auto;
+  @apply grid grid-cols-[25%_50%_25%] items-center mb-8 py-0 relative mt-6 w-[95%] mx-auto;
   @apply backdrop-blur-sm border-gray-600/25 shadow-md shadow-black/20;
   background-color: rgb(31 41 55 / 0.7);
   background-image: linear-gradient(
