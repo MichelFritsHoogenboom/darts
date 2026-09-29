@@ -445,6 +445,7 @@ const beginNewEdition = async () => {
   @apply relative -mb-px px-1 pb-2 text-lg font-bold text-gray-400;
   @apply bg-transparent border-0 border-b-2 border-transparent cursor-pointer;
   @apply transition-colors whitespace-nowrap;
+  letter-spacing: -0.8px;
 
   &:hover {
     @apply text-gray-200;

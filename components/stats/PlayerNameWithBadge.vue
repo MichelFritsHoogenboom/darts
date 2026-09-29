@@ -43,7 +43,7 @@ const isWinner = computed(() => playerId === winnerId);
     </span>
     <span
       v-if="isWinner && showBadge"
-      class="px-1 py-0.25 text-xs font-semibold bg-green-500 text-white rounded player-name-with-badge__badge"
+      class="px-1 py-0.25 text-xs font-semibold bg-dartboard-blue-bright text-white rounded player-name-with-badge__badge"
     >
       winner
     </span>

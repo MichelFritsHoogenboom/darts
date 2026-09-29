@@ -53,7 +53,7 @@ const {
   }
 
   &.h3 {
-    @apply text-lg;
+    @apply text-[1.375rem] leading-[3rem];
   }
 
   &.h4 {

@@ -109,7 +109,7 @@ watch(
   }
 
   &:nth-child(-n + 3) {
-    @apply bg-gradient-to-r from-gray-700/25 to-transparent;
+    @apply bg-gradient-to-r from-dartboard-blue/25 to-transparent;
   }
 
   &:nth-child(1) .rank {
