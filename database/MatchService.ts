@@ -90,10 +90,19 @@ export class MatchService extends BaseService<Match> {
   }
 
   /** Top match-level averages from finished matches only. */
-  async getTopMatchAverages(limit?: number): Promise<TopMatchAverage[]> {
-    const finishedMatches = (await this.getAll()).filter(
-      (match) => !!match.winner,
-    );
+  async getTopMatchAverages(
+    limit?: number,
+    competitionEditionId?: string,
+  ): Promise<TopMatchAverage[]> {
+    const table = await this.getTable();
+    const sourceMatches =
+      competitionEditionId !== undefined
+        ? await table
+            .where("competitionEditionId")
+            .equals(competitionEditionId)
+            .toArray()
+        : await this.getAll();
+    const finishedMatches = sourceMatches.filter((match) => !!match.winner);
     const winnerByMatchId = new Map(
       finishedMatches.map((match) => [match.id, match.winner!]),
     );

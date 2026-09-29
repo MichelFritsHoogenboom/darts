@@ -1,16 +1,24 @@
 <script lang="ts" setup>
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import {
+  faTrash,
+  faMagnifyingGlassChart,
+  faClipboard,
+} from "@fortawesome/free-solid-svg-icons";
 import { faPlay } from "~/assets/icons/faPlay";
 import type { Match } from "~/interfaces/match";
+import type { MatchPanel } from "~/interfaces/matchSummary";
 import type { Set } from "~/interfaces/set";
 import type { Leg, PlayerLeg, Score } from "~/interfaces/leg";
 import type { PlayerStats } from "~/interfaces/stats";
 import { X01_GAME_PLAYED_IN } from "~/interfaces/x01MatchConfig";
-import { getPlayerWinnerCount, formatX01MatchConfigSummary } from "~/utils/match";
+import {
+  getPlayerWinnerCount,
+  formatX01MatchConfigSummary,
+} from "~/utils/match";
 import { MATCH_TYPE_META } from "~/constants/match";
+import { MATCH_PANEL } from "~/constants/matchSummary";
 import { routes } from "~/utils/routes";
-import { useToggle } from "@vueuse/core";
 import LegSummary from "./LegSummary.vue";
 import SetSummary from "./SetSummary.vue";
 
@@ -44,8 +52,15 @@ const matchTypeMeta = computed(
 // Load player stats for the match
 const matchPlayerStats = ref<PlayerStats[]>([]);
 
-// Toggle to show/hide summary (defaults to false - hidden)
-const [showSummary, toggleSummary] = useToggle(openDetails);
+const panel = ref<MatchPanel>(
+  openDetails ? MATCH_PANEL.scores : MATCH_PANEL.none,
+);
+
+const isPanel = (value: MatchPanel) => panel.value === value;
+
+const togglePanel = (next: Exclude<MatchPanel, typeof MATCH_PANEL.none>) => {
+  panel.value = isPanel(next) ? MATCH_PANEL.none : next;
+};
 
 // Store loaded leg data with scores, organized by set (if sets mode)
 const setsWithLegs = ref<
@@ -192,11 +207,26 @@ onBeforeMount(async () => {
 
     <template #actions>
       <button
-        @click="toggleSummary()"
-        class="btn-gray"
-        :class="{ 'bg-gray-500': showSummary }"
+        type="button"
+        class="btn-gray px-1"
+        :class="{ 'bg-gray-500': isPanel(MATCH_PANEL.scores) }"
+        :title="isPanel(MATCH_PANEL.scores) ? 'Hide scores' : 'Show scores'"
+        :aria-label="
+          isPanel(MATCH_PANEL.scores) ? 'Hide scores' : 'Show scores'
+        "
+        @click="togglePanel(MATCH_PANEL.scores)"
       >
-        {{ showSummary ? "Hide" : "Show" }} Details
+        <FontAwesomeIcon :icon="faClipboard" class="w-4 h-4" />
+      </button>
+      <button
+        type="button"
+        class="btn-gray px-1"
+        :class="{ 'bg-gray-500': isPanel(MATCH_PANEL.stats) }"
+        :title="isPanel(MATCH_PANEL.stats) ? 'Hide stats' : 'Show stats'"
+        :aria-label="isPanel(MATCH_PANEL.stats) ? 'Hide stats' : 'Show stats'"
+        @click="togglePanel(MATCH_PANEL.stats)"
+      >
+        <FontAwesomeIcon :icon="faMagnifyingGlassChart" class="w-4 h-4" />
       </button>
       <NuxtLink
         v-if="!match.winner"
@@ -217,8 +247,7 @@ onBeforeMount(async () => {
       </button>
     </template>
 
-    <!-- Display sets with their legs when in sets mode -->
-    <div v-if="showSummary" class="mt-2">
+    <div v-if="isPanel(MATCH_PANEL.scores)" class="mt-2">
       <SetSummary
         v-if="match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets"
         v-for="(setData, setIndex) in setsWithLegs"
@@ -229,7 +258,6 @@ onBeforeMount(async () => {
         :legs-with-scores="setData.legsWithScores"
       />
 
-      <!-- Display legs directly when in legs mode -->
       <LegSummary
         v-else
         v-for="(legData, index) in legsWithScores"
@@ -241,11 +269,65 @@ onBeforeMount(async () => {
         :scores-by-player="legData.scoresByPlayer"
       />
     </div>
+
+    <div v-else-if="isPanel(MATCH_PANEL.stats)" class="mt-2 match-stats">
+      <StatsComparison :match-id="match.id" />
+    </div>
   </UiSummaryCardLayout>
 </template>
 
 <style scoped lang="scss">
 .match-meta {
-  @apply flex items-center gap-6;
+  @apply flex items-center gap-3 font-normal;
+
+  :deep(svg) {
+    @apply text-white;
+  }
+}
+
+.match-stats {
+  :deep(.stats-compare) {
+    @apply bg-gray-800;
+  }
+
+  :deep(.section) {
+    @apply mb-0;
+  }
+
+  :deep(.title) {
+    // Match SetSummary header: bg-gray-900 px-4 py-2 + items-center
+    @apply mb-0 flex items-center bg-gray-900 font-bold text-white;
+    margin: 0;
+    padding: 0.5rem 1rem;
+    text-align: left;
+    text-transform: none;
+    letter-spacing: normal;
+    font-size: 1rem;
+    line-height: 1.25rem;
+    min-height: 2.5rem;
+    box-sizing: border-box;
+  }
+
+  :deep(.panel) {
+    @apply px-4 pb-2 pt-1;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+  }
+
+  :deep(.label) {
+    @apply px-3 text-center;
+    width: 13rem;
+    min-width: 13rem;
+    font-size: 0.875rem;
+  }
+
+  :deep(.chip) {
+    font-size: 0.875rem;
+  }
+
+  :deep(.row) {
+    @apply gap-6 py-2;
+  }
 }
 </style>

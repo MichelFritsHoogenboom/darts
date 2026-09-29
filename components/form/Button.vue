@@ -26,7 +26,7 @@ const buttonClasses = computed(() => {
 
   const variantClasses: Record<ButtonVariant, string> = {
     primary:
-      "bg-dartboard-red hover:bg-red-600 text-white focus:ring-dartboard-red",
+      "bg-dartboard-red hover:bg-dartboard-red-dark text-white focus:ring-dartboard-red",
     secondary: "bg-gray-600 hover:bg-gray-500 text-white focus:ring-gray-500",
     outline:
       "border-2 border-dartboard-red text-dartboard-red hover:bg-dartboard-red hover:text-white focus:ring-dartboard-red",

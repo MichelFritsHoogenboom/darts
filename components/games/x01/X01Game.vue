@@ -652,10 +652,10 @@ onMounted(async () => {
 }
 
 .undo-button {
-  background-color: #43588b;
+  @apply bg-dartboard-blue;
 }
 .undo-button:hover:not(:disabled) {
-  background-color: #5a6fa0;
+  @apply bg-dartboard-blue-dark;
 }
 
 .score-board .card-panel {
@@ -663,8 +663,7 @@ onMounted(async () => {
 }
 
 .score-board .card-panel.active {
-  @apply border-dartboard-red-dark overflow-hidden;
-  background-color: #a12929;
+  @apply border-dartboard-red-dark overflow-hidden bg-dartboard-red;
 }
 
 .score-board .card-panel.active > * {

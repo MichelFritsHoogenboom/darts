@@ -16,10 +16,18 @@ export class ScoreService extends BaseService<Score> {
     );
   }
 
-  async getCheckouts(limit?: number): Promise<Score[]> {
+  async getCheckouts(
+    limit?: number,
+    matchIds?: string[],
+  ): Promise<Score[]> {
     const table = await this.getTable();
+    const matchIdSet = matchIds ? new Set(matchIds) : null;
     const checkouts = await table
-      .filter((score: Score) => isCheckoutScore(score))
+      .filter((score: Score) => {
+        if (!isCheckoutScore(score)) return false;
+        if (matchIdSet && !matchIdSet.has(score.matchId)) return false;
+        return true;
+      })
       .toArray();
 
     checkouts.sort((a: Score, b: Score) => {

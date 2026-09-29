@@ -43,6 +43,36 @@ export const usePlayerStats = () => {
     }
   };
 
+  /** Load stats in the given id order; skips missing ids. */
+  const getPlayerStatsInOrder = async (
+    ids: readonly string[],
+  ): Promise<PlayerStats[]> => {
+    loading.value = true;
+    error.value = null;
+    try {
+      const loaded = await Promise.all(
+        ids.map(async (id) => {
+          try {
+            return await playerStatsService.get(id);
+          } catch (err) {
+            console.error("Error loading player stats by id:", err);
+            return undefined;
+          }
+        }),
+      );
+      return loaded.filter((stat): stat is PlayerStats => stat !== undefined);
+    } catch (err) {
+      error.value =
+        err instanceof Error
+          ? err.message
+          : "Failed to load player stats in order";
+      console.error("Error loading player stats in order:", err);
+      return [];
+    } finally {
+      loading.value = false;
+    }
+  };
+
   const getPlayerStatsByPlayerLegId = async (
     playerLegId: string
   ): Promise<PlayerStats | null> => {
@@ -204,6 +234,7 @@ export const usePlayerStats = () => {
     error: readonly(error),
     loadPlayerStats,
     getPlayerStatsById,
+    getPlayerStatsInOrder,
     getPlayerStatsByPlayerLegId,
     getPlayerStatsForPlayer,
     getPlayerStatsForMatch,

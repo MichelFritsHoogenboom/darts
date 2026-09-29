@@ -1,22 +1,20 @@
 <script setup lang="ts">
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faMedal, faTrophy } from "@fortawesome/free-solid-svg-icons";
-import type { LeaderboardEntry } from "~/interfaces/stats";
+import type { LeaderboardEntry, StatValueFormat } from "~/interfaces/stats";
 import { createPlayerNameGetter } from "~/utils/player";
 import { isWithinLastWeek } from "~/utils/date";
-import {
-  formatLeaderboardValue,
-  type LeaderboardValueFormat,
-} from "~/utils/stats";
+import { formatStatValue } from "~/utils/stats";
+import { STAT_VALUE_FORMAT } from "~/constants/stats";
 
 const {
   entries,
   emptyText = "No results yet.",
-  valueFormat = "int",
+  valueFormat = STAT_VALUE_FORMAT.int,
 } = defineProps<{
   entries: LeaderboardEntry[];
   emptyText?: string;
-  valueFormat?: LeaderboardValueFormat;
+  valueFormat?: StatValueFormat;
 }>();
 
 const { loadPlayers, players } = usePlayers();
@@ -64,7 +62,7 @@ watch(
           class="score"
           :class="{ lost: entry.lost }"
         >
-          {{ formatLeaderboardValue(entry.value, valueFormat) }}
+          {{ formatStatValue(entry.value, valueFormat) }}
         </UiDisplayHeader>
 
         <span class="player" :class="{ lost: entry.lost }">{{
@@ -111,7 +109,7 @@ watch(
   }
 
   &:nth-child(-n + 3) {
-    @apply bg-gradient-to-r from-gray-700/25 to-transparent;
+    @apply bg-gradient-to-r from-dartboard-blue/25 to-transparent;
   }
 
   &:nth-child(1) .rank {

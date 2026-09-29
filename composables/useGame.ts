@@ -5,7 +5,7 @@ import { getPlayerIdsFromStats } from "~/utils/player";
 export const useGame = (match: Match) => {
   //composables
   const { players, loadPlayers } = usePlayers();
-  const { getPlayerStatsById } = usePlayerStats();
+  const { getPlayerStatsInOrder } = usePlayerStats();
 
   // Refs
   const scoreInput = useTemplateRef<HTMLInputElement>("scoreInput");
@@ -65,15 +65,7 @@ export const useGame = (match: Match) => {
   };
 
   onBeforeMount(async () => {
-    // Load PlayerStats in the order of match.playerStats IDs
-    const statsPromises = match.playerStats.map((statsId) =>
-      getPlayerStatsById(statsId)
-    );
-    const loadedStats = await Promise.all(statsPromises);
-    // Filter out undefined values and maintain order
-    playerStats.value = loadedStats.filter(
-      (stat): stat is PlayerStats => stat !== undefined
-    );
+    playerStats.value = await getPlayerStatsInOrder(match.playerStats);
 
     // Get playerId from the first PlayerStats
     if (playerStats.value.length > 0 && playerStats.value[0]?.playerId) {

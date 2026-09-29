@@ -17,8 +17,13 @@ module.exports = {
       colors: {
         dartboard: {
           red: {
-            DEFAULT: '#a12929',
-            dark: '#7a1f1f',
+            DEFAULT: '#c62828',
+            dark: '#9b1f1f',
+          },
+          blue: {
+            DEFAULT: '#3d5a80',
+            dark: '#2f4766',
+            bright: '#1a6fe8',
           },
           green: '#16a34a',
           black: '#1f2937',
@@ -30,4 +35,4 @@ module.exports = {
     },
   },
   plugins: [],
-}
+};

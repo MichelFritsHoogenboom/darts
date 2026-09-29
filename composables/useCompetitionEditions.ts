@@ -417,6 +417,7 @@ export function useCompetitionEditions() {
     startNewEdition,
     createH2HMatch,
     loadEditionPlayerStats,
+    getEdition,
     queryEditionBestAverages,
     queryEditionCamelMatchWins,
     queryRivalryCamelSeasonWins,

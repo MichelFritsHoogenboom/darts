@@ -1,20 +1,22 @@
 import type {
-  CheckoutRanges,
   CompareSide,
-  DartsThrownHit,
-  DisplayRange,
   LeaderboardEntry,
   PlayerStats,
-  RangeBounds,
-  ScoreDisplayRange,
-  ScoreRanges,
+  StatValueFormat,
   TopMatchAverage,
 } from "~/interfaces/stats";
 import {
   createCheckoutRanges,
   createScoreRanges,
-} from "~/interfaces/stats";
+  type CheckoutRanges,
+  type DisplayRange,
+  type DartsThrownHit,
+  type RangeBounds,
+  type ScoreDisplayRange,
+  type ScoreRanges,
+} from "~/interfaces/statsRanges";
 import type { Score } from "~/interfaces/leg";
+import { STAT_VALUE_FORMAT } from "~/constants/stats";
 
 export const parseRangeKey = (key: string): { min: number; max: number } => {
   if (key === "180") return { min: 180, max: 180 };
@@ -121,13 +123,13 @@ export const formatOneDartAverage = (
 export const formatStatCount = (value: number) =>
   value > 0 ? String(value) : "0";
 
-export type LeaderboardValueFormat = "average" | "int";
-
-export const formatLeaderboardValue = (
+export const formatStatValue = (
   value: number,
-  format: LeaderboardValueFormat = "int",
+  format: StatValueFormat = STAT_VALUE_FORMAT.int,
 ): string =>
-  format === "average" ? formatAverageDisplay(value) : formatStatCount(value);
+  format === STAT_VALUE_FORMAT.average
+    ? formatAverageDisplay(value)
+    : formatStatCount(value);
 
 export const leaderboardEntryFromCheckout = (score: Score): LeaderboardEntry => ({
   id: score.id,
@@ -142,7 +144,7 @@ export const leaderboardEntryFromMatchAverage = (
   id: average.stats.id,
   playerId: average.stats.playerId,
   value: average.stats.average,
-  date: average.stats.updatedAt,
+  date: average.stats.createdAt,
   lost: !average.won,
 });
 

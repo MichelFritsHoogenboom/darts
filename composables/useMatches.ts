@@ -161,11 +161,17 @@ export function useMatches() {
     return await matchService.getMatchesByIds(ids);
   };
 
-  const getTopMatchAverages = async (limit?: number) => {
+  const getTopMatchAverages = async (
+    limit?: number,
+    competitionEditionId?: string,
+  ) => {
     try {
       loading.value = true;
       error.value = null;
-      return await matchService.getTopMatchAverages(limit);
+      return await matchService.getTopMatchAverages(
+        limit,
+        competitionEditionId,
+      );
     } catch (err) {
       error.value =
         err instanceof Error

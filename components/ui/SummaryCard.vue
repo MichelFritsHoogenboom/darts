@@ -18,6 +18,10 @@ const { wrapperClass = "" } = defineProps<{
 
 <style scoped lang="postcss">
 .summary-card {
-  @apply flex flex-col gap-2 py-2 px-6 border border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-200;
+  @apply flex flex-col gap-2 py-2 px-6 transition-none;
+}
+
+.summary-card:hover {
+  @apply border-gray-500/40;
 }
 </style>

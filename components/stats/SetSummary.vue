@@ -17,14 +17,12 @@ const { set, setIndex, players, legsWithScores } = defineProps<{
   }>;
 }>();
 
-const { getPlayerStatsById } = usePlayerStats();
+const { getPlayerStatsInOrder } = usePlayerStats();
 
 const playerStatsArray = ref<PlayerStats[]>([]);
 
 onMounted(async () => {
-  playerStatsArray.value = await Promise.all(
-    set.playerStats.map((playerStat) => getPlayerStatsById(playerStat)),
-  );
+  playerStatsArray.value = await getPlayerStatsInOrder(set.playerStats);
 });
 
 // Extract legs from legsWithScores for the winner count function

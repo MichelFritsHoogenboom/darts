@@ -144,11 +144,14 @@ export const useScores = () => {
     }
   };
 
-  const getCheckouts = async (limit?: number): Promise<Score[]> => {
+  const getCheckouts = async (
+    limit?: number,
+    matchIds?: string[],
+  ): Promise<Score[]> => {
     loading.value = true;
     error.value = null;
     try {
-      return await scoreService.getCheckouts(limit);
+      return await scoreService.getCheckouts(limit, matchIds);
     } catch (err) {
       error.value =
         err instanceof Error ? err.message : "Failed to load checkouts";
