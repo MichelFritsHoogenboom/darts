@@ -21,10 +21,7 @@ import {
   sumCheckoutDisplayRange,
   sumScoreDisplayRange,
 } from "~/utils/stats";
-import {
-  STATS_COMPARE_KIND,
-  STAT_VALUE_FORMAT,
-} from "~/constants/stats";
+import { STATS_COMPARE_KIND, STAT_VALUE_FORMAT } from "~/constants/stats";
 import {
   CHECKOUT_DISPLAY_RANGES,
   SEASON_SCORE_DISPLAY_RANGES,
@@ -54,11 +51,8 @@ const seasonComplete = ref(false);
 const { getPlayerStatsInOrder } = usePlayerStats();
 const { getMatch, getMatchesByIds } = useMatches();
 const { calculateAndUpdateMatchPlayerStatAverage } = useAverages();
-const {
-  getEdition,
-  queryEditionBestAverages,
-  queryEditionCamelMatchWins,
-} = useCompetitionEditions();
+const { getEdition, queryEditionBestAverages, queryEditionCamelMatchWins } =
+  useCompetitionEditions();
 
 const load = async () => {
   loading.value = true;
@@ -399,8 +393,6 @@ const isHighlighted = (
 
 <style scoped lang="scss">
 .stats-compare {
-  --season-chip: #3d5a80;
-  --season-chip-hot: #1a6fe8;
   @apply w-full;
 }
 
@@ -409,18 +401,17 @@ const isHighlighted = (
 }
 
 .title {
-  @apply font-bold uppercase tracking-wide text-gray-200 mb-2 text-center text-lg;
+  @apply font-bold uppercase tracking-wide text-gray-200 mb-2  text-lg;
 }
 
 .panel {
   @apply px-5 py-2 backdrop-blur-md rounded-none;
-  background:
-    linear-gradient(
-      165deg,
-      rgb(75 85 99 / 0.28) 0%,
-      rgb(31 41 55 / 0.5) 45%,
-      rgb(17 24 39 / 0.62) 100%
-    );
+  background: linear-gradient(
+    165deg,
+    rgb(75 85 99 / 0.28) 0%,
+    rgb(31 41 55 / 0.5) 45%,
+    rgb(17 24 39 / 0.62) 100%
+  );
   border: 1px solid rgb(156 163 175 / 0.14);
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.07),
@@ -458,12 +449,10 @@ const isHighlighted = (
 }
 
 .chip {
-  @apply inline-block min-w-[3rem] px-1 text-center text-lg font-bold rounded text-white/80;
-  background-color: var(--season-chip);
+  @apply inline-block min-w-[3rem] px-1 text-center text-lg font-bold rounded text-white/80 bg-dartboard-blue;
 
   &.highlighted {
-    @apply text-white;
-    background-color: var(--season-chip-hot);
+    @apply text-white bg-dartboard-blue-bright;
   }
 }
 

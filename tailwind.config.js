@@ -21,8 +21,9 @@ module.exports = {
             dark: '#9b1f1f',
           },
           blue: {
-            DEFAULT: '#5a6fa0',
-            dark: '#43588b',
+            DEFAULT: '#3d5a80',
+            dark: '#2f4766',
+            bright: '#1a6fe8',
           },
           green: '#16a34a',
           black: '#1f2937',
@@ -34,4 +35,4 @@ module.exports = {
     },
   },
   plugins: [],
-}
+};

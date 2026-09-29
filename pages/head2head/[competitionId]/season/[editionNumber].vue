@@ -364,16 +364,16 @@ const beginNewEdition = async () => {
           <div class="tabs">
             <button
               type="button"
-              class="btn-gray"
-              :class="{ 'bg-gray-500': activeTab === 'matches' }"
+              class="tab"
+              :class="{ active: activeTab === 'matches' }"
               @click="selectTab('matches')"
             >
               Matches
             </button>
             <button
               type="button"
-              class="btn-gray"
-              :class="{ 'bg-gray-500': activeTab === 'stats' }"
+              class="tab"
+              :class="{ active: activeTab === 'stats' }"
               @click="selectTab('stats')"
             >
               Statistics
@@ -438,7 +438,21 @@ const beginNewEdition = async () => {
 }
 
 .tabs {
-  @apply flex gap-2 mb-4;
+  @apply flex gap-6 mb-4 border-b border-gray-600;
+}
+
+.tab {
+  @apply relative -mb-px px-1 pb-2 text-lg font-bold text-gray-400;
+  @apply bg-transparent border-0 border-b-2 border-transparent cursor-pointer;
+  @apply transition-colors whitespace-nowrap;
+
+  &:hover {
+    @apply text-gray-200;
+  }
+
+  &.active {
+    @apply text-dartboard-red border-dartboard-red;
+  }
 }
 
 .match-item {
