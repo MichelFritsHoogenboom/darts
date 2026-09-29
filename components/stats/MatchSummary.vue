@@ -54,8 +54,10 @@ const panel = ref<MatchPanel>(
   openDetails ? MATCH_PANEL.scores : MATCH_PANEL.none,
 );
 
+const isPanel = (value: MatchPanel) => panel.value === value;
+
 const togglePanel = (next: Exclude<MatchPanel, typeof MATCH_PANEL.none>) => {
-  panel.value = panel.value === next ? MATCH_PANEL.none : next;
+  panel.value = isPanel(next) ? MATCH_PANEL.none : next;
 };
 
 // Store loaded leg data with scores, organized by set (if sets mode)
@@ -205,10 +207,10 @@ onBeforeMount(async () => {
       <button
         type="button"
         class="btn-gray px-1"
-        :class="{ 'bg-gray-500': panel === MATCH_PANEL.scores }"
-        :title="panel === MATCH_PANEL.scores ? 'Hide scores' : 'Show scores'"
+        :class="{ 'bg-gray-500': isPanel(MATCH_PANEL.scores) }"
+        :title="isPanel(MATCH_PANEL.scores) ? 'Hide scores' : 'Show scores'"
         :aria-label="
-          panel === MATCH_PANEL.scores ? 'Hide scores' : 'Show scores'
+          isPanel(MATCH_PANEL.scores) ? 'Hide scores' : 'Show scores'
         "
         @click="togglePanel(MATCH_PANEL.scores)"
       >
@@ -217,9 +219,9 @@ onBeforeMount(async () => {
       <button
         type="button"
         class="btn-gray px-1"
-        :class="{ 'bg-gray-500': panel === MATCH_PANEL.stats }"
-        :title="panel === MATCH_PANEL.stats ? 'Hide stats' : 'Show stats'"
-        :aria-label="panel === MATCH_PANEL.stats ? 'Hide stats' : 'Show stats'"
+        :class="{ 'bg-gray-500': isPanel(MATCH_PANEL.stats) }"
+        :title="isPanel(MATCH_PANEL.stats) ? 'Hide stats' : 'Show stats'"
+        :aria-label="isPanel(MATCH_PANEL.stats) ? 'Hide stats' : 'Show stats'"
         @click="togglePanel(MATCH_PANEL.stats)"
       >
         <FontAwesomeIcon :icon="faMagnifyingGlassChart" class="w-4 h-4" />
@@ -243,7 +245,7 @@ onBeforeMount(async () => {
       </button>
     </template>
 
-    <div v-if="panel === MATCH_PANEL.scores" class="mt-2">
+    <div v-if="isPanel(MATCH_PANEL.scores)" class="mt-2">
       <SetSummary
         v-if="match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets"
         v-for="(setData, setIndex) in setsWithLegs"
@@ -266,7 +268,7 @@ onBeforeMount(async () => {
       />
     </div>
 
-    <div v-else-if="panel === MATCH_PANEL.stats" class="mt-2 match-stats">
+    <div v-else-if="isPanel(MATCH_PANEL.stats)" class="mt-2 match-stats">
       <StatsComparison :match-id="match.id" />
     </div>
   </UiSummaryCardLayout>
