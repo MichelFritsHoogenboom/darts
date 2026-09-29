@@ -5,7 +5,7 @@ import {
   formatCheckoutPercentage,
   resolveCheckoutDisplayRange,
 } from "~/utils/stats";
-import { CHECKOUT_DISPLAY_RANGES } from "~/constants/stats";
+import { CHECKOUT_DISPLAY_RANGES } from "~/constants/statsRanges";
 
 const { playerStats, playerCheckouts } = defineProps<{
   playerStats: PlayerStats;

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { CompetitionEdition } from "~/interfaces/competition";
 import type { LeaderboardEntry } from "~/interfaces/stats";
+import { STAT_VALUE_FORMAT } from "~/constants/stats";
 import {
   leaderboardEntryFromCheckout,
   leaderboardEntryFromMatchAverage,
@@ -27,13 +28,13 @@ const highlights = computed(() => [
     title: "Highest Checkouts",
     entries: highestCheckouts.value,
     emptyText: "No checkouts yet.",
-    valueFormat: "int" as const,
+    valueFormat: STAT_VALUE_FORMAT.int,
   },
   {
     title: "Best match averages",
     entries: bestMatchAverages.value,
     emptyText: "No match averages yet.",
-    valueFormat: "average" as const,
+    valueFormat: STAT_VALUE_FORMAT.average,
   },
 ]);
 

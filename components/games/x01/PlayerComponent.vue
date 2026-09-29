@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import type { Player } from "~/interfaces/player";
 import type { Score, Leg } from "~/interfaces/leg";
+import type { PlayerStats } from "~/interfaces/stats";
 import {
   createCheckoutRanges,
   type CheckoutRanges,
-  type PlayerStats,
-} from "~/interfaces/stats";
+} from "~/interfaces/statsRanges";
 import type { Set } from "~/interfaces/set";
 import { maxAverage } from "~/utils/averages";
 import { isCheckoutScore } from "~/utils/score";

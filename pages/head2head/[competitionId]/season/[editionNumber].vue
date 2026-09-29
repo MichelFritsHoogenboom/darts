@@ -248,10 +248,7 @@ const beginNewEdition = async () => {
               class="season-titles stat-well"
               :title="`${seasonWinsFor(rivalryPlayers[0]?.id)} seasons won · ${camelSeasonWinsFor(rivalryPlayers[0]?.id)} camel seasons`"
             >
-              <FontAwesomeIcon
-                :icon="faTrophy"
-                class="season-titles__trophy"
-              />
+              <FontAwesomeIcon :icon="faTrophy" class="season-titles__trophy" />
               <span class="season-titles__count">{{
                 seasonWinsFor(rivalryPlayers[0]?.id)
               }}</span>
@@ -301,8 +298,7 @@ const beginNewEdition = async () => {
                 <span class="season-meta__sep" aria-hidden="true">•</span>
               </template>
               <span
-                >{{ finishedCount }} / {{ amountMatches }} matches
-                played</span
+                >{{ finishedCount }} / {{ amountMatches }} matches played</span
               >
             </UiDisplayHeader>
 
@@ -337,10 +333,7 @@ const beginNewEdition = async () => {
               class="season-titles stat-well"
               :title="`${seasonWinsFor(rivalryPlayers[1]?.id)} seasons won · ${camelSeasonWinsFor(rivalryPlayers[1]?.id)} camel seasons`"
             >
-              <FontAwesomeIcon
-                :icon="faTrophy"
-                class="season-titles__trophy"
-              />
+              <FontAwesomeIcon :icon="faTrophy" class="season-titles__trophy" />
               <span class="season-titles__count">{{
                 seasonWinsFor(rivalryPlayers[1]?.id)
               }}</span>
@@ -461,7 +454,7 @@ const beginNewEdition = async () => {
 }
 
 .rivalry-header {
-  @apply grid grid-cols-[25%_50%_25%] items-center mb-14 py-0 relative mt-6 w-[85%] mx-auto;
+  @apply grid grid-cols-[25%_50%_25%] items-center mb-14 py-0 relative mt-6 w-[100%] mx-auto;
   @apply backdrop-blur-sm border-gray-600/25 shadow-md shadow-black/20;
   background-color: rgb(31 41 55 / 0.7);
   background-image: linear-gradient(

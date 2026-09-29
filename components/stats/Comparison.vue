@@ -12,20 +12,23 @@ import { getPlayerIdsFromStats } from "~/utils/player";
 import {
   betterCheckout,
   betterNumber,
-  formatAverageDisplay,
   formatCheckoutHitThrown,
   formatCheckoutPercentage,
   formatCheckoutDisplayRangeLabel,
   formatScoreDisplayRangeLabel,
   formatStatCount,
+  formatStatValue,
   sumCheckoutDisplayRange,
   sumScoreDisplayRange,
 } from "~/utils/stats";
 import {
-  CHECKOUT_DISPLAY_RANGES,
   STATS_COMPARE_KIND,
-  SEASON_SCORE_DISPLAY_RANGES,
+  STAT_VALUE_FORMAT,
 } from "~/constants/stats";
+import {
+  CHECKOUT_DISPLAY_RANGES,
+  SEASON_SCORE_DISPLAY_RANGES,
+} from "~/constants/statsRanges";
 import { X01_GAME_PLAYED_IN } from "~/interfaces/x01MatchConfig";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faCamel } from "~/assets/icons/faCamel";
@@ -156,28 +159,28 @@ const sections = computed((): StatsCompareSection[] => {
       label: "Average",
       player1: p1.average,
       player2: p2.average,
-      format: "average",
+      format: STAT_VALUE_FORMAT.average,
     },
     {
       kind: STATS_COMPARE_KIND.number,
       label: "First 9",
       player1: p1.firstNineAverage,
       player2: p2.firstNineAverage,
-      format: "average",
+      format: STAT_VALUE_FORMAT.average,
     },
     {
       kind: STATS_COMPARE_KIND.number,
       label: "Scoring average",
       player1: p1.scoringDartsAverage,
       player2: p2.scoringDartsAverage,
-      format: "average",
+      format: STAT_VALUE_FORMAT.average,
     },
     {
       kind: STATS_COMPARE_KIND.number,
       label: "Best leg",
       player1: player1Best.value.bestLegAverage ?? 0,
       player2: player2Best.value.bestLegAverage ?? 0,
-      format: "average",
+      format: STAT_VALUE_FORMAT.average,
     },
   ];
 
@@ -187,7 +190,7 @@ const sections = computed((): StatsCompareSection[] => {
       label: "Best set",
       player1: player1Best.value.bestSetAverage ?? 0,
       player2: player2Best.value.bestSetAverage ?? 0,
-      format: "average",
+      format: STAT_VALUE_FORMAT.average,
     });
   }
 
@@ -197,7 +200,7 @@ const sections = computed((): StatsCompareSection[] => {
       label: "Best match",
       player1: player1Best.value.bestMatchAverage ?? 0,
       player2: player2Best.value.bestMatchAverage ?? 0,
-      format: "average",
+      format: STAT_VALUE_FORMAT.average,
     });
   }
 
@@ -223,7 +226,7 @@ const sections = computed((): StatsCompareSection[] => {
         label,
         player1: player1Value,
         player2: player2Value,
-        format: "int",
+        format: STAT_VALUE_FORMAT.int,
       };
     },
   );
@@ -239,7 +242,7 @@ const sections = computed((): StatsCompareSection[] => {
           label: "Highest checkout",
           player1: p1.highestCheckout,
           player2: p2.highestCheckout,
-          format: "int",
+          format: STAT_VALUE_FORMAT.int,
         },
         ...CHECKOUT_DISPLAY_RANGES.map((range) => ({
           kind: STATS_COMPARE_KIND.checkout,
@@ -251,9 +254,6 @@ const sections = computed((): StatsCompareSection[] => {
     },
   ];
 });
-
-const displayNumber = (value: number, format?: "average" | "int") =>
-  format === "average" ? formatAverageDisplay(value) : formatStatCount(value);
 
 const camelSlots = (count: number) =>
   Array.from({ length: Math.max(0, count) }, (_, index) => index);
@@ -348,7 +348,7 @@ const isHighlighted = (
                 {{ formatStatCount(row.player1) }}
               </template>
               <template v-else>
-                {{ displayNumber(row.player1, row.format) }}
+                {{ formatStatValue(row.player1, row.format) }}
               </template>
             </span>
           </div>
@@ -367,7 +367,7 @@ const isHighlighted = (
                 {{ formatStatCount(row.player2) }}
               </template>
               <template v-else>
-                {{ displayNumber(row.player2, row.format) }}
+                {{ formatStatValue(row.player2, row.format) }}
               </template>
             </span>
             <div

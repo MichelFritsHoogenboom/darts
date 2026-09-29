@@ -1,22 +1,20 @@
 <script setup lang="ts">
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faMedal, faTrophy } from "@fortawesome/free-solid-svg-icons";
-import type { LeaderboardEntry } from "~/interfaces/stats";
+import type { LeaderboardEntry, StatValueFormat } from "~/interfaces/stats";
 import { createPlayerNameGetter } from "~/utils/player";
 import { isWithinLastWeek } from "~/utils/date";
-import {
-  formatLeaderboardValue,
-  type LeaderboardValueFormat,
-} from "~/utils/stats";
+import { formatStatValue } from "~/utils/stats";
+import { STAT_VALUE_FORMAT } from "~/constants/stats";
 
 const {
   entries,
   emptyText = "No results yet.",
-  valueFormat = "int",
+  valueFormat = STAT_VALUE_FORMAT.int,
 } = defineProps<{
   entries: LeaderboardEntry[];
   emptyText?: string;
-  valueFormat?: LeaderboardValueFormat;
+  valueFormat?: StatValueFormat;
 }>();
 
 const { loadPlayers, players } = usePlayers();
@@ -64,7 +62,7 @@ watch(
           class="score"
           :class="{ lost: entry.lost }"
         >
-          {{ formatLeaderboardValue(entry.value, valueFormat) }}
+          {{ formatStatValue(entry.value, valueFormat) }}
         </UiDisplayHeader>
 
         <span class="player" :class="{ lost: entry.lost }">{{
@@ -86,7 +84,7 @@ watch(
 @use "~/assets/css/glow" as *;
 
 .leaderboard {
-  @apply w-full overflow-hidden border border-gray-600/30 bg-gray-800/40 backdrop-blur-sm;
+  @apply w-full overflow-hidden rounded-lg border border-gray-600/30 bg-gray-800/40 backdrop-blur-sm;
 }
 
 .empty {

@@ -35,8 +35,10 @@ Before adding helpers in a component or inventing a new util file, check **all**
 | ----------------------------- | ----------------------------------------------------------------------------- |
 | `utils/averages.ts`           | Three-dart / first-nine / scoring averages, `maxAverage`, `buildBestAverages` |
 | `utils/stats.ts`              | Stat display/compare/aggregate helpers                                        |
-| `constants/stats.ts`          | Score/checkout display-range catalogs (single or merged keys)                 |
-| `interfaces/stats.ts`         | `PlayerStats`, ranges, `BestAverages`, compare types                          |
+| `constants/stats.ts`          | Stat value formats / compare kinds (`STAT_VALUE_FORMAT`, `STATS_COMPARE_KIND`) |
+| `constants/statsRanges.ts`    | Score/checkout display-range catalogs (single or merged keys)                 |
+| `interfaces/stats.ts`         | `PlayerStats`, compare / leaderboard types                                    |
+| `interfaces/statsRanges.ts`   | Score/checkout range shapes, `DartsThrownHit`, range factories                |
 | `utils/score.ts`              | Score-level predicates/helpers (e.g. checkout detection)                      |
 | `utils/match.ts`              | Match-level helpers (winner counts, match-config summary)                     |
 | `utils/player.ts`             | Player display names, silhouettes, id helpers                                 |

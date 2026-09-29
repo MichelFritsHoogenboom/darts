@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { createScoreRanges, type ScoreRanges } from "~/interfaces/stats";
-import type { Score } from "~/interfaces/leg";
 import type { PlayerStats } from "~/interfaces/stats";
+import { createScoreRanges, type ScoreRanges } from "~/interfaces/statsRanges";
+import type { Score } from "~/interfaces/leg";
 import { faCamel } from "~/assets/icons/faCamel";
 import { getScoreRangeKey, resolveScoreDisplayRange } from "~/utils/stats";
-import { MATCH_SCORE_DISPLAY_RANGES } from "~/constants/stats";
+import { MATCH_SCORE_DISPLAY_RANGES } from "~/constants/statsRanges";
 
 const matchId = inject<string>("matchId");
 

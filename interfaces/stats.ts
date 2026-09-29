@@ -1,38 +1,20 @@
 import { v4 as uuid } from "uuid";
 import { toRaw } from "vue";
 import { PlayerStatsService } from "~/database/PlayerStatsService";
+import {
+  STATS_COMPARE_KIND,
+  STAT_VALUE_FORMAT,
+} from "~/constants/stats";
+import {
+  createCheckoutRanges,
+  createDartsThrownHit,
+  createScoreRanges,
+  type CheckoutRanges,
+  type DartsThrownHit,
+  type ScoreRanges,
+} from "~/interfaces/statsRanges";
 
 const playerStatsService = new PlayerStatsService();
-
-export interface CheckoutRanges {
-  "0-40": DartsThrownHit;
-  "41-60": DartsThrownHit;
-  "61-80": DartsThrownHit;
-  "81-100": DartsThrownHit;
-  "101-130": DartsThrownHit;
-  "131-150": DartsThrownHit;
-  "151-170": DartsThrownHit;
-}
-
-export interface ScoreRanges {
-  "0-9": number;
-  "10-19": number;
-  "20-29": number;
-  "30-39": number;
-  "40-53": number; // 2 well aimed scoring darts and a loose dart
-  "54-65": number; // three single darts of at least 18
-  "66-89": number; // 1 triple and 1 single of at least 18, 1 loose dart
-  "90-125": number; // one triple and two singles of at least 18
-  "126-161": number; // 2 triples and one single dart of at least 18
-  "162-179": number; // 3 triples (perfect aimed)
-  "180": number; // 3 triple 20's (perfect aimed)
-  goldenCamel: number;
-}
-
-export interface DartsThrownHit {
-  thrown: number;
-  hit: number;
-}
 
 /** Best averages for whatever scope is relevant (leg / set / match). Omit unused keys. */
 export type BestAverages = {
@@ -65,19 +47,23 @@ export type ComparePair<T> = {
   player2: T;
 };
 
-export type StatsCompareKind = "number" | "checkout" | "camel";
+export type StatsCompareKind =
+  (typeof STATS_COMPARE_KIND)[keyof typeof STATS_COMPARE_KIND];
+
+export type StatValueFormat =
+  (typeof STAT_VALUE_FORMAT)[keyof typeof STAT_VALUE_FORMAT];
 
 export type StatsCompareNumberRow = ComparePair<number> & {
-  kind: Extract<StatsCompareKind, "number">;
-  format?: "average" | "int";
+  kind: typeof STATS_COMPARE_KIND.number;
+  format?: StatValueFormat;
 };
 
 export type StatsCompareCheckoutRow = ComparePair<DartsThrownHit> & {
-  kind: Extract<StatsCompareKind, "checkout">;
+  kind: typeof STATS_COMPARE_KIND.checkout;
 };
 
 export type StatsCompareCamelRow = ComparePair<number> & {
-  kind: Extract<StatsCompareKind, "camel">;
+  kind: typeof STATS_COMPARE_KIND.camel;
 };
 
 export type StatsCompareRow =
@@ -88,18 +74,6 @@ export type StatsCompareRow =
 export type StatsCompareSection = {
   title: string;
   rows: StatsCompareRow[];
-};
-
-export type RangeBounds = { key: string; min: number; max: number };
-
-/** One or more stored buckets shown as a single UI row. */
-export type DisplayRange<TRanges extends object> = {
-  keys: (keyof TRanges)[];
-};
-
-export type ScoreDisplayRange = DisplayRange<ScoreRanges> & {
-  /** Show golden-camel counts next to this row (match score board). */
-  showCamel?: boolean;
 };
 
 export interface PlayerStats {
@@ -122,51 +96,14 @@ export interface PlayerStats {
   matchDarts?: DartsThrownHit;
 }
 
-// Factory functions to create new instances
-export function createCheckoutRanges(): CheckoutRanges {
-  return {
-    "0-40": createDartsThrownHit(),
-    "41-60": createDartsThrownHit(),
-    "61-80": createDartsThrownHit(),
-    "81-100": createDartsThrownHit(),
-    "101-130": createDartsThrownHit(),
-    "131-150": createDartsThrownHit(),
-    "151-170": createDartsThrownHit(),
-  };
-}
-
-export function createScoreRanges(): ScoreRanges {
-  return {
-    "0-9": 0,
-    "10-19": 0,
-    "20-29": 0,
-    "30-39": 0,
-    "40-53": 0, // 2 well aimed scoring darts and a loose dart
-    "54-65": 0, // three single darts of at least 18
-    "66-89": 0, // 1 triple and 1 single of at least 18, 1 loose dart
-    "90-125": 0, // one triple and two singles of at least 18
-    "126-161": 0, // 2 triples and one single dart of at least 18
-    "162-179": 0, // 3 triples (perfect aimed)
-    "180": 0, // 3 triple 20's (perfect aimed)
-    goldenCamel: 0,
-  };
-}
-
-export function createDartsThrownHit(): DartsThrownHit {
-  return {
-    thrown: 0,
-    hit: 0,
-  };
-}
-
-export async function createPlayerStats(
+export const createPlayerStats = async (
   overrides: Partial<PlayerStats> & {
     playerId: string;
     matchId?: string;
     setId?: string;
     playerLegId?: string;
   },
-): Promise<PlayerStats> {
+): Promise<PlayerStats> => {
   const playerStats = {
     id: uuid(),
     createdAt: new Date(),
@@ -181,7 +118,6 @@ export async function createPlayerStats(
     ...overrides,
   };
 
-  // Save to database
   try {
     await playerStatsService.upsert(toRaw(playerStats));
   } catch (error) {
@@ -189,17 +125,16 @@ export async function createPlayerStats(
   }
 
   return playerStats;
-}
+};
 
-export async function createEditionPlayerStats(
+export const createEditionPlayerStats = async (
   editionId: string,
   playerIds: string[],
-): Promise<string[]> {
-  return Promise.all(
+): Promise<string[]> =>
+  Promise.all(
     playerIds.map((playerId) =>
       createPlayerStats({ playerId, competitionEditionId: editionId }).then(
         (stats) => stats.id,
       ),
     ),
   );
-}
