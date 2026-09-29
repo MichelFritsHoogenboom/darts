@@ -6,7 +6,8 @@ import {
   faClipboard,
 } from "@fortawesome/free-solid-svg-icons";
 import { faPlay } from "~/assets/icons/faPlay";
-import type { Match, MatchPanel } from "~/interfaces/match";
+import type { Match } from "~/interfaces/match";
+import type { MatchPanel } from "~/interfaces/matchSummary";
 import type { Set } from "~/interfaces/set";
 import type { Leg, PlayerLeg, Score } from "~/interfaces/leg";
 import type { PlayerStats } from "~/interfaces/stats";
@@ -15,7 +16,8 @@ import {
   getPlayerWinnerCount,
   formatX01MatchConfigSummary,
 } from "~/utils/match";
-import { MATCH_PANEL, MATCH_TYPE_META } from "~/constants/match";
+import { MATCH_TYPE_META } from "~/constants/match";
+import { MATCH_PANEL } from "~/constants/matchSummary";
 import { routes } from "~/utils/routes";
 import LegSummary from "./LegSummary.vue";
 import SetSummary from "./SetSummary.vue";
