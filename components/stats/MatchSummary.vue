@@ -229,7 +229,6 @@ const chartSeriesByPlayerId = computed(
         :players="[...players]"
         :player-stats="matchPlayerStats"
         :winner-id="match.winner"
-        :show-badge="false"
       >
         <UiStatWellValue size="large">
           {{ players[0] ? getPlayerWinnerCount(players[0].id, matchGame) : 0 }}
