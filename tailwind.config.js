@@ -30,7 +30,10 @@ module.exports = {
           black: '#1f2937',
           white: '#f9fafb'
         },
-       
+        page: {
+          DEFAULT: '#0f141d',
+          light: '#5a6987',
+        },
         logo: '#fafafa',
       }
     },
