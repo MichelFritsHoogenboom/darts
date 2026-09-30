@@ -70,7 +70,12 @@ onUnmounted(() => {
   }
 
   .silhouette {
-    @apply absolute inset-0 bg-page;
+    @apply absolute inset-0;
+    background-color: color-mix(
+      in srgb,
+      theme("colors.gray.800") 30%,
+      theme("colors.gray.900") 70%
+    );
     mask-image: var(--mask-image);
     mask-size: contain;
     mask-repeat: no-repeat;
