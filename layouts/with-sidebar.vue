@@ -6,7 +6,7 @@
     <div
       class="max-w-6xl mx-auto grid grid-cols-[minmax(0,1fr)_16rem] gap-6 items-start"
     >
-      <div class="flex gap-4 items-stretch col-span-2">
+      <div class="flex gap-4 items-stretch col-span-2 overflow-visible">
         <slot name="fullWidth" />
       </div>
       <div class="flex flex-col gap-6 min-w-0">
