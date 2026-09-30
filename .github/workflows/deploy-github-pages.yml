@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - feature/github-pages
+      - feature/staging
   workflow_dispatch:
 
 permissions:
