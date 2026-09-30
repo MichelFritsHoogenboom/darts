@@ -690,7 +690,7 @@ const beginNewEdition = async () => {
   }
 
   .score {
-    @apply inline-block px-4 py-1.5 bg-gray-400/50 font-bold rounded text-3xl mb-2;
+    @apply inline-block px-4 py-1.5 bg-gray-400/50 font-bold rounded text-6xl mb-2;
   }
 
   .progress {
