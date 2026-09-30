@@ -11,8 +11,7 @@
   .main-background {
     position: relative;
     z-index: 1;
-    @apply text-white;
-    background-color: #0f141d;
+    @apply text-white bg-page;
   }
 
   .main-background::before,
@@ -41,10 +40,13 @@
   /* Depth: grid + top-light + vertical dark wash over the photo */
   .main-background::after {
     background:
-      linear-gradient(rgba(15, 20, 29, 0.35), rgba(15, 20, 29, 0.85)),
+      linear-gradient(
+        color-mix(in srgb, theme("colors.page.DEFAULT") 35%, transparent),
+        color-mix(in srgb, theme("colors.page.DEFAULT") 85%, transparent)
+      ),
       radial-gradient(
         ellipse 55% 40% at 50% 12%,
-        rgba(90, 105, 135, 0.25) 0%,
+        color-mix(in srgb, theme("colors.page.light") 25%, transparent) 0%,
         transparent 70%
       ),
       repeating-linear-gradient(
