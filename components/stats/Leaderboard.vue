@@ -120,8 +120,14 @@ watch(
     }
   }
 
-  &:nth-child(1) :deep(.score) {
-    @apply text-dartboard-blue-bright;
+  &:nth-child(1) {
+    .rank {
+      @apply bg-dartboard-blue-bright;
+    }
+
+    :deep(.score) {
+      @apply text-dartboard-blue-bright;
+    }
   }
 }
 
