@@ -350,7 +350,9 @@ const beginNewEdition = async () => {
     <template #default>
       <template v-if="edition">
         <div v-if="unfinishedMatches.length > 0" class="section">
-          <h2 class="section-title">Resume match</h2>
+          <UiDisplayHeader tag-size="h2" display-size="h3">
+            Resume match
+          </UiDisplayHeader>
           <div
             v-for="match in unfinishedMatches"
             :key="match.id"
@@ -431,10 +433,6 @@ const beginNewEdition = async () => {
 
 .section {
   @apply mb-6;
-}
-
-.section-title {
-  @apply text-lg font-bold mb-2;
 }
 
 .tabs {
