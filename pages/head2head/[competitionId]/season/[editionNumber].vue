@@ -450,7 +450,8 @@ const beginNewEdition = async () => {
   }
 
   &.active {
-    @apply text-dartboard-red border-dartboard-red;
+    @apply text-white border-dartboard-red;
+    border-bottom-width: 3px;
   }
 }
 
