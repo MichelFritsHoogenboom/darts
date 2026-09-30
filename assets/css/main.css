@@ -12,32 +12,41 @@
     position: relative;
     z-index: 1;
     @apply text-white;
-
+    background-color: #0f141d;
   }
-  
 
-  .main-background::before, .main-background::after {
-    content: '';
+  .main-background::before,
+  .main-background::after {
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
+    pointer-events: none;
+  }
 
-  }
+  /* Photo base — lighting layers sit above this */
   .main-background::before {
-  
-    background-image: url('../images/background.jpg');
-    background-size: 100% auto;
-    background-position: 0 -200px;
+    background-image: url("../images/background.jpg");
+    background-size: cover;
+    background-position: center;
     background-repeat: no-repeat;
-    opacity: 0.09;
+    background-attachment: fixed;
+    opacity: 0.12;
     filter: grayscale(100%) blur(1px);
-    z-index: -1;
+    z-index: -2;
   }
+
+  /* Depth: grid + top-light + vertical dark wash over the photo */
   .main-background::after {
-    background: 
-  
+    background:
+      linear-gradient(rgba(15, 20, 29, 0.35), rgba(15, 20, 29, 0.85)),
+      radial-gradient(
+        ellipse 55% 40% at 50% 12%,
+        rgba(90, 105, 135, 0.25) 0%,
+        transparent 70%
+      ),
       repeating-linear-gradient(
         0deg,
         rgba(255, 255, 255, 0.025) 0px,
@@ -51,11 +60,8 @@
         rgba(255, 255, 255, 0.025) 1px,
         transparent 1px,
         transparent 12px
-      ),
-     
-      linear-gradient(to bottom right, #111827, #1f2937, #111827);
-    filter:  blur(0.5px);
-    z-index: -2;
+      );
+    z-index: -1;
   }
 }
 
