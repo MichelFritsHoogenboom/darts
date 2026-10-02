@@ -16,7 +16,7 @@ Also see root `AGENTS.md` for domain layout (`interfaces/`, `constants/`, `utils
 | `vue-accessibility` | Semantic HTML first; accessible names; keyboard; careful `aria-hidden`; disabled/loading for AT + keyboard. |
 | `composables` | `use*` + matching filename; arrow functions; named exports; cleanup. No required `index.ts` (Nuxt auto-import). Pure helpers → `utils/`. |
 | `typescript` | interface vs type, `import type`, utilities, arrow exports. Types in `interfaces/`, catalogs in `constants/` (`AGENTS.md`). |
-| `structured-imports` | Group imports: Vendor → Types → Constants → Composables → Components → Utils (comment separators). |
+| `structured-imports` | Group imports: Vendor → Types → Constants → Composables → Components → Utils (comment separators). Examples use `~/interfaces`, `~/composables`, `~/utils`. |
 | `ordering-constants` | In SFCs: props → emits → constants → composables → refs → computed → methods. |
 | `control-flow` | Braces on every `if`/`else`; no single-line if; prefer early returns. |
 
