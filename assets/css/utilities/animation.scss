@@ -1,0 +1,34 @@
+/// Wrap motion styles so `prefers-reduced-motion` always disables CSS animations
+/// and transitions on this selector.
+///
+/// Put the motion styles in the content block on the **same** selector that sets
+/// `animation` and/or `transition`. Nested animated children each need their own include.
+///
+/// Does **not** reset `transform` or `scroll-behavior` — those still need a local
+/// media query when movement must stop (not only become instant).
+///
+/// @example
+///   .loader {
+///     @include animation {
+///       animation: spin 1s linear infinite;
+///     }
+///   }
+///
+/// @example
+///   .card {
+///     @include animation {
+///       transition: transform 0.3s ease;
+///
+///       &:hover {
+///         transform: translateY(-0.25rem);
+///       }
+///     }
+///   }
+@mixin animation {
+  @content;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    transition: none;
+  }
+}
