@@ -16,6 +16,12 @@ git status && echo "=== STAGED CHANGES ===" && git diff --cached
 - Change types and scope (additions/deletions)
 - Which changes will actually be committed
 
+2b. **Refuse mixed app + tests** (see `.cursor/rules/testing/RULE.md`):
+
+- If staged files mix **production/app code** with **tests/scenarios** (e2e/Playwright, `*.spec.ts` / `*.test.ts`, test fixtures, test-only config), **do not commit**.
+- Stop and tell the user what is mixed. Do **not** auto-split, unstage, or create multiple commits unless the user explicitly asks you to split.
+- App-only or test/scenario-only staged sets may proceed.
+
 3. **Write accurate commit message** based on staged changes only:
 
 - Format: `<type>(<scope>): <subject> (branch)`

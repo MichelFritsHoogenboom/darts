@@ -80,7 +80,7 @@ If **no** rules directory is found, say so explicitly — do **not** invent “t
 
 ## Mapping changes to rules
 
-- Use **path and content**: e.g. `*.vue` → Vue rules, `**/composables/**` → composables, `*.scss` / `*.css` → styling, `*.ts` / `*.tsx` → TypeScript, `*.spec.*` / tests → unit-tests, control flow → control-flow, imports → structured-imports / ordering-constants.
+- Use **path and content**: e.g. `*.vue` → Vue rules, `**/composables/**` → composables, `*.scss` / `*.css` → styling, `*.ts` / `*.tsx` → TypeScript, `*.spec.*` / e2e / tests → testing, control flow → control-flow, imports → structured-imports / ordering-constants.
 - **Monorepo / multi-app:** if the diff touches several **`apps/*`** (or multiple packages), apply **per-app** and **shared package** expectations when rules distinguish them; call out cross-app impact briefly in the summary when relevant.
 - **alwaysApply** (or similar) frontmatter means: consider for **any** change, not only by extension.
 - Prefer **one rule citation per issue**: `rules/<topic>/RULE.md` → **heading or subsection name**.
@@ -91,7 +91,7 @@ For each changed file (and meaningful hunk):
 
 1. **Requirements** from the relevant `RULE.md` sections.
 2. **Cross-cutting** rules: imports order, constants placement, tests, Vue/SCSS/TS patterns as written in rules.
-3. **Rules vs tests** — If **`rules/unit-tests/RULE.md`** (or equivalent) implies **new or changed behavior should gain/update tests** (e.g. composables, non-trivial logic) and the diff **adds no** matching `*.spec.*` / test updates, add a **Should fix** or **Consider** item **with that rule cited**, unless the change is clearly non-logic (copy-only, types-only) per the same rules.
+3. **Rules vs tests** — If **`rules/testing/RULE.md`** implies coverage (Playwright for user-facing flows / IndexedDB behaviour; Vitest only for pure `utils/` domain logic) and the diff **adds no** matching e2e or util-spec updates where that rule would expect them, add a **Should fix** or **Consider** item **with that rule cited**, unless the change is clearly non-logic (copy-only, types-only) or the rule says component unit tests are out of scope.
 4. **Obvious regressions** only when they **directly conflict** with a cited rule — not personal taste.
 
 **Not in rules** — If something looks risky or inconsistent but **no** `RULE.md` covers it, list it under [Report format](#report-format) **Not covered by rules** — do **not** treat it as a team standard.
@@ -133,7 +133,7 @@ Structure:
 - <Optional: risks or smells with no matching RULE.md — not team law>
 
 ## Rules vs tests
-- <Optional: rule citation if tests likely missing per unit-tests RULE.md>
+- <Optional: rule citation if tests likely missing per testing RULE.md>
 
 ## Compliant / no rule hit
 …

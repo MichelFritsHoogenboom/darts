@@ -4,9 +4,9 @@ Execute the commit and push workflow following the project's commit message conv
 
 ## Workflow Steps
 
-1. Execute the `/commit` command
+1. Execute the `/commit` command. If staged changes mix app code with tests/scenarios, that command must **refuse** (no auto-split) per `.cursor/rules/testing/RULE.md`.
 
-2. Push the created commit using `git push` if the branch is not `main`
+2. Push the created commit using `git push` if the branch is not `main` (only after a successful commit)
 
 ## Important Notes
 
