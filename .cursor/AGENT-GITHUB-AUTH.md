@@ -2,112 +2,72 @@
 
 Agents use `gh` with **`GH_TOKEN`** only inside the Cursor sandbox. Your normal terminal can keep a separate keyring login.
 
-No secrets in this file. The token lives outside the repo.
+No secrets in this file.
 
-## Required token: classic PAT
+## Two tokens (by design)
 
-This repo uses a **user-owned GitHub Project** (Kanban). Fine-grained PATs **cannot** access user Projects (no Projects permission; GraphQL `projectsV2` fails). Agents must move Status columns → use a **classic** PAT.
+| Where | Token | Scopes / perms | Purpose |
+| --- | --- | --- | --- |
+| Cursor `~/.config/cursor-agent/gh-token` | **Fine-grained** | Issues R/W, PRs R/W, Contents read — **only** repo `darts` | Agent: Issues, labels, PRs |
+| Repo secret `PROJECT_TOKEN` | **Classic** | **`project` only** (not `repo`) | Action: label → Project Status |
 
-| Scope | Why |
+You keep the fine-grained agent token. Classic is only in Actions and only needs Project access (you have one Project — OK for now).
+
+Kanban: agents set `status:*` labels → workflow `.github/workflows/sync-status-label-to-project.yml` moves the card. See `.cursor/product/BOARD.md`.
+
+`git push` stays SSH.
+
+## Cursor agent token (fine-grained)
+
+| Permission | Access |
 | --- | --- |
-| **`repo`** | Issues, PRs, private repo API |
-| **`project`** | Read/write Project board Status (Kanban moves) |
+| **Issues** | Read and write |
+| **Pull requests** | Read and write |
+| **Contents** | Read-only |
 
-Do not add unrelated classic scopes. Trade-off: `repo` is broader than a fine-grained “one repo + PR/Issues” token — still store it **only** in `~/.config/cursor-agent/` and load it **only** when `CURSOR_SANDBOX` is set.
-
-| What | Role |
-| --- | --- |
-| Classic PAT (`ghp_…`) | PRs, Issues, Project Status |
-| `~/.config/cursor-agent/gh-token` | Token file (`chmod 600`) |
-| `~/.zshenv` | `export GH_TOKEN=…` only if `CURSOR_SANDBOX` is set |
-| `~/.cursor/sandbox.json` | Allow `api.github.com` + readonly token dir |
-
-`git push` stays SSH — not this token.
-
-Board rules: `.cursor/product/BOARD.md`.
-
-## Cursor settings
-
-*Settings → Cursor Settings → Agents*
-
-- **Run Mode:** Allowlist (with Sandbox)
-- **Network:** sandbox.json + Defaults
-
-Do not run `gh` unsandboxed (may use your full keyring token).
-
-## Setup (your terminal)
-
-**1.** GitHub → Settings → Developer settings → Personal access tokens → **Tokens (classic)** → Generate:
-
-- Note: `cursor-agent-darts`
-- Scopes: **`repo`**, **`project`**
-- Expiration: e.g. 90 days
-
-**2.** Save (overwrites any old fine-grained file):
+**1.** Create fine-grained PAT for `darts` only.  
+**2.** Save:
 
 ```bash
 mkdir -p ~/.config/cursor-agent && chmod 700 ~/.config/cursor-agent
 read -rs "TOKEN?Paste token: "; printf '%s' "$TOKEN" > ~/.config/cursor-agent/gh-token; unset TOKEN
 chmod 600 ~/.config/cursor-agent/gh-token
-wc -c ~/.config/cursor-agent/gh-token
 ```
 
-**3.** Sandbox-only load (once):
+**3.** Sandbox-only (`~/.zshenv`, once):
 
 ```bash
-cat >> ~/.zshenv <<'EOF'
 if [[ -n "$CURSOR_SANDBOX" && -r ~/.config/cursor-agent/gh-token ]]; then
   export GH_TOKEN="$(<~/.config/cursor-agent/gh-token)"
 fi
-EOF
 ```
 
-**4.** Sandbox config (merge if needed; your username):
+**4.** `~/.cursor/sandbox.json`: allow `api.github.com` + readonly `~/.config/cursor-agent`.  
+**5.** Cmd+Q Cursor.
 
-```bash
-cat > ~/.cursor/sandbox.json <<'EOF'
-{
-  "networkPolicy": {
-    "default": "deny",
-    "allow": ["api.github.com"]
-  },
-  "additionalReadonlyPaths": ["/Users/USERNAME/.config/cursor-agent"]
-}
-EOF
-```
+## Action secret (classic `project` only)
 
-**5.** Quit Cursor fully (Cmd+Q) and reopen.
+**1.** Classic PAT: note `darts-project-sync`, scope **`project` only**, expire e.g. 90 days.  
+**2.** Repo → Settings → Secrets and variables → Actions → **`PROJECT_TOKEN`**.  
+**3.** Optional variable **`PROJECT_NUMBER`** (default `1` if omitted) — number in the Project URL (`…/projects/1`).  
+**4.** Status column names must match `BOARD.md` exactly.
 
-## Check (via the agent)
+## Check (agent)
 
 ```bash
 echo "sandbox=${CURSOR_SANDBOX:-NOT SET}"
-echo "token-prefix=${GH_TOKEN:0:4}"
-gh auth status 2>&1 | grep -E "Logged in|Active account|Token scopes"
+echo "token-prefix=${GH_TOKEN:0:11}"
 gh api repos/MichelFritsHoogenboom/darts --jq .full_name
-gh project list --owner MichelFritsHoogenboom
+gh label list --repo MichelFritsHoogenboom/darts | grep status:
 ```
 
-Expect:
-
-- `sandbox=seatbelt`
-- prefix `ghp_` (classic), not `github_pat_`
-- scopes include `project` (and repo)
-- `gh project list` works (not “Resource not accessible”)
-
-## Replace the token
-
-Overwrite `gh-token` → Cmd+Q → check above → revoke the old token on GitHub.
+Expect prefix `github_pat_`. Then: `gh issue edit <n> --add-label "status:ready"` → Action runs → card moves.
 
 ## Troubleshooting
 
 | Symptom | Fix |
 | --- | --- |
-| prefix `github_pat_` | Still fine-grained — replace with classic `ghp_` |
-| `Resource not accessible` on `projectsV2` | Classic + `project` scope required for user Projects |
-| `Forbidden` / “keyring invalid” | Often blocked network → `sandbox.json` + restart |
-| `sandbox=NOT SET` | Ran outside sandbox |
-| Empty `token-prefix` | `~/.zshenv` / token path / `sandbox.json` readonly path |
-| Active `(keyring)` | `GH_TOKEN` not loaded |
-| `401` | Expired — replace token |
-| `403` on Issues/PRs | Missing `repo` on classic token |
+| Label changes, card does not | `PROJECT_TOKEN` / `PROJECT_NUMBER` / column name mismatch / Action failed |
+| Action: Resource not accessible | Classic token missing `project`, or wrong owner |
+| Agent `projectsV2` errors | Ignore — agent must not use Projects API |
+| Active `(keyring)` in agent | `GH_TOKEN` not loaded in sandbox |

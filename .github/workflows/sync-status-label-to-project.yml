@@ -1,0 +1,133 @@
+# Sync issue status:* labels → GitHub Project Status column
+#
+# Requires repo secret PROJECT_TOKEN = classic PAT with scope `project` only
+# (not `repo`). Optional repo variable PROJECT_NUMBER (default: 1).
+#
+# Agent uses fine-grained token (Issues/labels only). This workflow moves the card.
+
+name: Sync status label to Project
+
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  contents: read
+  issues: read
+
+jobs:
+  sync:
+    if: startsWith(github.event.label.name, 'status:')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Map label → Status and update Project
+        env:
+          PROJECT_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          PROJECT_OWNER: MichelFritsHoogenboom
+          PROJECT_NUMBER: ${{ vars.PROJECT_NUMBER || '1' }}
+          ISSUE_NODE_ID: ${{ github.event.issue.node_id }}
+          LABEL: ${{ github.event.label.name }}
+        run: |
+          set -euo pipefail
+          if [ -z "${PROJECT_TOKEN:-}" ]; then
+            echo "Missing secret PROJECT_TOKEN (classic PAT with scope project only)."
+            exit 1
+          fi
+
+          case "$LABEL" in
+            status:backlog) STATUS_NAME="Backlog" ;;
+            status:ready) STATUS_NAME="Ready" ;;
+            status:design) STATUS_NAME="Design" ;;
+            status:design-review) STATUS_NAME="Design review" ;;
+            status:ready-for-development) STATUS_NAME="Ready for development" ;;
+            status:in-progress) STATUS_NAME="In progress" ;;
+            status:qa-review) STATUS_NAME="QA review" ;;
+            status:user-review) STATUS_NAME="User review" ;;
+            status:done) STATUS_NAME="Done" ;;
+            *)
+              echo "Unknown status label: $LABEL"
+              exit 0
+              ;;
+          esac
+
+          export GH_TOKEN="$PROJECT_TOKEN"
+
+          project_json=$(gh api graphql -f query='
+            query($login: String!, $number: Int!) {
+              user(login: $login) {
+                projectV2(number: $number) {
+                  id
+                  field(name: "Status") {
+                    ... on ProjectV2SingleSelectField {
+                      id
+                      options { id name }
+                    }
+                  }
+                }
+              }
+            }' -f login="$PROJECT_OWNER" -F number="$PROJECT_NUMBER")
+
+          PROJECT_ID=$(echo "$project_json" | jq -r '.data.user.projectV2.id')
+          STATUS_FIELD_ID=$(echo "$project_json" | jq -r '.data.user.projectV2.field.id')
+          STATUS_OPTION_ID=$(echo "$project_json" | jq -r --arg n "$STATUS_NAME" '
+            .data.user.projectV2.field.options[] | select(.name == $n) | .id
+          ')
+
+          if [ -z "$PROJECT_ID" ] || [ "$PROJECT_ID" = "null" ]; then
+            echo "Project not found for $PROJECT_OWNER #$PROJECT_NUMBER"
+            echo "$project_json" | jq .
+            exit 1
+          fi
+          if [ -z "$STATUS_OPTION_ID" ] || [ "$STATUS_OPTION_ID" = "null" ]; then
+            echo "Status option not found: '$STATUS_NAME' — check column names match BOARD.md"
+            echo "$project_json" | jq '.data.user.projectV2.field.options'
+            exit 1
+          fi
+
+          # Ensure issue is on the project; resolve item id
+          ITEM_ID=$(gh api graphql -f query='
+            query($id: ID!) {
+              node(id: $id) {
+                ... on Issue {
+                  projectItems(first: 20) {
+                    nodes {
+                      id
+                      project { ... on ProjectV2 { id number } }
+                    }
+                  }
+                }
+              }
+            }' -f id="$ISSUE_NODE_ID" | jq -r --arg pid "$PROJECT_ID" '
+              .data.node.projectItems.nodes[]
+              | select(.project.id == $pid)
+              | .id
+            ' | head -1)
+
+          if [ -z "$ITEM_ID" ] || [ "$ITEM_ID" = "null" ]; then
+            ITEM_ID=$(gh api graphql -f query='
+              mutation($project: ID!, $content: ID!) {
+                addProjectV2ItemById(input: { projectId: $project, contentId: $content }) {
+                  item { id }
+                }
+              }' -f project="$PROJECT_ID" -f content="$ISSUE_NODE_ID" \
+              | jq -r '.data.addProjectV2ItemById.item.id')
+          fi
+
+          if [ -z "$ITEM_ID" ] || [ "$ITEM_ID" = "null" ]; then
+            echo "Could not resolve project item for issue"
+            exit 1
+          fi
+
+          gh api graphql -f query='
+            mutation($project: ID!, $item: ID!, $field: ID!, $option: String!) {
+              updateProjectV2ItemFieldValue(input: {
+                projectId: $project
+                itemId: $item
+                fieldId: $field
+                value: { singleSelectOptionId: $option }
+              }) {
+                projectV2Item { id }
+              }
+            }' -f project="$PROJECT_ID" -f item="$ITEM_ID" -f field="$STATUS_FIELD_ID" -f option="$STATUS_OPTION_ID"
+
+          echo "Set Status → $STATUS_NAME ($LABEL)"

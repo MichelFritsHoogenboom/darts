@@ -46,7 +46,7 @@ Stay **readonly** unless the user explicitly asks you to apply a fix.
 
 ## GitHub Project board
 
-Follow `.cursor/product/BOARD.md`. Security findings that need product work → Issue in **Backlog** for PO (do not silently expand scope). You do not drive Design→Done columns unless asked to comment on a ticket.
+Follow `.cursor/product/BOARD.md`. Security findings that need product work → Issue + `status:backlog` for PO. Do not drive workflow labels through Design→Done unless asked.
 
 ## When invoked
 

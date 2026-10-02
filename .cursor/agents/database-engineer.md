@@ -46,7 +46,7 @@ Do **not** import Dexie / `getDatabase` from components or pages. Do **not** inv
 
 ## GitHub Project board
 
-Follow `.cursor/product/BOARD.md`. Same as FE for implementation tickets: **Ready for development** → **In progress** → **QA review**. Schema-only work still uses that flow when tied to an Issue. Gaps → **Backlog** for PO. Board moves need classic `project` token.
+Follow `.cursor/product/BOARD.md`. Same as FE for implementation tickets: `status:ready-for-development` → `status:in-progress` → `status:qa-review` (via label swaps). Gaps → Issue + `status:backlog` for PO. No Projects API.
 
 ## When invoked
 

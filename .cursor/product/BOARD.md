@@ -1,52 +1,63 @@
 # GitHub Project board (Kanban)
 
-Single source of truth for **ticket status**. Priority (`Now` / `Next` / `Later`) is a separate Project field or labels — not a column.
+Agents change stage with Issue labels (`status:*`). A **GitHub Action** maps those labels to Project **Status** (built-in Project UI has no “on label → status” workflow).
 
-Link the `darts` repo to this Project and enable automation: **Issue opened → add to project → Status = Backlog** (recommended).
-
-Fill in after create:
-
-- Project name / URL: _(paste here)_
-- Owner: `MichelFritsHoogenboom` (user project)
-- `gh` needs a token that can write **user-owned Projects** — see `.cursor/AGENT-GITHUB-AUTH.md` (classic PAT with `project` scope). Fine-grained PATs cannot move cards on user Projects.
-
-## Status columns (workflow)
-
-| Status | Meaning |
+| Actor | Token |
 | --- | --- |
-| **Backlog** | New / untriaged |
-| **Ready** | Triaged with acceptance; may start |
-| **Design** | Designer working |
-| **Design review** | Waiting for **your** design approval |
-| **Ready for development** | Design approved; FE/DB may start |
-| **In progress** | FE/DB implementing |
-| **QA review** | QA verifying |
-| **User review** | Waiting for **your** product approval |
-| **Done** | Closed — **only you** |
+| Cursor agents | Fine-grained → Issues/labels only |
+| `.github/workflows/sync-status-label-to-project.yml` | Secret `PROJECT_TOKEN` = classic **`project` only** |
 
-## Who may set Status
+Fill in:
 
-| From → To | Who |
+- Project URL: _(paste here)_
+- Project number (URL `…/projects/N`): set repo variable `PROJECT_NUMBER` if not `1`
+- Repo: `MichelFritsHoogenboom/darts`
+
+Recommend Project auto-add: new issues from this repo → project (Status Backlog).
+
+## Status ↔ labels
+
+Exactly **one** `status:*` at a time. Swap: remove other `status:*`, add the new one.
+
+| Status (column name — must match) | Label |
 | --- | --- |
-| → **Backlog** | Any specialist (new Issue) or PO |
-| Backlog → **Ready** | PO **with you** (priority + acceptance) |
-| Ready → **Design** | Designer (when starting) |
-| Design → **Design review** | Designer (UI ready for you) |
-| Design review → **Ready for development** | **You only** (or you ask PO to move after you approve) |
-| Design review → **Design** | You / Designer (changes needed) |
-| Ready for development → **In progress** | front-end-developer or database-engineer |
-| In progress → **QA review** | FE/DB when build ready for QA |
-| In progress → **Design** | FE if blocked on design (comment why) |
-| QA review → **User review** | QA when verification passed |
-| QA review → **In progress** or **Design** | QA when failed (comment why) |
-| User review → **Done** | **You only** |
-| User review → earlier column | **You** (rework) |
+| **Backlog** | `status:backlog` |
+| **Ready** | `status:ready` |
+| **Design** | `status:design` |
+| **Design review** | `status:design-review` |
+| **Ready for development** | `status:ready-for-development` |
+| **In progress** | `status:in-progress` |
+| **QA review** | `status:qa-review` |
+| **User review** | `status:user-review` |
+| **Done** | `status:done` |
 
-Agents **must not** set **Done** or skip **Design review** / **User review** gates.
+Optional prio labels: `prio:now` / `prio:next` / `prio:later`.
+
+## Who may set which label
+
+| To label | Who |
+| --- | --- |
+| `status:backlog` | Any specialist or PO |
+| `status:ready` | PO **with you** |
+| `status:design` | Designer |
+| `status:design-review` | Designer |
+| `status:ready-for-development` | **You only** (after design OK) |
+| `status:in-progress` | FE / DB |
+| `status:qa-review` | FE / DB |
+| `status:user-review` | QA (pass) |
+| `status:done` | **You only** |
+
+## One-time setup
+
+1. Labels on the repo (already created if we ran `gh label create`).
+2. Classic PAT scope **`project` only** → repo secret **`PROJECT_TOKEN`**.
+3. Variable **`PROJECT_NUMBER`** if the project is not `#1`.
+4. Merge/enable workflow `sync-status-label-to-project.yml` on the default branch (or test on this branch with `workflow_dispatch` later).
+5. Test: `gh issue edit 21 --add-label "status:ready"` → check Actions + board.
 
 ## Agent habits
 
-1. Create/find the GitHub Issue; ensure it is on the Project (automation or `gh project item-add`).
-2. When starting or finishing a stage, update Status via `gh project item-edit` (or equivalent) and leave a short Issue comment.
-3. You (human) kick agents when a column has work — agents do not watch the board 24/7.
-4. Product gaps / new ideas → Issue in **Backlog**, label `po-intake` if useful; do not self-prioritize into Ready.
+1. New work → Issue + `status:backlog`.
+2. Stage change → swap `status:*` + short comment.
+3. Do not call Projects GraphQL from the agent.
+4. You kick agents per column; they do not watch the board.
