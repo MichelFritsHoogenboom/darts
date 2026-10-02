@@ -21,27 +21,27 @@ alwaysApply: false
 
 ```typescript
 // ✅ Use interface for object shapes
-export interface Product {
-  code: string;
+export interface Player {
+  id: string;
   name: string;
-  slug: string;
+  nickname?: string;
 }
 
 // ✅ Use type for unions
-export type ButtonType = "primary" | "secondary" | "light" | (string & {});
+export type MatchStatus = "pending" | "in-progress" | "finished" | (string & {});
 
 // ✅ Use type for aliases
-export type ImageConfig = ImageSizes | ImageDimensions;
+export type ScoreValue = number | null;
 
 // ✅ Use type for utility types
-export type productKey = keyof ProductPage["product"][0];
+export type PlayerStatKey = keyof PlayerStats;
 ```
 
 ### Naming Conventions
 
 - **Interfaces and Types**: Use PascalCase
 - **Properties**: Use camelCase
-- **Enums**: Use PascalCase with `Enum` suffix (e.g., `BackgroundColorEnum`)
+- **Enums**: Use PascalCase with `Enum` suffix (e.g., `MatchStatusEnum`)
 - **Enum Values**: Use UPPER_CASE for constants, lowercase strings for string enums
 - **Type Parameters**: Use single uppercase letters (e.g., `T`, `K`, `V`)
 
@@ -49,21 +49,22 @@ export type productKey = keyof ProductPage["product"][0];
 
 ```typescript
 // ✅ Interface naming
-export interface ProductVariant {
-  code: string;
-  name: string;
+export interface Match {
+  id: string;
+  playerIds: string[];
 }
 
 // ✅ Type naming
-export type Author = {
-  reviewedBy: DoctorFragment | ReviewedByFragment;
-  reviewedAt: string;
+export type LegSummaryMeta = {
+  winnerId: Player["id"] | null;
+  finishedAt: string;
 };
 
 // ✅ Enum naming
-export enum BackgroundColorEnum {
-  NONE = "none",
-  PRIMARY = "PRIMARY",
+export enum MatchStatusEnum {
+  PENDING = "pending",
+  IN_PROGRESS = "in-progress",
+  FINISHED = "finished",
 }
 ```
 
@@ -75,37 +76,36 @@ export enum BackgroundColorEnum {
 **Example:**
 
 ```typescript
-export interface Product {
-  code: string;
+export interface Player {
+  id: string;
   name: string;
-  slug: string;
-  inStock?: boolean;
-  startingPrice?: ProductPrice;
+  nickname?: string;
+  silhouetteIndex?: number;
 }
 ```
 
 ### Type Organization
 
-- Store types in `@types` folders
+- Store types in `interfaces/` (see root `AGENTS.md`) — not `@types` folders
 - One type/interface per file, or related types together
-- Re-export types via `index.ts` files using `export * from './filename'`
+- Re-export via `index.ts` only when useful; not required for every folder
 - Group related types in the same file when they're closely related
 
 **Example:**
 
 ```typescript
-// @types/product.ts
-export interface Product {
+// interfaces/player.ts
+export interface Player {
   // ...
 }
 
-export interface ProductVariant {
+export interface PlayerLeg {
   // ...
 }
 
-// @types/index.ts
-export * from "./product";
-export * from "./button";
+// interfaces/index.ts (optional)
+export * from "./player";
+export * from "./match";
 ```
 
 ## Functions
@@ -130,18 +130,15 @@ export const useInstanceOf = <T extends Object>(
 };
 
 // ✅ Generic function (arrow function)
-export const useFindHeadingsByType = (
-  pageContent: any,
-  type: string
-): string[] => {
+export const getPlayerIdsFromStats = (stats: PlayerStats[]): string[] => {
   // ...
 };
 
 // ✅ Using utility types for parameters (arrow function)
-export const getYouTubeEmbedFromUrl = (
-  url: string,
-  options: Parameters<typeof getYouTubeEmbedUrl>[1] = {}
-): string | null => {
+export const buildMatchSummary = (
+  match: Match,
+  options: Parameters<typeof formatMatchSummary>[1] = {}
+): string => {
   // ...
 };
 ```
@@ -154,8 +151,8 @@ export const getYouTubeEmbedFromUrl = (
 **Example:**
 
 ```typescript
-export const useFormField = (options: UseFormFieldOptions = {}) => {
-  const { debounceMs = 2000, type = "text" } = options;
+export const useScoreInput = (options: UseScoreInputOptions = {}) => {
+  const { maxScore = 180, allowBust = true } = options;
   // ...
 };
 ```
@@ -170,9 +167,10 @@ export const useFormField = (options: UseFormFieldOptions = {}) => {
 **Example:**
 
 ```typescript
-export enum BackgroundColorEnum {
-  NONE = "none",
-  PRIMARY = "PRIMARY",
+export enum MatchStatusEnum {
+  PENDING = "pending",
+  IN_PROGRESS = "in-progress",
+  FINISHED = "finished",
 }
 ```
 
@@ -180,19 +178,18 @@ export enum BackgroundColorEnum {
 
 - Use `const` for constants
 - Use `Record<string, T>` for constant objects with string keys
-- Export constants from `@constants` folders
+- Export constants from `constants/` (see root `AGENTS.md`) — not `@constants` folders
 - Type constants explicitly when the type cannot be inferred
 
 **Example:**
 
 ```typescript
-export const languages: Record<string, string> = {
-  da: "Dansk",
-  de: "Deutsch",
-  en: "English",
+export const STARTING_SCORES: Record<string, number> = {
+  x01: 501,
+  cricket: 0,
 };
 
-export const emailPattern = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+export const CHECKOUT_MAX = 170;
 ```
 
 ## Type Imports
@@ -209,8 +206,7 @@ import { ref, computed } from "vue";
 
 // Types
 import type { Ref, ComputedRef } from "vue";
-import type { Product } from "@layer/base/@types/product";
-import type { DocumentNode } from "graphql";
+import type { Player } from "~/interfaces/player";
 ```
 
 ## Utility Types
@@ -227,16 +223,16 @@ import type { DocumentNode } from "graphql";
 **Examples:**
 
 ```typescript
-export type productKey = keyof ProductPage["product"][0];
+export type PlayerStatKey = keyof PlayerStats;
 
-export const getYouTubeEmbedFromUrl = (
-  url: string,
-  options: Parameters<typeof getYouTubeEmbedUrl>[1] = {}
-): string | null => {
+export const buildMatchSummary = (
+  match: Match,
+  options: Parameters<typeof formatMatchSummary>[1] = {}
+): string => {
   // ...
 };
 
-export const languages: Record<string, string> = {
+export const STARTING_SCORES: Record<string, number> = {
   // ...
 };
 ```
@@ -251,7 +247,7 @@ export const languages: Record<string, string> = {
 
 ```typescript
 // @ts-expect-error - TODO: fix this typescript error
-import type { CartData } from "sylius-store";
+import type { LegacyScoreRow } from "~/database/legacy";
 ```
 
 ## Classes
@@ -263,11 +259,10 @@ import type { CartData } from "sylius-store";
 **Example:**
 
 ```typescript
-export class AidenWebhookObject {
-  timestamp: number = Date.now();
-  route: string = "";
-  advisorId: string = "";
-  finishedForm: boolean = false;
+export class MatchExportPayload {
+  exportedAt: number = Date.now();
+  matchId: string = "";
+  includeStats: boolean = true;
 }
 ```
 
@@ -290,8 +285,8 @@ export const useInstanceOf = <T extends Object>(
   return properties in object;
 };
 
-export const isYouTubeMediaItem = (item: MediaItem): item is YouTubeMediaItem =>
-  item.type === "youtube";
+export const isCheckoutScore = (score: Score): score is CheckoutScore =>
+  score.isCheckout === true;
 ```
 
 ## Union Types
@@ -303,11 +298,11 @@ export const isYouTubeMediaItem = (item: MediaItem): item is YouTubeMediaItem =>
 **Example:**
 
 ```typescript
-export type ButtonType = "primary" | "secondary" | "light" | (string & {});
+export type MatchStatus = "pending" | "in-progress" | "finished" | (string & {});
 
-export type Author = {
-  reviewedBy: DoctorFragment | ReviewedByFragment;
-  reviewedAt: string;
+export type LegSummaryMeta = {
+  winnerId: Player["id"] | null;
+  finishedAt: string;
 };
 ```
 
@@ -320,13 +315,12 @@ export type Author = {
 **Example:**
 
 ```typescript
-export interface Facets {
-  [key: string]: any;
-  type: FacetItem[];
+export interface ScoreCounts {
+  [score: string]: number;
 }
 
 // Prefer Record when possible
-export const languages: Record<string, string> = {
+export const STARTING_SCORES: Record<string, number> = {
   // ...
 };
 ```
@@ -340,17 +334,15 @@ export const languages: Record<string, string> = {
 **Example:**
 
 ```typescript
-export interface YouTubeMediaItem extends MediaItem {
-  videoId: string;
-  embedUrl: string;
+export interface CheckoutScore extends Score {
+  checkoutDarts: number;
 }
 
-export interface ProductVariantTranslation extends ProductTranslation {
-  caption?: string;
+export interface MatchWithStats extends Match {
+  playerStats?: PlayerStats[];
 }
 
 export const useInstanceOf = <T extends Object>(): object is T => {
-  // ...
   // ...
 };
 ```
@@ -364,11 +356,11 @@ export const useInstanceOf = <T extends Object>(): object is T => {
 **Example:**
 
 ```typescript
-export interface Articles {
-  items: Article[];
+export interface SetSummary {
+  legs: Leg[];
 }
 
-const headings: string[] = [];
+const playerIds: string[] = [];
 ```
 
 ## Comments
@@ -388,8 +380,8 @@ const hash = (value: string): string => {
   // ...
 };
 
-// TODO: replace this type with the type from generated GraphQL
-export type NormalizedPage = {
+// Domain types live under interfaces/
+export type MatchListItem = {
   // ...
 };
 ```
