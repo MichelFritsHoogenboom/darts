@@ -11,6 +11,11 @@ Also see root `AGENTS.md` for domain layout (`interfaces/`, `constants/`, `utils
 | `styling` | Component first → else CSS utility in `assets/css/utilities/` → else scoped. No BEM. Tailwind for coarse layout only; tokens over hardcoded colors. |
 | `accessible-motion` | Only when changing motion. CSS first; `@mixin animation` resets `animation`/`transition` under reduced motion. VueUse only for JS-driven motion. |
 | `ssr-responsive` | Dexie/DOM client-only; responsive via CSS not `innerWidth`; avoid hydration mismatches (dev SSR / Pages SPA). |
+| `database` | Dexie stack only: schema → `*Service` → `use*` → `dbExport` `TABLE_NAMES`. Indexed service queries; no Dexie in UI; no liveQuery. |
+| `event-bus` | mitt via `$event` / `$listen` / `$unlisten`; same handler + unlisten on unmount; no Pinia for live score sync. |
+| `fontawesome` | Specific FA icons (or `assets/icons` + `library.add`); no second icon system / whole packs. |
+| `routing` | Paths via `utils/routes`; GH Pages `NUXT_APP_BASE_URL` / `NUXT_SPA` — don’t hardcode base or path literals. |
+| `forms` | Reuse `FormButton` / `FormInput` / `FormSelect` / `FormCheckbox` from `components/form/`. |
 | `testing` | Playwright + DB fixtures primary; Vitest only for pure `utils/`. No test/scenario edits unless asked. Refuse commits that mix app + tests. |
 | `vue-global-rules` | Feature + `atoms`/`molecules`/`organisms`; shared lifted cross-feature. No `withDefaults`. Original SFC examples kept (props, emits, templates, no BEM). |
 | `vue-accessibility` | Semantic HTML first; accessible names; keyboard; careful `aria-hidden`; disabled/loading for AT + keyboard. |
