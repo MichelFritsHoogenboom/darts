@@ -1,95 +1,37 @@
-# 🎯 Frontend Cursor Rules
+# Cursor config — darts
 
-> **Centralized coding standards and best practices for our frontend development workflow**
+Project-local Cursor rules, commands, and skills for this Nuxt darts app. Not a shared/global team ruleset.
 
-This repository contains the frontend coding rules and conventions that are applied **globally** across all projects in our Cursor account. These rules ensure consistency, maintainability, and code quality across our entire frontend codebase.
+Also see root `AGENTS.md` for domain layout (`interfaces/`, `constants/`, `utils/`, no BEM).
 
-## 📋 What's Inside
+## Rules (`.cursor/rules/`)
 
-This repository defines comprehensive rules for:
+| Rule | What it covers |
+| --- | --- |
+| `styling` | Component first → else CSS utility in `assets/css/utilities/` → else scoped. No BEM. Tailwind for coarse layout only; tokens over hardcoded colors. |
+| `accessible-motion` | Only when changing motion. CSS first; `@mixin animation` resets `animation`/`transition` under reduced motion. VueUse only for JS-driven motion. |
+| `ssr-responsive` | Dexie/DOM client-only; responsive via CSS not `innerWidth`; avoid hydration mismatches (dev SSR / Pages SPA). |
+| `testing` | Playwright + DB fixtures primary; Vitest only for pure `utils/`. No test/scenario edits unless asked. Refuse commits that mix app + tests. |
+| `vue-global-rules` | SFC patterns: typed props/emits, reactive derived props, shorthands, lifecycle placement, no BEM. *Partly source copy* (atomic design, i18n, `withDefaults` ban) — not fully adapted. |
+| `vue-accessibility` | Semantic HTML first; accessible names; keyboard; careful `aria-hidden`; disabled/loading for AT + keyboard. |
+| `composables` | `use*` naming, arrow functions, named exports, cleanup. *Partly source copy* — examples/paths may not match this repo. |
+| `typescript` | interface vs type, `import type`, utilities. Prefer `interfaces/` here (`AGENTS.md`), not `@types`. *Partly source copy*. |
+| `structured-imports` | Group imports: Vendor → Types → Constants → Composables → Components → Utils (comment separators). |
+| `ordering-constants` | In SFCs: props → emits → constants → composables → refs → computed → methods. |
+| `control-flow` | Braces on every `if`/`else`; no single-line if; prefer early returns. |
 
-- **🎨 Vue.js Components** - Component structure, lifecycle management, and best practices
-- **♿ Vue Accessibility** - Semantic templates, keyboard navigation, and ARIA
-- **🧩 Composables** - Naming conventions, file structure, and reactive state management
-- **📦 TypeScript** - Type definitions, interfaces, utility types, and type safety
-- **🎯 SCSS/CSS** - Utility framework usage, variable management, and styling conventions
-- **♿ Accessible Motion** - `prefers-reduced-motion` for animations, transitions, and scroll
-- **📝 Code Organization** - Import ordering, code structure, and file organization
-- **🔧 Best Practices** - Error handling, lifecycle management, and code patterns
+## Commands (`.cursor/commands/`)
 
-## 🚀 How It Works
+| Command | Role |
+| --- | --- |
+| `/commit` | Commit **staged only** — never `git add`. Stop if nothing staged. Refuse mixed app + test/scenario staging. |
+| `/commit-and-push` | `/commit` then `git push` (not on `main`; no force-push unless asked). |
+| `/branch-review` | Review branch/diff against all project rules (Must fix / Should fix / Consider). |
+| `/pr-create-or-update` | PR via `gh`: template if present, else English `## Summary` + `## Test plan`. |
 
-These rules are automatically applied to **all projects** in your Cursor account. When you're working in any frontend project, Cursor will:
+## Skills (`.cursor/skills/`)
 
-- ✅ Enforce consistent code structure and organization
-- ✅ Suggest proper naming conventions and patterns
-- ✅ Guide you to use our utility framework and SCSS extends
-- ✅ Ensure TypeScript best practices are followed
-- ✅ Maintain Vue.js component standards
-
-## 📚 Rule Categories
-
-### Vue Components
-
-- Atomic design principles
-- Component structure and organization
-- Props, emits, and lifecycle management
-- Template best practices
-
-### Vue Accessibility
-
-- Semantic HTML before ARIA
-- Keyboard navigation and focus management
-- Labels, `aria-*`, and form associations
-
-### Composables
-
-- `use` prefix for reactive composables
-- `get` prefix for simple getters
-- Lifecycle management and cleanup
-- Singleton patterns for shared state
-
-### TypeScript
-
-- Interface vs Type usage
-- Type definitions and organization
-- Utility types and type guards
-- Explicit return types
-
-### Styling
-
-- SCSS utility framework extends
-- Variable usage from `variables.scss`
-- Flex/grid alignment: `start` / `end` (via extends), not `left` / `right`
-
-- Responsive breakpoints
-- Margin/padding utilities
-
-### Accessible Motion
-
-- Decision ladder (CSS-only → VueUse → multi-layer)
-- Local `prefers-reduced-motion` overrides (no global resets)
-- Smooth scroll and autoplay fallbacks
-- Vue `<Transition>` / modal / third-party toast handling
-
-### Code Structure
-
-- Import organization (Vendor → Types → Constants → Composables → Components → Utils)
-- Code ordering in components
-- File organization patterns
-
-## 🎨 Benefits
-
-- **Consistency** - All developers follow the same patterns
-- **Quality** - Enforced best practices reduce bugs and technical debt
-- **Efficiency** - Less time spent on code review discussions
-- **Maintainability** - Easier to understand and modify code across projects
-- **Onboarding** - New team members get instant guidance
-
-## 📖 Usage
-
-These rules are automatically active in Cursor. No configuration needed! Just start coding and Cursor will guide you based on these standards.
-
----
-
-**Note:** These rules are managed centrally and applied globally. For project-specific rules or exceptions, consult with the team lead.
+| Skill | Role |
+| --- | --- |
+| `branch-review` | Load `AGENTS.md` + rules, review the chosen diff, cite rule files in the report. |
+| `pr-create-or-update` | Build PR title/body (template or English Summary + Test plan) and create/update with `gh`. |
