@@ -73,8 +73,8 @@ onUnmounted(() => {
     @apply absolute inset-0;
     background-color: color-mix(
       in srgb,
-      theme("colors.gray.800") 50%,
-      theme("colors.gray.900") 50%
+      theme("colors.gray.800") 30%,
+      theme("colors.gray.900") 70%
     );
     mask-image: var(--mask-image);
     mask-size: contain;

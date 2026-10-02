@@ -23,13 +23,17 @@ module.exports = {
           blue: {
             DEFAULT: '#3d5a80',
             dark: '#2f4766',
+            mid: '#2c65b4',
             bright: '#1a6fe8',
           },
           green: '#16a34a',
           black: '#1f2937',
           white: '#f9fafb'
         },
-       
+        page: {
+          DEFAULT: '#0f141d',
+          light: '#5a6987',
+        },
         logo: '#fafafa',
       }
     },

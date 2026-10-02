@@ -45,12 +45,12 @@ watch(
         :title="entry.lost ? 'Losing average' : undefined"
       >
         <span class="rank">
-          <FontAwesomeIcon v-if="index === 0" :icon="faTrophy" class="trophy" />
+          <FontAwesomeIcon v-if="index === 0" :icon="faTrophy" class="icon" />
 
           <FontAwesomeIcon
             v-else-if="index < 3"
             :icon="faMedal"
-            class="medal"
+            class="icon"
           />
           <template v-else>{{ index + 1 }}</template>
         </span>
@@ -110,32 +110,24 @@ watch(
 
   &:nth-child(-n + 3) {
     @apply bg-gradient-to-r from-dartboard-blue/25 to-transparent;
+
+    .rank {
+      @apply bg-dartboard-blue text-white ring-0;
+    }
+
+    .icon {
+      @apply text-gray-300;
+    }
   }
 
-  &:nth-child(1) .rank {
-    @apply bg-gray-700/35 ring-1 ring-gray-600/40;
-    @include glow-gold(0.3, 0.4);
-  }
+  &:nth-child(1) {
+    .rank {
+      @apply bg-dartboard-blue-bright;
+    }
 
-  &:nth-child(1) .trophy {
-    @apply text-amber-200/75;
-  }
-
-  &:nth-child(2) .rank,
-  &:nth-child(3) .rank {
-    @apply bg-gray-600/20 ring-1 ring-gray-500/35;
-  }
-
-  &:nth-child(2) .medal {
-    @apply text-gray-300/80;
-  }
-
-  &:nth-child(3) .medal {
-    @apply text-amber-500/60;
-  }
-
-  &:nth-child(1) :deep(.score) {
-    @apply text-dartboard-red;
+    :deep(.score) {
+      @apply text-dartboard-blue-bright;
+    }
   }
 }
 
@@ -144,8 +136,7 @@ watch(
   @apply bg-gray-700/80 text-xs font-bold tabular-nums text-gray-300;
 }
 
-.medal,
-.trophy {
+.icon {
   @apply h-3.5 w-3.5;
 }
 
