@@ -2,6 +2,9 @@
 
 Agents change stage with Issue labels (`status:*`). A **GitHub Action** maps those labels to Project **Status** (built-in Project UI has no “on label → status” workflow).
 
+**Product memory (read first):** `.cursor/product/VISION.md` (vision / audience / competitors — not an Issue).  
+**Sequencing:** GitHub Project **roadmap** view + Issues on the board. Do not ask the user to re-explain vision/audience/competitors — update `VISION.md` when decisions change.
+
 | Actor | Token |
 | --- | --- |
 | Cursor agents | Fine-grained → Issues/labels only |
@@ -9,8 +12,9 @@ Agents change stage with Issue labels (`status:*`). A **GitHub Action** maps tho
 
 Fill in:
 
-- Project URL: _(paste here)_
-- Project number (URL `…/projects/N`): set repo variable `PROJECT_NUMBER` if not `1`
+- Project URL: https://github.com/users/MichelFritsHoogenboom/projects/1
+- Project number: `1` (repo variable `PROJECT_NUMBER` optional)
+- Roadmap view: Project → Roadmap (Start date / Target date fields filled by PO)
 - Repo: `MichelFritsHoogenboom/darts`
 
 Recommend Project auto-add: new issues from this repo → project (Status Backlog).
@@ -63,4 +67,5 @@ Optional prio labels: `prio:now` / `prio:next` / `prio:later`.
 4. You kick agents per column; they do not watch the board.
 5. **Ready bar:** PO must sharpen AC beyond the intake (concrete screens/controls). Involve specialists **when relevant**: **designer** (UX choices), **accessibility-expert** (new/changed interaction), **seo-expert** (public/share pages), **db** / **security** as needed. Once AC are usable → kick **qa** for early Given/When/Expect on the Issue.
 6. **QA review:** **qa** checks the Issue AC + project rules/docs (incl. basic a11y from `vue-accessibility`). Kick **accessibility-expert** / **seo-expert** only if AC require specialist sign-off or QA hits something beyond the docs — not on every ticket.
-7. **No duplicate product markdown:** when findings/work are already GitHub Issues (or Issue comments), do **not** also write an index/summary under `.cursor/product/`. Issues are enough. Keep `.cursor/product/` for lasting process docs (e.g. this board), not ticket dumps.
+7. **Prioritize:** PO keeps milestones + `prio:*` and the Project **roadmap** view aligned with `VISION.md`. Project API: `GH_TOKEN="$PROJECT_TOKEN"` (local classic file — `.cursor/AGENT-GITHUB-AUTH.md`). Issues stay on fine-grained `GH_TOKEN`.
+8. **No duplicate product markdown:** when findings/work are already GitHub Issues (or Issue comments), do **not** also write an index/summary under `.cursor/product/`. Issues are enough. Keep `.cursor/product/` for lasting process docs (e.g. this board, `VISION.md`), not ticket dumps.
