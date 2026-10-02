@@ -1,19 +1,30 @@
 # GitHub auth for the Cursor agent
 
-The agent creates PRs with `gh` using a **limited fine-grained PAT** (this repo only). Your normal terminal keeps using your usual `gh` login (keyring).
+Agents use `gh` with **`GH_TOKEN`** only inside the Cursor sandbox. Your normal terminal can keep a separate keyring login.
 
 No secrets in this file. The token lives outside the repo.
 
-## Pieces
+## Required token: classic PAT
+
+This repo uses a **user-owned GitHub Project** (Kanban). Fine-grained PATs **cannot** access user Projects (no Projects permission; GraphQL `projectsV2` fails). Agents must move Status columns → use a **classic** PAT.
+
+| Scope | Why |
+| --- | --- |
+| **`repo`** | Issues, PRs, private repo API |
+| **`project`** | Read/write Project board Status (Kanban moves) |
+
+Do not add unrelated classic scopes. Trade-off: `repo` is broader than a fine-grained “one repo + PR/Issues” token — still store it **only** in `~/.config/cursor-agent/` and load it **only** when `CURSOR_SANDBOX` is set.
 
 | What | Role |
 | --- | --- |
-| Fine-grained PAT | PR read/write + Contents read, `darts` only |
+| Classic PAT (`ghp_…`) | PRs, Issues, Project Status |
 | `~/.config/cursor-agent/gh-token` | Token file (`chmod 600`) |
-| `~/.zshenv` | Sets `GH_TOKEN` **only** when `CURSOR_SANDBOX` is set |
-| `~/.cursor/sandbox.json` | Allows `api.github.com` + read access to the token folder |
+| `~/.zshenv` | `export GH_TOKEN=…` only if `CURSOR_SANDBOX` is set |
+| `~/.cursor/sandbox.json` | Allow `api.github.com` + readonly token dir |
 
-`git push` stays SSH — it does not use this token.
+`git push` stays SSH — not this token.
+
+Board rules: `.cursor/product/BOARD.md`.
 
 ## Cursor settings
 
@@ -22,22 +33,26 @@ No secrets in this file. The token lives outside the repo.
 - **Run Mode:** Allowlist (with Sandbox)
 - **Network:** sandbox.json + Defaults
 
-Do not run `gh` unsandboxed: it may fall back to your full keyring token.
+Do not run `gh` unsandboxed (may use your full keyring token).
 
-## First-time setup (your terminal)
+## Setup (your terminal)
 
-**1.** Create a fine-grained PAT on GitHub: repo `darts` only, Pull requests read/write, Contents read.
+**1.** GitHub → Settings → Developer settings → Personal access tokens → **Tokens (classic)** → Generate:
 
-**2.** Save it:
+- Note: `cursor-agent-darts`
+- Scopes: **`repo`**, **`project`**
+- Expiration: e.g. 90 days
+
+**2.** Save (overwrites any old fine-grained file):
 
 ```bash
 mkdir -p ~/.config/cursor-agent && chmod 700 ~/.config/cursor-agent
 read -rs "TOKEN?Paste token: "; printf '%s' "$TOKEN" > ~/.config/cursor-agent/gh-token; unset TOKEN
 chmod 600 ~/.config/cursor-agent/gh-token
-wc -c ~/.config/cursor-agent/gh-token   # ~90, not 0
+wc -c ~/.config/cursor-agent/gh-token
 ```
 
-**3.** Load it only in the sandbox:
+**3.** Sandbox-only load (once):
 
 ```bash
 cat >> ~/.zshenv <<'EOF'
@@ -47,7 +62,7 @@ fi
 EOF
 ```
 
-**4.** Sandbox config (merge if the file already exists; use your username):
+**4.** Sandbox config (merge if needed; your username):
 
 ```bash
 cat > ~/.cursor/sandbox.json <<'EOF'
@@ -67,24 +82,32 @@ EOF
 
 ```bash
 echo "sandbox=${CURSOR_SANDBOX:-NOT SET}"
-echo "token-prefix=${GH_TOKEN:0:11}"
-gh auth status 2>&1 | grep -E "Logged in|Active account"
+echo "token-prefix=${GH_TOKEN:0:4}"
+gh auth status 2>&1 | grep -E "Logged in|Active account|Token scopes"
 gh api repos/MichelFritsHoogenboom/darts --jq .full_name
+gh project list --owner MichelFritsHoogenboom
 ```
 
-Expect: `sandbox=seatbelt`, `token-prefix=github_pat_`, active `(GH_TOKEN)`, API → `MichelFritsHoogenboom/darts`.
+Expect:
+
+- `sandbox=seatbelt`
+- prefix `ghp_` (classic), not `github_pat_`
+- scopes include `project` (and repo)
+- `gh project list` works (not “Resource not accessible”)
 
 ## Replace the token
 
-New PAT with the same permissions → overwrite `gh-token` → Cmd+Q → run the check above → revoke the old token on GitHub.
+Overwrite `gh-token` → Cmd+Q → check above → revoke the old token on GitHub.
 
 ## Troubleshooting
 
 | Symptom | Fix |
 | --- | --- |
-| `Forbidden` / “keyring invalid” | Often blocked network → fix `sandbox.json` + restart |
-| `sandbox=NOT SET` | Ran outside sandbox → Allowlist (with Sandbox) |
-| Empty `token-prefix` | Check `~/.zshenv` + path in `sandbox.json` |
-| Active `(keyring)` | `GH_TOKEN` not loaded — do not continue |
-| `401` | Token expired → replace it |
-| `403` on PR | Wrong repo or missing PR write permission |
+| prefix `github_pat_` | Still fine-grained — replace with classic `ghp_` |
+| `Resource not accessible` on `projectsV2` | Classic + `project` scope required for user Projects |
+| `Forbidden` / “keyring invalid” | Often blocked network → `sandbox.json` + restart |
+| `sandbox=NOT SET` | Ran outside sandbox |
+| Empty `token-prefix` | `~/.zshenv` / token path / `sandbox.json` readonly path |
+| Active `(keyring)` | `GH_TOKEN` not loaded |
+| `401` | Expired — replace token |
+| `403` on Issues/PRs | Missing `repo` on classic token |

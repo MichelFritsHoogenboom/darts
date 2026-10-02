@@ -40,3 +40,18 @@ Also see root `AGENTS.md` for domain layout (`interfaces/`, `constants/`, `utils
 | --- | --- |
 | `branch-review` | Load `AGENTS.md` + rules, review the chosen diff, cite rule files in the report. |
 | `pr-create-or-update` | Build PR title/body (template or English Summary + Test plan) and create/update with `gh`. |
+
+## Agents (`.cursor/agents/`)
+
+Role subagents — invoke with `/name` or ask the parent agent to delegate.
+
+Board workflow: `.cursor/product/BOARD.md`. Agent GitHub auth (incl. classic `project` for card moves): `.cursor/AGENT-GITHUB-AUTH.md`.
+
+| Agent | Role |
+| --- | --- |
+| `designer` | UI audit + responsiveness + new-feature UI in Vue/CSS; Design → Design review. |
+| `front-end-developer` | Vue/TS implement & harden; lint/standards; Ready for development → In progress → QA review. |
+| `qa` | Verify; scenarios; story gaps; QA review → User review. |
+| `database-engineer` | Dexie schema/indexes/services/export; same board flow as FE when ticketed. |
+| `product-owner` | Questions, roadmap/money with you; Backlog → Ready triage; acceptance criteria. |
+| `security-officer` | Threat review; flag Backlog issues; readonly fixes. |
