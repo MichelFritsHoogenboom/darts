@@ -33,28 +33,26 @@ To keep the code readable, we use an order where each type of const is separated
 // ... Imports
 
 const props = defineProps<{
-  initialCountry?: string;
-  initialLanguage?: string;
+  matchId: string;
+  openDetails?: boolean;
 }>();
 
 const emits = defineEmits<{
   (e: "change", value: string): void;
 }>();
 
-const prefix = "molecules.section.language-country-selector";
+const startingScore = 501;
 
-const { locale } = useI18n();
+const { players, loadPlayers } = usePlayers();
 
-const country = ref<string>(props.initialCountry);
-const language = ref<string>(props.initialLanguage);
+const currentScore = ref<number>();
+const currentPlayerId = ref<string>("");
 
-const countryList = computed(() => getCountryList());
-const languageList = computed(() => getLanguageList(country.value));
+const playerCount = computed(() => players.value.length);
+const canSubmit = computed(() => currentScore.value != null);
 
-const redirectLink = () => {
-  if (country.value && language.value) {
-    location.href = `/${language.value}-${country.value.toLowerCase()}/`;
-  }
+const focusScoreInput = () => {
+  // ...
 };
 </script>
 ```
