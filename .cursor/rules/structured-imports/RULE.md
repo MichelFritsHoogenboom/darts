@@ -57,18 +57,18 @@ Utility functions - vendor utils first, then local utils.
 import { ref, onMounted } from "vue";
 // Types
 import type { Ref, ComputedRef } from "vue";
-import type { PaymentRedirectStatus } from "@common/@types/payment";
+import type { Match } from "~/interfaces/match";
+import type { Player } from "~/interfaces/player";
 // Constants
-import { CONST_FROM_VENDOR } from "vendor-package";
-import { ALLOWED_CANCEL_STATES } from "@account/@constants/order";
+import { STARTING_SCORES } from "~/constants/match";
 // Composables
 import { useRoute } from "vue-router";
-import { useFormatPrice } from "sylius-store/composables/formatPrice";
+import { usePlayers } from "~/composables/usePlayers";
 // Components
-import { ElButton } from "element-plus";
-import { SbButton } from "superbrave-component-library";
+import Button from "~/components/form/Button.vue";
+import SummaryCard from "~/components/ui/SummaryCard.vue";
 // Utils
-import { formatDate } from "@utils/date";
+import { formatDate } from "~/utils/date";
 </script>
 ```
 
@@ -79,16 +79,15 @@ import { formatDate } from "@utils/date";
 import { ref, computed, onUnmounted } from "vue";
 // Types
 import type { Ref } from "vue";
-import type { Breadcrumb } from "@layer/base/@types/breadcrumbs";
+import type { Player } from "~/interfaces/player";
 // Constants
-import { EMAIL_PATTERN } from "@common/@constants/validation";
+import { CHECKOUT_MAX } from "~/constants/scoring";
 // Composables
-import { useI18n } from "vue-i18n";
-import { useFormatPrice } from "@layer/base/composables/price";
+import { usePlayers } from "~/composables/usePlayers";
 // Utils
-import { debounce } from "@utils/debounce";
+import { isCheckoutScore } from "~/utils/score";
 
-export const useFormField = (options: UseFormFieldOptions = {}) => {
+export const useScoreInput = (options: UseScoreInputOptions = {}) => {
   // ... composable implementation
 };
 ```
@@ -128,16 +127,15 @@ Within each category, vendor imports must come before local imports:
 ```typescript
 // Composables
 import { useRoute } from "vue-router";
-import { useI18n } from "vue-i18n";
-import { useFormatPrice } from "@layer/base/composables/price";
-import { useCountdown } from "@/composables/useCountdown";
+import { usePlayers } from "~/composables/usePlayers";
+import { useScores } from "~/composables/useScores";
 ```
 
 **❌ Incorrect:**
 
 ```typescript
 // Composables
-import { useFormatPrice } from "@layer/base/composables/price";
+import { usePlayers } from "~/composables/usePlayers";
 import { useRoute } from "vue-router";
 ```
 
