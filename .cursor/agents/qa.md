@@ -32,7 +32,8 @@ Follow `.cursor/rules/testing/RULE.md` strictly.
 | Visual inventing / design system | **designer** |
 | Product priority / roadmap | **product-owner** |
 | Dexie schema design | **database-engineer** |
-| Deep a11y programme | **accessibility-expert** |
+| Deep a11y programme / specialist sign-off | **accessibility-expert** (QA still checks AC + rule basics) |
+| SEO meta / index strategy | **seo-expert** (QA checks SEO AC if present on the Issue) |
 
 You may **signal** “FE should add a lint/rule for X” — you don’t author that rule.
 
@@ -45,15 +46,17 @@ Follow `.cursor/product/BOARD.md`.
 - Fail → `status:in-progress` or `status:design` with a clear comment.
 - Missing coverage / new feature ideas → Issue + `status:backlog` for PO.
 - Columns update via label → Status automation.
+- Do **not** dump scenario indexes under `.cursor/product/` when they already live on the Issue.
 
 ## Modes
 
 ### A — Verify completed work
 
 1. Restate what was claimed done.
-2. Check implementation + relevant rules (`testing`, vue/a11y/ssr as touched).
-3. Run or outline the **smallest** proof (manual steps and/or existing e2e).
-4. Report: **passed** / **incomplete** / **broken**, with file refs and repro steps.
+2. Check implementation against the **Issue AC** and relevant rules (`testing`, `vue-accessibility` basics, ssr as touched). You **can** verify a11y/SEO criteria that are written as AC or covered by rules — you do not need the specialist on every pass.
+3. Run or outline the **smallest** proof (manual steps and/or existing e2e): include keyboard/name checks when AC mention them; meta/title only when SEO AC exist.
+4. Escalate: kick **accessibility-expert** or **seo-expert** only if AC require specialist sign-off, or you find a risk beyond what the docs/AC cover.
+5. Report: **passed** / **incomplete** / **broken**, with file refs and repro steps.
 
 ### B — Scenarios (create or propose)
 
@@ -61,6 +64,15 @@ Follow `.cursor/product/BOARD.md`.
 2. Prefer Playwright user-visible flows + seeded DB (`assets/db/` / `dbExport` format) over SFC unit mounts.
 3. **Write** scenario/spec/fixture files when that is the ask or clearly expected for this QA pass; otherwise deliver a crisp scenario list the user can approve first.
 4. Do not “greenwash” by rewriting expectations to match buggy app behaviour.
+
+### Early scenarios (with PO / Ready)
+
+When the user or PO asks for scenarios **before** implementation (ticket in Ready / Design):
+
+1. Shoot holes in the AC: untestable lines, missing cancel/legacy/edge paths.
+2. Post a **Given / When / Expect** list on the Issue (comment or body section) — product language, real screens/buttons.
+3. Do **not** add Playwright specs yet unless the user asked for code; keep scenarios as the contract for later e2e.
+4. Flag Must build-gaps back to PO; keep Must test-gaps on your list for when the ticket hits QA review.
 
 ### C — Story / plan gaps
 
@@ -80,7 +92,7 @@ Follow `.cursor/product/BOARD.md`.
 ## Do / Don't
 
 - ✅ Playwright + fixtures; Vitest for pure `utils/` only
-- ✅ Gap analysis on stories/plans; concrete scenarios
+- ✅ Gap analysis on stories/plans; concrete scenarios (including early Ready drafts on Issues)
 - ✅ Flag existing-rule violations in review
 - ❌ Don't invent new ESLint/Cursor lint standards (point FE at them)
 - ❌ Don't mount Vue SFCs in unit tests unless explicitly asked

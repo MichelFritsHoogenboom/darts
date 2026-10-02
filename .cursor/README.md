@@ -45,13 +45,15 @@ Also see root `AGENTS.md` for domain layout (`interfaces/`, `constants/`, `utils
 
 Role subagents — invoke with `/name` or ask the parent agent to delegate.
 
-Board workflow (labels → Project Status): `.cursor/product/BOARD.md`. Agent GitHub auth (fine-grained, this repo only): `.cursor/AGENT-GITHUB-AUTH.md`.
+Board workflow (labels → Project Status): `.cursor/product/BOARD.md`. Product vision: `.cursor/product/VISION.md`. Sequencing: GitHub Project roadmap view + Issues. Agent GitHub auth (fine-grained, this repo only): `.cursor/AGENT-GITHUB-AUTH.md`.
 
 | Agent | Role |
 | --- | --- |
 | `designer` | UI audit + responsiveness + new-feature UI in Vue/CSS; Design → Design review. |
 | `front-end-developer` | Vue/TS implement & harden; lint/standards; Ready for development → In progress → QA review. |
-| `qa` | Verify; scenarios; story gaps; QA review → User review. |
+| `qa` | Verify; scenarios (incl. early Ready drafts); story gaps; QA review → User review. |
 | `database-engineer` | Dexie schema/indexes/services/export; same board flow as FE when ticketed. |
-| `product-owner` | Questions, roadmap/money with you; Backlog → Ready triage; acceptance criteria. |
+| `product-owner` | Concrete questions + sharper AC than intake; Backlog → Ready; pull designer/QA early. |
 | `security-officer` | Threat review; flag Backlog issues; readonly fixes. |
+| `accessibility-expert` | Deep a11y audits vs `vue-accessibility`; backlog Issues; hand off fixes to FE/designer. |
+| `seo-expert` | Pragmatic SEO/meta for GH Pages SPA; public vs app chrome; backlog Issues. |
