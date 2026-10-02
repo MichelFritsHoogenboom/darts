@@ -61,3 +61,4 @@ Optional prio labels: `prio:now` / `prio:next` / `prio:later`.
 2. Stage change → swap `status:*` + short comment.
 3. Do not call Projects GraphQL from the agent.
 4. You kick agents per column; they do not watch the board.
+5. **Ready bar:** PO must sharpen AC beyond the intake (concrete screens/controls). UX choice questions → involve **designer**. Once AC are usable → kick **qa** for early Given/When/Expect scenarios on the Issue.
