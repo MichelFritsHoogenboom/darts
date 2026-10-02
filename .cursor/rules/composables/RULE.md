@@ -253,19 +253,14 @@ const getProductVariants = async (productCode?: string) => {
 - **Export the main function** directly
 - **Export helper functions** only if they need to be used elsewhere
 - **Use named exports** (not default exports)
-- **Create index.ts files** in composable directories to re-export all composables
-- **Use `export * from`** syntax for clean re-exports
+- **Do not require** `composables/index.ts` barrel files — Nuxt auto-imports from `composables/`
+- Pure non-reactive helpers belong in `utils/` (see root `AGENTS.md`), not as composables
 
 ```typescript
 // ✅ Correct (arrow function)
 export const useCountdown = (targetDate: Date | string) => {
   // ...
 };
-
-// composables/index.ts
-export * from "./breadcrumbs";
-export * from "./canonical";
-export * from "./useFormField";
 ```
 
 ## Best Practices
