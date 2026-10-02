@@ -14,7 +14,7 @@ Also see root `AGENTS.md` for domain layout (`interfaces/`, `constants/`, `utils
 | `testing` | Playwright + DB fixtures primary; Vitest only for pure `utils/`. No test/scenario edits unless asked. Refuse commits that mix app + tests. |
 | `vue-global-rules` | Feature + `atoms`/`molecules`/`organisms`; shared lifted cross-feature. No `withDefaults`. Original SFC examples kept (props, emits, templates, no BEM). |
 | `vue-accessibility` | Semantic HTML first; accessible names; keyboard; careful `aria-hidden`; disabled/loading for AT + keyboard. |
-| `composables` | `use*` naming, arrow functions, named exports, cleanup. *Partly source copy* — examples/paths may not match this repo. |
+| `composables` | `use*` + matching filename; arrow functions; named exports; cleanup. No required `index.ts` (Nuxt auto-import). Pure helpers → `utils/`. |
 | `typescript` | interface vs type, `import type`, utilities. Prefer `interfaces/` here (`AGENTS.md`), not `@types`. *Partly source copy*. |
 | `structured-imports` | Group imports: Vendor → Types → Constants → Composables → Components → Utils (comment separators). |
 | `ordering-constants` | In SFCs: props → emits → constants → composables → refs → computed → methods. |
