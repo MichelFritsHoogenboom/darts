@@ -1,159 +1,85 @@
 ---
 name: branch-review
 description: >-
-  Reviews git changes against team Cursor rules (RULE.md / .cursor/rules) for
-  standards compliance: default is current branch vs main; also supports
-  commit-range, staged, and working-tree diffs when specified. Use when the user
-  asks for a review, branch review, commit review, commits review, rules review,
-  diff review, staged or uncommitted changes, pre-merge check, compliance audit,
-  or validation of AI-generated work against project rules.
+  Reviews git changes against project Cursor rules for standards compliance:
+  default branch vs main; also commit-range, staged, or working-tree diffs.
+  Use for review, branch review, rules review, staged/uncommitted review, or
+  pre-merge compliance checks.
 ---
 
 # Branch review (rules vs `main`)
 
 ## Goal
 
-Compare the chosen **git diff** against **`main`**, a **commit range**, or **working tree / index** (see [Scope](#scope-full-branch-commits-or-working-tree)) and judge every touched area against **the full rules corpus** — the same obligation as root **`AGENTS.md`** (“read all rules before coding”). Surface **concrete violations** with **rule citations**, not generic style opinions.
+Judge the chosen **git diff** against **all** project rules (`AGENTS.md` + `.cursor/rules`). Report **concrete violations** with **rule citations** — not generic style opinions.
 
 ## Protection: nothing on `main`
 
-Run **`git rev-parse --abbrev-ref HEAD`** before rules/diff work.
+1. **Branch vs `main` (default)** — If HEAD is `main` (or `master` when that is the integration branch), **stop**. Ask for a feature branch. Do not load rules or produce a branch-vs-main report.
+2. **Commits-only / staged / uncommitted** — Allowed on `main` (read-only) when the user explicitly scopes that way.
+3. **Writes** — Never commit, merge, push, or rewrite `main` as part of this skill. If asked to apply fixes while on `main`, refuse until they switch branch.
 
-1. **Default (branch vs `main`)** — If the current branch is **`main`**, **stop**. Do **not** load rules for that run, do **not** diff branch-vs-main, do **not** produce the report. Tell the user to **check out or create a feature branch** first (same bar as `pr-create-or-update`). Treat **`master`** the same if it is the repo’s primary integration branch when `main` does not exist.
-2. **Commits-only review** — If the user **explicitly** scoped to a commit range or SHAs and did **not** ask for “my branch vs main”, you may proceed **read-only** even when checked out on `main`.
-3. **Working tree / staged review** — Allowed on **`main`** (read-only): `git diff`, `git diff --cached`, or `git diff HEAD` do not violate the branch-vs-main guard (the user is not claiming a merge-ready branch delta).
-4. **Writes** — As part of this skill, **never** add commits on `main`, merge to `main`, push to `main`, rebase `main`, or rewrite `main`. Review-first; if the user later asks to apply fixes and is still on `main`, **refuse** until they switch branch (unless they only want analysis with no repo writes).
+## Scope
 
-## Scope: full branch, commits, or working tree
-
-**Default (branch review):** merge-base with `main` / `origin/main` — the full delta you would merge.
-
-**Commits review** — when the user asks for **recent commits**, **this commit**, or a **range** (e.g. `abc123..def456`, “last 5 commits”):
-
-1. Resolve `<from>` and `<to>` (usually `<to>` = `HEAD`).
-2. Examples:
-   - **Last N commits:** `git diff HEAD~N..HEAD` (linear tip).
-   - **Single commit:** `git show <sha>` or `git diff <sha>^..<sha>`.
-   - **Named range:** `git diff <from>..<to>` and `git log <from>..<to> --oneline`.
-3. State **which diff command** was used in the report summary.
-
-**Working tree / staged** — when the user asks for **uncommitted**, **staged**, **working tree**, **before I commit**, or **my local changes**:
-
-| Ask | Diff to use |
-|-----|-------------|
-| Uncommitted only (not staged) | `git diff` |
-| Staged only | `git diff --cached` |
+| Ask | Diff |
+| --- | --- |
+| Default / “my branch” | `git diff <base>...HEAD` (three-dot); `<base>` = `main` or `origin/main` |
+| Last N / range / SHA | `git diff <from>..<to>` (state the command) |
+| Uncommitted | `git diff` |
+| Staged | `git diff --cached` |
 | Staged + unstaged | `git diff HEAD` |
 
-State **exactly** which command the report used. [Protection](#protection-nothing-on-main) allows these on `main`; default **branch-vs-main** still does not.
-
-If the request is ambiguous, prefer **branch vs `main`** unless the user clearly narrows to commits or working tree — but if that implies branch-vs-main while on `main`, [Protection](#protection-nothing-on-main) applies first.
+Ambiguous → prefer branch vs `main`, unless that hits [Protection](#protection-nothing-on-main).
 
 ## Before you review
 
-1. **Branch check** — Apply [Protection](#protection-nothing-on-main) for the **default branch-vs-main** flow. If you are on `main` **and** the request is branch-vs-main (or ambiguous that way), **stop**. If on `main` **only** for **explicit commits-only** or **working tree/staged** scope, continue with the appropriate diff.
-2. **Merge / rebase state** — Run **`git status`**. If a merge or rebase is **in progress** or there are **unmerged paths**, put a short **warning** at the top of the report: the diff may not match what will finally land until conflicts are resolved.
-3. **Stale base (optional but recommended for branch scope)** — When `<base>` is `main` or `origin/main`, if **both** `main` and `origin/main` exist and **`git rev-parse main`** ≠ **`git rev-parse origin/main`**, note in the **Summary** that local `main` may be behind (or ahead of) **`origin/main`**, say **which ref you used** for the diff, and suggest **`git fetch origin main`** (or equivalent) if a fresher review against remote matters.
-4. **Read root `AGENTS.md`** — If **`AGENTS.md`** exists at the **workspace root**, read it **before** enumerating rules. Use it as the **canonical** pointer to rule locations and any “always do X first” workflow; it may reference `.cursor/rules` or other paths.
-5. **Load every rule file** (see [Where rules live](#where-rules-live)) **before** interpreting the diff.
-6. **Resolve the diff** — default branch scope:
+1. Apply [Protection](#protection-nothing-on-main).
+2. `git status` — warn if merge/rebase in progress.
+3. If reviewing vs `main` and local `main` ≠ `origin/main`, note which ref you used.
+4. Read root **`AGENTS.md`**, then **every** file under `.cursor/rules/` (do not invent rules).
+5. Resolve and read the diff (log + stat + name-only + full diff for the chosen scope).
 
-```bash
-git rev-parse --abbrev-ref HEAD
-git merge-base main HEAD 2>/dev/null || git merge-base origin/main HEAD
-git log <base>..HEAD --oneline
-git diff <base>...HEAD --stat
-git diff <base>...HEAD --name-only
-git diff <base>...HEAD
-```
+## Mapping & checks
 
-- Prefer **`main`**; if missing locally, use **`origin/main`** as `<base>` and state that in the report.
-- Use **`<base>...HEAD`** (three-dot) for the default branch diff.
-
-## Where rules live
-
-1. **Root `AGENTS.md`** — Already covered in [Before you review](#before-you-review); it may direct you to `.cursor/rules` or spell out team workflow.
-2. **`.cursor/rules/`** — If it exists (including subfolders), read **all** rule files — typically `*.md`, `*.mdc`, or `RULE.md` per folder.
-3. **This repository’s layout** — In the rules repo (or when present), read **`rules/**/RULE.md`** (and sibling rule docs).
-
-If **no** rules directory is found, say so explicitly — do **not** invent “team rules.”
-
-## Mapping changes to rules
-
-- Use **path and content**: e.g. `*.vue` → Vue rules, `**/composables/**` → composables, `*.scss` / `*.css` → styling, `*.ts` / `*.tsx` → TypeScript, `*.spec.*` / e2e / tests → testing, control flow → control-flow, imports → structured-imports / ordering-constants.
-- **alwaysApply** (or similar) frontmatter means: consider for **any** change, not only by extension.
-- Prefer **one rule citation per issue**: `rules/<topic>/RULE.md` → **heading or subsection name**.
-
-## What to check
-
-For each changed file (and meaningful hunk):
-
-1. **Requirements** from the relevant `RULE.md` sections.
-2. **Cross-cutting** rules: imports order, constants placement, tests, Vue/SCSS/TS patterns as written in rules.
-3. **Rules vs tests** — If **`rules/testing/RULE.md`** implies coverage (Playwright for user-facing flows / IndexedDB behaviour; Vitest only for pure `utils/` domain logic) and the diff **adds no** matching e2e or util-spec updates where that rule would expect them, add a **Should fix** or **Consider** item **with that rule cited**, unless the change is clearly non-logic (copy-only, types-only) or the rule says component unit tests are out of scope.
-4. **Obvious regressions** only when they **directly conflict** with a cited rule — not personal taste.
-
-**Not in rules** — If something looks risky or inconsistent but **no** `RULE.md` covers it, list it under [Report format](#report-format) **Not covered by rules** — do **not** treat it as a team standard.
-
-Skip or lightly note: generated lockfiles, binary assets, unless rules cover them.
+- Map by path/content to the matching rule(s); cite `rules/<topic>/RULE.md` → section.
+- `alwaysApply` rules apply to any change.
+- Per finding: rule requirement vs hunk. Cross-cutting: imports, control-flow, styling, testing.
+- **Tests:** follow `rules/testing/RULE.md` (no silent test edits expectation — missing coverage → Should fix / Consider when the rule implies it).
+- Risky but unruled → **Not covered by rules**, not Must fix.
 
 ## Report format
 
-Severity:
-
 | Level | Meaning |
-|--------|---------|
-| **Must fix** | Violates a stated rule or breaks a rule invariant |
-| **Should fix** | Strong rule misalignment or likely review rejection |
-| **Consider** | Minor deviation or optional rule |
-
-Structure:
+| --- | --- |
+| **Must fix** | Violates a stated rule |
+| **Should fix** | Strong misalignment / likely reject |
+| **Consider** | Minor / optional |
 
 ```markdown
-# Rules review: <scope description, e.g. branch vs main / staged / commits A..B>
+# Rules review: <scope>
 
 ## Summary
-- Diff: <exact git command(s)>, base ref(s) if any
-- Branch: <name>; commits in scope: N; files: M (from stat)
-- Merge/rebase warning: <if applicable, else omit>
-- Stale main note: <if local vs origin differed, else omit>
-- Rules read: <files or dirs>
+- Diff command(s), base ref, branch, file count
+- Rules read
+- Warnings (merge/rebase, stale main) if any
 
 ## Must fix
-…
-
 ## Should fix
-…
-
 ## Consider
-…
-
 ## Not covered by rules
-- <Optional: risks or smells with no matching RULE.md — not team law>
-
 ## Rules vs tests
-- <Optional: rule citation if tests likely missing per testing RULE.md>
-
 ## Compliant / no rule hit
-…
-
 ## Follow-ups
-- Tests or checks rules imply but diff cannot prove
 ```
 
-If the diff is **large**, group by **theme** (TypeScript, Vue, Styling, apps) and keep **rule citations** per finding.
-
-## After the review (optional)
-
-If the user will open or update a **GitHub PR**, they can follow **`skills/pr-create-or-update/SKILL.MD`** next — it does **not** replace this rules review.
+Large diffs: group by theme; keep citations per item.
 
 ## Constraints
 
-- Obey [Protection](#protection-nothing-on-main).
-- **Do not** edit the repo unless the user asks to apply fixes — and **do not** apply fixes on `main` (see protection).
-- **Do not** substitute for CI, security review, or product requirements — only **documented rules** plus the explicit **Not covered by rules** bucket.
-- Tone: precise, plain language, scannable lists (match other project skills).
+- Review only unless the user asks to apply fixes (never on `main`).
+- Not a substitute for CI, security, or product review.
+- Afterward (optional): `skills/pr-create-or-update/SKILL.MD` for the GitHub PR.
 
-## Optional Cursor command
+## Command
 
-See `commands/branch-review.md`.
+`commands/branch-review.md` invokes this skill.
