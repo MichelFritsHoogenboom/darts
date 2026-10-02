@@ -12,7 +12,7 @@ Also see root `AGENTS.md` for domain layout (`interfaces/`, `constants/`, `utils
 | `accessible-motion` | Only when changing motion. CSS first; `@mixin animation` resets `animation`/`transition` under reduced motion. VueUse only for JS-driven motion. |
 | `ssr-responsive` | Dexie/DOM client-only; responsive via CSS not `innerWidth`; avoid hydration mismatches (dev SSR / Pages SPA). |
 | `testing` | Playwright + DB fixtures primary; Vitest only for pure `utils/`. No test/scenario edits unless asked. Refuse commits that mix app + tests. |
-| `vue-global-rules` | SFC patterns: typed props/emits, reactive derived props, shorthands, lifecycle placement, no BEM. *Partly source copy* (atomic design, i18n, `withDefaults` ban) — not fully adapted. |
+| `vue-global-rules` | Feature + `atoms`/`molecules`/`organisms`; shared lifted cross-feature. No `withDefaults`. Original SFC examples kept (props, emits, templates, no BEM). |
 | `vue-accessibility` | Semantic HTML first; accessible names; keyboard; careful `aria-hidden`; disabled/loading for AT + keyboard. |
 | `composables` | `use*` naming, arrow functions, named exports, cleanup. *Partly source copy* — examples/paths may not match this repo. |
 | `typescript` | interface vs type, `import type`, utilities. Prefer `interfaces/` here (`AGENTS.md`), not `@types`. *Partly source copy*. |

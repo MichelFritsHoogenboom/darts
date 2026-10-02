@@ -1,5 +1,5 @@
 ---
-description: Vue SFCs — atomic design, props, script setup, lifecycle, templates
+description: Vue SFCs — feature + atomic folders, no withDefaults, script setup, templates
 globs:
   - "**/*.vue"
 alwaysApply: false
@@ -7,10 +7,23 @@ alwaysApply: false
 
 # Vue Global Rules
 
-## Naming components and folder location
+## Component structure (feature + atomic)
 
-We are using the ATOMIC design principle to structure our components. When a component uses an Atom, this atom becomes a molecule. If it uses a molecule it becomes an organism.
-This structure only applies for the components with the app specific `app/components` folder.
+Use **atomic design inside a feature folder**:
+
+```text
+components/<feature>/atoms/
+components/<feature>/molecules/
+components/<feature>/organisms/
+```
+
+Examples of `<feature>`: `games/x01`, `stats`, `head2head`, `setup`.
+
+**Promotion rule:** when a component uses an Atom, it becomes a molecule; when it uses a molecule, it becomes an organism — **within that feature**.
+
+**Shared across features:** lift to a shared place (e.g. `components/ui/atoms/…` or `components/form/atoms/…`). Do not duplicate shared controls per feature.
+
+**Existing tree:** do not big-bang relocate the whole repo. **New** components follow this layout; move/touch files toward it when you edit them.
 
 ## Defining properties
 
