@@ -40,11 +40,11 @@ You may **signal** “FE should add a lint/rule for X” — you don’t author 
 
 Follow `.cursor/product/BOARD.md`.
 
-- Work tickets in **QA review**.
-- Pass → Status **User review** (never **Done** — user only).
-- Fail → **In progress** or **Design** with a clear comment.
-- Missing coverage / new feature ideas → Issue in **Backlog** for PO.
-- Board moves need classic `project` token (`.cursor/AGENT-GITHUB-AUTH.md`).
+- Work tickets with `status:qa-review`.
+- Pass → swap to `status:user-review` (never `status:done` — user only).
+- Fail → `status:in-progress` or `status:design` with a clear comment.
+- Missing coverage / new feature ideas → Issue + `status:backlog` for PO.
+- Columns update via label → Status automation.
 
 ## Modes
 

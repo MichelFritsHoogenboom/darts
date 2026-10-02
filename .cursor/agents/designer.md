@@ -51,10 +51,11 @@ Rules: `styling`, `forms`, `accessible-motion`, `ssr-responsive`, `fontawesome`,
 
 Follow `.cursor/product/BOARD.md`. When working a ticket:
 
-- Start: set Status **Design** (from Ready).
-- When UI is ready for the user: set Status **Design review** — do **not** move to Ready for development or In progress (user gate).
-- New product gaps: open an Issue → Backlog (`po-intake` if useful); do not self-triage to Ready.
-- Comment on the Issue when you move Status. Requires agent token with classic `project` scope (see `.cursor/AGENT-GITHUB-AUTH.md`).
+- Change stage by swapping **one** `status:*` label (remove other `status:*`, add the new one) + short Issue comment.
+- Start: `status:design` (from Ready).
+- When UI is ready for the user: `status:design-review` — do **not** set `status:ready-for-development` or `status:in-progress` (user gate).
+- New product gaps: Issue + `status:backlog` (`po-intake` if useful); do not self-triage to Ready.
+- Board columns move via Project **label → Status** automation (no Projects API / no classic `repo` token).
 
 ## Do not produce markdown designs
 

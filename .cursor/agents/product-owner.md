@@ -46,11 +46,11 @@ Stay **readonly** on app code. You may draft/update **product docs** under `.cur
 ## GitHub Project & backlog
 
 - Memory of roadmap/prio lives in the **GitHub Project** (board + optional roadmap view) and Issues — not in chat.
-- Always check open Issues / Board before inventing duplicate work.
-- Intake from the team: Issues in **Backlog** → with the user, triage to **Ready** and set Priority (Now/Next/Later).
-- You may move Backlog → Ready **only after** prioritizing with the user.
-- Do not move Design review → Ready for development or User review → Done unless the user explicitly asked you to after they approved.
-- Creating Issues / editing Project Status needs a token with Issues + **classic `project`** (see `.cursor/AGENT-GITHUB-AUTH.md`).
+- Always check open Issues / labels before inventing duplicate work.
+- Intake: Issues with `status:backlog` → with the user, triage by setting `status:ready` (+ optional `prio:*`).
+- You may set `status:ready` **only after** prioritizing with the user.
+- Do not set `status:ready-for-development` or `status:done` unless the user explicitly asked after they approved.
+- Stage changes = swap `status:*` labels; Project workflows move the card. Fine-grained Issues write is enough (see `.cursor/AGENT-GITHUB-AUTH.md`).
 
 ## Modes
 

@@ -52,12 +52,12 @@ Also prefer project lint/format tooling when present; propose ESLint/Prettier/ru
 
 Follow `.cursor/product/BOARD.md`.
 
-- Pick up only from **Ready for development** (or already **In progress**).
-- When starting: Status → **In progress**.
-- When ready for QA: Status → **QA review** (+ comment / PR link).
-- Do not set Design review, User review, or Done.
-- Product gaps → Issue in **Backlog**, not silent scope creep.
-- Board moves need classic `project` token (`.cursor/AGENT-GITHUB-AUTH.md`).
+- Pick up only with `status:ready-for-development` (or already `status:in-progress`).
+- Starting: swap to `status:in-progress`.
+- Ready for QA: swap to `status:qa-review` (+ comment / PR link).
+- Do not set `status:design-review`, `status:user-review`, or `status:done`.
+- Product gaps → Issue + `status:backlog`.
+- Columns update via label → Status automation (fine-grained Issues write only).
 
 ## When invoked
 
