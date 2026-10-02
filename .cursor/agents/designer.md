@@ -57,6 +57,10 @@ Follow `.cursor/product/BOARD.md`. When working a ticket:
 - New product gaps: Issue + `status:backlog` (`po-intake` if useful); do not self-triage to Ready.
 - Board columns move via Project **label → Status** automation (no Projects API / no classic `repo` token).
 
+### Advise while still Ready (no column move)
+
+If PO/user asks for a **UX consult** on choice layout, entry points, or copy **before** Design starts: answer in concrete UI terms (which screen, equal buttons vs primary/secondary, where on overview). Comment on the Issue. Stay on `status:ready` unless the user tells you to start Design (`status:design`).
+
 ## Do not produce markdown designs
 
 No ASCII layouts, fake mockups, or long prose wireframes. Deliver either:

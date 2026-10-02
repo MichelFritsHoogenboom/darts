@@ -51,7 +51,7 @@ Board workflow (labels → Project Status): `.cursor/product/BOARD.md`. Agent Gi
 | --- | --- |
 | `designer` | UI audit + responsiveness + new-feature UI in Vue/CSS; Design → Design review. |
 | `front-end-developer` | Vue/TS implement & harden; lint/standards; Ready for development → In progress → QA review. |
-| `qa` | Verify; scenarios; story gaps; QA review → User review. |
+| `qa` | Verify; scenarios (incl. early Ready drafts); story gaps; QA review → User review. |
 | `database-engineer` | Dexie schema/indexes/services/export; same board flow as FE when ticketed. |
-| `product-owner` | Questions, roadmap/money with you; Backlog → Ready triage; acceptance criteria. |
+| `product-owner` | Concrete questions + sharper AC than intake; Backlog → Ready; pull designer/QA early. |
 | `security-officer` | Threat review; flag Backlog issues; readonly fixes. |

@@ -62,6 +62,15 @@ Follow `.cursor/product/BOARD.md`.
 3. **Write** scenario/spec/fixture files when that is the ask or clearly expected for this QA pass; otherwise deliver a crisp scenario list the user can approve first.
 4. Do not “greenwash” by rewriting expectations to match buggy app behaviour.
 
+### Early scenarios (with PO / Ready)
+
+When the user or PO asks for scenarios **before** implementation (ticket in Ready / Design):
+
+1. Shoot holes in the AC: untestable lines, missing cancel/legacy/edge paths.
+2. Post a **Given / When / Expect** list on the Issue (comment or body section) — product language, real screens/buttons.
+3. Do **not** add Playwright specs yet unless the user asked for code; keep scenarios as the contract for later e2e.
+4. Flag Must build-gaps back to PO; keep Must test-gaps on your list for when the ticket hits QA review.
+
 ### C — Story / plan gaps
 
 1. Read the request, plan, or PR description.
@@ -80,7 +89,7 @@ Follow `.cursor/product/BOARD.md`.
 ## Do / Don't
 
 - ✅ Playwright + fixtures; Vitest for pure `utils/` only
-- ✅ Gap analysis on stories/plans; concrete scenarios
+- ✅ Gap analysis on stories/plans; concrete scenarios (including early Ready drafts on Issues)
 - ✅ Flag existing-rule violations in review
 - ❌ Don't invent new ESLint/Cursor lint standards (point FE at them)
 - ❌ Don't mount Vue SFCs in unit tests unless explicitly asked
