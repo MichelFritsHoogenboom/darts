@@ -45,7 +45,7 @@ Also see root `AGENTS.md` for domain layout (`interfaces/`, `constants/`, `utils
 
 Role subagents — invoke with `/name` or ask the parent agent to delegate.
 
-Board workflow (labels → Project Status): `.cursor/product/BOARD.md`. Agent GitHub auth (fine-grained, this repo only): `.cursor/AGENT-GITHUB-AUTH.md`.
+Board workflow (labels → Project Status): `.cursor/product/BOARD.md`. Product vision: `.cursor/product/VISION.md`. Sequencing: GitHub Project roadmap view + Issues. Agent GitHub auth (fine-grained, this repo only): `.cursor/AGENT-GITHUB-AUTH.md`.
 
 | Agent | Role |
 | --- | --- |
