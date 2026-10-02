@@ -15,7 +15,7 @@ Also see root `AGENTS.md` for domain layout (`interfaces/`, `constants/`, `utils
 | `vue-global-rules` | Feature + `atoms`/`molecules`/`organisms`; shared lifted cross-feature. No `withDefaults`. Original SFC examples kept (props, emits, templates, no BEM). |
 | `vue-accessibility` | Semantic HTML first; accessible names; keyboard; careful `aria-hidden`; disabled/loading for AT + keyboard. |
 | `composables` | `use*` + matching filename; arrow functions; named exports; cleanup. No required `index.ts` (Nuxt auto-import). Pure helpers → `utils/`. |
-| `typescript` | interface vs type, `import type`, utilities. Prefer `interfaces/` here (`AGENTS.md`), not `@types`. *Partly source copy*. |
+| `typescript` | interface vs type, `import type`, utilities, arrow exports. Types in `interfaces/`, catalogs in `constants/` (`AGENTS.md`). |
 | `structured-imports` | Group imports: Vendor → Types → Constants → Composables → Components → Utils (comment separators). |
 | `ordering-constants` | In SFCs: props → emits → constants → composables → refs → computed → methods. |
 | `control-flow` | Braces on every `if`/`else`; no single-line if; prefer early returns. |

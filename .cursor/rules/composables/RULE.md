@@ -10,13 +10,13 @@ alwaysApply: false
 ## Naming Conventions
 
 - **Use `use` prefix** for composables that return reactive state, computed properties, or methods (e.g., `useCountdown`, `useFormField`, `useImageConfig`)
-- **Use descriptive names** for formatting/transformation functions (e.g., `useFormatBreadcrumbs`, `useFormatPrice`, `useFindHeadingsByType`)
+- **Use descriptive names** for formatting/transformation functions (e.g., `useFormatPlayerNames`, `useFormatMatchLabel`)
 - **Use camelCase** for all function names
 - **Use arrow functions** for composables and helpers — do not use `function` declarations
 
 ### File naming
 
-- **Composable files** must be named to match the main exported function: `useXxx.ts` for composables (e.g. `useInitials.ts`, `useCountdown.ts`). This keeps filenames and exports aligned and makes composables easy to find.
+- **Composable files** must be named to match the main exported function: `useXxx.ts` for composables (e.g. `usePlayers.ts`, `useScores.ts`). This keeps filenames and exports aligned and makes composables easy to find.
 
 **Examples:**
 
@@ -27,7 +27,7 @@ export const useCountdown = (targetDate: Date | string) => {
 };
 
 // ✅ Formatting function (arrow function)
-export const useFormatBreadcrumbs = (page: {...}, useShortTitle = true) => {
+export const useFormatPlayerNames = (players: Player[], useNickname = true) => {
     // ...
 };
 ```
@@ -42,12 +42,12 @@ export const useFormatBreadcrumbs = (page: {...}, useShortTitle = true) => {
 
 ```typescript
 // Helper (arrow function)
-const ensureParentArray = (parent: PageParentFragment | PageParentFragment[] | undefined): PageParentFragment[] => {
+const ensurePlayerList = (players: Player | Player[] | undefined): Player[] => {
     // ...
 };
 
 // Main composable (arrow function)
-export const useFormatBreadcrumbs = (page: {...}, useShortTitle = true) => {
+export const useFormatPlayerNames = (players: Player[], useNickname = true) => {
     // ...
     return {
         // public API
@@ -231,16 +231,14 @@ export const useFormField = (options: UseFormFieldOptions = {}) => {
   // ...
 };
 
-const getProductVariants = async (productCode?: string) => {
+const loadMatchScores = async (matchId?: string) => {
   try {
     loading.value = true;
-    const data: Product = await $fetch("/api/sylius-product-variants", {
-      // ...
-    });
-    productData.value = data;
+    const data: Score[] = await scoreService.getForMatch(matchId);
+    scores.value = data;
     return data;
   } catch (error) {
-    errorFetchingProductData.value = true;
+    errorLoadingScores.value = true;
     return;
   } finally {
     loading.value = false;

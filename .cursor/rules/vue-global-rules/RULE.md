@@ -48,7 +48,7 @@ Plain setup assignments run once. If the same component instance later receives 
 ```vue
 <script setup lang="ts">
 const { data } = defineProps<{
-  data: CollectionFragment;
+  data: MatchSummary;
 }>();
 
 const displayItems = computed(() => {
@@ -66,7 +66,7 @@ useSomeScroller({ itemCount });
 ```vue
 <script setup lang="ts">
 const { data } = defineProps<{
-  data: CollectionFragment;
+  data: MatchSummary;
 }>();
 
 const itemCount = data.items.length; // snapshot — will not track prop updates
