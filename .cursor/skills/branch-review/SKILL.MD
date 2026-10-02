@@ -81,7 +81,6 @@ If **no** rules directory is found, say so explicitly — do **not** invent “t
 ## Mapping changes to rules
 
 - Use **path and content**: e.g. `*.vue` → Vue rules, `**/composables/**` → composables, `*.scss` / `*.css` → styling, `*.ts` / `*.tsx` → TypeScript, `*.spec.*` / e2e / tests → testing, control flow → control-flow, imports → structured-imports / ordering-constants.
-- **Monorepo / multi-app:** if the diff touches several **`apps/*`** (or multiple packages), apply **per-app** and **shared package** expectations when rules distinguish them; call out cross-app impact briefly in the summary when relevant.
 - **alwaysApply** (or similar) frontmatter means: consider for **any** change, not only by extension.
 - Prefer **one rule citation per issue**: `rules/<topic>/RULE.md` → **heading or subsection name**.
 

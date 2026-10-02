@@ -27,12 +27,12 @@ Use the element that matches the meaning. Do not fake controls with `div` / `spa
 ```vue
 <!-- ❌ BAD -->
 <div class="close" @click="close">Close</div>
-<span class="link" @click="goToProduct">{{ name }}</span>
+<span class="link" @click="goToMatch">{{ name }}</span>
 <a href="#" @click.prevent="save">Save</a>
 
 <!-- ✅ GOOD -->
 <button type="button" class="close" @click="close">Close</button>
-<a :href="productUrl">{{ name }}</a>
+<a :href="matchUrl">{{ name }}</a>
 <button type="button" @click="save">Save</button>
 ```
 
