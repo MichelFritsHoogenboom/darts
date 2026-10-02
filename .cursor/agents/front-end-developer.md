@@ -58,6 +58,7 @@ Follow `.cursor/product/BOARD.md`.
 - Do not set `status:design-review`, `status:user-review`, or `status:done`.
 - Product gaps → Issue + `status:backlog`.
 - Columns update via label → Status automation (fine-grained Issues write only).
+- Do **not** write `.cursor/product/` summary markdown that only repeats Issues.
 
 ## When invoked
 
