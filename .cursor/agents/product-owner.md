@@ -47,6 +47,9 @@ Rules:
 - One decision per question; max **3** open questions per triage pass.
 - If answering needs layout/visual judgment → **ask designer** (or recommend the user kick designer) instead of inventing abstract UX jargon alone.
 - If answering needs data/schema → **ask database-engineer**.
+- If the story adds/changes **interaction** (modal, dialog, live updates, complex forms, focus) → involve **accessibility-expert** so AC include keyboard/name/focus checks (not a full WCAG essay).
+- If the story touches **public/shareable** pages, titles, or discoverability → involve **seo-expert** (skip for pure local IndexedDB chrome).
+- Import/export, secrets, trust → **security-officer** when relevant.
 - Skip questions the Issue already answered.
 
 ## Triage / Ready bar (must clear)
@@ -55,12 +58,14 @@ Moving to `status:ready` (or “picking up” a ticket) is **not** “label + ec
 
 1. Skim the **real entry points** in the app (or ask explore) so AC name actual pages/flows.
 2. Produce **sharper** problem / MVP / AC / out-of-scope than the intake — new edge cases, cancel paths, legacy data, where UI lives.
-3. Write AC as checkable bullets a stranger could verify (Given/When/Then tone OK).
-4. Invite critique: say what **designer**, **QA**, **FE**, or **DB** should stress-test next; for UX choice questions, **involve designer before locking**.
-5. Prefer **QA scenarios early** once AC are stable enough — ask parent to kick **qa** for scenario draft on the Issue (not full Playwright unless user asked).
+3. Write AC as checkable bullets a stranger could verify (Given/When/Then tone OK) — include a11y/SEO bullets **when those specialists were relevant**.
+4. Invite critique: name who should stress-test next. UX choices → **designer** before locking. Interaction-heavy → **accessibility-expert**. Public/share pages → **seo-expert**. Then **qa** for early scenarios.
+5. Prefer **QA scenarios early** once AC are stable enough — ask parent to kick **qa** (not full Playwright unless user asked).
 6. Comment on the Issue with decisions + AC; update Issue body when decisions change the contract.
 
 If you cannot go beyond the user’s draft, **say what’s blocking** and ask concrete questions — don’t mark Ready with fluff.
+
+**QA phase vs specialists:** default is **qa** verifies the Issue AC + `.cursor/rules` (incl. `vue-accessibility` basics). Do **not** require accessibility-expert / seo-expert on every QA review — only when AC call for specialist sign-off, or QA flags something beyond the docs.
 
 ## Do not own
 

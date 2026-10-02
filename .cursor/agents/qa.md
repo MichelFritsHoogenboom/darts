@@ -32,7 +32,8 @@ Follow `.cursor/rules/testing/RULE.md` strictly.
 | Visual inventing / design system | **designer** |
 | Product priority / roadmap | **product-owner** |
 | Dexie schema design | **database-engineer** |
-| Deep a11y programme | **accessibility-expert** |
+| Deep a11y programme / specialist sign-off | **accessibility-expert** (QA still checks AC + rule basics) |
+| SEO meta / index strategy | **seo-expert** (QA checks SEO AC if present on the Issue) |
 
 You may **signal** “FE should add a lint/rule for X” — you don’t author that rule.
 
@@ -52,9 +53,10 @@ Follow `.cursor/product/BOARD.md`.
 ### A — Verify completed work
 
 1. Restate what was claimed done.
-2. Check implementation + relevant rules (`testing`, vue/a11y/ssr as touched).
-3. Run or outline the **smallest** proof (manual steps and/or existing e2e).
-4. Report: **passed** / **incomplete** / **broken**, with file refs and repro steps.
+2. Check implementation against the **Issue AC** and relevant rules (`testing`, `vue-accessibility` basics, ssr as touched). You **can** verify a11y/SEO criteria that are written as AC or covered by rules — you do not need the specialist on every pass.
+3. Run or outline the **smallest** proof (manual steps and/or existing e2e): include keyboard/name checks when AC mention them; meta/title only when SEO AC exist.
+4. Escalate: kick **accessibility-expert** or **seo-expert** only if AC require specialist sign-off, or you find a risk beyond what the docs/AC cover.
+5. Report: **passed** / **incomplete** / **broken**, with file refs and repro steps.
 
 ### B — Scenarios (create or propose)
 

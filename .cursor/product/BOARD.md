@@ -61,5 +61,6 @@ Optional prio labels: `prio:now` / `prio:next` / `prio:later`.
 2. Stage change → swap `status:*` + short comment.
 3. Do not call Projects GraphQL from the agent.
 4. You kick agents per column; they do not watch the board.
-5. **Ready bar:** PO must sharpen AC beyond the intake (concrete screens/controls). UX choice questions → involve **designer**. Once AC are usable → kick **qa** for early Given/When/Expect scenarios on the Issue.
-6. **No duplicate product markdown:** when findings/work are already GitHub Issues (or Issue comments), do **not** also write an index/summary under `.cursor/product/`. Issues are enough. Keep `.cursor/product/` for lasting process docs (e.g. this board), not ticket dumps.
+5. **Ready bar:** PO must sharpen AC beyond the intake (concrete screens/controls). Involve specialists **when relevant**: **designer** (UX choices), **accessibility-expert** (new/changed interaction), **seo-expert** (public/share pages), **db** / **security** as needed. Once AC are usable → kick **qa** for early Given/When/Expect on the Issue.
+6. **QA review:** **qa** checks the Issue AC + project rules/docs (incl. basic a11y from `vue-accessibility`). Kick **accessibility-expert** / **seo-expert** only if AC require specialist sign-off or QA hits something beyond the docs — not on every ticket.
+7. **No duplicate product markdown:** when findings/work are already GitHub Issues (or Issue comments), do **not** also write an index/summary under `.cursor/product/`. Issues are enough. Keep `.cursor/product/` for lasting process docs (e.g. this board), not ticket dumps.

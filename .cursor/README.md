@@ -55,3 +55,5 @@ Board workflow (labels → Project Status): `.cursor/product/BOARD.md`. Agent Gi
 | `database-engineer` | Dexie schema/indexes/services/export; same board flow as FE when ticketed. |
 | `product-owner` | Concrete questions + sharper AC than intake; Backlog → Ready; pull designer/QA early. |
 | `security-officer` | Threat review; flag Backlog issues; readonly fixes. |
+| `accessibility-expert` | Deep a11y audits vs `vue-accessibility`; backlog Issues; hand off fixes to FE/designer. |
+| `seo-expert` | Pragmatic SEO/meta for GH Pages SPA; public vs app chrome; backlog Issues. |
