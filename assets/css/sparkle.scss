@@ -1,3 +1,5 @@
+@use "~/assets/css/utilities/animation" as *;
+
 @keyframes icon-sparkle-glow {
   0%,
   100% {
@@ -29,11 +31,13 @@
 
   &::before,
   &::after {
-    @apply absolute rounded-full bg-amber-200 pointer-events-none;
-    content: "";
-    width: 3px;
-    height: 3px;
-    animation: icon-sparkle-twinkle 2.4s ease-in-out infinite;
+    @include animation {
+      @apply absolute rounded-full bg-amber-200 pointer-events-none;
+      content: "";
+      width: 3px;
+      height: 3px;
+      animation: icon-sparkle-twinkle 2.4s ease-in-out infinite;
+    }
   }
 
   &::before {
@@ -48,15 +52,9 @@
   }
 
   :deep(svg) {
-    animation: icon-sparkle-glow 2.4s ease-in-out infinite;
-    transform: skewX(-8deg);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    &::before,
-    &::after,
-    :deep(svg) {
-      animation: none;
+    @include animation {
+      animation: icon-sparkle-glow 2.4s ease-in-out infinite;
+      transform: skewX(-8deg);
     }
   }
 }
