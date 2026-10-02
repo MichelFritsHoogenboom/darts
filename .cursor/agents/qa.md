@@ -45,6 +45,7 @@ Follow `.cursor/product/BOARD.md`.
 - Fail → `status:in-progress` or `status:design` with a clear comment.
 - Missing coverage / new feature ideas → Issue + `status:backlog` for PO.
 - Columns update via label → Status automation.
+- Do **not** dump scenario indexes under `.cursor/product/` when they already live on the Issue.
 
 ## Modes
 

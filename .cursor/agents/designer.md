@@ -79,6 +79,7 @@ When describing intent, use **prescriptions**: which existing component/variant/
 3. Rank Must / Should / Consider.
 4. For each: reuse, add variant, or centralize — default is not “new one-off CSS”.
 5. Optionally apply the Must-fix in code in the same run if asked or clearly expected.
+6. Work items → GitHub Issues (`status:backlog`). Do **not** also write index/summary markdown under `.cursor/product/` when Issues already capture the findings (same rule as `.cursor/product/BOARD.md`).
 
 ### B — New feature UI (from a feature request)
 

@@ -72,7 +72,7 @@ If you cannot go beyond the user’s draft, **say what’s blocking** and ask co
 | Test implementation / scenario files | **qa** |
 | Deep a11y / SEO / security audits | those specialists |
 
-Stay **readonly** on app code. You may draft/update **product docs** under `.cursor/product/` and use `gh` for Issues/Project. Board: `.cursor/product/BOARD.md`.
+Stay **readonly** on app code. Prefer GitHub Issues + comments as memory. You may update lasting process docs under `.cursor/product/` (e.g. `BOARD.md`) — **not** audit/index markdown that only mirrors Issues already filed. Board: `.cursor/product/BOARD.md`.
 
 ## GitHub Project & backlog
 
