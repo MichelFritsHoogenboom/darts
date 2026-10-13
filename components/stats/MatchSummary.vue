@@ -4,10 +4,15 @@ import {
   faTrash,
   faMagnifyingGlassChart,
   faClipboard,
+  faChartLine,
 } from "@fortawesome/free-solid-svg-icons";
 import { faPlay } from "~/assets/icons/faPlay";
 import type { Match } from "~/interfaces/match";
-import type { MatchPanel } from "~/interfaces/matchSummary";
+import type {
+  MatchAverageChartLegInput,
+  MatchAverageChartPoint,
+  MatchPanel,
+} from "~/interfaces/matchSummary";
 import type { Set } from "~/interfaces/set";
 import type { Leg, PlayerLeg, Score } from "~/interfaces/leg";
 import type { PlayerStats } from "~/interfaces/stats";
@@ -18,9 +23,11 @@ import {
 } from "~/utils/match";
 import { MATCH_TYPE_META } from "~/constants/match";
 import { MATCH_PANEL } from "~/constants/matchSummary";
+import { buildMatchAverageChartSeries } from "~/utils/averages";
 import { routes } from "~/utils/routes";
 import LegSummary from "./LegSummary.vue";
 import SetSummary from "./SetSummary.vue";
+import MatchAverageChart from "./MatchAverageChart.vue";
 
 const { match, openDetails = false } = defineProps<{
   match: Match;
@@ -167,6 +174,33 @@ onBeforeMount(async () => {
   hasScores.value = scores.length > 0;
   matchPlayerStats.value = await getPlayerStatsForMatch(match.id);
 });
+
+const chartLegsForPlayer = (playerId: string): MatchAverageChartLegInput[] => {
+  if (match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets) {
+    return setsWithLegs.value.flatMap((setData, setIndex) =>
+      setData.legsWithScores.map((legData) => ({
+        scores: legData.scoresByPlayer[playerId] ?? [],
+        setIndex,
+      })),
+    );
+  }
+
+  return legsWithScores.value.map((legData) => ({
+    scores: legData.scoresByPlayer[playerId] ?? [],
+  }));
+};
+
+const chartSeriesByPlayerId = computed(
+  (): Record<string, MatchAverageChartPoint[]> => {
+    const series: Record<string, MatchAverageChartPoint[]> = {};
+    for (const player of toValue(players)) {
+      series[player.id] = buildMatchAverageChartSeries(
+        chartLegsForPlayer(player.id),
+      );
+    }
+    return series;
+  },
+);
 </script>
 
 <template>
@@ -195,7 +229,6 @@ onBeforeMount(async () => {
         :players="[...players]"
         :player-stats="matchPlayerStats"
         :winner-id="match.winner"
-        :show-badge="false"
       >
         <UiStatWellValue size="large">
           {{ players[0] ? getPlayerWinnerCount(players[0].id, matchGame) : 0 }}
@@ -227,6 +260,16 @@ onBeforeMount(async () => {
         @click="togglePanel(MATCH_PANEL.stats)"
       >
         <FontAwesomeIcon :icon="faMagnifyingGlassChart" class="w-4 h-4" />
+      </button>
+      <button
+        type="button"
+        class="btn-gray px-1"
+        :class="{ 'bg-gray-500': isPanel(MATCH_PANEL.chart) }"
+        :title="isPanel(MATCH_PANEL.chart) ? 'Hide chart' : 'Show chart'"
+        :aria-label="isPanel(MATCH_PANEL.chart) ? 'Hide chart' : 'Show chart'"
+        @click="togglePanel(MATCH_PANEL.chart)"
+      >
+        <FontAwesomeIcon :icon="faChartLine" class="w-4 h-4" />
       </button>
       <NuxtLink
         v-if="!match.winner"
@@ -272,6 +315,13 @@ onBeforeMount(async () => {
 
     <div v-else-if="isPanel(MATCH_PANEL.stats)" class="mt-2 match-stats">
       <StatsComparison :match-id="match.id" />
+    </div>
+
+    <div v-else-if="isPanel(MATCH_PANEL.chart)" class="mt-2 match-chart">
+      <MatchAverageChart
+        :players="[...players]"
+        :series-by-player-id="chartSeriesByPlayerId"
+      />
     </div>
   </UiSummaryCardLayout>
 </template>
