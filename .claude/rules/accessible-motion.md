@@ -1,0 +1,1 @@
+../../.cursor/rules/accessible-motion/RULE.md

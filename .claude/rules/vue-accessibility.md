@@ -1,0 +1,1 @@
+../../.cursor/rules/vue-accessibility/RULE.md

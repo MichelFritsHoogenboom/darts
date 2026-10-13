@@ -44,7 +44,7 @@ Ambiguous → prefer branch vs `main`, unless that hits [Protection](#protection
 - Map by path/content to the matching rule(s); cite `rules/<topic>/RULE.md` → section.
 - `alwaysApply` rules apply to any change.
 - Per finding: rule requirement vs hunk. Cross-cutting: imports, control-flow, styling, testing.
-- **Tests:** follow `rules/testing/RULE.md` (no silent test edits expectation — missing coverage → Should fix / Consider when the rule implies it).
+- **Tests:** follow `.cursor/rules/testing/RULE.md` (no silent test edits expectation — missing coverage → Should fix / Consider when the rule implies it).
 - Risky but unruled → **Not covered by rules**, not Must fix.
 
 ## Report format
@@ -78,7 +78,7 @@ Large diffs: group by theme; keep citations per item.
 
 - Review only unless the user asks to apply fixes (never on `main`).
 - Not a substitute for CI, security, or product review.
-- Afterward (optional): `skills/pr-create-or-update/SKILL.MD` for the GitHub PR.
+- Afterward (optional): `.cursor/skills/pr-create-or-update/SKILL.MD` for the GitHub PR.
 
 ## Command
 

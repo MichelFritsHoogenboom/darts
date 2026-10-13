@@ -1,6 +1,10 @@
+---
+description: Create or update the GitHub PR for the current branch via gh
+---
+
 # Create or update PR on GitHub
 
-Apply the project skill **pr-create-or-update**: read `skills/pr-create-or-update/SKILL.MD` and follow it for the **current branch**, including the **GitHub CLI (`gh`)** section.
+Apply the project skill **pr-create-or-update**: read `.cursor/skills/pr-create-or-update/SKILL.MD` and follow it for the **current branch**, including the **GitHub CLI (`gh`)** section.
 
 - If `.github/pull_request_template.md` exists → follow the skill’s **Source of truth** rules (headings character-for-character, no invented sections).
 - If not → follow **When there is no pull_request_template.md** (English body with **only** `## Summary` and `## Test plan`).

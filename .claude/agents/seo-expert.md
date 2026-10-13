@@ -1,0 +1,1 @@
+../../.cursor/agents/seo-expert.md

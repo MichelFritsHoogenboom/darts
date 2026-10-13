@@ -5,6 +5,11 @@ globs:
   - "**/composables/**/*.ts"
   - "**/*.spec.ts"
   - "**/__tests__/**/*.ts"
+paths:
+  - "**/*.vue"
+  - "**/composables/**/*.ts"
+  - "**/*.spec.ts"
+  - "**/__tests__/**/*.ts"
 alwaysApply: false
 ---
 

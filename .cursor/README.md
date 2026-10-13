@@ -1,6 +1,10 @@
 # Cursor config — darts
 
-Project-local Cursor rules, commands, and skills for this Nuxt darts app. Not a shared/global team ruleset.
+Project-local rules, commands, and skills for this Nuxt darts app. Not a shared/global team ruleset.
+
+**This folder is the single source for Claude Code too.** `.claude/` mirrors it with symlinks, and
+every file here carries both tools' frontmatter (`globs:` for Cursor, `paths:` for Claude Code).
+Edit files here, never a copy — see [`.claude/README.md`](../.claude/README.md).
 
 Also see root `AGENTS.md` for domain layout (`interfaces/`, `constants/`, `utils/`, no BEM).
 
@@ -8,6 +12,8 @@ Also see root `AGENTS.md` for domain layout (`interfaces/`, `constants/`, `utils
 
 | Rule | What it covers |
 | --- | --- |
+| `ponytail` | Always on. Simplest solution that works: YAGNI → reuse → stdlib → platform → installed dep → one line. Root-cause fixes, shortest correct diff. From `frontend-ai-rules`. |
+| `bundle-splitting` | `manualChunks` in `nuxt.config.ts` (client-only by construction), not in `vite:extendConfig`. Measured wins only; keep the list in sync with `package.json`. From `frontend-ai-rules`. |
 | `styling` | Component first → else CSS utility in `assets/css/utilities/` → else scoped. No BEM. Tailwind for coarse layout only; tokens over hardcoded colors. |
 | `accessible-motion` | Only when changing motion. CSS first; `@mixin animation` resets `animation`/`transition` under reduced motion. VueUse only for JS-driven motion. |
 | `ssr-responsive` | Dexie/DOM client-only; responsive via CSS not `innerWidth`; avoid hydration mismatches (dev SSR / Pages SPA). |
@@ -20,7 +26,7 @@ Also see root `AGENTS.md` for domain layout (`interfaces/`, `constants/`, `utils
 | `vue-global-rules` | Feature + `atoms`/`molecules`/`organisms`; shared lifted cross-feature. No `withDefaults`. Original SFC examples kept (props, emits, templates, no BEM). |
 | `vue-accessibility` | Semantic HTML first; accessible names; keyboard; careful `aria-hidden`; disabled/loading for AT + keyboard. |
 | `composables` | `use*` + matching filename; arrow functions; named exports; cleanup. No required `index.ts` (Nuxt auto-import). Pure helpers → `utils/`. |
-| `typescript` | interface vs type, `import type`, utilities, arrow exports. Types in `interfaces/`, catalogs in `constants/` (`AGENTS.md`). |
+| `typescript` | `.ts` files only — interface vs type, `import type`, utilities, arrow exports. Types in `interfaces/`, catalogs in `constants/` (`AGENTS.md`). SFC typing lives in `vue-global-rules`. |
 | `structured-imports` | Group imports: Vendor → Types → Constants → Composables → Components → Utils (comment separators). Examples use `~/interfaces`, `~/composables`, `~/utils`. |
 | `ordering-constants` | In SFCs: props → emits → constants → composables → refs → computed → methods. |
 | `control-flow` | Braces on every `if`/`else`; no single-line if; prefer early returns. |

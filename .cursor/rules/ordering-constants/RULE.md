@@ -2,6 +2,8 @@
 description: Declaration order in Vue SFCs — props, emits, constants, refs, composables, computed, methods
 globs:
   - "**/*.vue"
+paths:
+  - "**/*.vue"
 alwaysApply: false
 ---
 
