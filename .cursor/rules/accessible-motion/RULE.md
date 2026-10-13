@@ -4,6 +4,10 @@ globs:
   - "**/*.vue"
   - "**/*.scss"
   - "**/*.css"
+paths:
+  - "**/*.vue"
+  - "**/*.scss"
+  - "**/*.css"
 alwaysApply: false
 ---
 

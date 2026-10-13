@@ -1,3 +1,8 @@
+---
+description: Run the commit workflow, then push (never on main)
+disable-model-invocation: true
+---
+
 # Git Commit and Push Workflow
 
 1. Execute the `/commit` command. If that command **refuses** (e.g. mixed app + tests/scenarios), stop — do not push and do not auto-split.

@@ -2,6 +2,8 @@
 description: Vue templates — semantics, names/ARIA, keyboard, disabled/loading states
 globs:
   - "**/*.vue"
+paths:
+  - "**/*.vue"
 alwaysApply: false
 ---
 

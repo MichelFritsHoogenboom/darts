@@ -1,0 +1,1 @@
+../../.cursor/rules/forms/RULE.md

@@ -1,0 +1,1 @@
+../../.cursor/rules/composables/RULE.md

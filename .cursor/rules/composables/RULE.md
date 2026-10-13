@@ -2,6 +2,8 @@
 description: Composable naming, structure, and patterns (use* in composables/)
 globs:
   - "**/composables/**/*.ts"
+paths:
+  - "**/composables/**/*.ts"
 alwaysApply: false
 ---
 

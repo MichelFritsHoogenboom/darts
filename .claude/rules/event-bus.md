@@ -1,0 +1,1 @@
+../../.cursor/rules/event-bus/RULE.md

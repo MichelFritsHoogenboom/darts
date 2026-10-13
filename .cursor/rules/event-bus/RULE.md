@@ -4,6 +4,10 @@ globs:
   - "**/*.vue"
   - "composables/**/*.ts"
   - "plugins/eventEmitter*.ts"
+paths:
+  - "**/*.vue"
+  - "composables/**/*.ts"
+  - "plugins/eventEmitter*.ts"
 alwaysApply: false
 ---
 

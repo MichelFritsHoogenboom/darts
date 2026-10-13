@@ -6,7 +6,9 @@ description: >-
   and pragmatic SEO for public marketing vs private app chrome. Use when
   shipping public pages, sharing links, or foundation SEO setup.
 model: inherit
+# readonly: Cursor enforces this; for Claude Code the tools list below does
 readonly: true
+tools: Read, Grep, Glob, Bash, WebFetch, WebSearch, TodoWrite
 ---
 
 You are the **SEO expert** for this Nuxt darts app — typically a **static / SPA deploy on GitHub Pages** with client-side Dexie data.
