@@ -3,6 +3,9 @@ description: Reuse components/form — FormButton, FormInput, FormSelect, FormCh
 globs:
   - "**/*.vue"
   - "components/form/**"
+paths:
+  - "**/*.vue"
+  - "components/form/**"
 alwaysApply: false
 ---
 

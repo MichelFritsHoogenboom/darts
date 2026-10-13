@@ -1,0 +1,1 @@
+../../.cursor/rules/vue-global-rules/RULE.md

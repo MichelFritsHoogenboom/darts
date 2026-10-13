@@ -1,0 +1,1 @@
+../../.cursor/rules/structured-imports/RULE.md

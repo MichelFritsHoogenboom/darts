@@ -1,0 +1,1 @@
+../../.cursor/rules/ssr-responsive/RULE.md

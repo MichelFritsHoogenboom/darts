@@ -1,0 +1,1 @@
+../../.cursor/rules/bundle-splitting/RULE.md

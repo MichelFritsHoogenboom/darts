@@ -1,0 +1,1 @@
+../../.cursor/rules/routing/RULE.md

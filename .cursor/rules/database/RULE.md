@@ -6,6 +6,12 @@ globs:
   - "utils/dbExport.ts"
   - "plugins/database*.ts"
   - "interfaces/**/*.ts"
+paths:
+  - "database/**"
+  - "composables/use*.ts"
+  - "utils/dbExport.ts"
+  - "plugins/database*.ts"
+  - "interfaces/**/*.ts"
 alwaysApply: false
 ---
 
@@ -30,7 +36,7 @@ Init stays in `plugins/database.client.ts` / `ensureDatabase()`.
 - IndexedDB access only under `database/` (and export via `utils/dbExport.ts`).
 - Do **not** import Dexie / `getDatabase` from components or pages.
 - Do **not** put table queries in SFCs — domain lookups belong on the matching service.
-- Entity factories in `interfaces/` may call services; that is an existing exception, not a reason to query from UI.
+- Entity factories in `interfaces/` may call services and persist themselves (`leg.ts`, `set.ts` and `stats.ts` each construct services and `upsert`); that is an existing exception, not a reason to query from UI. The whole of `interfaces/` stays in this rule's globs because that pattern keeps spreading — a new factory that saves itself needs this rule on the read that creates it.
 
 ## Speed & indexes
 

@@ -3,6 +3,9 @@ description: SSR-safe client APIs (Dexie/DOM) and CSS-first responsive layout
 globs:
   - "**/*.vue"
   - "**/*.ts"
+paths:
+  - "**/*.vue"
+  - "**/*.ts"
 alwaysApply: false
 ---
 

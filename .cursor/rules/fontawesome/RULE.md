@@ -4,6 +4,10 @@ globs:
   - "**/*.vue"
   - "plugins/fontawesome.ts"
   - "assets/icons/**"
+paths:
+  - "**/*.vue"
+  - "plugins/fontawesome.ts"
+  - "assets/icons/**"
 alwaysApply: false
 ---
 

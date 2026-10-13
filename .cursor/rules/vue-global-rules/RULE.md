@@ -2,6 +2,8 @@
 description: Vue SFCs — feature + atomic folders, no withDefaults, script setup, templates
 globs:
   - "**/*.vue"
+paths:
+  - "**/*.vue"
 alwaysApply: false
 ---
 

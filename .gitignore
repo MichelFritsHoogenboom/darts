@@ -189,3 +189,7 @@ temp/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Claude Code (personal, not shared)
+CLAUDE.local.md
+.claude/settings.local.json

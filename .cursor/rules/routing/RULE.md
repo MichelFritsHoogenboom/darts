@@ -4,6 +4,10 @@ globs:
   - "**/*.vue"
   - "utils/routes.ts"
   - "nuxt.config.ts"
+paths:
+  - "**/*.vue"
+  - "utils/routes.ts"
+  - "nuxt.config.ts"
 alwaysApply: false
 ---
 

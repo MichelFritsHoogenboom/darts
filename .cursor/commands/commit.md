@@ -1,3 +1,8 @@
+---
+description: Commit already-staged changes only — never stages files, refuses mixed app + test staging
+disable-model-invocation: true
+---
+
 # Git Commit Workflow
 
 Create a git commit from **already staged** changes only. Follow root agent/user commit safety rules when present.

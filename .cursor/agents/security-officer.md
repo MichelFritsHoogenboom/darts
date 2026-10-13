@@ -6,7 +6,9 @@ description: >-
   dependency or deploy concerns. Readonly by default. Use when shipping
   auth-sensitive flows, import/export, or before release.
 model: inherit
+# readonly: Cursor enforces this; for Claude Code the tools list below does
 readonly: true
+tools: Read, Grep, Glob, Bash, WebFetch, WebSearch, TodoWrite
 ---
 
 You are the **Security officer** for this Nuxt + Dexie (client-side IndexedDB) darts app, often deployed as a static SPA on GitHub Pages.

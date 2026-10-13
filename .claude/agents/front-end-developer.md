@@ -1,0 +1,1 @@
+../../.cursor/agents/front-end-developer.md

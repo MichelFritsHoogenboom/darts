@@ -1,12 +1,17 @@
 ---
-description: TypeScript — interfaces vs types, narrowing, generics, enums, utility types
+description: TypeScript — interfaces vs types, narrowing, generics, enums, utility types (.ts files; SFC script blocks follow vue-global-rules)
 globs:
   - "**/*.ts"
-  - "**/*.vue"
+paths:
+  - "**/*.ts"
 alwaysApply: false
 ---
 
 # TypeScript Rules
+
+Scope: `.ts` files. Typing inside an SFC `<script setup>` (props, emits, derived values) is covered by
+`vue-global-rules`; the arrow-function and named-export preferences are in root `AGENTS.md`, which is
+always loaded. Read this file when an SFC needs something from below (enums, type guards, utility types).
 
 ## Type Definitions
 
