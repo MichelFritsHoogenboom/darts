@@ -7,7 +7,7 @@ import type {
   StatsCompareRow,
   StatsCompareSection,
 } from "~/interfaces/stats";
-import { emptyBestAverages, needsMatchAverageBackfill } from "~/utils/averages";
+import { emptyBestAverages, needsMatchStatsBackfill } from "~/utils/averages";
 import { getPlayerIdsFromStats } from "~/utils/player";
 import {
   betterCheckout,
@@ -50,7 +50,7 @@ const seasonComplete = ref(false);
 
 const { getPlayerStatsInOrder } = usePlayerStats();
 const { getMatch, getMatchesByIds } = useMatches();
-const { calculateAndUpdateMatchPlayerStatAverage } = useAverages();
+const { calculateAndUpdateMatchPlayerStat } = useAverages();
 const { getEdition, queryEditionBestAverages, queryEditionCamelMatchWins } =
   useCompetitionEditions();
 
@@ -71,9 +71,9 @@ const load = async () => {
       if (!match) return;
 
       const matchStats = await getPlayerStatsInOrder(match.playerStats);
-      if (needsMatchAverageBackfill(matchStats)) {
+      if (needsMatchStatsBackfill(matchStats)) {
         for (const stat of matchStats) {
-          await calculateAndUpdateMatchPlayerStatAverage(stat);
+          await calculateAndUpdateMatchPlayerStat(stat);
         }
       }
       const [player1Id, player2Id] = getPlayerIdsFromStats(matchStats);

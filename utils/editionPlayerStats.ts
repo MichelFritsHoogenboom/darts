@@ -1,18 +1,12 @@
 import type { Score } from "~/interfaces/leg";
 import type { PlayerStats } from "~/interfaces/stats";
-import { isCheckoutScore } from "~/utils/score";
+import { highestCheckoutFromScores } from "~/utils/score";
 import {
   calculateFirstNineAverage,
   calculateScoringDartsAverage,
   calculateThreeDartAverage,
-  maxAverage,
 } from "~/utils/averages";
 import { sumCheckoutRanges, sumScoreRanges } from "~/utils/stats";
-
-export const highestCheckoutFromScores = (scores: Score[]): number => {
-  const checkouts = scores.filter(isCheckoutScore);
-  return maxAverage(checkouts.map((score) => score.totalScore));
-};
 
 export const buildEditionPlayerStatMetrics = (input: {
   scores: Score[];
