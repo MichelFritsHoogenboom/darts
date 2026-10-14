@@ -42,17 +42,19 @@ import { routes } from "~/utils/routes";
 
 .main-background::before,
 .main-background::after {
-  @apply absolute inset-0 pointer-events-none;
+  @apply pointer-events-none;
   content: "";
 }
 
-/* Photo base — lighting layers sit above this */
+/* Photo base — lighting layers sit above this. Pinned to the viewport with
+   `fixed` rather than `background-attachment`, so the blurred layer composites
+   once instead of repainting every scroll frame. */
 .main-background::before {
+  @apply fixed inset-0;
   background-image: url("../assets/images/background.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-attachment: fixed;
   opacity: 0.12;
   filter: grayscale(100%) blur(1px);
   z-index: -2;
@@ -60,6 +62,7 @@ import { routes } from "~/utils/routes";
 
 /* Depth: grid + top-light + vertical dark wash over the photo */
 .main-background::after {
+  @apply absolute inset-0;
   background:
     linear-gradient(
       color-mix(in srgb, theme("colors.page.DEFAULT") 35%, transparent),

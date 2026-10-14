@@ -482,13 +482,13 @@ const beginNewEdition = async () => {
 }
 
 .page-header {
-  @apply w-full overflow-visible;
+  @apply w-full;
 }
 
 .rivalry-header {
   @apply grid grid-cols-[1fr_auto_1fr] items-stretch gap-x-2 mb-12 relative mt-10 w-[95%] mx-auto;
   @apply rounded-lg border-2 border-gray-600/25 shadow-md shadow-black/20;
-  @apply overflow-visible bg-gray-800/70;
+  @apply bg-gray-800/70;
   background-image: linear-gradient(
     -45deg,
     rgb(55 65 81 / 0.04) 0%,

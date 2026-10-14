@@ -68,16 +68,18 @@ const name = computed(() => getPlayerDisplayName(player));
 
 <style scoped lang="scss">
 .season-player-panel {
-  @apply relative flex items-stretch justify-between overflow-visible;
-  @apply min-h-[11rem];
+  @apply relative flex items-stretch justify-between min-h-[11rem];
 
   &.right {
     @apply flex-row-reverse;
   }
 
+  /* The panel sits flush in a rounded, unclipped container (the silhouette
+     overhangs the top, so it cannot use overflow: hidden). Match the outer
+     corners to the container radius minus its 2px border. */
   .meta {
     @apply relative z-10 flex flex-col justify-end gap-1.5 self-stretch;
-    @apply w-max max-w-[16rem] pl-7 pr-4 pt-5 pb-1;
+    @apply w-max max-w-[16rem] pl-7 pr-4 pt-5 pb-1 rounded-l-md;
     @apply backdrop-blur-sm box-border text-left;
     background: linear-gradient(
       90deg,
@@ -88,7 +90,7 @@ const name = computed(() => getPlayerDisplayName(player));
   }
 
   &.right .meta {
-    @apply pl-4 pr-7 text-right;
+    @apply pl-4 pr-7 text-right rounded-l-none rounded-r-md;
     background: linear-gradient(
       270deg,
       theme("colors.gray.900 / 55%") 0%,
