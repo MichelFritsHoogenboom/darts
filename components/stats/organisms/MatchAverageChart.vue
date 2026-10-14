@@ -24,7 +24,7 @@ import {
   AVERAGE_CHART_ANIMATION,
   AVERAGE_METRICS,
   AVERAGE_PLAYER_COLORS,
-  AVERAGE_VIEW_BOTH,
+  AVERAGE_VIEW_ALL,
   CHART_COLORS,
   DEFAULT_HIDDEN_AVERAGE_METRICS,
 } from "~/constants/averageChart";
@@ -55,17 +55,17 @@ const { players, seriesByPlayerId } = defineProps<{
 const reducedMotion = usePreferredReducedMotion();
 
 /** `both` or a player id */
-const selectedView = ref<string>(AVERAGE_VIEW_BOTH);
+const selectedView = ref<string>(AVERAGE_VIEW_ALL);
 
 /** Hidden dataset keys (`playerId:metric`). */
 const hiddenKeys = ref(new Set<string>());
 
 const getPlayerName = computed(() => createPlayerNameGetter(players));
 
-const showBoth = computed(() => selectedView.value === AVERAGE_VIEW_BOTH);
+const showAll = computed(() => selectedView.value === AVERAGE_VIEW_ALL);
 
 const viewTabs = computed(() => [
-  { id: AVERAGE_VIEW_BOTH, label: "Both" },
+  { id: AVERAGE_VIEW_ALL, label: "All" },
   ...players.map((player) => ({
     id: player.id,
     label: getPlayerName.value(player.id),
@@ -73,7 +73,7 @@ const viewTabs = computed(() => [
 ]);
 
 const visiblePlayerIds = computed(() => {
-  if (showBoth.value) {
+  if (showAll.value) {
     return players.map((player) => player.id);
   }
 
@@ -105,7 +105,7 @@ const setBreaks = computed(() =>
 
 const legendRows = computed((): LegendRow[] =>
   visiblePlayerIds.value.map((playerId) => ({
-    playerLabel: showBoth.value ? getPlayerName.value(playerId) : null,
+    playerLabel: showAll.value ? getPlayerName.value(playerId) : null,
     items: AVERAGE_METRICS.map((metric) => {
       const key = datasetKey(playerId, metric.key);
 
@@ -131,7 +131,7 @@ const chartData = computed((): ChartData<"line"> => {
       const key = datasetKey(playerId, metric.key);
 
       return {
-        label: showBoth.value ? `${name} · ${metric.label}` : metric.label,
+        label: showAll.value ? `${name} · ${metric.label}` : metric.label,
         data: points.map((point) => point[metric.key]),
         borderColor: color,
         backgroundColor: color,
@@ -294,11 +294,11 @@ watch(
   () => players.map((player) => player.id).join(","),
   () => {
     const valid =
-      selectedView.value === AVERAGE_VIEW_BOTH ||
+      selectedView.value === AVERAGE_VIEW_ALL ||
       players.some((player) => player.id === selectedView.value);
 
     if (!valid) {
-      selectedView.value = AVERAGE_VIEW_BOTH;
+      selectedView.value = AVERAGE_VIEW_ALL;
     }
 
     resetHiddenKeys();
@@ -369,11 +369,13 @@ watch(
 @use "~/assets/css/utilities/animation" as *;
 
 .match-average-chart {
-  @apply w-full;
+  // Body matches LegSummary / the stats panel inside a match card
+  @apply w-full bg-gray-800 pb-2;
 }
 
 .controls {
-  @apply flex flex-wrap items-center gap-3 mb-3 px-1;
+  // Matches the SetSummary / stats panel header bar
+  @apply flex flex-wrap items-center gap-3 mb-3 bg-gray-900 px-4 py-2 text-white;
 }
 
 .views {
@@ -401,12 +403,12 @@ watch(
 }
 
 .canvas {
-  @apply w-full px-1;
+  @apply w-full px-4;
   height: 16rem;
 }
 
 .legend {
-  @apply flex flex-col gap-1.5 mt-3 px-1;
+  @apply flex flex-col gap-1.5 mt-3 px-4;
 }
 
 .row {

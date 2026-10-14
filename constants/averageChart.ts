@@ -4,7 +4,7 @@ import type {
 } from "~/interfaces/averageChart";
 
 /** View selector value showing every player at once; otherwise a player id. */
-export const AVERAGE_VIEW_BOTH = "both";
+export const AVERAGE_VIEW_ALL = "all";
 
 /**
  * Chart colors. chart.js needs literal color strings, so these mirror the
