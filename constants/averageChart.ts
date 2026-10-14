@@ -63,9 +63,8 @@ export const AVERAGE_METRICS: AverageMetric[] = [
   },
 ];
 
-/** Metrics toggled off when the chart opens. */
+/** Metrics toggled off when the chart opens; the rest draw by default. */
 export const DEFAULT_HIDDEN_AVERAGE_METRICS = new Set<AverageMetricKey>([
-  "matchAverage",
   "legFirstNineAverage",
 ]);
 

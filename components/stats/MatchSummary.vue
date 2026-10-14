@@ -25,7 +25,6 @@ import { X01_GAME_PLAYED_IN } from "~/interfaces/x01MatchConfig";
 // Components
 import LegSummary from "./LegSummary.vue";
 import SetSummary from "./SetSummary.vue";
-import MatchAverageChart from "./organisms/MatchAverageChart.vue";
 // Utils
 import { buildAverageSeries } from "~/utils/averages";
 import {
@@ -323,8 +322,9 @@ onBeforeMount(async () => {
       <StatsComparison :match-id="match.id" />
     </div>
 
+    <!-- Lazy so chart.js only downloads once the chart panel is opened -->
     <div v-else-if="isPanel(MATCH_PANEL.chart)" class="mt-2 match-chart">
-      <MatchAverageChart
+      <LazyStatsOrganismsMatchAverageChart
         :players="[...players]"
         :series-by-player-id="chartSeriesByPlayerId"
       />

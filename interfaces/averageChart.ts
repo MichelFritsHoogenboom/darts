@@ -15,13 +15,18 @@ export type AverageMetric = {
   borderWidth: number;
 };
 
-/** Per-leg averages plus the cumulative match average through that leg. */
+/**
+ * Per-leg averages plus the cumulative match average through that leg. `null`
+ * where the player has thrown nothing yet, so the chart shows a gap instead of
+ * a drop to zero.
+ */
 export type AverageSeriesPoint = {
+  /** 1-based leg number within its set, matching the scores panel. */
   legIndex: number;
-  legAverage: number;
-  matchAverage: number;
-  legScoringDartsAverage: number;
-  legFirstNineAverage: number;
+  legAverage: number | null;
+  matchAverage: number | null;
+  legScoringDartsAverage: number | null;
+  legFirstNineAverage: number | null;
   setIndex?: number;
 };
 

@@ -92,8 +92,15 @@ const labels = computed(() =>
   referencePoints.value.map((point) => `Leg ${point.legIndex}`),
 );
 
-const setBreakIndices = computed(() =>
-  changeIndices(referencePoints.value, (point) => point.setIndex),
+/** Leg positions where a new set starts, labelled with that set's number. */
+const setBreaks = computed(() =>
+  changeIndices(referencePoints.value, (point) => point.setIndex).map(
+    (index) => ({
+      index,
+      // A break exists only where `setIndex` changed, so it is set here.
+      setNumber: referencePoints.value[index].setIndex! + 1,
+    }),
+  ),
 );
 
 const legendRows = computed((): LegendRow[] =>
@@ -150,7 +157,7 @@ const animateLines = computed(() => reducedMotion.value !== "reduce");
 const chartOptions = computed((): ChartOptions<"line"> => {
   const annotations: Record<string, SetBreakAnnotation> = {};
 
-  setBreakIndices.value.forEach((index, i) => {
+  setBreaks.value.forEach(({ index, setNumber }, i) => {
     annotations[`setBreak${i}`] = {
       type: "line",
       xMin: index - 0.5,
@@ -160,7 +167,7 @@ const chartOptions = computed((): ChartOptions<"line"> => {
       borderDash: [4, 4],
       label: {
         display: true,
-        content: `Set ${i + 2}`,
+        content: `Set ${setNumber}`,
         position: "start",
         color: CHART_COLORS.axis,
         backgroundColor: CHART_COLORS.annotationBackground,
