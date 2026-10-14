@@ -24,9 +24,7 @@ import {
   sumCamelCountsByPlayer,
   camelSeasonWinnerId,
 } from "../utils/editionPlayerStats";
-import {
-  buildBestAverages,
-} from "../utils/averages";
+import { buildBestAverages } from "../utils/averages";
 import type { BestAverages } from "../interfaces/stats";
 import type { Match } from "../interfaces/match";
 import type { Score } from "../interfaces/leg";

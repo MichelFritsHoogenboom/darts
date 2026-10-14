@@ -47,7 +47,7 @@ export interface Head2HeadOverviewItem {
 }
 
 export function createCompetition(
-  overrides: Partial<Competition> = {}
+  overrides: Partial<Competition> = {},
 ): Competition {
   return {
     id: uuid(),
@@ -62,7 +62,7 @@ export function createCompetitionEdition(
   overrides: Partial<CompetitionEdition> & {
     competitionId: string;
     competitionConfig: CompetitionConfig;
-  }
+  },
 ): CompetitionEdition {
   return {
     id: uuid(),

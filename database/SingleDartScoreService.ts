@@ -7,14 +7,14 @@ export class SingleDartScoreService extends BaseService<SingleDartScore> {
   }
 
   async getSingleDartScoresForScore(
-    scoreId: string
+    scoreId: string,
   ): Promise<SingleDartScore[]> {
     const table = await this.getTable();
     return await table.where("scoreId").equals(scoreId).toArray();
   }
 
   async getSingleDartScoresForPlayer(
-    playerId: string
+    playerId: string,
   ): Promise<SingleDartScore[]> {
     const table = await this.getTable();
     return await table.where("playerId").equals(playerId).toArray();

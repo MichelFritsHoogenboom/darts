@@ -6,10 +6,7 @@ import type {
 import { COMPETITION_TYPES } from "../interfaces/competition";
 import { CompetitionService } from "./CompetitionService";
 import { PlayerStatsService } from "./PlayerStatsService";
-import {
-  sortPlayerIds,
-  playerIdsMatch,
-} from "../utils/rivalry";
+import { sortPlayerIds, playerIdsMatch } from "../utils/rivalry";
 import { getPlayerIdsFromStats } from "../utils/player";
 
 const competitionService = new CompetitionService();
@@ -21,7 +18,7 @@ export class CompetitionEditionService extends BaseService<CompetitionEdition> {
   }
 
   async getEditionsForCompetition(
-    competitionId: string
+    competitionId: string,
   ): Promise<CompetitionEdition[]> {
     const table = await this.getTable();
     return await table
@@ -31,7 +28,7 @@ export class CompetitionEditionService extends BaseService<CompetitionEdition> {
   }
 
   async getCurrentEdition(
-    competitionId: string
+    competitionId: string,
   ): Promise<CompetitionEdition | undefined> {
     const editions = await this.getEditionsForCompetition(competitionId);
     if (editions.length === 0) return undefined;
@@ -39,18 +36,18 @@ export class CompetitionEditionService extends BaseService<CompetitionEdition> {
     const active = editions.filter((e) => !e.winner);
     if (active.length > 0) {
       return active.reduce((latest, e) =>
-        e.editionNumber > latest.editionNumber ? e : latest
+        e.editionNumber > latest.editionNumber ? e : latest,
       );
     }
 
     return editions.reduce((latest, e) =>
-      e.editionNumber > latest.editionNumber ? e : latest
+      e.editionNumber > latest.editionNumber ? e : latest,
     );
   }
 
   async findHead2HeadCompetitionForPair(
     playerId1: string,
-    playerId2: string
+    playerId2: string,
   ): Promise<Competition | undefined> {
     const sorted = sortPlayerIds([playerId1, playerId2]);
     const statsForPlayer = await playerStatsService.getPlayerStatsForPlayer(
@@ -65,7 +62,9 @@ export class CompetitionEditionService extends BaseService<CompetitionEdition> {
       if (!edition) continue;
 
       const editionPlayerStats =
-        await playerStatsService.getPlayerStatsForCompetitionEdition(edition.id);
+        await playerStatsService.getPlayerStatsForCompetitionEdition(
+          edition.id,
+        );
       const editionPlayerIds = getPlayerIdsFromStats(editionPlayerStats);
       if (!playerIdsMatch(editionPlayerIds, sorted)) continue;
 

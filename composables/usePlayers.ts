@@ -23,7 +23,7 @@ export function usePlayers() {
       const loadedPlayers: Player[] =
         playerIds.length > 0
           ? (await Promise.all(playerIds.map((id) => getPlayer(id)))).filter(
-              (player): player is Player => player !== undefined
+              (player): player is Player => player !== undefined,
             )
           : await playerService.getAll();
 
@@ -48,7 +48,7 @@ export function usePlayers() {
 
       // Update local players array
       const existingIndex = players.value.findIndex(
-        (p) => p.id === savedPlayer.id
+        (p) => p.id === savedPlayer.id,
       );
       if (existingIndex >= 0) {
         players.value[existingIndex] = savedPlayer;

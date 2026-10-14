@@ -50,7 +50,8 @@ export default withNuxt(
             "Use an arrow export: export default (...) => {} (AGENTS.md, TypeScript / exports).",
         },
         {
-          selector: "CallExpression[callee.name='defineEmits'] > ArrayExpression",
+          selector:
+            "CallExpression[callee.name='defineEmits'] > ArrayExpression",
           message:
             "Use a typed defineEmits<{ ... }>() instead of the array form (.cursor/rules/vue-global-rules).",
         },

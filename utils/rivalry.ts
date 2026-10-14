@@ -17,7 +17,7 @@ export function sortPlayerIds(ids: string[]): [string, string] {
 
 export function playerIdsMatch(
   editionPlayerIds: string[],
-  sortedPair: [string, string]
+  sortedPair: [string, string],
 ): boolean {
   if (editionPlayerIds.length !== 2) return false;
   const sorted = [...editionPlayerIds].sort();
@@ -47,7 +47,7 @@ export function computeEditionStandings(
 
 export function isEditionComplete(
   edition: CompetitionEdition,
-  matches: Match[]
+  matches: Match[],
 ): boolean {
   const { amountMatches } = edition.competitionConfig;
   const editionMatches = matches.filter((m) => edition.matches.includes(m.id));
@@ -61,7 +61,7 @@ export function hasUnfinishedMatch(matches: Match[]): boolean {
 
 export function canStartNewMatch(
   edition: CompetitionEdition,
-  matches: Match[]
+  matches: Match[],
 ): boolean {
   if (edition.winner) return false;
   if (hasUnfinishedMatch(matches)) return false;
@@ -72,7 +72,7 @@ export function canStartNewMatch(
 
 export function getEditionLastActiveAt(
   edition: CompetitionEdition,
-  matches: Match[]
+  matches: Match[],
 ): Date {
   let maxTime = edition.updatedAt.getTime();
   const editionMatchIds = new Set(edition.matches);

@@ -5,7 +5,10 @@ import type { Match } from "../interfaces/match";
 import type { Set } from "../interfaces/set";
 import type { Leg, PlayerLeg, Score, SingleDartScore } from "../interfaces/leg";
 import type { PlayerStats } from "../interfaces/stats";
-import type { Competition, CompetitionEdition } from "../interfaces/competition";
+import type {
+  Competition,
+  CompetitionEdition,
+} from "../interfaces/competition";
 
 export class DartsDatabase extends Dexie {
   // Define tables
@@ -54,7 +57,7 @@ export class DartsDatabase extends Dexie {
         // Migration logic: Dexie will automatically rebuild indexes
         // No data transformation needed - just re-indexing
         console.log(
-          "Migrating database to version 2: Adding multi-entry indexes for players arrays"
+          "Migrating database to version 2: Adding multi-entry indexes for players arrays",
         );
       });
 
@@ -76,7 +79,7 @@ export class DartsDatabase extends Dexie {
       })
       .upgrade(async (tx) => {
         console.log(
-          "Migrating database to version 3: Adding playerStats table"
+          "Migrating database to version 3: Adding playerStats table",
         );
       });
 
@@ -99,7 +102,7 @@ export class DartsDatabase extends Dexie {
       })
       .upgrade(async (tx) => {
         console.log(
-          "Migrating database to version 4: Adding matchId and setId indexes to scores table"
+          "Migrating database to version 4: Adding matchId and setId indexes to scores table",
         );
       });
 
@@ -125,7 +128,7 @@ export class DartsDatabase extends Dexie {
       })
       .upgrade(async () => {
         console.log(
-          "Migrating database to version 5: competitions, competitionEditions, competitionEditionId on matches"
+          "Migrating database to version 5: competitions, competitionEditions, competitionEditionId on matches",
         );
       });
 
@@ -164,7 +167,9 @@ export class DartsDatabase extends Dexie {
 
           if (legacyPlayerIds?.length) {
             const existingStats = (
-              await Promise.all(statsIds.map((id: string) => statsTable.get(id)))
+              await Promise.all(
+                statsIds.map((id: string) => statsTable.get(id)),
+              )
             ).filter(Boolean);
 
             const coveredPlayerIds = new Set(

@@ -16,10 +16,7 @@ export class ScoreService extends BaseService<Score> {
     );
   }
 
-  async getCheckouts(
-    limit?: number,
-    matchIds?: string[],
-  ): Promise<Score[]> {
+  async getCheckouts(limit?: number, matchIds?: string[]): Promise<Score[]> {
     const table = await this.getTable();
     const matchIdSet = matchIds ? new Set(matchIds) : null;
     const checkouts = await table

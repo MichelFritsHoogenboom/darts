@@ -79,7 +79,7 @@ export const useSets = () => {
 
   const getSetsForMatch = async (
     matchId: string,
-    sortOrder?: string[]
+    sortOrder?: string[],
   ): Promise<Set[]> => {
     loading.value = true;
     error.value = null;
@@ -98,7 +98,7 @@ export const useSets = () => {
 
   const entityGamesWonByPlayer = (
     entity: Set[] | Leg[],
-    playerId: string
+    playerId: string,
   ): number => {
     const f = entity.filter((game) => game.winner === playerId).length;
 

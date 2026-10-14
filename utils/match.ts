@@ -12,8 +12,7 @@ import { X01_GAME_PLAYED_IN } from "~/interfaces/x01MatchConfig";
 export const getPlayerWinnerCount = (
   playerId: string,
   games: Array<Set | Leg>,
-): number =>
-  games?.filter((game) => game.winner === playerId).length || 0;
+): number => games?.filter((game) => game.winner === playerId).length || 0;
 
 /** Full: "501 • First to 2 sets • 3 legs to win set". Compact: "501 First to 2 sets" */
 export const formatX01MatchConfigSummary = (

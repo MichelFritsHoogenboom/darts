@@ -7,7 +7,10 @@ export class SetService extends BaseService<Set> {
     return "sets";
   }
 
-  async getSetsForMatch(matchId: string, _sortOrder?: string[]): Promise<Set[]> {
+  async getSetsForMatch(
+    matchId: string,
+    _sortOrder?: string[],
+  ): Promise<Set[]> {
     const table = await this.getTable();
     const sets = await table.where("matchId").equals(matchId).toArray();
     return sortByCreatedAt(sets);

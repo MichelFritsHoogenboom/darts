@@ -1,10 +1,7 @@
 import { v4 as uuid } from "uuid";
 import { toRaw } from "vue";
 import { PlayerStatsService } from "~/database/PlayerStatsService";
-import {
-  STATS_COMPARE_KIND,
-  STAT_VALUE_FORMAT,
-} from "~/constants/stats";
+import { STATS_COMPARE_KIND, STAT_VALUE_FORMAT } from "~/constants/stats";
 import {
   createCheckoutRanges,
   createDartsThrownHit,
@@ -67,9 +64,7 @@ export type StatsCompareCamelRow = ComparePair<number> & {
 };
 
 export type StatsCompareRow =
-  | StatsCompareNumberRow
-  | StatsCompareCheckoutRow
-  | StatsCompareCamelRow;
+  StatsCompareNumberRow | StatsCompareCheckoutRow | StatsCompareCamelRow;
 
 export type StatsCompareSection = {
   title: string;

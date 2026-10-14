@@ -14,7 +14,7 @@ export async function initializeDatabase() {
     if ("storage" in navigator && "persist" in navigator.storage) {
       const isPersistent = await navigator.storage.persist();
       console.log(
-        `Database persistence: ${isPersistent ? "Granted" : "Denied"}`
+        `Database persistence: ${isPersistent ? "Granted" : "Denied"}`,
       );
     }
 

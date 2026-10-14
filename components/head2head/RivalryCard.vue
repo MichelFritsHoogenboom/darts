@@ -18,12 +18,8 @@ const playerB = computed(() =>
   props.players.find((p) => p.id === playerIds.value[1]),
 );
 
-const winsA = computed(
-  () => props.item.standings[playerIds.value[0]] ?? 0,
-);
-const winsB = computed(
-  () => props.item.standings[playerIds.value[1]] ?? 0,
-);
+const winsA = computed(() => props.item.standings[playerIds.value[0]] ?? 0);
+const winsB = computed(() => props.item.standings[playerIds.value[1]] ?? 0);
 
 const playedCount = computed(
   () => props.item.matches.filter((m) => m.winner).length,

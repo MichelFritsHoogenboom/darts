@@ -47,11 +47,7 @@ watch(
         <span class="rank">
           <FontAwesomeIcon v-if="index === 0" :icon="faTrophy" class="icon" />
 
-          <FontAwesomeIcon
-            v-else-if="index < 3"
-            :icon="faMedal"
-            class="icon"
-          />
+          <FontAwesomeIcon v-else-if="index < 3" :icon="faMedal" class="icon" />
           <template v-else>{{ index + 1 }}</template>
         </span>
 

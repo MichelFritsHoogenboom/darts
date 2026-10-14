@@ -21,13 +21,13 @@ export class DatabaseService {
    * If the record exists (based on id), it updates; otherwise, it creates
    */
   static async upsert<
-    T extends { id: string; createdAt: Date; updatedAt: Date }
+    T extends { id: string; createdAt: Date; updatedAt: Date },
   >(table: any, data: T): Promise<T> {
     await this.ensureDatabase();
 
     if (!data.id || typeof data.id !== "string") {
       throw new Error(
-        `Invalid ID provided: ${data.id} (type: ${typeof data.id})`
+        `Invalid ID provided: ${data.id} (type: ${typeof data.id})`,
       );
     }
 
@@ -77,7 +77,7 @@ export class DatabaseService {
   static async search<T>(
     table: any,
     searchTerm: string,
-    searchFields: string[]
+    searchFields: string[],
   ): Promise<T[]> {
     await this.ensureDatabase();
     return await table

@@ -20,7 +20,10 @@ export default defineNuxtConfig({
   imports: {
     autoImport: true,
   },
-  css: ["~/assets/css/main.css", "@fortawesome/fontawesome-svg-core/styles.css"],
+  css: [
+    "~/assets/css/main.css",
+    "@fortawesome/fontawesome-svg-core/styles.css",
+  ],
   build: {
     transpile: ["@fortawesome/vue-fontawesome"],
   },

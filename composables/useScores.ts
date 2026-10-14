@@ -74,14 +74,13 @@ export const useScores = () => {
   };
 
   const getScoresForPlayerLeg = async (
-    playerLegId: string
+    playerLegId: string,
   ): Promise<Score[]> => {
     loading.value = true;
     error.value = null;
     try {
-      const playerLegScores = await scoreService.getScoresForPlayerLeg(
-        playerLegId
-      );
+      const playerLegScores =
+        await scoreService.getScoresForPlayerLeg(playerLegId);
 
       return playerLegScores;
     } catch (err) {

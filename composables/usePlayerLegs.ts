@@ -28,7 +28,7 @@ export const usePlayerLegs = () => {
   };
 
   const savePlayerLeg = async (
-    playerLeg: PlayerLeg
+    playerLeg: PlayerLeg,
   ): Promise<PlayerLeg | null> => {
     loading.value = true;
     error.value = null;
@@ -103,14 +103,13 @@ export const usePlayerLegs = () => {
 
   const getPlayerLegsForPlayer = async (
     playerId: string,
-    matchId?: string
+    matchId?: string,
   ): Promise<PlayerLeg[]> => {
     loading.value = true;
     error.value = null;
     try {
-      const playerPlayerLegs = await playerLegService.getPlayerLegsForPlayer(
-        playerId
-      );
+      const playerPlayerLegs =
+        await playerLegService.getPlayerLegsForPlayer(playerId);
       return playerPlayerLegs;
     } catch (err) {
       error.value =

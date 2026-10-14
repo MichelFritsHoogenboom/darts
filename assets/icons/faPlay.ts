@@ -4,11 +4,5 @@ import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 export const faPlay: IconDefinition = {
   prefix: "fas",
   iconName: "play",
-  icon: [
-    512,
-    512,
-    [],
-    "f04b",
-    "M96,448 L416,256 L96,64 Z",
-  ],
+  icon: [512, 512, [], "f04b", "M96,448 L416,256 L96,64 Z"],
 };

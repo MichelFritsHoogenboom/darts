@@ -151,7 +151,7 @@ export async function createLeg(
     gameType: X01GameType;
     players: Array<string>; // PlayerLeg IDs
     startingPlayer: string;
-  }
+  },
 ): Promise<Leg> {
   const leg = {
     id: uuid(),

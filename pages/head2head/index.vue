@@ -67,7 +67,10 @@ watch(head2HeadOverview, async () => {
         />
       </div>
       <div class="flex justify-center mb-6">
-        <NuxtLink :to="routes.head2head.create" class="dartboard-button px-6 py-2">
+        <NuxtLink
+          :to="routes.head2head.create"
+          class="dartboard-button px-6 py-2"
+        >
           New rivalry
         </NuxtLink>
       </div>

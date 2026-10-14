@@ -2,12 +2,7 @@
 import { computed } from "vue";
 
 type ButtonVariant =
-  | "primary"
-  | "secondary"
-  | "outline"
-  | "ghost"
-  | "light"
-  | "lightOutline";
+  "primary" | "secondary" | "outline" | "ghost" | "light" | "lightOutline";
 type ButtonSize = "sm" | "md" | "lg" | "xl";
 
 const props = defineProps<{

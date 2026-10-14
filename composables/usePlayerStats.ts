@@ -25,7 +25,7 @@ export const usePlayerStats = () => {
   };
 
   const getPlayerStatsById = async (
-    id: string
+    id: string,
   ): Promise<PlayerStats | undefined> => {
     loading.value = true;
     error.value = null;
@@ -74,14 +74,13 @@ export const usePlayerStats = () => {
   };
 
   const getPlayerStatsByPlayerLegId = async (
-    playerLegId: string
+    playerLegId: string,
   ): Promise<PlayerStats | null> => {
     loading.value = true;
     error.value = null;
     try {
-      const stats = await playerStatsService.getPlayerStatsForPlayerLeg(
-        playerLegId
-      );
+      const stats =
+        await playerStatsService.getPlayerStatsForPlayerLeg(playerLegId);
       // Return the first PlayerStats if found, or null if none
       return stats.length > 0 ? stats[0] : null;
     } catch (err) {
@@ -97,7 +96,7 @@ export const usePlayerStats = () => {
   };
 
   const getPlayerStatsForPlayer = async (
-    playerId: string
+    playerId: string,
   ): Promise<PlayerStats[]> => {
     loading.value = true;
     error.value = null;
@@ -117,14 +116,14 @@ export const usePlayerStats = () => {
   };
 
   const getPlayerStatsForMatch = async (
-    matchId: string
+    matchId: string,
   ): Promise<PlayerStats[]> => {
     loading.value = true;
     error.value = null;
     try {
       const allStats = await playerStatsService.getPlayerStatsForMatch(matchId);
       const filteredStats = allStats.filter(
-        (stat) => !stat.playerLegId && !stat.setId
+        (stat) => !stat.playerLegId && !stat.setId,
       );
       return filteredStats;
     } catch (err) {
@@ -140,7 +139,7 @@ export const usePlayerStats = () => {
   };
 
   const getPlayerStatsForSet = async (
-    setId: string
+    setId: string,
   ): Promise<PlayerStats[]> => {
     loading.value = true;
     error.value = null;
@@ -175,10 +174,7 @@ export const usePlayerStats = () => {
         err instanceof Error
           ? err.message
           : "Failed to load player stats for competition edition";
-      console.error(
-        "Error loading player stats for competition edition:",
-        err,
-      );
+      console.error("Error loading player stats for competition edition:", err);
       return [];
     } finally {
       loading.value = false;
@@ -186,7 +182,7 @@ export const usePlayerStats = () => {
   };
 
   const savePlayerStats = async (
-    stats: PlayerStats
+    stats: PlayerStats,
   ): Promise<PlayerStats | null> => {
     loading.value = true;
     error.value = null;

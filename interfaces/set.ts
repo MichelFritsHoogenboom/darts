@@ -21,7 +21,7 @@ export async function createSet(
     matchId: string;
     playerStats: Array<string>; // PlayerStats IDs
     startingPlayer: string;
-  }
+  },
 ): Promise<Set> {
   const set = {
     id: uuid(),

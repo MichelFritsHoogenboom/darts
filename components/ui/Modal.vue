@@ -20,7 +20,7 @@ watch(
   () => props.modelValue,
   (newValue) => {
     isOpen.value = newValue;
-  }
+  },
 );
 
 // Watch for internal changes and emit

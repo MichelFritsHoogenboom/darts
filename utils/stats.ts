@@ -138,7 +138,9 @@ export const formatStatValue = (
     ? formatAverageDisplay(value)
     : formatStatCount(value);
 
-export const leaderboardEntryFromCheckout = (score: Score): LeaderboardEntry => ({
+export const leaderboardEntryFromCheckout = (
+  score: Score,
+): LeaderboardEntry => ({
   id: score.id,
   playerId: score.playerId,
   value: score.totalScore,
@@ -206,9 +208,7 @@ export const sumScoreRanges = (ranges: ScoreRanges[]): ScoreRanges => {
   return result;
 };
 
-export const sumCheckoutRanges = (
-  ranges: CheckoutRanges[],
-): CheckoutRanges => {
+export const sumCheckoutRanges = (ranges: CheckoutRanges[]): CheckoutRanges => {
   const result = createCheckoutRanges();
   for (const range of ranges) {
     for (const key of Object.keys(result) as (keyof CheckoutRanges)[]) {

@@ -8,7 +8,8 @@ const matchService = new MatchService();
 const { getSetsForMatch, deleteSet } = useSets();
 const { getLegsForMatch, deleteLeg } = useLegs();
 const { getScoresForMatch } = useScores();
-const { getPlayerStatsForMatch, savePlayerStats, deletePlayerStats } = usePlayerStats();
+const { getPlayerStatsForMatch, savePlayerStats, deletePlayerStats } =
+  usePlayerStats();
 
 export function useMatches() {
   const matches = ref<Match[]>([]);

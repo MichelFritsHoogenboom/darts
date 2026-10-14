@@ -2,7 +2,7 @@ import { getDatabase } from "./schema";
 import { DatabaseService } from "./DatabaseService";
 
 export abstract class BaseService<
-  T extends { id: string; createdAt: Date; updatedAt: Date }
+  T extends { id: string; createdAt: Date; updatedAt: Date },
 > {
   protected abstract getTableName(): string;
 
@@ -37,7 +37,7 @@ export abstract class BaseService<
     return await table
       .filter((entity: any) => {
         return searchFields.some((field) =>
-          entity[field]?.toString().toLowerCase().includes(query.toLowerCase())
+          entity[field]?.toString().toLowerCase().includes(query.toLowerCase()),
         );
       })
       .toArray();

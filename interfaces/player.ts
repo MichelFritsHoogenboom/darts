@@ -20,7 +20,7 @@ export interface Player {
 }
 
 export async function createPlayer(
-  overrides: Partial<Player> = {}
+  overrides: Partial<Player> = {},
 ): Promise<Player> {
   const playerId = uuid();
 
@@ -38,7 +38,7 @@ export async function createPlayer(
     dartsWeightInGrams: undefined,
     flightColor: "",
     allTimeStats: await createPlayerStats({ playerId: playerId }).then(
-      (stats) => stats.id
+      (stats) => stats.id,
     ),
 
     ...overrides,

@@ -152,9 +152,7 @@ const createRivalry = async () => {
 
       <div class="card-panel rounded-lg p-8 mb-6">
         <FormCheckbox v-model="useFixedConfig" disabled>
-          <template #label
-            >Fixed match settings for this season</template
-          >
+          <template #label>Fixed match settings for this season</template>
         </FormCheckbox>
       </div>
 
