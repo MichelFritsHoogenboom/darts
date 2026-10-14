@@ -21,8 +21,10 @@ export type AverageMetric = {
  * a drop to zero.
  */
 export type AverageSeriesPoint = {
-  /** 1-based leg number within its set, matching the scores panel. */
+  /** 1-based leg number across the whole match, used for the x axis. */
   legIndex: number;
+  /** 1-based leg number within its set, matching the scores panel. */
+  setLegIndex: number;
   legAverage: number | null;
   matchAverage: number | null;
   legScoringDartsAverage: number | null;

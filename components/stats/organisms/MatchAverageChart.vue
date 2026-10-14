@@ -54,7 +54,7 @@ const { players, seriesByPlayerId } = defineProps<{
 
 const reducedMotion = usePreferredReducedMotion();
 
-/** `both` or a player id */
+/** `all` or a player id */
 const selectedView = ref<string>(AVERAGE_VIEW_ALL);
 
 /** Hidden dataset keys (`playerId:metric`). */
@@ -192,7 +192,25 @@ const chartOptions = computed((): ChartOptions<"line"> => {
         backgroundColor: CHART_COLORS.tooltipBackground,
         titleColor: CHART_COLORS.tooltipTitle,
         bodyColor: CHART_COLORS.tooltipBody,
+        // Draw each key as the line it belongs to, same width and dash as the
+        // legend swatch, instead of a filled square that only repeats the
+        // player colour.
+        boxWidth: 24,
+        boxHeight: 0,
+        boxPadding: 6,
+        multiKeyBackground: "transparent",
         callbacks: {
+          // The axis counts legs across the match; the title also names the
+          // set, so a leg can be matched to the scores panel.
+          title: (items) => {
+            const point = referencePoints.value[items[0].dataIndex];
+
+            if (point.setIndex === undefined) {
+              return `Leg ${point.legIndex}`;
+            }
+
+            return `Set ${point.setIndex + 1} · Leg ${point.setLegIndex}`;
+          },
           label: (ctx) => {
             const value = ctx.parsed.y;
 
@@ -202,6 +220,13 @@ const chartOptions = computed((): ChartOptions<"line"> => {
 
             return `${ctx.dataset.label}: ${value.toFixed(2)}`;
           },
+          labelColor: (ctx) => ({
+            backgroundColor: "transparent",
+            borderColor: ctx.dataset.borderColor as string,
+            borderWidth: ctx.dataset.borderWidth as number,
+            // chart.js types this as a pair; an empty array is valid and solid.
+            borderDash: ctx.dataset.borderDash as [number, number],
+          }),
         },
       },
       annotation: {

@@ -102,10 +102,10 @@ export const calculateFirstNineAverage = (scores: Score[]): number => {
 };
 
 /**
- * Per-leg averages plus cumulative match average through each leg. Legs are
- * numbered within their set, so the numbers match the scores panel. A leg the
- * player has not thrown in yet yields `null` rather than `0`, which would read
- * as a real average on a chart.
+ * Per-leg averages plus cumulative match average through each leg. Legs get
+ * both a running number for the x axis and a number within their set, which is
+ * how the scores panel counts them. A leg the player has not thrown in yet
+ * yields `null` rather than `0`, which would read as a real average on a chart.
  */
 export const buildAverageSeries = (
   legs: readonly AverageSeriesLegInput[],
@@ -113,18 +113,19 @@ export const buildAverageSeries = (
   const cumulativeScores: Score[] = [];
   const points: AverageSeriesPoint[] = [];
 
-  let legNumber = 0;
+  let setLegNumber = 0;
   let previousSetIndex: number | undefined;
 
-  legs.forEach((leg) => {
+  legs.forEach((leg, index) => {
     cumulativeScores.push(...leg.scores);
-    legNumber = leg.setIndex === previousSetIndex ? legNumber + 1 : 1;
+    setLegNumber = leg.setIndex === previousSetIndex ? setLegNumber + 1 : 1;
     previousSetIndex = leg.setIndex;
 
     const thrown = leg.scores.length > 0;
 
     points.push({
-      legIndex: legNumber,
+      legIndex: index + 1,
+      setLegIndex: setLegNumber,
       setIndex: leg.setIndex,
       legAverage: thrown ? calculateThreeDartAverage(leg.scores) : null,
       matchAverage: cumulativeScores.length
