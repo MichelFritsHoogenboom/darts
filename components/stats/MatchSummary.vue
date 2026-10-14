@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+// Vendor
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import {
   faTrash,
@@ -7,27 +8,31 @@ import {
   faChartLine,
 } from "@fortawesome/free-solid-svg-icons";
 import { faPlay } from "~/assets/icons/faPlay";
-import type { Match } from "~/interfaces/match";
+// Types
 import type {
-  MatchAverageChartLegInput,
-  MatchAverageChartPoint,
-  MatchPanel,
-} from "~/interfaces/matchSummary";
+  AverageSeriesLegInput,
+  AverageSeriesPoint,
+} from "~/interfaces/averageChart";
+import type { Match } from "~/interfaces/match";
+import type { MatchPanel } from "~/interfaces/matchSummary";
 import type { Set } from "~/interfaces/set";
 import type { Leg, PlayerLeg, Score } from "~/interfaces/leg";
 import type { PlayerStats } from "~/interfaces/stats";
+// Constants
+import { MATCH_TYPE_META } from "~/constants/match";
+import { MATCH_PANEL } from "~/constants/matchSummary";
 import { X01_GAME_PLAYED_IN } from "~/interfaces/x01MatchConfig";
+// Components
+import LegSummary from "./LegSummary.vue";
+import SetSummary from "./SetSummary.vue";
+import MatchAverageChart from "./organisms/MatchAverageChart.vue";
+// Utils
+import { buildAverageSeries } from "~/utils/averages";
 import {
   getPlayerWinnerCount,
   formatX01MatchConfigSummary,
 } from "~/utils/match";
-import { MATCH_TYPE_META } from "~/constants/match";
-import { MATCH_PANEL } from "~/constants/matchSummary";
-import { buildMatchAverageChartSeries } from "~/utils/averages";
 import { routes } from "~/utils/routes";
-import LegSummary from "./LegSummary.vue";
-import SetSummary from "./SetSummary.vue";
-import MatchAverageChart from "./MatchAverageChart.vue";
 
 const { match, openDetails = false } = defineProps<{
   match: Match;
@@ -165,6 +170,33 @@ const deleteEmptyMatch = async () => {
   }
 };
 
+const chartSeriesByPlayerId = computed(
+  (): Record<string, AverageSeriesPoint[]> => {
+    const series: Record<string, AverageSeriesPoint[]> = {};
+
+    for (const player of toValue(players)) {
+      series[player.id] = buildAverageSeries(chartLegsForPlayer(player.id));
+    }
+
+    return series;
+  },
+);
+
+const chartLegsForPlayer = (playerId: string): AverageSeriesLegInput[] => {
+  if (match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets) {
+    return setsWithLegs.value.flatMap((setData, setIndex) =>
+      setData.legsWithScores.map((legData) => ({
+        scores: legData.scoresByPlayer[playerId],
+        setIndex,
+      })),
+    );
+  }
+
+  return legsWithScores.value.map((legData) => ({
+    scores: legData.scoresByPlayer[playerId],
+  }));
+};
+
 // Load data when component mounts
 onBeforeMount(async () => {
   const [scores] = await Promise.all([
@@ -174,33 +206,6 @@ onBeforeMount(async () => {
   hasScores.value = scores.length > 0;
   matchPlayerStats.value = await getPlayerStatsForMatch(match.id);
 });
-
-const chartLegsForPlayer = (playerId: string): MatchAverageChartLegInput[] => {
-  if (match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets) {
-    return setsWithLegs.value.flatMap((setData, setIndex) =>
-      setData.legsWithScores.map((legData) => ({
-        scores: legData.scoresByPlayer[playerId] ?? [],
-        setIndex,
-      })),
-    );
-  }
-
-  return legsWithScores.value.map((legData) => ({
-    scores: legData.scoresByPlayer[playerId] ?? [],
-  }));
-};
-
-const chartSeriesByPlayerId = computed(
-  (): Record<string, MatchAverageChartPoint[]> => {
-    const series: Record<string, MatchAverageChartPoint[]> = {};
-    for (const player of toValue(players)) {
-      series[player.id] = buildMatchAverageChartSeries(
-        chartLegsForPlayer(player.id),
-      );
-    }
-    return series;
-  },
-);
 </script>
 
 <template>

@@ -1,9 +1,9 @@
 import type { Score } from "~/interfaces/leg";
 import type { BestAverages, PlayerStats } from "~/interfaces/stats";
 import type {
-  MatchAverageChartLegInput,
-  MatchAverageChartPoint,
-} from "~/interfaces/matchSummary";
+  AverageSeriesLegInput,
+  AverageSeriesPoint,
+} from "~/interfaces/averageChart";
 
 export const getDartsThrownForScore = (score: Score): number =>
   score.dartsThrown ?? 3;
@@ -102,11 +102,11 @@ export const calculateFirstNineAverage = (scores: Score[]): number => {
 };
 
 /** Per-leg averages plus cumulative match average through each leg. */
-export const buildMatchAverageChartSeries = (
-  legs: readonly MatchAverageChartLegInput[],
-): MatchAverageChartPoint[] => {
+export const buildAverageSeries = (
+  legs: readonly AverageSeriesLegInput[],
+): AverageSeriesPoint[] => {
   const cumulativeScores: Score[] = [];
-  const points: MatchAverageChartPoint[] = [];
+  const points: AverageSeriesPoint[] = [];
 
   legs.forEach((leg, index) => {
     cumulativeScores.push(...leg.scores);
@@ -121,19 +121,4 @@ export const buildMatchAverageChartSeries = (
   });
 
   return points;
-};
-
-/** Indices (0-based on x categories) where a new set starts after the first. */
-export const matchAverageChartSetBreakIndices = (
-  points: readonly MatchAverageChartPoint[],
-): number[] => {
-  const breaks: number[] = [];
-  for (let i = 1; i < points.length; i++) {
-    const prev = points[i - 1]?.setIndex;
-    const curr = points[i]?.setIndex;
-    if (curr !== undefined && prev !== undefined && curr !== prev) {
-      breaks.push(i);
-    }
-  }
-  return breaks;
 };
