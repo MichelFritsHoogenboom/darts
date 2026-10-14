@@ -1,15 +1,15 @@
 <script setup lang="ts">
+// Types
 import type { Match } from "~/interfaces/match";
 import type { Player } from "~/interfaces/player";
 import type { PlayerStats } from "~/interfaces/stats";
 import type { CompetitionEdition } from "~/interfaces/competition";
+// Utils
 import { canStartNewMatch, computeEditionStandings } from "~/utils/rivalry";
 import { getPlayerIdsFromStats, createPlayerNameGetter } from "~/utils/player";
 import { routes } from "~/utils/routes";
 import { formatX01MatchConfigSummary } from "~/utils/match";
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { faTrophy } from "@fortawesome/free-solid-svg-icons";
-import { faCamel } from "~/assets/icons/faCamel";
+import { averageForPlayer } from "~/utils/stats";
 
 definePageMeta({
   layout: false,
@@ -31,6 +31,7 @@ const {
 } = useCompetitionEditions();
 const { getMatchesByIds } = useMatches();
 const { loadPlayers, players } = usePlayers();
+const progressLabelId = useId();
 
 const competition = ref<Awaited<ReturnType<typeof getCompetition>>>();
 const edition = ref<CompetitionEdition>();
@@ -203,28 +204,26 @@ const seasonWinsByPlayer = computed(() => {
   return counts;
 });
 
+const getPlayerName = computed(() =>
+  createPlayerNameGetter(rivalryPlayers.value),
+);
+
+const matchProgressPercent = computed(() => {
+  if (!amountMatches.value) {
+    return 0;
+  }
+
+  return Math.min(100, (finishedCount.value / amountMatches.value) * 100);
+});
+
 const seasonWinsFor = (playerId: string | undefined) =>
   playerId ? (seasonWinsByPlayer.value[playerId] ?? 0) : 0;
 
 const camelSeasonWinsFor = (playerId: string | undefined) =>
   playerId ? (camelSeasonWinsByPlayer.value[playerId] ?? 0) : 0;
 
-const getPlayerName = computed(() =>
-  createPlayerNameGetter(rivalryPlayers.value),
-);
-
-const averageFor = (playerId: string | undefined) => {
-  if (!playerId) return 0;
-  const stats = loadedEditionPlayerStats.value.find(
-    (entry) => entry.playerId === playerId,
-  );
-  return stats?.average ?? 0;
-};
-
-const matchProgressPercent = computed(() => {
-  if (!amountMatches.value) return 0;
-  return Math.min(100, (finishedCount.value / amountMatches.value) * 100);
-});
+const averageFor = (playerId: string) =>
+  averageForPlayer(loadedEditionPlayerStats.value, playerId);
 
 const startMatch = async () => {
   if (!edition.value || !competition.value || !isCurrentSeason.value) return;
@@ -258,55 +257,16 @@ const beginNewEdition = async () => {
       <div v-if="editionLoading && !edition" class="loading">Loading...</div>
 
       <div v-else-if="edition" class="page-header">
-        <div class="card-panel rivalry-header">
-          <div v-if="rivalryPlayers.length >= 2" class="side side--left">
-            <div class="player-meta">
-              <div class="player-name">
-                {{ getPlayerName(rivalryPlayers[0].id) }}
-              </div>
-              <ul class="player-stats">
-                <li class="player-stats__row" title="3 dart average">
-                  <span class="player-stats__label">Season avg.</span>
-                  <span class="player-stats__value">{{
-                    averageFor(rivalryPlayers[0].id).toFixed(2)
-                  }}</span>
-                </li>
-                <li class="player-stats__row">
-                  <span class="player-stats__label">
-                    <FontAwesomeIcon
-                      :icon="faTrophy"
-                      class="player-stats__icon"
-                    />
-                    Season wins
-                  </span>
-                  <span class="player-stats__value">{{
-                    seasonWinsFor(rivalryPlayers[0].id)
-                  }}</span>
-                </li>
-                <li class="player-stats__row">
-                  <span class="player-stats__label">
-                    <FontAwesomeIcon
-                      :icon="faCamel"
-                      class="player-stats__icon"
-                    />
-                    Camel wins
-                  </span>
-                  <span class="player-stats__value">{{
-                    camelSeasonWinsFor(rivalryPlayers[0].id)
-                  }}</span>
-                </li>
-              </ul>
-            </div>
-            <div
-              class="silhouette-frame"
-              :class="{
-                'silhouette-frame--winner':
-                  edition.winner === rivalryPlayers[0].id,
-              }"
-            >
-              <PlayerImage :player="rivalryPlayers[0]" :silhouette-index="0" />
-            </div>
-          </div>
+        <div class="rivalry-header">
+          <Head2headMoleculesSeasonPlayerPanel
+            v-if="rivalryPlayers.length >= 2"
+            :player="rivalryPlayers[0]"
+            :silhouette-index="0"
+            :average="averageFor(rivalryPlayers[0].id)"
+            :season-wins="seasonWinsFor(rivalryPlayers[0].id)"
+            :camel-wins="camelSeasonWinsFor(rivalryPlayers[0].id)"
+            :is-winner="edition.winner === rivalryPlayers[0].id"
+          />
 
           <div class="center">
             <div class="header">
@@ -358,14 +318,14 @@ const beginNewEdition = async () => {
                   :aria-valuenow="finishedCount"
                   :aria-valuemin="0"
                   :aria-valuemax="amountMatches"
-                  :aria-label="`${finishedCount} of ${amountMatches} matches played`"
+                  :aria-labelledby="progressLabelId"
                 >
                   <div
                     class="progress-fill"
                     :style="{ width: `${matchProgressPercent}%` }"
                   />
                 </div>
-                <span class="progress-label">
+                <span :id="progressLabelId" class="progress-label">
                   {{ finishedCount }} / {{ amountMatches }} matches played
                 </span>
               </div>
@@ -389,54 +349,16 @@ const beginNewEdition = async () => {
             </div>
           </div>
 
-          <div v-if="rivalryPlayers.length >= 2" class="side side--right">
-            <div
-              class="silhouette-frame"
-              :class="{
-                'silhouette-frame--winner':
-                  edition.winner === rivalryPlayers[1].id,
-              }"
-            >
-              <PlayerImage :player="rivalryPlayers[1]" :silhouette-index="1" />
-            </div>
-            <div class="player-meta player-meta--end">
-              <div class="player-name">
-                {{ getPlayerName(rivalryPlayers[1].id) }}
-              </div>
-              <ul class="player-stats">
-                <li class="player-stats__row" title="3 dart average">
-                  <span class="player-stats__label">Season avg.</span>
-                  <span class="player-stats__value">{{
-                    averageFor(rivalryPlayers[1].id).toFixed(2)
-                  }}</span>
-                </li>
-                <li class="player-stats__row">
-                  <span class="player-stats__label">
-                    <FontAwesomeIcon
-                      :icon="faTrophy"
-                      class="player-stats__icon"
-                    />
-                    Season wins
-                  </span>
-                  <span class="player-stats__value">{{
-                    seasonWinsFor(rivalryPlayers[1].id)
-                  }}</span>
-                </li>
-                <li class="player-stats__row">
-                  <span class="player-stats__label">
-                    <FontAwesomeIcon
-                      :icon="faCamel"
-                      class="player-stats__icon"
-                    />
-                    Camel wins
-                  </span>
-                  <span class="player-stats__value">{{
-                    camelSeasonWinsFor(rivalryPlayers[1].id)
-                  }}</span>
-                </li>
-              </ul>
-            </div>
-          </div>
+          <Head2headMoleculesSeasonPlayerPanel
+            v-if="rivalryPlayers.length >= 2"
+            align="right"
+            :player="rivalryPlayers[1]"
+            :silhouette-index="1"
+            :average="averageFor(rivalryPlayers[1].id)"
+            :season-wins="seasonWinsFor(rivalryPlayers[1].id)"
+            :camel-wins="camelSeasonWinsFor(rivalryPlayers[1].id)"
+            :is-winner="edition.winner === rivalryPlayers[1].id"
+          />
         </div>
       </div>
     </template>
@@ -517,6 +439,8 @@ const beginNewEdition = async () => {
 </template>
 
 <style scoped lang="scss">
+@use "~/assets/css/utilities/animation" as *;
+
 .page-title {
   @apply text-xl font-bold text-white mb-2;
 }
@@ -563,9 +487,8 @@ const beginNewEdition = async () => {
 
 .rivalry-header {
   @apply grid grid-cols-[1fr_auto_1fr] items-stretch gap-x-2 mb-12 relative mt-10 w-[95%] mx-auto;
-  @apply border-gray-600/25 shadow-md shadow-black/20 overflow-visible;
-  padding: 0 !important;
-  background-color: rgb(31 41 55 / 0.7);
+  @apply rounded-lg border-2 border-gray-600/25 shadow-md shadow-black/20;
+  @apply overflow-visible bg-gray-800/70;
   background-image: linear-gradient(
     -45deg,
     rgb(55 65 81 / 0.04) 0%,
@@ -575,105 +498,6 @@ const beginNewEdition = async () => {
     rgb(55 65 81 / 0.04) 100%
   );
   min-height: 11rem;
-
-  .side {
-    @apply relative flex items-stretch overflow-visible min-h-[11rem];
-  }
-
-  .side--left {
-    @apply justify-start;
-
-    .silhouette-frame {
-      @apply ml-auto;
-    }
-  }
-
-  .side--right {
-    @apply justify-end;
-
-    .silhouette-frame {
-      @apply mr-auto;
-    }
-  }
-
-  .silhouette-frame {
-    @apply relative z-0 shrink-0 self-end;
-    margin-top: -5rem;
-    margin-bottom: 0.875rem;
-    border-bottom: 3px solid rgb(75 85 99 / 0.55);
-
-    &--winner {
-      border-bottom-color: theme("colors.dartboard.blue.bright");
-    }
-
-    :deep(.player-image) {
-      .photo,
-      .sizer {
-        @apply h-64 w-auto block;
-      }
-    }
-  }
-
-  .player-meta {
-    @apply relative z-10 flex flex-col justify-end gap-1.5 self-stretch;
-    @apply w-max max-w-[16rem] pl-7 pr-4 pt-5 pb-1;
-    @apply backdrop-blur-sm box-border;
-    text-align: left;
-    background: linear-gradient(
-      90deg,
-      rgb(17 24 39 / 0.55) 0%,
-      rgb(17 24 39 / 0.28) 65%,
-      transparent 100%
-    );
-  }
-
-  .player-meta--end {
-    @apply pl-4 pr-7;
-    text-align: right;
-    background: linear-gradient(
-      270deg,
-      rgb(17 24 39 / 0.55) 0%,
-      rgb(17 24 39 / 0.28) 65%,
-      transparent 100%
-    );
-  }
-
-  .player-name {
-    @apply text-3xl font-bold text-white leading-tight mb-1 whitespace-nowrap;
-  }
-
-  .player-stats {
-    @apply m-0 p-0 list-none;
-  }
-
-  .player-stats__row {
-    @apply flex items-center justify-between gap-4 py-2;
-    border-bottom: 1px solid rgb(75 85 99 / 0.35);
-
-    &:last-child {
-      border-bottom: 0;
-    }
-  }
-
-  .player-meta--end .player-stats__row {
-    @apply flex-row-reverse;
-  }
-
-  .player-stats__label {
-    @apply inline-flex items-center gap-2 text-base text-gray-400;
-  }
-
-  .player-stats__icon {
-    @apply text-gray-400 shrink-0;
-    height: 0.9375rem;
-    width: 0.9375rem;
-  }
-
-  .player-stats__value {
-    @apply font-oswald font-bold text-xl text-logo tabular-nums;
-    letter-spacing: -0.5px;
-    transform: skewX(-8deg);
-  }
 
   .center {
     @apply relative z-10 flex flex-col items-center justify-between self-stretch;
@@ -703,7 +527,10 @@ const beginNewEdition = async () => {
 
   .progress-fill {
     @apply h-full rounded-full bg-gray-300/80;
-    transition: width 0.3s ease;
+
+    @include animation {
+      transition: width 0.3s ease;
+    }
   }
 
   .progress-label {

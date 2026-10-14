@@ -34,7 +34,56 @@ import { routes } from "~/utils/routes";
 
 <style scoped>
 .main-background {
+  @apply relative text-white bg-page;
   min-width: 1300px;
   width: 100dvw;
+  z-index: 1;
+}
+
+.main-background::before,
+.main-background::after {
+  @apply absolute inset-0 pointer-events-none;
+  content: "";
+}
+
+/* Photo base — lighting layers sit above this */
+.main-background::before {
+  background-image: url("../assets/images/background.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  opacity: 0.12;
+  filter: grayscale(100%) blur(1px);
+  z-index: -2;
+}
+
+/* Depth: grid + top-light + vertical dark wash over the photo */
+.main-background::after {
+  background:
+    linear-gradient(
+      color-mix(in srgb, theme("colors.page.DEFAULT") 35%, transparent),
+      color-mix(in srgb, theme("colors.page.DEFAULT") 85%, transparent)
+    ),
+    radial-gradient(
+      ellipse 55% 40% at 50% 12%,
+      color-mix(in srgb, theme("colors.page.light") 25%, transparent) 0%,
+      transparent 70%
+    ),
+    repeating-linear-gradient(
+      0deg,
+      theme("colors.white / 2.5%") 0px,
+      theme("colors.white / 2.5%") 1px,
+      transparent 1px,
+      transparent 12px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      theme("colors.white / 2.5%") 0px,
+      theme("colors.white / 2.5%") 1px,
+      transparent 1px,
+      transparent 12px
+    );
+  z-index: -1;
 }
 </style>
