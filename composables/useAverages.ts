@@ -5,6 +5,7 @@ import {
   calculateScoringDartsAverage,
   calculateThreeDartAverage,
 } from "~/utils/averages";
+import { highestCheckoutFromScores } from "~/utils/score";
 
 const { getScoresForMatch, getScoresForPlayerLeg, getScoresForSet } =
   useScores();
@@ -20,7 +21,7 @@ export const useAverages = () => {
   const loading = ref(false);
   const error = ref<string | null>(null);
 
-  const calculateAndUpdateMatchPlayerStatAverage = async (
+  const calculateAndUpdateMatchPlayerStat = async (
     playerStat: PlayerStats,
   ): Promise<void> => {
     // Only calculate if playerStat has a matchId and playerId, and does NOT have a playerLegId or setId
@@ -43,12 +44,13 @@ export const useAverages = () => {
     playerStat.average = calculateThreeDartAverage(scores);
     playerStat.scoringDartsAverage = calculateScoringDartsAverage(scores);
     playerStat.firstNineAverage = calculateFirstNineAverage(scores);
+    playerStat.highestCheckout = highestCheckoutFromScores(scores);
 
     // Save the updated playerStats
     await savePlayerStats(playerStat);
   };
 
-  const calculateAndUpdateMatchPlayerStatsAverages = async (
+  const calculateAndUpdateMatchPlayerStats = async (
     matchId: string,
   ): Promise<void> => {
     loading.value = true;
@@ -57,7 +59,7 @@ export const useAverages = () => {
       const playerStats = await getPlayerStatsForMatch(matchId);
       // getPlayerStatsForMatch already returns only match-level stats
       for (const playerStat of playerStats) {
-        await calculateAndUpdateMatchPlayerStatAverage(playerStat);
+        await calculateAndUpdateMatchPlayerStat(playerStat);
       }
     } catch (err) {
       error.value =
@@ -161,8 +163,8 @@ export const useAverages = () => {
   return {
     loading: readonly(loading),
     error: readonly(error),
-    calculateAndUpdateMatchPlayerStatAverage,
-    calculateAndUpdateMatchPlayerStatsAverages,
+    calculateAndUpdateMatchPlayerStat,
+    calculateAndUpdateMatchPlayerStats,
     calculateAndUpdatePlayerLegAverage,
     calculateAndUpdatePlayerLegAverages,
     calculateAndUpdateSetPlayerStatAverage,

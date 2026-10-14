@@ -13,16 +13,27 @@ export const maxAverage = (averages: number[]) =>
 
 export const emptyBestAverages = (): BestAverages => ({});
 
-/** Legacy match stats before first-nine / scoring averages were stored.*/
-export const needsMatchAverageBackfill = (
+/**
+ * Checkouts were counted per range before the highest one was stored, so hits
+ * without a highest checkout mean the stat row predates that field. A player
+ * who never checked out keeps a legitimate 0 and is left alone.
+ */
+const hasUncountedCheckouts = (stat: PlayerStats): boolean =>
+  stat.highestCheckout === 0 &&
+  Object.values(stat.checkouts).some((range) => range.hit > 0);
+
+/** Legacy match stats from before a metric was stored. */
+export const needsMatchStatsBackfill = (
   stats: readonly PlayerStats[],
 ): boolean => {
   const isUnset = (value: number | undefined) => value == null || value === 0;
 
   return stats.some(
     (stat) =>
-      stat.average > 0 &&
-      (isUnset(stat.firstNineAverage) || isUnset(stat.scoringDartsAverage)),
+      (stat.average > 0 &&
+        (isUnset(stat.firstNineAverage) ||
+          isUnset(stat.scoringDartsAverage))) ||
+      hasUncountedCheckouts(stat),
   );
 };
 

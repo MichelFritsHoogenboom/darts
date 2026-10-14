@@ -40,7 +40,7 @@ const {
 } = usePlayerStats();
 const { getScoresForMatch } = useScores();
 const {
-  calculateAndUpdateMatchPlayerStatsAverages,
+  calculateAndUpdateMatchPlayerStats,
   calculateAndUpdateSetPlayerStatsAverages,
   calculateAndUpdatePlayerLegAverages,
 } = useAverages();
@@ -98,7 +98,7 @@ const updateLegWonAverages = async (allLegs: Leg[]) => {
 const updatePlayerAverages = async () => {
   if (!matchId) return;
 
-  await calculateAndUpdateMatchPlayerStatsAverages(matchId);
+  await calculateAndUpdateMatchPlayerStats(matchId);
   await updateMatchPlayerStats();
 
   // Also update set and leg averages if applicable

@@ -44,7 +44,7 @@ export const useX01Game = (
   const { savePlayerLeg, getPlayerLegsForLeg } = usePlayerLegs();
   const {
     calculateAndUpdatePlayerLegAverages,
-    calculateAndUpdateMatchPlayerStatsAverages,
+    calculateAndUpdateMatchPlayerStats,
     calculateAndUpdateSetPlayerStatsAverages,
   } = useAverages();
   const { getLegsForSet, saveLeg, getLegsForMatch, deleteLeg } = useLegs();
@@ -560,7 +560,7 @@ export const useX01Game = (
   };
 
   const handleMatchWin = async () => {
-    await calculateAndUpdateMatchPlayerStatsAverages(match.id);
+    await calculateAndUpdateMatchPlayerStats(match.id);
 
     match.winner = currentPlayerId.value;
     await saveMatch(match);
