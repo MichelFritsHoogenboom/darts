@@ -1,0 +1,12 @@
+.nuxt
+.output
+dist
+coverage
+pnpm-lock.yaml
+
+# DB export dumps / seed fixtures — byte-for-byte artefacts, not source
+assets/db
+
+# Human-owned prose. Prettier also reformats fenced code inside Markdown, which
+# rewrites the deliberately-wrong examples in .cursor/rules/**/RULE.md.
+*.md

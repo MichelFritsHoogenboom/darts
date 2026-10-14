@@ -4,7 +4,11 @@ const isSpaBuild = process.env.NUXT_SPA === "true";
 
 export default defineNuxtConfig({
   devtools: { enabled: true },
-  modules: ["@nuxtjs/tailwindcss", "@nuxt/fonts"],
+  modules: ["@nuxtjs/tailwindcss", "@nuxt/fonts", "@nuxt/eslint"],
+  eslint: {
+    // Prettier owns formatting, so the stylistic/formatters dials stay off.
+    config: { stylistic: false, standalone: true },
+  },
   fonts: {
     families: [
       { name: "Oswald", provider: "google", weights: [400, 700] },
