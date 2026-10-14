@@ -24,6 +24,25 @@ export function sortByCreatedAt<T extends { createdAt: Date }>(
   );
 }
 
+/**
+ * Indices where `keyOf` differs from the previous item, so the first item is
+ * never included. Useful for marking group boundaries in a flat ordered list.
+ */
+export const changeIndices = <T>(
+  items: readonly T[],
+  keyOf: (item: T) => unknown,
+): number[] => {
+  const indices: number[] = [];
+
+  for (let index = 1; index < items.length; index++) {
+    if (keyOf(items[index]) !== keyOf(items[index - 1])) {
+      indices.push(index);
+    }
+  }
+
+  return indices;
+};
+
 export function removeValueById<T>(array: T[], value: T): boolean {
   const index = array.indexOf(value);
   if (index > -1) {
