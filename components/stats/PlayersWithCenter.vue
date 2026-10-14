@@ -1,6 +1,9 @@
 <script lang="ts" setup>
+// Types
 import type { Player } from "~/interfaces/player";
 import type { PlayerStats } from "~/interfaces/stats";
+// Utils
+import { averageForPlayer } from "~/utils/stats";
 
 const {
   playerStats,
@@ -16,10 +19,8 @@ const {
   showBadge?: boolean;
 }>();
 
-const getAverage = (playerId: string) => {
-  const found = playerStats.find((player) => player.playerId === playerId);
-  return found?.average ?? 0;
-};
+const getAverage = (playerId: string) =>
+  averageForPlayer(playerStats, playerId);
 
 const sizeClasses = computed(() => {
   const sizes: Record<"small" | "medium" | "large" | "xlarge", string> = {

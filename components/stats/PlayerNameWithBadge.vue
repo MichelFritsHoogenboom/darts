@@ -43,7 +43,7 @@ const isWinner = computed(() => playerId === winnerId);
     </span>
     <span
       v-if="isWinner && showBadge"
-      class="px-1 py-0.25 text-xs font-semibold bg-dartboard-blue-bright text-white rounded player-name-with-badge__badge"
+      class="px-1 py-0.25 text-xs font-semibold bg-dartboard-blue-mid text-white rounded badge"
     >
       winner
     </span>
@@ -54,7 +54,7 @@ const isWinner = computed(() => playerId === winnerId);
 .player-name-with-badge {
   @apply flex items-center gap-2 gap-y-1 justify-center flex-wrap;
 
-  &--badge-first .player-name-with-badge__badge {
+  &--badge-first .badge {
     order: -1;
   }
 }

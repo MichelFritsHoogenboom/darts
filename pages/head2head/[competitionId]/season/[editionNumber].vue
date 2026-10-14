@@ -1,15 +1,15 @@
 <script setup lang="ts">
+// Types
 import type { Match } from "~/interfaces/match";
 import type { Player } from "~/interfaces/player";
 import type { PlayerStats } from "~/interfaces/stats";
 import type { CompetitionEdition } from "~/interfaces/competition";
+// Utils
 import { canStartNewMatch, computeEditionStandings } from "~/utils/rivalry";
-import { getPlayerIdsFromStats } from "~/utils/player";
+import { getPlayerIdsFromStats, createPlayerNameGetter } from "~/utils/player";
 import { routes } from "~/utils/routes";
 import { formatX01MatchConfigSummary } from "~/utils/match";
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { faTrophy } from "@fortawesome/free-solid-svg-icons";
-import { faCamel } from "~/assets/icons/faCamel";
+import { averageForPlayer } from "~/utils/stats";
 
 definePageMeta({
   layout: false,
@@ -31,6 +31,7 @@ const {
 } = useCompetitionEditions();
 const { getMatchesByIds } = useMatches();
 const { loadPlayers, players } = usePlayers();
+const progressLabelId = useId();
 
 const competition = ref<Awaited<ReturnType<typeof getCompetition>>>();
 const edition = ref<CompetitionEdition>();
@@ -203,11 +204,26 @@ const seasonWinsByPlayer = computed(() => {
   return counts;
 });
 
+const getPlayerName = computed(() =>
+  createPlayerNameGetter(rivalryPlayers.value),
+);
+
+const matchProgressPercent = computed(() => {
+  if (!amountMatches.value) {
+    return 0;
+  }
+
+  return Math.min(100, (finishedCount.value / amountMatches.value) * 100);
+});
+
 const seasonWinsFor = (playerId: string | undefined) =>
   playerId ? (seasonWinsByPlayer.value[playerId] ?? 0) : 0;
 
 const camelSeasonWinsFor = (playerId: string | undefined) =>
   playerId ? (camelSeasonWinsByPlayer.value[playerId] ?? 0) : 0;
+
+const averageFor = (playerId: string) =>
+  averageForPlayer(loadedEditionPlayerStats.value, playerId);
 
 const startMatch = async () => {
   if (!edition.value || !competition.value || !isCurrentSeason.value) return;
@@ -241,79 +257,85 @@ const beginNewEdition = async () => {
       <div v-if="editionLoading && !edition" class="loading">Loading...</div>
 
       <div v-else-if="edition" class="page-header">
-        <div class="card-panel rivalry-header">
-          <div v-if="rivalryPlayers.length >= 2" class="side">
-            <PlayerImage :player="rivalryPlayers[0]" :silhouette-index="0" />
-            <div
-              class="season-titles stat-well"
-              :title="`${seasonWinsFor(rivalryPlayers[0]?.id)} seasons won · ${camelSeasonWinsFor(rivalryPlayers[0]?.id)} camel seasons`"
-            >
-              <FontAwesomeIcon :icon="faTrophy" class="season-titles__trophy" />
-              <span class="season-titles__count">{{
-                seasonWinsFor(rivalryPlayers[0]?.id)
-              }}</span>
-              <FontAwesomeIcon :icon="faCamel" class="season-titles__camel" />
-              <span class="season-titles__count">{{
-                camelSeasonWinsFor(rivalryPlayers[0]?.id)
-              }}</span>
-            </div>
-          </div>
+        <div class="rivalry-header">
+          <Head2headMoleculesSeasonPlayerPanel
+            v-if="rivalryPlayers.length >= 2"
+            :player="rivalryPlayers[0]"
+            :silhouette-index="0"
+            :average="averageFor(rivalryPlayers[0].id)"
+            :season-wins="seasonWinsFor(rivalryPlayers[0].id)"
+            :camel-wins="camelSeasonWinsFor(rivalryPlayers[0].id)"
+            :is-winner="edition.winner === rivalryPlayers[0].id"
+          />
 
-          <div class="content">
-            <UiDisplayHeader
-              tag-size="h1"
-              display-size="h1"
-              emphasize
-              class="season-header"
-            >
-              <span>Season</span>
-              <select
-                v-if="seasonOptions.length > 1"
-                class="season-select"
-                :value="selectedSeason"
-                aria-label="Season"
-                @change="
-                  selectedSeason = Number(
-                    ($event.target as HTMLSelectElement).value,
-                  )
-                "
+          <div class="center">
+            <div class="header">
+              <UiDisplayHeader
+                tag-size="h1"
+                display-size="h1"
+                emphasize
+                class="season-header"
               >
-                <option
-                  v-for="option in seasonOptions"
-                  :key="option.value"
-                  :value="option.value"
+                <span>Season</span>
+                <select
+                  v-if="seasonOptions.length > 1"
+                  class="season-select"
+                  :value="selectedSeason"
+                  aria-label="Season"
+                  @change="
+                    selectedSeason = Number(
+                      ($event.target as HTMLSelectElement).value,
+                    )
+                  "
                 >
-                  {{ option.label }}
-                </option>
-              </select>
-              <span v-else>{{ edition.editionNumber }}</span>
-            </UiDisplayHeader>
-            <UiDisplayHeader
-              tag-size="h2"
-              display-size="h4"
-              class="season-meta"
-            >
-              <template v-if="matchConfigSummary">
-                <span>{{ matchConfigSummary }}</span>
-                <span class="season-meta__sep" aria-hidden="true">•</span>
-              </template>
-              <span
-                >{{ finishedCount }} / {{ amountMatches }} matches played</span
+                  <option
+                    v-for="option in seasonOptions"
+                    :key="option.value"
+                    :value="option.value"
+                  >
+                    {{ option.label }}
+                  </option>
+                </select>
+                <span v-else>{{ edition.editionNumber }}</span>
+              </UiDisplayHeader>
+              <UiDisplayHeader
+                v-if="matchConfigSummary"
+                tag-size="h2"
+                display-size="h4"
+                class="season-meta"
               >
-            </UiDisplayHeader>
+                {{ matchConfigSummary }}
+              </UiDisplayHeader>
+            </div>
 
-            <StatsPlayersWithCenter
-              v-if="rivalryPlayers.length >= 2"
-              class="stats"
-              size="xlarge"
-              :players="rivalryPlayers"
-              :player-stats="loadedEditionPlayerStats"
-              :winner-id="edition.winner"
-              :show-badge="true"
-            >
-              <span class="wins">{{ winsDisplay }}</span>
-            </StatsPlayersWithCenter>
-            <div class="actions">
+            <div class="content">
+              <div class="score">{{ winsDisplay }}</div>
+
+              <div v-if="amountMatches > 0" class="progress">
+                <div
+                  class="progress-track"
+                  role="progressbar"
+                  :aria-valuenow="finishedCount"
+                  :aria-valuemin="0"
+                  :aria-valuemax="amountMatches"
+                  :aria-labelledby="progressLabelId"
+                >
+                  <div
+                    class="progress-fill"
+                    :style="{ width: `${matchProgressPercent}%` }"
+                  />
+                </div>
+                <span :id="progressLabelId" class="progress-label">
+                  {{ finishedCount }} / {{ amountMatches }} matches played
+                </span>
+              </div>
+
+              <div v-if="edition.winner" class="winner-badge">
+                {{ getPlayerName(edition.winner) }} wins
+              </div>
+            </div>
+
+            <div v-if="showStartMatch || showStartEdition" class="actions">
               <FormButton
                 v-if="showStartMatch"
                 :disabled="startingMatch"
@@ -327,22 +349,16 @@ const beginNewEdition = async () => {
             </div>
           </div>
 
-          <div v-if="rivalryPlayers.length >= 2" class="side">
-            <PlayerImage :player="rivalryPlayers[1]" :silhouette-index="1" />
-            <div
-              class="season-titles stat-well"
-              :title="`${seasonWinsFor(rivalryPlayers[1]?.id)} seasons won · ${camelSeasonWinsFor(rivalryPlayers[1]?.id)} camel seasons`"
-            >
-              <FontAwesomeIcon :icon="faTrophy" class="season-titles__trophy" />
-              <span class="season-titles__count">{{
-                seasonWinsFor(rivalryPlayers[1]?.id)
-              }}</span>
-              <FontAwesomeIcon :icon="faCamel" class="season-titles__camel" />
-              <span class="season-titles__count">{{
-                camelSeasonWinsFor(rivalryPlayers[1]?.id)
-              }}</span>
-            </div>
-          </div>
+          <Head2headMoleculesSeasonPlayerPanel
+            v-if="rivalryPlayers.length >= 2"
+            align="right"
+            :player="rivalryPlayers[1]"
+            :silhouette-index="1"
+            :average="averageFor(rivalryPlayers[1].id)"
+            :season-wins="seasonWinsFor(rivalryPlayers[1].id)"
+            :camel-wins="camelSeasonWinsFor(rivalryPlayers[1].id)"
+            :is-winner="edition.winner === rivalryPlayers[1].id"
+          />
         </div>
       </div>
     </template>
@@ -350,7 +366,9 @@ const beginNewEdition = async () => {
     <template #default>
       <template v-if="edition">
         <div v-if="unfinishedMatches.length > 0" class="section">
-          <h2 class="section-title">Resume match</h2>
+          <UiDisplayHeader tag-size="h2" display-size="h3">
+            Resume match
+          </UiDisplayHeader>
           <div
             v-for="match in unfinishedMatches"
             :key="match.id"
@@ -421,6 +439,8 @@ const beginNewEdition = async () => {
 </template>
 
 <style scoped lang="scss">
+@use "~/assets/css/utilities/animation" as *;
+
 .page-title {
   @apply text-xl font-bold text-white mb-2;
 }
@@ -431,10 +451,6 @@ const beginNewEdition = async () => {
 
 .section {
   @apply mb-6;
-}
-
-.section-title {
-  @apply text-lg font-bold mb-2;
 }
 
 .tabs {
@@ -452,7 +468,8 @@ const beginNewEdition = async () => {
   }
 
   &.active {
-    @apply text-dartboard-red border-dartboard-red;
+    @apply text-white border-dartboard-red;
+    border-bottom-width: 3px;
   }
 }
 
@@ -469,9 +486,9 @@ const beginNewEdition = async () => {
 }
 
 .rivalry-header {
-  @apply grid grid-cols-[25%_50%_25%] items-center mb-8 py-0 relative mt-6 w-[95%] mx-auto;
-  @apply backdrop-blur-sm border-gray-600/25 shadow-md shadow-black/20;
-  background-color: rgb(31 41 55 / 0.7);
+  @apply grid grid-cols-[1fr_auto_1fr] items-stretch gap-x-2 mb-12 relative mt-10 w-[95%] mx-auto;
+  @apply rounded-lg border-2 border-gray-600/25 shadow-md shadow-black/20;
+  @apply bg-gray-800/70;
   background-image: linear-gradient(
     -45deg,
     rgb(55 65 81 / 0.04) 0%,
@@ -480,80 +497,58 @@ const beginNewEdition = async () => {
     rgb(55 65 81 / 0.01) 80%,
     rgb(55 65 81 / 0.04) 100%
   );
-  background-size: 300% 300%;
-  animation: rivalry-header-shift 20s ease-in-out infinite;
+  min-height: 11rem;
 
-  .side {
-    @apply flex justify-center relative self-stretch min-h-[12rem];
+  .center {
+    @apply relative z-10 flex flex-col items-center justify-between self-stretch;
+    @apply px-4 pt-0 pb-0 min-w-[13rem];
   }
 
-  :deep(.player-image) {
-    @apply absolute bottom-0;
-  }
-
-  .season-titles {
-    @apply absolute bottom-3 z-10 flex items-center justify-center gap-1 w-auto;
-    @apply font-bold text-gray-400 px-10 py-1 border-0;
-    font-size: 13px;
-    display: flex;
-    grid-template-columns: none;
-    -webkit-mask-image: linear-gradient(
-      90deg,
-      transparent,
-      #000 18%,
-      #000 82%,
-      transparent
-    );
-    mask-image: linear-gradient(
-      90deg,
-      transparent,
-      #000 18%,
-      #000 82%,
-      transparent
-    );
-
-    &:hover {
-      @apply from-gray-700/55 via-gray-700/45 to-gray-800/55 border-gray-600/25 shadow-none;
-    }
-  }
-
-  .season-titles__trophy,
-  .season-titles__camel {
-    @apply text-gray-400;
-    height: 0.9375rem;
-    width: 0.9375rem;
-  }
-
-  .season-titles__camel {
-    @apply ml-2.5;
-  }
-
-  .season-titles__count {
-    @apply tabular-nums;
+  .header {
+    @apply text-center relative z-20;
+    margin-top: -1.25rem;
   }
 
   .content {
-    @apply text-center relative -top-6;
+    @apply flex flex-col items-center py-3;
   }
 
-  .stats {
-    @apply my-7;
+  .score {
+    @apply inline-block px-4 py-1.5 bg-gray-400/50 font-bold rounded text-6xl mb-2;
+  }
 
-    :deep(.font-oswald) {
-      @apply text-lg;
+  .progress {
+    @apply flex flex-col items-center gap-1 w-full max-w-[13rem] mb-2;
+  }
+
+  .progress-track {
+    @apply w-full h-1.5 rounded-full bg-gray-700/80 overflow-hidden;
+  }
+
+  .progress-fill {
+    @apply h-full rounded-full bg-gray-300/80;
+
+    @include animation {
+      transition: width 0.3s ease;
     }
   }
 
-  .wins {
-    @apply inline-block px-4 py-2 bg-gray-400/50 font-bold rounded text-2xl;
+  .progress-label {
+    @apply text-sm text-gray-400;
+  }
+
+  .winner-badge {
+    @apply inline-block px-3 py-1 text-sm font-semibold rounded;
+    @apply bg-dartboard-blue-mid text-white;
   }
 
   .actions {
-    @apply mt-4 justify-center flex gap-4;
+    @apply flex justify-center gap-4 relative z-20;
+    margin-bottom: -1.25rem;
   }
 
   :deep(.display-header.h1) {
-    @apply mb-3 block w-full;
+    @apply mb-2 block w-full;
   }
 
   :deep(.season-header) {
@@ -561,7 +556,7 @@ const beginNewEdition = async () => {
   }
 
   :deep(.season-meta) {
-    @apply flex flex-wrap items-baseline justify-center gap-x-2 mb-0 w-full;
+    @apply mb-0 w-full;
   }
 
   .season-select {
@@ -578,23 +573,6 @@ const beginNewEdition = async () => {
       @apply text-base normal-case text-black;
       letter-spacing: normal;
     }
-  }
-}
-
-@keyframes rivalry-header-shift {
-  0%,
-  100% {
-    background-position: -100% 0%;
-  }
-
-  50% {
-    background-position: 200% 0%;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .rivalry-header {
-    animation: none;
   }
 }
 </style>

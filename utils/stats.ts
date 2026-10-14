@@ -109,6 +109,13 @@ export const getScoreRangeKey = (totalScore: number): keyof ScoreRanges => {
   return "0-9";
 };
 
+/** 3-dart average of one player in a stats collection; 0 when they have no row yet. */
+export const averageForPlayer = (
+  playerStats: PlayerStats[],
+  playerId: string,
+): number =>
+  playerStats.find((entry) => entry.playerId === playerId)?.average ?? 0;
+
 export const formatAverageDisplay = (
   value: number,
   fractionDigits = 1,
