@@ -1,26 +1,37 @@
 <script lang="ts" setup>
+// Vendor
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import {
   faTrash,
   faMagnifyingGlassChart,
   faClipboard,
+  faChartLine,
 } from "@fortawesome/free-solid-svg-icons";
 import { faPlay } from "~/assets/icons/faPlay";
+// Types
+import type {
+  AverageSeriesLegInput,
+  AverageSeriesPoint,
+} from "~/interfaces/averageChart";
 import type { Match } from "~/interfaces/match";
 import type { MatchPanel } from "~/interfaces/matchSummary";
 import type { Set } from "~/interfaces/set";
 import type { Leg, PlayerLeg, Score } from "~/interfaces/leg";
 import type { PlayerStats } from "~/interfaces/stats";
+// Constants
+import { MATCH_TYPE_META } from "~/constants/match";
+import { MATCH_PANEL } from "~/constants/matchSummary";
 import { X01_GAME_PLAYED_IN } from "~/interfaces/x01MatchConfig";
+// Components
+import LegSummary from "./LegSummary.vue";
+import SetSummary from "./SetSummary.vue";
+// Utils
+import { buildAverageSeries } from "~/utils/averages";
 import {
   getPlayerWinnerCount,
   formatX01MatchConfigSummary,
 } from "~/utils/match";
-import { MATCH_TYPE_META } from "~/constants/match";
-import { MATCH_PANEL } from "~/constants/matchSummary";
 import { routes } from "~/utils/routes";
-import LegSummary from "./LegSummary.vue";
-import SetSummary from "./SetSummary.vue";
 
 const { match, openDetails = false } = defineProps<{
   match: Match;
@@ -158,6 +169,33 @@ const deleteEmptyMatch = async () => {
   }
 };
 
+const chartSeriesByPlayerId = computed(
+  (): Record<string, AverageSeriesPoint[]> => {
+    const series: Record<string, AverageSeriesPoint[]> = {};
+
+    for (const player of toValue(players)) {
+      series[player.id] = buildAverageSeries(chartLegsForPlayer(player.id));
+    }
+
+    return series;
+  },
+);
+
+const chartLegsForPlayer = (playerId: string): AverageSeriesLegInput[] => {
+  if (match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets) {
+    return setsWithLegs.value.flatMap((setData, setIndex) =>
+      setData.legsWithScores.map((legData) => ({
+        scores: legData.scoresByPlayer[playerId],
+        setIndex,
+      })),
+    );
+  }
+
+  return legsWithScores.value.map((legData) => ({
+    scores: legData.scoresByPlayer[playerId],
+  }));
+};
+
 // Load data when component mounts
 onBeforeMount(async () => {
   const [scores] = await Promise.all([
@@ -228,6 +266,16 @@ onBeforeMount(async () => {
       >
         <FontAwesomeIcon :icon="faMagnifyingGlassChart" class="w-4 h-4" />
       </button>
+      <button
+        type="button"
+        class="btn-gray px-1"
+        :class="{ 'bg-gray-500': isPanel(MATCH_PANEL.chart) }"
+        :title="isPanel(MATCH_PANEL.chart) ? 'Hide chart' : 'Show chart'"
+        :aria-label="isPanel(MATCH_PANEL.chart) ? 'Hide chart' : 'Show chart'"
+        @click="togglePanel(MATCH_PANEL.chart)"
+      >
+        <FontAwesomeIcon :icon="faChartLine" class="w-4 h-4" />
+      </button>
       <NuxtLink
         v-if="!match.winner"
         :to="routes.matchDetail(match.id)"
@@ -272,6 +320,14 @@ onBeforeMount(async () => {
 
     <div v-else-if="isPanel(MATCH_PANEL.stats)" class="mt-2 match-stats">
       <StatsComparison :match-id="match.id" />
+    </div>
+
+    <!-- Lazy so chart.js only downloads once the chart panel is opened -->
+    <div v-else-if="isPanel(MATCH_PANEL.chart)" class="mt-2 match-chart">
+      <LazyStatsOrganismsMatchAverageChart
+        :players="[...players]"
+        :series-by-player-id="chartSeriesByPlayerId"
+      />
     </div>
   </UiSummaryCardLayout>
 </template>
