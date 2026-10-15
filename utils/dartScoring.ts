@@ -80,7 +80,9 @@ export function isAchievableScore(score) {
 
 // Get checkout suggestions for a given score
 export function getCheckoutSuggestions(score) {
-  if (score > 170) return [];
+  if (score > 170) {
+    return [];
+  }
 
   // Complete list of all possible checkouts
   const checkoutPatterns = {
@@ -253,8 +255,12 @@ export function getCheckoutSuggestions(score) {
 
 // Get the current player's checkout status
 export function getCheckoutStatus(score) {
-  if (score > 170) return { isCheckout: false, suggestions: [] };
-  if (score <= 1) return { isCheckout: false, suggestions: [] };
+  if (score > 170) {
+    return { isCheckout: false, suggestions: [] };
+  }
+  if (score <= 1) {
+    return { isCheckout: false, suggestions: [] };
+  }
 
   const suggestions = getCheckoutSuggestions(score);
   return {

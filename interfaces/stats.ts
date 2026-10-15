@@ -1,14 +1,16 @@
 import { v4 as uuid } from "uuid";
 import { toRaw } from "vue";
 import { PlayerStatsService } from "~/database/PlayerStatsService";
-import { STATS_COMPARE_KIND, STAT_VALUE_FORMAT } from "~/constants/stats";
+import type { STATS_COMPARE_KIND, STAT_VALUE_FORMAT } from "~/constants/stats";
 import {
   createCheckoutRanges,
   createDartsThrownHit,
   createScoreRanges,
-  type CheckoutRanges,
-  type DartsThrownHit,
-  type ScoreRanges,
+} from "~/interfaces/statsRanges";
+import type {
+  CheckoutRanges,
+  DartsThrownHit,
+  ScoreRanges,
 } from "~/interfaces/statsRanges";
 
 const playerStatsService = new PlayerStatsService();

@@ -63,7 +63,9 @@ const startMatch = async () => {
   try {
     const competition = await getCompetition(competitionId.value);
     const edition = await getCurrentEdition(competitionId.value);
-    if (!competition || !edition) return;
+    if (!competition || !edition) {
+      return;
+    }
 
     const saved = await createH2HMatch(edition, competition, {
       ...matchConfig.value,

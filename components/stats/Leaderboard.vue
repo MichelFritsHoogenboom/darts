@@ -27,7 +27,9 @@ watch(
   () => entries.map((entry) => entry.playerId).join(","),
   async () => {
     const playerIds = [...new Set(entries.map((entry) => entry.playerId))];
-    if (playerIds.length) await loadPlayers(playerIds);
+    if (playerIds.length) {
+      await loadPlayers(playerIds);
+    }
   },
   { immediate: true },
 );

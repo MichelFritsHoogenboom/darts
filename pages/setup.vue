@@ -19,7 +19,7 @@
 
       <SetupX01MatchSetup v-model="match.matchConfig">
         <template #footer>
-          <FormButton @click="startGame" :disabled="!canStartGame"
+          <FormButton :disabled="!canStartGame" @click="startGame"
             >Start Game</FormButton
           >
         </template>
@@ -73,7 +73,9 @@ const canStartGame = computed(() => {
 
 // Methods
 const startGame = async () => {
-  if (!canStartGame.value) return;
+  if (!canStartGame.value) {
+    return;
+  }
 
   try {
     match.playerStats = await Promise.all(

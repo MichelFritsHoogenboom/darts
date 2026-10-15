@@ -44,7 +44,9 @@ const activeHighlight = computed(
 
 const editionScopeKey = computed(() => {
   const edition = props.competitionEdition;
-  if (!edition) return "global";
+  if (!edition) {
+    return "global";
+  }
   return `${edition.id}:${edition.matches.join(",")}`;
 });
 

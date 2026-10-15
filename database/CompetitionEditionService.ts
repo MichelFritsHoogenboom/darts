@@ -31,7 +31,9 @@ export class CompetitionEditionService extends BaseService<CompetitionEdition> {
     competitionId: string,
   ): Promise<CompetitionEdition | undefined> {
     const editions = await this.getEditionsForCompetition(competitionId);
-    if (editions.length === 0) return undefined;
+    if (editions.length === 0) {
+      return undefined;
+    }
 
     const active = editions.filter((e) => !e.winner);
     if (active.length > 0) {
@@ -59,14 +61,18 @@ export class CompetitionEditionService extends BaseService<CompetitionEdition> {
 
     for (const stat of editionStats) {
       const edition = await this.get(stat.competitionEditionId!);
-      if (!edition) continue;
+      if (!edition) {
+        continue;
+      }
 
       const editionPlayerStats =
         await playerStatsService.getPlayerStatsForCompetitionEdition(
           edition.id,
         );
       const editionPlayerIds = getPlayerIdsFromStats(editionPlayerStats);
-      if (!playerIdsMatch(editionPlayerIds, sorted)) continue;
+      if (!playerIdsMatch(editionPlayerIds, sorted)) {
+        continue;
+      }
 
       const competition = await competitionService.get(edition.competitionId);
       if (

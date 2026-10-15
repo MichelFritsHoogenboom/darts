@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import type { PlayerStats } from "~/interfaces/stats";
-import { createScoreRanges, type ScoreRanges } from "~/interfaces/statsRanges";
+import { createScoreRanges } from "~/interfaces/statsRanges";
+import type { ScoreRanges } from "~/interfaces/statsRanges";
 import type { Score } from "~/interfaces/leg";
 import { faCamel } from "~/assets/icons/faCamel";
 import { getScoreRangeKey, resolveScoreDisplayRange } from "~/utils/stats";
@@ -81,12 +82,16 @@ onBeforeUnmount(() => {
 });
 
 const averagePerLeg = (value: number) => {
-  if (legsPlayed.value === 0) return "0.000";
+  if (legsPlayed.value === 0) {
+    return "0.000";
+  }
   return (value / legsPlayed.value).toFixed(3);
 };
 
 const scoreRows = computed(() => {
-  if (!playerStatsRef.value) return [];
+  if (!playerStatsRef.value) {
+    return [];
+  }
   return MATCH_SCORE_DISPLAY_RANGES.map((range) => ({
     ...resolveScoreDisplayRange(playerStatsRef.value.scores, range),
     showCamel: !!range.showCamel,

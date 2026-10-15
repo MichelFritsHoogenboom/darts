@@ -21,15 +21,21 @@ export class ScoreService extends BaseService<Score> {
     const matchIdSet = matchIds ? new Set(matchIds) : null;
     const checkouts = await table
       .filter((score: Score) => {
-        if (!isCheckoutScore(score)) return false;
-        if (matchIdSet && !matchIdSet.has(score.matchId)) return false;
+        if (!isCheckoutScore(score)) {
+          return false;
+        }
+        if (matchIdSet && !matchIdSet.has(score.matchId)) {
+          return false;
+        }
         return true;
       })
       .toArray();
 
     checkouts.sort((a: Score, b: Score) => {
       const scoreDiff = b.totalScore - a.totalScore;
-      if (scoreDiff !== 0) return scoreDiff;
+      if (scoreDiff !== 0) {
+        return scoreDiff;
+      }
       return b.createdAt.getTime() - a.createdAt.getTime();
     });
 

@@ -19,7 +19,9 @@ export function playerIdsMatch(
   editionPlayerIds: string[],
   sortedPair: [string, string],
 ): boolean {
-  if (editionPlayerIds.length !== 2) return false;
+  if (editionPlayerIds.length !== 2) {
+    return false;
+  }
   const sorted = [...editionPlayerIds].sort();
   return sorted[0] === sortedPair[0] && sorted[1] === sortedPair[1];
 }
@@ -36,7 +38,9 @@ export function computeEditionStandings(
 
   const editionMatchIds = new Set(edition.matches);
   for (const match of matches) {
-    if (!editionMatchIds.has(match.id) || !match.winner) continue;
+    if (!editionMatchIds.has(match.id) || !match.winner) {
+      continue;
+    }
     if (standings[match.winner] !== undefined) {
       standings[match.winner] += 1;
     }
@@ -63,8 +67,12 @@ export function canStartNewMatch(
   edition: CompetitionEdition,
   matches: Match[],
 ): boolean {
-  if (edition.winner) return false;
-  if (hasUnfinishedMatch(matches)) return false;
+  if (edition.winner) {
+    return false;
+  }
+  if (hasUnfinishedMatch(matches)) {
+    return false;
+  }
   const editionMatches = matches.filter((m) => edition.matches.includes(m.id));
   const finishedCount = editionMatches.filter((m) => m.winner).length;
   return finishedCount < edition.competitionConfig.amountMatches;
@@ -77,9 +85,13 @@ export function getEditionLastActiveAt(
   let maxTime = edition.updatedAt.getTime();
   const editionMatchIds = new Set(edition.matches);
   for (const match of matches) {
-    if (!editionMatchIds.has(match.id)) continue;
+    if (!editionMatchIds.has(match.id)) {
+      continue;
+    }
     const t = match.updatedAt.getTime();
-    if (t > maxTime) maxTime = t;
+    if (t > maxTime) {
+      maxTime = t;
+    }
   }
   return new Date(maxTime);
 }
@@ -89,7 +101,9 @@ export function getEditionMatchWinner(
   matches: Match[],
   playerIds: string[],
 ): string | undefined {
-  if (!isEditionComplete(edition, matches)) return undefined;
+  if (!isEditionComplete(edition, matches)) {
+    return undefined;
+  }
 
   const standings = computeEditionStandings(edition, matches, playerIds);
   let bestId: string | undefined;
@@ -134,7 +148,9 @@ export function findHead2HeadCompetitionFromEditions(
   const edition = editions.find((e) =>
     playerIdsMatch(editionPlayerIds.get(e.id) ?? [], sorted),
   );
-  if (!edition) return undefined;
+  if (!edition) {
+    return undefined;
+  }
 
   return competitions.find((c) => c.id === edition.competitionId);
 }

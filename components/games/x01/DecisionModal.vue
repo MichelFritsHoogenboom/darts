@@ -40,7 +40,9 @@ const setOptionRef = (el: unknown, index: number) => {
 
 const focusOption = (index: number) => {
   const count = props.options.length;
-  if (count === 0) return;
+  if (count === 0) {
+    return;
+  }
   const nextIndex = (index + count) % count;
   optionRefs.value[nextIndex]?.focus({ focusVisible: true });
 };
@@ -49,7 +51,9 @@ watch(
   () => [props.visible, props.options.length] as const,
   ([visible, optionCount]) => {
     if (!visible || optionCount === 0) {
-      if (!visible) optionRefs.value = [];
+      if (!visible) {
+        optionRefs.value = [];
+      }
       return;
     }
 

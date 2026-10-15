@@ -32,17 +32,23 @@ const openImportModal = () => {
 };
 
 const closeExportModal = () => {
-  if (busy.value) return;
+  if (busy.value) {
+    return;
+  }
   exportModalVisible.value = false;
 };
 
 const closeImportModal = () => {
-  if (busy.value) return;
+  if (busy.value) {
+    return;
+  }
   importModalVisible.value = false;
 };
 
 const handleExportSelect = async (value: string | number | boolean) => {
-  if (value !== "export" || busy.value) return;
+  if (value !== "export" || busy.value) {
+    return;
+  }
 
   busy.value = true;
   try {
@@ -56,7 +62,9 @@ const handleExportSelect = async (value: string | number | boolean) => {
 };
 
 const handleImportSelect = async (value: string | number | boolean) => {
-  if (value !== "import" || busy.value) return;
+  if (value !== "import" || busy.value) {
+    return;
+  }
 
   busy.value = true;
   try {

@@ -75,23 +75,23 @@ const togglePanel = (next: Exclude<MatchPanel, typeof MATCH_PANEL.none>) => {
 
 // Store loaded leg data with scores, organized by set (if sets mode)
 const setsWithLegs = ref<
-  Array<{
+  {
     set: Set;
-    legsWithScores: Array<{
+    legsWithScores: {
       leg: Leg;
       playerLegs: PlayerLeg[];
       scoresByPlayer: Record<string, Score[]>;
-    }>;
-  }>
+    }[];
+  }[]
 >([]);
 
 // Store loaded leg data for direct legs mode
 const legsWithScores = ref<
-  Array<{
+  {
     leg: Leg;
     playerLegs: PlayerLeg[];
     scoresByPlayer: Record<string, Score[]>;
-  }>
+  }[]
 >([]);
 
 // Helper function to load a leg with its playerLegs and scores
@@ -156,7 +156,9 @@ const loadLegsData = async () => {
 };
 
 const deleteEmptyMatch = async () => {
-  if (hasScores.value || deleting.value) return;
+  if (hasScores.value || deleting.value) {
+    return;
+  }
 
   deleting.value = true;
   try {
@@ -296,8 +298,8 @@ onBeforeMount(async () => {
 
     <div v-if="isPanel(MATCH_PANEL.scores)" class="mt-2">
       <SetSummary
-        v-if="match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets"
         v-for="(setData, setIndex) in setsWithLegs"
+        v-if="match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets"
         :key="setData.set.id"
         :set="setData.set"
         :set-index="setIndex"
@@ -306,8 +308,8 @@ onBeforeMount(async () => {
       />
 
       <LegSummary
-        v-else
         v-for="(legData, index) in legsWithScores"
+        v-else
         :key="legData.leg.id"
         :leg-index="index"
         :leg="legData.leg"

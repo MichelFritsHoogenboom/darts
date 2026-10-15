@@ -19,9 +19,13 @@ const activeTitle = computed(
 const transitionName = computed(() => `cube-${direction.value}`);
 
 const goTo = (index: number, preferredDirection?: "next" | "prev") => {
-  if (slideCount.value === 0) return;
+  if (slideCount.value === 0) {
+    return;
+  }
   const nextIndex = (index + slideCount.value) % slideCount.value;
-  if (nextIndex === activeIndex.value) return;
+  if (nextIndex === activeIndex.value) {
+    return;
+  }
 
   if (preferredDirection) {
     direction.value = preferredDirection;
@@ -37,12 +41,16 @@ const goTo = (index: number, preferredDirection?: "next" | "prev") => {
 const next = () => goTo(activeIndex.value + 1, "next");
 
 const { pause, resume } = useIntervalFn(() => {
-  if (slideCount.value > 1) next();
+  if (slideCount.value > 1) {
+    next();
+  }
 }, autoplayMs);
 
 const pauseAutoplay = () => pause();
 const resumeAutoplay = () => {
-  if (slideCount.value > 1) resume();
+  if (slideCount.value > 1) {
+    resume();
+  }
 };
 </script>
 

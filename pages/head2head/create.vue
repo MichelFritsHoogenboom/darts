@@ -45,7 +45,9 @@ onBeforeMount(async () => {
 const canCreate = computed(() => selectedPlayers.value.length === 2);
 
 const duplicatePath = computed(() => {
-  if (!duplicateCompetition.value) return routes.head2head.index;
+  if (!duplicateCompetition.value) {
+    return routes.head2head.index;
+  }
   return routes.head2head.season(
     duplicateCompetition.value.id,
     duplicateCompetition.value.editionNumber,
@@ -93,7 +95,9 @@ const removePlayer = (playerId: string) => {
 };
 
 const createRivalry = async () => {
-  if (!canCreate.value || duplicateCompetition.value) return;
+  if (!canCreate.value || duplicateCompetition.value) {
+    return;
+  }
 
   saving.value = true;
   submitError.value = null;

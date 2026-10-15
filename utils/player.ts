@@ -27,7 +27,9 @@ export function getPlayerIdsFromStats(
  * Falls back to alias if no name, or "Unknown" if nothing available
  */
 export function getPlayerFullName(player: Player): string {
-  if (!player) return "Unknown";
+  if (!player) {
+    return "Unknown";
+  }
   return `${player.firstName} ${player.lastName || ""}`;
 }
 
@@ -36,7 +38,9 @@ export function getPlayerFullName(player: Player): string {
  * Returns alias if available, otherwise full name
  */
 export function getPlayerDisplayName(player: Player): string {
-  if (!player) return "Unknown";
+  if (!player) {
+    return "Unknown";
+  }
   return player.alias || player.firstName;
 }
 

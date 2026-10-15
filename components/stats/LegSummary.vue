@@ -104,9 +104,9 @@ const [showLegDetails, toggleLegDetails] = useToggle(false);
                   </span>
                 </StatsPlayersWithCenter>
                 <button
-                  @click="toggleLegDetails()"
                   class="text-xs px-2 py-1 bg-gray-700 hover:bg-gray-600 transition-colors"
                   :class="{ 'bg-gray-600': showLegDetails }"
+                  @click="toggleLegDetails()"
                 >
                   {{ showLegDetails ? "−" : "+" }}
                 </button>

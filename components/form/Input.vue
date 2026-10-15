@@ -41,14 +41,14 @@ const inputClasses = computed(() => {
     </label>
     <input
       :value="modelValue"
-      @input="
-        $emit('update:modelValue', ($event.target as HTMLInputElement).value)
-      "
       :type="type"
       :placeholder="placeholder"
       :disabled="disabled"
       :required="required"
       :class="inputClasses"
+      @input="
+        $emit('update:modelValue', ($event.target as HTMLInputElement).value)
+      "
     />
   </div>
 </template>

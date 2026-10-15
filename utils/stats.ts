@@ -8,18 +8,22 @@ import type {
 import {
   createCheckoutRanges,
   createScoreRanges,
-  type CheckoutRanges,
-  type DisplayRange,
-  type DartsThrownHit,
-  type RangeBounds,
-  type ScoreDisplayRange,
-  type ScoreRanges,
+} from "~/interfaces/statsRanges";
+import type {
+  CheckoutRanges,
+  DisplayRange,
+  DartsThrownHit,
+  RangeBounds,
+  ScoreDisplayRange,
+  ScoreRanges,
 } from "~/interfaces/statsRanges";
 import type { Score } from "~/interfaces/leg";
 import { STAT_VALUE_FORMAT } from "~/constants/stats";
 
 export const parseRangeKey = (key: string): { min: number; max: number } => {
-  if (key === "180") return { min: 180, max: 180 };
+  if (key === "180") {
+    return { min: 180, max: 180 };
+  }
   const [min, max] = key.split("-").map(Number);
   return { min, max };
 };
@@ -32,8 +36,12 @@ const formatMergedRangeLabel = (keys: string[]): string => {
 };
 
 export const formatScoreRangeLabel = (key: keyof ScoreRanges): string => {
-  if (key === "180") return "180's";
-  if (key === "goldenCamel") return "Golden camels";
+  if (key === "180") {
+    return "180's";
+  }
+  if (key === "goldenCamel") {
+    return "Golden camels";
+  }
   return key.replace("-", " - ");
 };
 
@@ -43,14 +51,18 @@ export const formatCheckoutRangeKey = (key: keyof CheckoutRanges) =>
 export const formatScoreDisplayRangeLabel = (
   range: ScoreDisplayRange,
 ): string => {
-  if (range.keys.length === 1) return formatScoreRangeLabel(range.keys[0]);
+  if (range.keys.length === 1) {
+    return formatScoreRangeLabel(range.keys[0]);
+  }
   return formatMergedRangeLabel(range.keys);
 };
 
 export const formatCheckoutDisplayRangeLabel = (
   range: DisplayRange<CheckoutRanges>,
 ): string => {
-  if (range.keys.length === 1) return formatCheckoutRangeKey(range.keys[0]);
+  if (range.keys.length === 1) {
+    return formatCheckoutRangeKey(range.keys[0]);
+  }
   return formatMergedRangeLabel(range.keys);
 };
 
@@ -165,7 +177,9 @@ export const formatCheckoutPercentage = (
   value: DartsThrownHit,
   fractionDigits = 0,
 ): string => {
-  if (!value.thrown) return "—";
+  if (!value.thrown) {
+    return "—";
+  }
   const factor = 10 ** fractionDigits;
   const pct = Math.round((value.hit / value.thrown) * 100 * factor) / factor;
   return `${pct}%`;
@@ -175,7 +189,9 @@ export const checkoutRate = (value: DartsThrownHit): number | undefined =>
   value.thrown > 0 ? value.hit / value.thrown : undefined;
 
 export const betterNumber = (a: number, b: number): CompareSide => {
-  if (a === b) return null;
+  if (a === b) {
+    return null;
+  }
   return a > b ? "player1" : "player2";
 };
 
@@ -187,14 +203,22 @@ export const betterCheckout = (
   const rateB = checkoutRate(b);
   if (rateA !== undefined && rateB !== undefined) {
     if (rateA === rateB) {
-      if (a.hit === b.hit) return null;
+      if (a.hit === b.hit) {
+        return null;
+      }
       return a.hit > b.hit ? "player1" : "player2";
     }
     return rateA > rateB ? "player1" : "player2";
   }
-  if (rateA !== undefined) return "player1";
-  if (rateB !== undefined) return "player2";
-  if (a.hit === b.hit) return null;
+  if (rateA !== undefined) {
+    return "player1";
+  }
+  if (rateB !== undefined) {
+    return "player2";
+  }
+  if (a.hit === b.hit) {
+    return null;
+  }
   return a.hit > b.hit ? "player1" : "player2";
 };
 

@@ -235,7 +235,9 @@ export async function exportDatabaseAsJson(): Promise<void> {
 
 export async function importDatabaseFromJson(): Promise<boolean> {
   const file = await pickJsonFile();
-  if (!file) return false;
+  if (!file) {
+    return false;
+  }
 
   const raw = await readFileAsText(file);
   const payload = parseExportPayload(raw);

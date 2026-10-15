@@ -57,7 +57,9 @@ export const buildBestAverages = (input: {
 };
 
 export const calculateThreeDartAverage = (scores: Score[]): number => {
-  if (scores.length === 0) return 0;
+  if (scores.length === 0) {
+    return 0;
+  }
 
   const totalScoreSum = scores.reduce(
     (sum, score) => sum + score.totalScore,
@@ -68,7 +70,9 @@ export const calculateThreeDartAverage = (scores: Score[]): number => {
     0,
   );
 
-  if (totalDarts === 0) return 0;
+  if (totalDarts === 0) {
+    return 0;
+  }
 
   return totalScoreSum / (totalDarts / 3);
 };
@@ -89,7 +93,9 @@ const scoreTime = (score: Score): number => {
  * the leg ends earlier), aggregated across all legs.
  */
 export const calculateFirstNineAverage = (scores: Score[]): number => {
-  if (scores.length === 0) return 0;
+  if (scores.length === 0) {
+    return 0;
+  }
 
   const byPlayerLeg = new Map<string, Score[]>();
   for (const score of scores) {
@@ -103,7 +109,9 @@ export const calculateFirstNineAverage = (scores: Score[]): number => {
     const sorted = [...legScores].sort((a, b) => scoreTime(a) - scoreTime(b));
     let darts = 0;
     for (const score of sorted) {
-      if (darts >= 9) break;
+      if (darts >= 9) {
+        break;
+      }
       firstNineScores.push(score);
       darts += getDartsThrownForScore(score);
     }

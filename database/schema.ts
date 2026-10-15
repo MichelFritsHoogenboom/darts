@@ -163,7 +163,7 @@ export class DartsDatabase extends Dexie {
 
         for (const edition of editions) {
           const legacyPlayerIds = edition.playerIds as string[] | undefined;
-          let statsIds = [...(edition.playerStats ?? [])];
+          const statsIds = [...(edition.playerStats ?? [])];
 
           if (legacyPlayerIds?.length) {
             const existingStats = (
@@ -177,7 +177,9 @@ export class DartsDatabase extends Dexie {
             );
 
             for (const playerId of legacyPlayerIds) {
-              if (coveredPlayerIds.has(playerId)) continue;
+              if (coveredPlayerIds.has(playerId)) {
+                continue;
+              }
 
               const statId = uuid();
               await statsTable.add({

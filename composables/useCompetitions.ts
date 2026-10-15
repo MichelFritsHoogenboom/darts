@@ -58,7 +58,9 @@ export function useCompetitions() {
 
       for (const competition of comps) {
         const edition = await editionService.getCurrentEdition(competition.id);
-        if (!edition) continue;
+        if (!edition) {
+          continue;
+        }
 
         const matches =
           await matchService.getMatchesForCompetitionEdition(edition);

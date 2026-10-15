@@ -119,7 +119,9 @@ const startingPlayerOptions = computed(() =>
 );
 
 const handleStartingPlayerSelect = async (value: string | number | boolean) => {
-  if (typeof value !== "string") return;
+  if (typeof value !== "string") {
+    return;
+  }
 
   pendingStartingPlayer.value = false;
   await initializeMatch(value);
@@ -293,7 +295,9 @@ const resetGame = () => {
 };
 
 const returnToHead2Head = async () => {
-  if (!head2headReturn.value) return;
+  if (!head2headReturn.value) {
+    return;
+  }
 
   const query = head2headReturn.value.editionComplete
     ? { editionComplete: "1" }
@@ -342,13 +346,13 @@ onMounted(async () => {
       <div class="font-bold text-white pb-3 px-2">
         <div class="flex justify-center items-center gap-4">
           <span
-            class="text-md text-center"
             v-if="match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets"
+            class="text-md text-center"
           >
             Set {{ matchGame.length }} - Leg
             {{ currentSetGame.length }}
           </span>
-          <span class="text-md" v-else>
+          <span v-else class="text-md">
             Leg
             {{ matchGame.length }}
           </span>
@@ -359,15 +363,15 @@ onMounted(async () => {
           v-if="players[0]?.id"
           side="left"
           :player="players[0]"
-          :realTimeScore="realTimePlayerScore(players[0].id)"
-          :currentPlayerId="currentPlayerId"
-          :currentLeg="currentLeg"
-          :currentSet="currentSet"
-          :matchGame="matchGame"
-          :currentSetGame="currentSetGame"
-          :showGoldenCamel="camelLeaderPlayerId === players[0].id"
+          :real-time-score="realTimePlayerScore(players[0].id)"
+          :current-player-id="currentPlayerId"
+          :current-leg="currentLeg"
+          :current-set="currentSet"
+          :match-game="matchGame"
+          :current-set-game="currentSetGame"
+          :show-golden-camel="camelLeaderPlayerId === players[0].id"
         />
-        <div class="flex flex-col gap-4" v-if="players[0] && players[1]">
+        <div v-if="players[0] && players[1]" class="flex flex-col gap-4">
           <div class="flex items-stretch score-board gap-4">
             <div
               class="flex-1 text-center font-oswald flex flex-wrap justify-center content-center self-stretch"
@@ -503,17 +507,17 @@ onMounted(async () => {
                 </div>
                 <div class="flex gap-2 mt-3">
                   <button
-                    @click="submitScore"
                     :disabled="!isValidScore || scoreInputBlocked"
                     class="dartboard-button flex-1 py-2 rounded-bl-lg"
+                    @click="submitScore"
                   >
                     Submit Score
                   </button>
                   <button
-                    @click="undoLastTurn"
                     :disabled="!canUndo"
                     class="undo-button rounded-br-lg disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-2 px-3 transition-colors duration-200 text-sm"
                     title="Undo last turn (Ctrl+Z)"
+                    @click="undoLastTurn"
                   >
                     Undo
                   </button>
@@ -526,13 +530,13 @@ onMounted(async () => {
           v-if="players[1]?.id"
           side="right"
           :player="players[1]"
-          :realTimeScore="realTimePlayerScore(players[1].id)"
-          :currentPlayerId="currentPlayerId"
-          :currentLeg="currentLeg"
-          :currentSet="currentSet"
-          :currentSetGame="currentSetGame"
-          :matchGame="matchGame"
-          :showGoldenCamel="camelLeaderPlayerId === players[1].id"
+          :real-time-score="realTimePlayerScore(players[1].id)"
+          :current-player-id="currentPlayerId"
+          :current-leg="currentLeg"
+          :current-set="currentSet"
+          :current-set-game="currentSetGame"
+          :match-game="matchGame"
+          :show-golden-camel="camelLeaderPlayerId === players[1].id"
         />
       </div>
 
@@ -583,24 +587,24 @@ onMounted(async () => {
           <div class="flex gap-2 py-4 justify-end">
             <button
               v-if="currentLeg && !head2headReturn"
-              @click="undoLastTurn"
               :disabled="!canUndo"
               class="dartboard-button undo-button disabled:bg-gray-600 disabled:cursor-not-allowed"
               title="Undo last turn (Ctrl+Z)"
+              @click="undoLastTurn"
             >
               Undo
             </button>
             <button
               v-if="head2headReturn"
-              @click="returnToHead2Head"
               class="dartboard-button"
+              @click="returnToHead2Head"
             >
               Back to Head 2 Head overview
             </button>
             <button
               v-else-if="currentLeg"
-              @click="resetGame"
               class="dartboard-button"
+              @click="resetGame"
             >
               New Match
             </button>

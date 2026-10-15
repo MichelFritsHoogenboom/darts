@@ -49,7 +49,7 @@ onMounted(() => {
 <template>
   <NuxtLayout name="skeleton">
     <template #title>
-      <span class="text-right font-normal" v-if="match">
+      <span v-if="match" class="text-right font-normal">
         {{ formatX01MatchConfigSummary(match.matchConfig) }}
       </span>
     </template>
@@ -64,8 +64,8 @@ onMounted(() => {
       Error: {{ error }}
       <br />
       <button
-        @click="handleGameReset"
         class="mt-4 px-4 py-2 bg-blue-600 text-white"
+        @click="handleGameReset"
       >
         Back to Setup
       </button>

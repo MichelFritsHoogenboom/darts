@@ -90,8 +90,8 @@ const legsToWinMatchOptions = Object.entries(LEGS_TO_WIN_MATCH_OPTIONS).map(
       </div>
 
       <div
-        class="flex-1"
         v-if="config.gamePlayedIn === X01_GAME_PLAYED_IN.sets"
+        class="flex-1"
       >
         <FormSelect
           v-model="config.legsToWinParent"
@@ -140,12 +140,12 @@ const legsToWinMatchOptions = Object.entries(LEGS_TO_WIN_MATCH_OPTIONS).map(
       </div>
     </div>
     <div
-      class="mb-6"
       v-if="
         config.gamePlayedIn === X01_GAME_PLAYED_IN.sets ||
         (config.gamePlayedIn === X01_GAME_PLAYED_IN.legs &&
           config.legsToWinParent > 1)
       "
+      class="mb-6"
     >
       <FormCheckbox v-model="config.tiebreak" disabled>
         <template #label>Enable Tiebreak</template>

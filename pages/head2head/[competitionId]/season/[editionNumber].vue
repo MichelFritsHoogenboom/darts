@@ -49,7 +49,9 @@ const seasonPath = (editionNumber: number) =>
   routes.head2head.season(competitionId.value, editionNumber);
 
 const isCurrentSeason = computed(() => {
-  if (!edition.value || !currentEdition.value) return false;
+  if (!edition.value || !currentEdition.value) {
+    return false;
+  }
   return edition.value.id === currentEdition.value.id;
 });
 
@@ -63,7 +65,9 @@ const seasonOptions = computed(() =>
 const selectedSeason = computed({
   get: () => edition.value?.editionNumber ?? editionNumberParam.value,
   set: (value: number) => {
-    if (value === edition.value?.editionNumber) return;
+    if (value === edition.value?.editionNumber) {
+      return;
+    }
     navigateTo(seasonPath(value));
   },
 });
@@ -139,7 +143,9 @@ onBeforeMount(async () => {
 });
 
 const standings = computed(() => {
-  if (!edition.value) return {};
+  if (!edition.value) {
+    return {};
+  }
   return computeEditionStandings(
     edition.value,
     matches.value,
@@ -148,7 +154,9 @@ const standings = computed(() => {
 });
 
 const unfinishedMatches = computed(() => {
-  if (!isCurrentSeason.value) return [];
+  if (!isCurrentSeason.value) {
+    return [];
+  }
   return matches.value.filter((m) => !m.winner);
 });
 const finishedMatches = computed(() => matches.value.filter((m) => !!m.winner));
@@ -162,7 +170,9 @@ const amountMatches = computed(
 );
 
 const showStartMatch = computed(() => {
-  if (!edition.value || !isCurrentSeason.value) return false;
+  if (!edition.value || !isCurrentSeason.value) {
+    return false;
+  }
   return canStartNewMatch(edition.value, matches.value);
 });
 
@@ -171,7 +181,9 @@ const showStartEdition = computed(
 );
 
 const winsDisplay = computed(() => {
-  if (!edition.value || rivalryPlayers.value.length < 2) return "0 - 0";
+  if (!edition.value || rivalryPlayers.value.length < 2) {
+    return "0 - 0";
+  }
   const [a, b] = getPlayerIdsFromStats(loadedEditionPlayerStats.value);
   return `${standings.value[a] ?? 0} - ${standings.value[b] ?? 0}`;
 });
@@ -181,7 +193,9 @@ const pageTitle = computed(() => {
 });
 
 const championPlayer = computed(() => {
-  if (!edition.value?.winner) return undefined;
+  if (!edition.value?.winner) {
+    return undefined;
+  }
   return rivalryPlayers.value.find((p) => p.id === edition.value?.winner);
 });
 
@@ -226,7 +240,9 @@ const averageFor = (playerId: string) =>
   averageForPlayer(loadedEditionPlayerStats.value, playerId);
 
 const startMatch = async () => {
-  if (!edition.value || !competition.value || !isCurrentSeason.value) return;
+  if (!edition.value || !competition.value || !isCurrentSeason.value) {
+    return;
+  }
   if (edition.value.competitionConfig.matchConfig) {
     startingMatch.value = true;
     try {
@@ -241,7 +257,9 @@ const startMatch = async () => {
 };
 
 const beginNewEdition = async () => {
-  if (!edition.value || !isCurrentSeason.value) return;
+  if (!edition.value || !isCurrentSeason.value) {
+    return;
+  }
   const created = await startNewEdition(competitionId.value, edition.value);
   await navigateTo(seasonPath(created.editionNumber));
 };
