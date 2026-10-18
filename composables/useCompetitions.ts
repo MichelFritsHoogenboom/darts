@@ -13,7 +13,7 @@ const competitionService = new CompetitionService();
 const editionService = new CompetitionEditionService();
 const matchService = new MatchService();
 
-export function useCompetitions() {
+export const useCompetitions = () => {
   const { getPlayerStatsForCompetitionEdition } = usePlayerStats();
   const competitions = ref<Competition[]>([]);
   const head2HeadOverview = ref<Head2HeadOverviewItem[]>([]);
@@ -102,4 +102,4 @@ export function useCompetitions() {
     getCompetition,
     loadHead2HeadOverview,
   };
-}
+};

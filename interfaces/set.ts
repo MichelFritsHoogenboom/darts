@@ -16,13 +16,13 @@ export interface Set {
   winner?: string;
 }
 
-export async function createSet(
+export const createSet = async (
   overrides: Partial<Set> & {
     matchId: string;
     playerStats: string[]; // PlayerStats IDs
     startingPlayer: string;
   },
-): Promise<Set> {
+): Promise<Set> => {
   const set = {
     id: uuid(),
     createdAt: new Date(),
@@ -39,4 +39,4 @@ export async function createSet(
   }
 
   return set;
-}
+};

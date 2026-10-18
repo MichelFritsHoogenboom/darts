@@ -17,7 +17,7 @@ export interface Match {
   competitionEditionId?: string;
 }
 
-export function createMatch(overrides: Partial<Match> = {}): Match {
+export const createMatch = (overrides: Partial<Match> = {}): Match => {
   return {
     id: uuid(),
     createdAt: new Date(),
@@ -28,4 +28,4 @@ export function createMatch(overrides: Partial<Match> = {}): Match {
     game: [],
     ...overrides,
   };
-}
+};

@@ -41,7 +41,7 @@ const editionService = new CompetitionEditionService();
 const competitionService = new CompetitionService();
 const matchService = new MatchService();
 
-export function useCompetitionEditions() {
+export const useCompetitionEditions = () => {
   const { getPlayerStatsForCompetitionEdition } = usePlayerStats();
   const loading = ref(false);
   const error = ref<string | null>(null);
@@ -443,4 +443,4 @@ export function useCompetitionEditions() {
     queryRivalryCamelSeasonWins,
     onEditionMatchFinished,
   };
-}
+};

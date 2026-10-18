@@ -59,10 +59,10 @@ export interface Leg {
   winner?: string;
 }
 
-export async function createSingleDartScore(overrides: {
+export const createSingleDartScore = async (overrides: {
   scoreId: string;
   score: number;
-}): Promise<SingleDartScore> {
+}): Promise<SingleDartScore> => {
   const singleDartScore = {
     id: uuid(),
     createdAt: new Date(),
@@ -78,9 +78,9 @@ export async function createSingleDartScore(overrides: {
   }
 
   return singleDartScore;
-}
+};
 
-export async function createScore(overrides: {
+export const createScore = async (overrides: {
   matchId: string;
   setId?: string;
   playerId: string;
@@ -89,7 +89,7 @@ export async function createScore(overrides: {
   totalScore: number;
   dartsThrown?: 1 | 2 | 3;
   isGoldenCamel?: boolean;
-}): Promise<Score> {
+}): Promise<Score> => {
   const score: Score = {
     id: uuid(),
     createdAt: new Date(),
@@ -106,14 +106,14 @@ export async function createScore(overrides: {
   }
 
   return score;
-}
+};
 
-export async function createPlayerLeg(overrides: {
+export const createPlayerLeg = async (overrides: {
   legId: string;
   playerId: string;
   matchId: string;
   setId?: string;
-}): Promise<PlayerLeg> {
+}): Promise<PlayerLeg> => {
   // Generate playerLeg ID first so we can use it for PlayerStats
   const playerLegId = uuid();
 
@@ -142,9 +142,9 @@ export async function createPlayerLeg(overrides: {
   }
 
   return playerLeg;
-}
+};
 
-export async function createLeg(
+export const createLeg = async (
   overrides: Partial<Leg> & {
     matchId: string;
     setId?: string;
@@ -152,7 +152,7 @@ export async function createLeg(
     players: string[]; // PlayerLeg IDs
     startingPlayer: string;
   },
-): Promise<Leg> {
+): Promise<Leg> => {
   const leg = {
     id: uuid(),
     createdAt: new Date(),
@@ -168,4 +168,4 @@ export async function createLeg(
   }
 
   return leg;
-}
+};

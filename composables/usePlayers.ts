@@ -7,7 +7,7 @@ const playerService = new PlayerService();
 /**
  * Composable for player management
  */
-export function usePlayers() {
+export const usePlayers = () => {
   const players = ref<Player[]>([]);
   const loading = ref(true); // Start with loading true
   const error = ref<string | null>(null);
@@ -148,4 +148,4 @@ export function usePlayers() {
     searchPlayers,
     getPlayer,
   };
-}
+};

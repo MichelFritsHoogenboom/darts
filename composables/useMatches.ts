@@ -11,7 +11,7 @@ const { getScoresForMatch } = useScores();
 const { getPlayerStatsForMatch, savePlayerStats, deletePlayerStats } =
   usePlayerStats();
 
-export function useMatches() {
+export const useMatches = () => {
   const matches = ref<Match[]>([]);
   const unfinishedMatches = ref<Match[]>([]);
   const loading = ref(false);
@@ -201,4 +201,4 @@ export function useMatches() {
     getMatchesByIds,
     getTopMatchAverages,
   };
-}
+};

@@ -239,12 +239,12 @@ export class DartsDatabase extends Dexie {
 // Singleton pattern to ensure only one database instance
 let dbInstance: DartsDatabase | null = null;
 
-export function getDatabase(): DartsDatabase {
+export const getDatabase = (): DartsDatabase => {
   if (!dbInstance) {
     dbInstance = new DartsDatabase();
   }
   return dbInstance;
-}
+};
 
 // Export the singleton instance for convenience
 export const db = getDatabase();

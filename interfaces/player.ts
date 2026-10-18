@@ -19,9 +19,9 @@ export interface Player {
   allTimeStats: string;
 }
 
-export async function createPlayer(
+export const createPlayer = async (
   overrides: Partial<Player> = {},
-): Promise<Player> {
+): Promise<Player> => {
   const playerId = uuid();
 
   return {
@@ -43,4 +43,4 @@ export async function createPlayer(
 
     ...overrides,
   };
-}
+};

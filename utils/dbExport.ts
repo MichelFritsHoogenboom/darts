@@ -208,7 +208,7 @@ const parseExportPayload = (raw: string): DbExportPayload => {
   return payload;
 };
 
-export async function exportDatabaseAsJson(): Promise<void> {
+export const exportDatabaseAsJson = async (): Promise<void> => {
   const db = getDatabase();
   await db.open();
 
@@ -231,9 +231,9 @@ export async function exportDatabaseAsJson(): Promise<void> {
   };
 
   downloadJson(payload, exportFilename(exportedAt));
-}
+};
 
-export async function importDatabaseFromJson(): Promise<boolean> {
+export const importDatabaseFromJson = async (): Promise<boolean> => {
   const file = await pickJsonFile();
   if (!file) {
     return false;
@@ -260,4 +260,4 @@ export async function importDatabaseFromJson(): Promise<boolean> {
   });
 
   return true;
-}
+};

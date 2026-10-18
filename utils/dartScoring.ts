@@ -74,12 +74,12 @@ function generateAllPossibleScores() {
 const ALL_POSSIBLE_SCORES = generateAllPossibleScores();
 
 // Check if a score is achievable with 3 darts
-export function isAchievableScore(score) {
+export const isAchievableScore = (score) => {
   return ALL_POSSIBLE_SCORES.includes(score);
-}
+};
 
 // Get checkout suggestions for a given score
-export function getCheckoutSuggestions(score) {
+export const getCheckoutSuggestions = (score) => {
   if (score > 170) {
     return [];
   }
@@ -251,10 +251,10 @@ export function getCheckoutSuggestions(score) {
   };
 
   return checkoutPatterns[score] || [];
-}
+};
 
 // Get the current player's checkout status
-export function getCheckoutStatus(score) {
+export const getCheckoutStatus = (score) => {
   if (score > 170) {
     return { isCheckout: false, suggestions: [] };
   }
@@ -267,4 +267,4 @@ export function getCheckoutStatus(score) {
     isCheckout: suggestions.length > 0,
     suggestions: suggestions,
   };
-}
+};
