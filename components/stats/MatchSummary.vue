@@ -297,26 +297,30 @@ onBeforeMount(async () => {
     </template>
 
     <div v-if="isPanel(MATCH_PANEL.scores)" class="mt-2">
-      <SetSummary
-        v-for="(setData, setIndex) in setsWithLegs"
+      <template
         v-if="match.matchConfig.gamePlayedIn === X01_GAME_PLAYED_IN.sets"
-        :key="setData.set.id"
-        :set="setData.set"
-        :set-index="setIndex"
-        :players="[...players]"
-        :legs-with-scores="setData.legsWithScores"
-      />
+      >
+        <SetSummary
+          v-for="(setData, setIndex) in setsWithLegs"
+          :key="setData.set.id"
+          :set="setData.set"
+          :set-index="setIndex"
+          :players="[...players]"
+          :legs-with-scores="setData.legsWithScores"
+        />
+      </template>
 
-      <LegSummary
-        v-for="(legData, index) in legsWithScores"
-        v-else
-        :key="legData.leg.id"
-        :leg-index="index"
-        :leg="legData.leg"
-        :players="[...players]"
-        :player-legs="legData.playerLegs"
-        :scores-by-player="legData.scoresByPlayer"
-      />
+      <template v-else>
+        <LegSummary
+          v-for="(legData, index) in legsWithScores"
+          :key="legData.leg.id"
+          :leg-index="index"
+          :leg="legData.leg"
+          :players="[...players]"
+          :player-legs="legData.playerLegs"
+          :scores-by-player="legData.scoresByPlayer"
+        />
+      </template>
     </div>
 
     <div v-else-if="isPanel(MATCH_PANEL.stats)" class="mt-2 match-stats">
