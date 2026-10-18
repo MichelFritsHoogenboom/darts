@@ -122,7 +122,7 @@ onBeforeMount(async () => {
           Season {{ nextSeasonNumber }} — same players, new settings.
         </p>
 
-        <SetupPlayersPanel :players="editionPlayers" />
+        <SetupPlayerSelector :available-players="editionPlayers" readonly />
 
         <div class="card-panel rounded-lg p-8 mb-6">
           <FormSelect v-model="amountMatches" :options="AMOUNT_MATCH_OPTIONS">

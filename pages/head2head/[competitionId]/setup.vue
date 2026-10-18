@@ -84,7 +84,7 @@ const startMatch = async () => {
     </template>
 
     <div class="max-w-4xl mx-auto">
-      <SetupPlayersPanel :players="editionPlayers" />
+      <SetupPlayerSelector :available-players="editionPlayers" readonly />
 
       <SetupX01MatchSetup v-model="matchConfig">
         <template #footer>

@@ -1,11 +1,12 @@
 <script setup lang="ts">
 // Vendor
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { onKeyStroke, useToggle } from "@vueuse/core";
-import { computed, watch } from "vue";
+import { watch } from "vue";
 
 interface Props {
   modelValue: boolean;
-  skin?: "light" | "dark";
 }
 
 interface Emits {
@@ -18,28 +19,6 @@ const emit = defineEmits<Emits>();
 const titleId = useId();
 
 const [isOpen, toggle] = useToggle(props.modelValue);
-
-const isDark = computed(() => props.skin === "dark");
-
-const panelClass = computed(() =>
-  isDark.value ? "bg-gray-800 text-gray-100" : "bg-white",
-);
-
-const bodyClass = computed(() => (isDark.value ? "bg-gray-800" : "bg-white"));
-
-const titleClass = computed(() =>
-  isDark.value ? "text-white" : "text-gray-900",
-);
-
-const closeClass = computed(() =>
-  isDark.value
-    ? "text-gray-400 hover:text-gray-200"
-    : "text-gray-400 hover:text-gray-600",
-);
-
-const footerClass = computed(() =>
-  isDark.value ? "bg-gray-900/60" : "bg-gray-50",
-);
 
 // Watch for external changes to modelValue
 watch(
@@ -93,62 +72,34 @@ defineExpose({
       @click="close"
     >
       <!-- Backdrop -->
-      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+      <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" />
 
       <!-- Modal container -->
       <div
-        class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0"
+        class="flex min-h-full items-end justify-center p-4 sm:items-center sm:p-0"
       >
         <div
-          class="relative transform overflow-hidden text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg"
-          :class="panelClass"
+          class="panel"
           role="dialog"
           aria-modal="true"
           :aria-labelledby="$slots.title ? titleId : undefined"
           @click.stop
         >
-          <!-- Modal content -->
-          <div class="px-4 pb-4 pt-5 sm:p-6 sm:pb-4" :class="bodyClass">
-            <div class="sm:flex sm:items-start">
-              <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left w-full">
-                <div class="flex justify-between items-center mb-4">
-                  <h3
-                    :id="titleId"
-                    class="text-lg font-semibold leading-6"
-                    :class="titleClass"
-                  >
-                    <slot name="title" />
-                  </h3>
-                  <button type="button" :class="closeClass" @click="close">
-                    <span class="sr-only">Close</span>
-                    <svg
-                      class="h-6 w-6"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke-width="1.5"
-                      stroke="currentColor"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                </div>
-                <div class="mt-2">
-                  <slot />
-                </div>
-              </div>
+          <div class="body">
+            <div class="head">
+              <h3 :id="titleId" class="title">
+                <slot name="title" />
+              </h3>
+              <button type="button" class="close" @click="close">
+                <span class="sr-only">Close</span>
+                <FontAwesomeIcon :icon="faXmark" class="w-5 h-5" />
+              </button>
             </div>
+
+            <slot />
           </div>
 
-          <!-- Modal footer -->
-          <div
-            v-if="$slots.footer"
-            class="px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6"
-            :class="footerClass"
-          >
+          <div v-if="$slots.footer" class="footer">
             <slot name="footer" />
           </div>
         </div>
@@ -156,3 +107,32 @@ defineExpose({
     </div>
   </Transition>
 </template>
+
+<style scoped lang="postcss">
+.panel {
+  @apply relative w-full overflow-hidden text-left;
+  @apply bg-gray-800 text-white shadow-xl;
+  @apply sm:my-8 sm:max-w-lg;
+}
+
+.body {
+  @apply px-6 py-6;
+}
+
+.head {
+  @apply flex justify-between items-center gap-4 mb-4;
+}
+
+.title {
+  @apply text-lg font-semibold leading-6 text-white;
+}
+
+.close {
+  @apply text-gray-400 hover:text-gray-200 transition-colors;
+}
+
+.footer {
+  @apply flex flex-col-reverse gap-3 px-6 py-4 border-t border-gray-700;
+  @apply sm:flex-row sm:justify-end;
+}
+</style>

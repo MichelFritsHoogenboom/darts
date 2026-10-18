@@ -293,7 +293,7 @@ const openNewSeasonChoice = () => {
                 <span>Season</span>
                 <select
                   v-if="seasonOptions.length > 1"
-                  class="season-select"
+                  class="season-number"
                   :value="selectedSeason"
                   aria-label="Season"
                   @change="
@@ -310,7 +310,7 @@ const openNewSeasonChoice = () => {
                     {{ option.label }}
                   </option>
                 </select>
-                <span v-else>{{ edition.editionNumber }}</span>
+                <span v-else class="season-number">{{ selectedSeason }}</span>
               </UiDisplayHeader>
               <UiDisplayHeader
                 v-if="matchConfigSummary"
@@ -579,14 +579,20 @@ const openNewSeasonChoice = () => {
     @apply mb-0 w-full;
   }
 
-  .season-select {
-    @apply appearance-none bg-transparent border-0 border-b-2 border-current;
-    @apply text-inherit uppercase cursor-pointer;
-    @apply px-1 py-0 text-center outline-none;
+  /* One look for the season number, whether it is a picker or a single season */
+  .season-number {
+    @apply inline-block border-0 border-b-2 border-current;
+    @apply text-inherit uppercase;
+    @apply px-1 py-0 text-center;
     font-family: inherit;
     font-size: inherit;
     font-weight: inherit;
+    line-height: inherit;
     letter-spacing: -1px;
+  }
+
+  select.season-number {
+    @apply appearance-none bg-transparent cursor-pointer outline-none;
     background-image: none;
 
     option {

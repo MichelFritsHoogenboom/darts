@@ -46,7 +46,7 @@ const chooseDifferent = async () => {
 </script>
 
 <template>
-  <UiModal v-model="model" skin="dark">
+  <UiModal v-model="model">
     <template #title>New season</template>
 
     <p class="support">

@@ -11,7 +11,7 @@ defineProps<{
 </script>
 
 <template>
-  <UiModal v-model="model" skin="dark">
+  <UiModal v-model="model">
     <template #title>Season finished</template>
     <div class="text-center py-4">
       <p class="text-lg text-white mb-2">
