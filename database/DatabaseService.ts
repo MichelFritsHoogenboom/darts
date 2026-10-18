@@ -1,4 +1,4 @@
-import type { Table } from "dexie";
+import type { Table, UpdateSpec } from "dexie";
 
 import { getDatabase } from "./schema";
 import { initializeDatabase } from "./init";
@@ -38,7 +38,9 @@ export class DatabaseService {
     if (existingRecord) {
       // Update existing record - preserve createdAt, update updatedAt
       data.updatedAt = new Date();
-      await table.update(data.id, data);
+      // `data` is the whole entity, so every key is a valid key path of T.
+      // Dexie's UpdateSpec<T> cannot see that for an unresolved generic.
+      await table.update(data.id, data as UpdateSpec<T>);
       return data;
     } else {
       // Create new record - set both timestamps
