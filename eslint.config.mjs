@@ -14,11 +14,6 @@ export default withNuxt(
       "@typescript-eslint/consistent-type-definitions": "off",
       "vue/attribute-hyphenation": "error",
       "vue/block-order": "error",
-      // Keep the preset severity, but drop its autofix: hyphenating
-      // `@update:modelValue` on an element that also has `v-model` registers a
-      // second, different prop key, and Vue's emit() only ever calls the
-      // camelCase one — so the autofix silently drops the listener.
-      "vue/v-on-event-hyphenation": ["warn", "always", { autofix: false }],
       // A vue2-essential rule that @nuxt/eslint-config switches on for
       // pages/layouts; Vue 3 templates may have multiple roots (fragments).
       // Turn it back on if app.pageTransition is ever enabled, since a

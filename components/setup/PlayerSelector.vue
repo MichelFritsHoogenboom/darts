@@ -93,7 +93,7 @@ defineExpose({
             :options="availablePlayers"
             :disabled="selectedPlayers.length >= 2"
             variant="dark"
-            @update:modelValue="addPlayerToMatch"
+            @update:model-value="addPlayerToMatch"
           >
             <template #label>Selected players</template>
           </FormSelect>
