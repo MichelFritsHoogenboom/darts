@@ -2,7 +2,6 @@
 import { formatAverageDisplay, formatOneDartAverage } from "~/utils/stats";
 
 const {
-  matchAverage = 0,
   legAverage = 0,
   setAverage = 0,
   firstNineAverage = 0,

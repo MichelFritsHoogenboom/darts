@@ -53,7 +53,7 @@ export class DartsDatabase extends Dexie {
         singleDartScores:
           "id, scoreId, playerId, score, createdAt, updatedAt, doubleHit, isSetDart, isMatchDart",
       })
-      .upgrade(async (tx) => {
+      .upgrade(async () => {
         // Migration logic: Dexie will automatically rebuild indexes
         // No data transformation needed - just re-indexing
         console.log(
@@ -77,7 +77,7 @@ export class DartsDatabase extends Dexie {
         playerStats:
           "id, playerId, matchId, setId, playerLegId, createdAt, updatedAt",
       })
-      .upgrade(async (tx) => {
+      .upgrade(async () => {
         console.log(
           "Migrating database to version 3: Adding playerStats table",
         );
@@ -100,7 +100,7 @@ export class DartsDatabase extends Dexie {
         playerStats:
           "id, playerId, matchId, setId, playerLegId, createdAt, updatedAt",
       })
-      .upgrade(async (tx) => {
+      .upgrade(async () => {
         console.log(
           "Migrating database to version 4: Adding matchId and setId indexes to scores table",
         );

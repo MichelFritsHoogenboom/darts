@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import type { Leg, PlayerLeg, Score } from "~/interfaces/leg";
 import type { Player } from "~/interfaces/player";
-import { formatDateTime } from "~/utils/date";
 import { createPlayerNameGetter } from "~/utils/player";
 import { useToggle } from "@vueuse/core";
 import CheckoutDouble from "./CheckoutDouble.vue";

@@ -1,4 +1,3 @@
-import type { PlayerStats } from "./stats";
 import { v4 as uuid } from "uuid";
 import { createPlayerStats } from "./stats";
 

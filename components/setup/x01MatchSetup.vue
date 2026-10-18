@@ -27,41 +27,41 @@ const config = computed({
 });
 
 // Convert constants to options format for Select components
-const gameTypeOptions = Object.entries(X01_GAMETYPES).map(([key, value]) => ({
+const gameTypeOptions = Object.entries(X01_GAMETYPES).map(([, value]) => ({
   value: value,
   label: `${value} Points`,
 }));
 
 const gamePlayedInOptions = Object.entries(X01_GAME_PLAYED_IN).map(
-  ([key, value]) => ({
+  ([, value]) => ({
     value: value,
     label: value.charAt(0).toUpperCase() + value.slice(1),
   }),
 );
 
 const winDefinitionOptions = Object.entries(GAME_WIN_DEFINITION).map(
-  ([key, value]) => ({
+  ([, value]) => ({
     value: value,
     label: value,
   }),
 );
 
 const setsToWinOptions = Object.entries(SETS_TO_WIN_OPTIONS).map(
-  ([key, value]) => ({
+  ([, value]) => ({
     value: value,
     label: `${value} sets`,
   }),
 );
 
 const legsToWinSetOptions = Object.entries(LEGS_TO_WIN_SET_OPTIONS).map(
-  ([key, value]) => ({
+  ([, value]) => ({
     value: value,
     label: `${value} legs`,
   }),
 );
 
 const legsToWinMatchOptions = Object.entries(LEGS_TO_WIN_MATCH_OPTIONS).map(
-  ([key, value]) => ({
+  ([, value]) => ({
     value: value,
     label: `${value} legs`,
   }),

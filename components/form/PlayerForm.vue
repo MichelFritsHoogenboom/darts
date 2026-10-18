@@ -3,7 +3,7 @@ import { ref, computed, toRaw } from "vue";
 import { createPlayer } from "../../interfaces/player";
 import type { Player } from "../../interfaces/player";
 
-const props = defineProps({
+defineProps({
   updatePlayer: {
     type: String,
     default: null,

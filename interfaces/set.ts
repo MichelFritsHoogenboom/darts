@@ -1,7 +1,6 @@
 import { v4 as uuid } from "uuid";
 import { SetService } from "~/database/SetService";
 import { toRaw } from "vue";
-import type { Leg } from "./leg";
 
 const setService = new SetService();
 

@@ -391,7 +391,7 @@ export const useX01Game = (
     await savePlayerLeg(playerLeg);
 
     $event("score-submitted");
-    await handleLegWin(checkoutScore);
+    await handleLegWin();
     $event("leg-finished");
     resetScore();
   };
@@ -644,7 +644,7 @@ export const useX01Game = (
     }
   };
 
-  const handleLegWin = async (createdScore: Score) => {
+  const handleLegWin = async () => {
     if (!currentLeg.value) {
       return;
     }
