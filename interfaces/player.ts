@@ -1,4 +1,3 @@
-import type { PlayerStats } from "./stats";
 import { v4 as uuid } from "uuid";
 import { createPlayerStats } from "./stats";
 
@@ -19,9 +18,9 @@ export interface Player {
   allTimeStats: string;
 }
 
-export async function createPlayer(
-  overrides: Partial<Player> = {}
-): Promise<Player> {
+export const createPlayer = async (
+  overrides: Partial<Player> = {},
+): Promise<Player> => {
   const playerId = uuid();
 
   return {
@@ -38,9 +37,9 @@ export async function createPlayer(
     dartsWeightInGrams: undefined,
     flightColor: "",
     allTimeStats: await createPlayerStats({ playerId: playerId }).then(
-      (stats) => stats.id
+      (stats) => stats.id,
     ),
 
     ...overrides,
   };
-}
+};

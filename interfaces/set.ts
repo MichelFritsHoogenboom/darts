@@ -1,7 +1,6 @@
 import { v4 as uuid } from "uuid";
 import { SetService } from "~/database/SetService";
 import { toRaw } from "vue";
-import type { Leg } from "./leg";
 
 const setService = new SetService();
 
@@ -10,19 +9,19 @@ export interface Set {
   matchId: string;
   createdAt: Date;
   updatedAt: Date;
-  playerStats: string[] | ReadonlyArray<string>; // PlayerStats IDs - accepts both mutable and readonly
+  playerStats: string[] | readonly string[]; // PlayerStats IDs - accepts both mutable and readonly
   startingPlayer: string;
-  game: string[] | ReadonlyArray<string>; // Leg IDs - accepts both mutable and readonly
+  game: string[] | readonly string[]; // Leg IDs - accepts both mutable and readonly
   winner?: string;
 }
 
-export async function createSet(
+export const createSet = async (
   overrides: Partial<Set> & {
     matchId: string;
-    playerStats: Array<string>; // PlayerStats IDs
+    playerStats: string[]; // PlayerStats IDs
     startingPlayer: string;
-  }
-): Promise<Set> {
+  },
+): Promise<Set> => {
   const set = {
     id: uuid(),
     createdAt: new Date(),
@@ -39,4 +38,4 @@ export async function createSet(
   }
 
   return set;
-}
+};

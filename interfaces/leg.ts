@@ -3,12 +3,12 @@ import { LegService } from "~/database/LegService";
 import { PlayerLegService } from "~/database/PlayerLegService";
 import { ScoreService } from "~/database/ScoreService";
 import { SingleDartScoreService } from "~/database/SingleDartScoreService";
+import type { X01GameType } from "./x01MatchConfig";
+import { createPlayerStats } from "./stats";
 const legService = new LegService();
 const playerLegService = new PlayerLegService();
 const scoreService = new ScoreService();
 const singleDartScoreService = new SingleDartScoreService();
-import type { X01GameType } from "./x01MatchConfig";
-import { createPlayerStats } from "./stats";
 export interface SingleDartScore {
   id: string;
   scoreId: string;
@@ -43,7 +43,7 @@ export interface PlayerLeg {
   createdAt: Date;
   updatedAt: Date;
   playerId: string;
-  scores: string[] | ReadonlyArray<string>; // Score IDs - accepts both mutable and readonly
+  scores: string[] | readonly string[]; // Score IDs - accepts both mutable and readonly
   stats: string; // Stats ID
 }
 
@@ -54,15 +54,15 @@ export interface Leg {
   createdAt: Date;
   updatedAt: Date;
   gameType: X01GameType;
-  players: string[] | ReadonlyArray<string>; // PlayerLeg IDs - accepts both mutable and readonly
+  players: string[] | readonly string[]; // PlayerLeg IDs - accepts both mutable and readonly
   startingPlayer: string;
   winner?: string;
 }
 
-export async function createSingleDartScore(overrides: {
+export const createSingleDartScore = async (overrides: {
   scoreId: string;
   score: number;
-}): Promise<SingleDartScore> {
+}): Promise<SingleDartScore> => {
   const singleDartScore = {
     id: uuid(),
     createdAt: new Date(),
@@ -78,9 +78,9 @@ export async function createSingleDartScore(overrides: {
   }
 
   return singleDartScore;
-}
+};
 
-export async function createScore(overrides: {
+export const createScore = async (overrides: {
   matchId: string;
   setId?: string;
   playerId: string;
@@ -89,7 +89,7 @@ export async function createScore(overrides: {
   totalScore: number;
   dartsThrown?: 1 | 2 | 3;
   isGoldenCamel?: boolean;
-}): Promise<Score> {
+}): Promise<Score> => {
   const score: Score = {
     id: uuid(),
     createdAt: new Date(),
@@ -106,14 +106,14 @@ export async function createScore(overrides: {
   }
 
   return score;
-}
+};
 
-export async function createPlayerLeg(overrides: {
+export const createPlayerLeg = async (overrides: {
   legId: string;
   playerId: string;
   matchId: string;
   setId?: string;
-}): Promise<PlayerLeg> {
+}): Promise<PlayerLeg> => {
   // Generate playerLeg ID first so we can use it for PlayerStats
   const playerLegId = uuid();
 
@@ -142,17 +142,17 @@ export async function createPlayerLeg(overrides: {
   }
 
   return playerLeg;
-}
+};
 
-export async function createLeg(
+export const createLeg = async (
   overrides: Partial<Leg> & {
     matchId: string;
     setId?: string;
     gameType: X01GameType;
-    players: Array<string>; // PlayerLeg IDs
+    players: string[]; // PlayerLeg IDs
     startingPlayer: string;
-  }
-): Promise<Leg> {
+  },
+): Promise<Leg> => {
   const leg = {
     id: uuid(),
     createdAt: new Date(),
@@ -168,4 +168,4 @@ export async function createLeg(
   }
 
   return leg;
-}
+};

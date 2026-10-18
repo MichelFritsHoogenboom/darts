@@ -6,20 +6,20 @@ import type {
 } from "../interfaces/competition";
 
 /** Plain copy safe for IndexedDB (no Vue reactive proxies). */
-export function cloneCompetitionConfig(
+export const cloneCompetitionConfig = (
   config: CompetitionConfig,
-): CompetitionConfig {
+): CompetitionConfig => {
   const raw = toRaw(config);
   return {
     amountMatches: raw.amountMatches,
     gameType: raw.gameType,
     matchConfig: raw.matchConfig ? { ...toRaw(raw.matchConfig) } : undefined,
   };
-}
+};
 
-export function cloneCompetitionEdition(
+export const cloneCompetitionEdition = (
   edition: CompetitionEdition,
-): CompetitionEdition {
+): CompetitionEdition => {
   const raw = toRaw(edition);
   return {
     id: raw.id,
@@ -32,9 +32,9 @@ export function cloneCompetitionEdition(
     winner: raw.winner,
     competitionConfig: cloneCompetitionConfig(raw.competitionConfig),
   };
-}
+};
 
-export function cloneCompetition(competition: Competition): Competition {
+export const cloneCompetition = (competition: Competition): Competition => {
   const raw = toRaw(competition);
   return {
     id: raw.id,
@@ -46,4 +46,4 @@ export function cloneCompetition(competition: Competition): Competition {
       ? cloneCompetitionConfig(raw.defaultCompetitionConfig)
       : undefined,
   };
-}
+};

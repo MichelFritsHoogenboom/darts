@@ -56,7 +56,9 @@ export class MatchService extends BaseService<Match> {
    * Optimized: Fetches a small batch of recent matches instead of all matches
    */
   async getMatchesByIds(ids: string[]): Promise<Match[]> {
-    if (ids.length === 0) return [];
+    if (ids.length === 0) {
+      return [];
+    }
     const table = await this.getTable();
     const matches = await Promise.all(ids.map((id) => table.get(id)));
     return matches.filter((m): m is Match => m !== undefined);
@@ -124,7 +126,9 @@ export class MatchService extends BaseService<Match> {
 
     matchAverages.sort((a, b) => {
       const averageDiff = b.stats.average - a.stats.average;
-      if (averageDiff !== 0) return averageDiff;
+      if (averageDiff !== 0) {
+        return averageDiff;
+      }
       return b.stats.updatedAt.getTime() - a.stats.updatedAt.getTime();
     });
 

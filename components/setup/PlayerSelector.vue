@@ -90,10 +90,10 @@ defineExpose({
         <div class="flex-1">
           <FormSelect
             v-model="selectedPlayerId"
-            @update:modelValue="addPlayerToMatch"
             :options="availablePlayers"
             :disabled="selectedPlayers.length >= 2"
             variant="dark"
+            @update:model-value="addPlayerToMatch"
           >
             <template #label>Selected players</template>
           </FormSelect>
@@ -118,9 +118,9 @@ defineExpose({
               </p>
             </div>
             <button
-              @click="removePlayerFromMatch(player.id)"
               class="text-red-400 hover:text-red-300 text-xl font-bold"
               title="Remove player"
+              @click="removePlayerFromMatch(player.id)"
             >
               ×
             </button>

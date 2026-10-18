@@ -32,7 +32,7 @@ export const useGame = (match: Match) => {
   // Shared logic to get player ID at a relative index
   const getPlayerIdAtOffset = (playerId: string, offset: number) => {
     const currentIndex = players.value.findIndex(
-      (player) => player.id === playerId
+      (player) => player.id === playerId,
     );
     const newIndex =
       (currentIndex + offset + players.value.length) % players.value.length;

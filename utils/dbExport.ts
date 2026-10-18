@@ -20,20 +20,20 @@ const DATE_KEYS = new Set(["createdAt", "updatedAt", "birthDate"]);
 
 export type DbExportTableName = (typeof TABLE_NAMES)[number];
 
-export type SerializedBlob = {
+export interface SerializedBlob {
   __type: "Blob";
   mimeType: string;
   data: string;
-};
+}
 
-export type DbExportPayload = {
+export interface DbExportPayload {
   format: typeof DB_EXPORT_FORMAT;
   version: number;
   dbName: string;
   schemaVersion: number;
   exportedAt: string;
   tables: Partial<Record<DbExportTableName, unknown[]>>;
-};
+}
 
 const isSerializedBlob = (value: unknown): value is SerializedBlob =>
   typeof value === "object" &&
@@ -208,7 +208,7 @@ const parseExportPayload = (raw: string): DbExportPayload => {
   return payload;
 };
 
-export async function exportDatabaseAsJson(): Promise<void> {
+export const exportDatabaseAsJson = async (): Promise<void> => {
   const db = getDatabase();
   await db.open();
 
@@ -231,11 +231,13 @@ export async function exportDatabaseAsJson(): Promise<void> {
   };
 
   downloadJson(payload, exportFilename(exportedAt));
-}
+};
 
-export async function importDatabaseFromJson(): Promise<boolean> {
+export const importDatabaseFromJson = async (): Promise<boolean> => {
   const file = await pickJsonFile();
-  if (!file) return false;
+  if (!file) {
+    return false;
+  }
 
   const raw = await readFileAsText(file);
   const payload = parseExportPayload(raw);
@@ -258,4 +260,4 @@ export async function importDatabaseFromJson(): Promise<boolean> {
   });
 
   return true;
-}
+};

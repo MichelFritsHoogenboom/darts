@@ -15,7 +15,11 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["update:modelValue"]);
+// The `modelValue` prop above is declared as a plain `Object`, so this payload
+// stays loosely typed to match it.
+const emit = defineEmits<{
+  "update:modelValue": [value: Record<string, unknown>];
+}>();
 
 const config = computed({
   get: () => props.modelValue,
@@ -23,41 +27,37 @@ const config = computed({
 });
 
 // Convert constants to options format for Select components
-const gameTypeOptions = Object.entries(X01_GAMETYPES).map(([key, value]) => ({
+const gameTypeOptions = Object.values(X01_GAMETYPES).map((value) => ({
   value: value,
   label: `${value} Points`,
 }));
 
-const gamePlayedInOptions = Object.entries(X01_GAME_PLAYED_IN).map(
-  ([key, value]) => ({
-    value: value,
-    label: value.charAt(0).toUpperCase() + value.slice(1),
-  }),
-);
+const gamePlayedInOptions = Object.values(X01_GAME_PLAYED_IN).map((value) => ({
+  value: value,
+  label: value.charAt(0).toUpperCase() + value.slice(1),
+}));
 
-const winDefinitionOptions = Object.entries(GAME_WIN_DEFINITION).map(
-  ([key, value]) => ({
+const winDefinitionOptions = Object.values(GAME_WIN_DEFINITION).map(
+  (value) => ({
     value: value,
     label: value,
   }),
 );
 
-const setsToWinOptions = Object.entries(SETS_TO_WIN_OPTIONS).map(
-  ([key, value]) => ({
-    value: value,
-    label: `${value} sets`,
-  }),
-);
+const setsToWinOptions = Object.values(SETS_TO_WIN_OPTIONS).map((value) => ({
+  value: value,
+  label: `${value} sets`,
+}));
 
-const legsToWinSetOptions = Object.entries(LEGS_TO_WIN_SET_OPTIONS).map(
-  ([key, value]) => ({
+const legsToWinSetOptions = Object.values(LEGS_TO_WIN_SET_OPTIONS).map(
+  (value) => ({
     value: value,
     label: `${value} legs`,
   }),
 );
 
-const legsToWinMatchOptions = Object.entries(LEGS_TO_WIN_MATCH_OPTIONS).map(
-  ([key, value]) => ({
+const legsToWinMatchOptions = Object.values(LEGS_TO_WIN_MATCH_OPTIONS).map(
+  (value) => ({
     value: value,
     label: `${value} legs`,
   }),
@@ -90,8 +90,8 @@ const legsToWinMatchOptions = Object.entries(LEGS_TO_WIN_MATCH_OPTIONS).map(
       </div>
 
       <div
-        class="flex-1"
         v-if="config.gamePlayedIn === X01_GAME_PLAYED_IN.sets"
+        class="flex-1"
       >
         <FormSelect
           v-model="config.legsToWinParent"
@@ -140,12 +140,12 @@ const legsToWinMatchOptions = Object.entries(LEGS_TO_WIN_MATCH_OPTIONS).map(
       </div>
     </div>
     <div
-      class="mb-6"
       v-if="
         config.gamePlayedIn === X01_GAME_PLAYED_IN.sets ||
         (config.gamePlayedIn === X01_GAME_PLAYED_IN.legs &&
           config.legsToWinParent > 1)
       "
+      class="mb-6"
     >
       <FormCheckbox v-model="config.tiebreak" disabled>
         <template #label>Enable Tiebreak</template>

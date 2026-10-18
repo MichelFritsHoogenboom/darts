@@ -1,10 +1,8 @@
 import { ref, readonly } from "vue";
 import { PlayerLegService } from "~/database/PlayerLegService";
-import { PlayerStatsService } from "~/database/PlayerStatsService";
 import type { PlayerLeg } from "~/interfaces/leg";
 
 const playerLegService = new PlayerLegService();
-const playerStatsService = new PlayerStatsService();
 const { getScoresForPlayerLeg, deleteScore } = useScores();
 const { getPlayerStatsByPlayerLegId, deletePlayerStats } = usePlayerStats();
 
@@ -28,7 +26,7 @@ export const usePlayerLegs = () => {
   };
 
   const savePlayerLeg = async (
-    playerLeg: PlayerLeg
+    playerLeg: PlayerLeg,
   ): Promise<PlayerLeg | null> => {
     loading.value = true;
     error.value = null;
@@ -103,14 +101,12 @@ export const usePlayerLegs = () => {
 
   const getPlayerLegsForPlayer = async (
     playerId: string,
-    matchId?: string
   ): Promise<PlayerLeg[]> => {
     loading.value = true;
     error.value = null;
     try {
-      const playerPlayerLegs = await playerLegService.getPlayerLegsForPlayer(
-        playerId
-      );
+      const playerPlayerLegs =
+        await playerLegService.getPlayerLegsForPlayer(playerId);
       return playerPlayerLegs;
     } catch (err) {
       error.value =

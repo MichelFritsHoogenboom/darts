@@ -26,17 +26,16 @@ export const useSingleDartScores = () => {
   };
 
   const saveSingleDartScore = async (
-    singleDartScore: SingleDartScore
+    singleDartScore: SingleDartScore,
   ): Promise<SingleDartScore | null> => {
     loading.value = true;
     error.value = null;
     try {
-      const savedSingleDartScore = await singleDartScoreService.upsert(
-        singleDartScore
-      );
+      const savedSingleDartScore =
+        await singleDartScoreService.upsert(singleDartScore);
       // Update local state
       const index = singleDartScores.value.findIndex(
-        (sds) => sds.id === singleDartScore.id
+        (sds) => sds.id === singleDartScore.id,
       );
       if (index >= 0) {
         singleDartScores.value[index] = savedSingleDartScore;
@@ -60,7 +59,7 @@ export const useSingleDartScores = () => {
     try {
       await singleDartScoreService.delete(id);
       singleDartScores.value = singleDartScores.value.filter(
-        (singleDartScore) => singleDartScore.id !== id
+        (singleDartScore) => singleDartScore.id !== id,
       );
       return true;
     } catch (err) {
@@ -76,7 +75,7 @@ export const useSingleDartScores = () => {
   };
 
   const getSingleDartScoresForScore = async (
-    scoreId: string
+    scoreId: string,
   ): Promise<SingleDartScore[]> => {
     loading.value = true;
     error.value = null;
@@ -97,7 +96,7 @@ export const useSingleDartScores = () => {
   };
 
   const getSingleDartScoresForPlayer = async (
-    playerId: string
+    playerId: string,
   ): Promise<SingleDartScore[]> => {
     loading.value = true;
     error.value = null;

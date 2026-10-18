@@ -58,12 +58,16 @@ export const createScoreRanges = (): ScoreRanges => ({
   goldenCamel: 0,
 });
 
-export type RangeBounds = { key: string; min: number; max: number };
+export interface RangeBounds {
+  key: string;
+  min: number;
+  max: number;
+}
 
 /** One or more stored buckets shown as a single UI row. */
-export type DisplayRange<TRanges extends object> = {
+export interface DisplayRange<TRanges extends object> {
   keys: (keyof TRanges)[];
-};
+}
 
 export type ScoreDisplayRange = DisplayRange<ScoreRanges> & {
   /** Show golden-camel counts next to this row (match score board). */

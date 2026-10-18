@@ -5,7 +5,10 @@ import type { Match } from "../interfaces/match";
 import type { Set } from "../interfaces/set";
 import type { Leg, PlayerLeg, Score, SingleDartScore } from "../interfaces/leg";
 import type { PlayerStats } from "../interfaces/stats";
-import type { Competition, CompetitionEdition } from "../interfaces/competition";
+import type {
+  Competition,
+  CompetitionEdition,
+} from "../interfaces/competition";
 
 export class DartsDatabase extends Dexie {
   // Define tables
@@ -50,11 +53,11 @@ export class DartsDatabase extends Dexie {
         singleDartScores:
           "id, scoreId, playerId, score, createdAt, updatedAt, doubleHit, isSetDart, isMatchDart",
       })
-      .upgrade(async (tx) => {
+      .upgrade(async () => {
         // Migration logic: Dexie will automatically rebuild indexes
         // No data transformation needed - just re-indexing
         console.log(
-          "Migrating database to version 2: Adding multi-entry indexes for players arrays"
+          "Migrating database to version 2: Adding multi-entry indexes for players arrays",
         );
       });
 
@@ -74,9 +77,9 @@ export class DartsDatabase extends Dexie {
         playerStats:
           "id, playerId, matchId, setId, playerLegId, createdAt, updatedAt",
       })
-      .upgrade(async (tx) => {
+      .upgrade(async () => {
         console.log(
-          "Migrating database to version 3: Adding playerStats table"
+          "Migrating database to version 3: Adding playerStats table",
         );
       });
 
@@ -97,9 +100,9 @@ export class DartsDatabase extends Dexie {
         playerStats:
           "id, playerId, matchId, setId, playerLegId, createdAt, updatedAt",
       })
-      .upgrade(async (tx) => {
+      .upgrade(async () => {
         console.log(
-          "Migrating database to version 4: Adding matchId and setId indexes to scores table"
+          "Migrating database to version 4: Adding matchId and setId indexes to scores table",
         );
       });
 
@@ -125,7 +128,7 @@ export class DartsDatabase extends Dexie {
       })
       .upgrade(async () => {
         console.log(
-          "Migrating database to version 5: competitions, competitionEditions, competitionEditionId on matches"
+          "Migrating database to version 5: competitions, competitionEditions, competitionEditionId on matches",
         );
       });
 
@@ -160,11 +163,13 @@ export class DartsDatabase extends Dexie {
 
         for (const edition of editions) {
           const legacyPlayerIds = edition.playerIds as string[] | undefined;
-          let statsIds = [...(edition.playerStats ?? [])];
+          const statsIds = [...(edition.playerStats ?? [])];
 
           if (legacyPlayerIds?.length) {
             const existingStats = (
-              await Promise.all(statsIds.map((id: string) => statsTable.get(id)))
+              await Promise.all(
+                statsIds.map((id: string) => statsTable.get(id)),
+              )
             ).filter(Boolean);
 
             const coveredPlayerIds = new Set(
@@ -172,7 +177,9 @@ export class DartsDatabase extends Dexie {
             );
 
             for (const playerId of legacyPlayerIds) {
-              if (coveredPlayerIds.has(playerId)) continue;
+              if (coveredPlayerIds.has(playerId)) {
+                continue;
+              }
 
               const statId = uuid();
               await statsTable.add({
@@ -232,12 +239,12 @@ export class DartsDatabase extends Dexie {
 // Singleton pattern to ensure only one database instance
 let dbInstance: DartsDatabase | null = null;
 
-export function getDatabase(): DartsDatabase {
+export const getDatabase = (): DartsDatabase => {
   if (!dbInstance) {
     dbInstance = new DartsDatabase();
   }
   return dbInstance;
-}
+};
 
 // Export the singleton instance for convenience
 export const db = getDatabase();

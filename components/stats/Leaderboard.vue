@@ -27,7 +27,9 @@ watch(
   () => entries.map((entry) => entry.playerId).join(","),
   async () => {
     const playerIds = [...new Set(entries.map((entry) => entry.playerId))];
-    if (playerIds.length) await loadPlayers(playerIds);
+    if (playerIds.length) {
+      await loadPlayers(playerIds);
+    }
   },
   { immediate: true },
 );
@@ -47,11 +49,7 @@ watch(
         <span class="rank">
           <FontAwesomeIcon v-if="index === 0" :icon="faTrophy" class="icon" />
 
-          <FontAwesomeIcon
-            v-else-if="index < 3"
-            :icon="faMedal"
-            class="icon"
-          />
+          <FontAwesomeIcon v-else-if="index < 3" :icon="faMedal" class="icon" />
           <template v-else>{{ index + 1 }}</template>
         </span>
 

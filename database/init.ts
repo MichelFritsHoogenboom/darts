@@ -3,7 +3,7 @@ import { getDatabase } from "./schema";
 /**
  * Initialize the database and ensure it's ready to use
  */
-export async function initializeDatabase() {
+export const initializeDatabase = async () => {
   try {
     const db = getDatabase();
 
@@ -14,7 +14,7 @@ export async function initializeDatabase() {
     if ("storage" in navigator && "persist" in navigator.storage) {
       const isPersistent = await navigator.storage.persist();
       console.log(
-        `Database persistence: ${isPersistent ? "Granted" : "Denied"}`
+        `Database persistence: ${isPersistent ? "Granted" : "Denied"}`,
       );
     }
 
@@ -24,24 +24,24 @@ export async function initializeDatabase() {
     console.error("Failed to initialize database:", error);
     throw error;
   }
-}
+};
 
 /**
  * Check if the database is ready
  */
-export function isDatabaseReady(): boolean {
+export const isDatabaseReady = (): boolean => {
   try {
     const db = getDatabase();
     return db.isOpen();
   } catch {
     return false;
   }
-}
+};
 
 /**
  * Close the database connection (useful for cleanup)
  */
-export async function closeDatabase() {
+export const closeDatabase = async () => {
   try {
     const db = getDatabase();
     if (db.isOpen()) {
@@ -51,4 +51,4 @@ export async function closeDatabase() {
   } catch (error) {
     console.error("Failed to close database:", error);
   }
-}
+};

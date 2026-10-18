@@ -4,9 +4,7 @@ import { v4 as uuid } from "uuid";
 //interfaces
 import type { Match } from "~/interfaces/match";
 import type { Set } from "~/interfaces/set";
-import type { Leg } from "~/interfaces/leg";
-import type { PlayerLeg } from "~/interfaces/leg";
-import type { Score } from "~/interfaces/leg";
+import type { Leg, PlayerLeg, Score } from "~/interfaces/leg";
 
 // utils
 import { getPlayerWinnerCount } from "~/utils/match";
@@ -14,9 +12,7 @@ import { getPlayerIdsFromStats } from "~/utils/player";
 
 //factories
 import { createSet } from "~/interfaces/set";
-import { createLeg } from "~/interfaces/leg";
-import { createScore } from "~/interfaces/leg";
-import { createPlayerLeg } from "~/interfaces/leg";
+import { createLeg, createScore, createPlayerLeg } from "~/interfaces/leg";
 import { createPlayerStats } from "~/interfaces/stats";
 
 //enums
@@ -197,7 +193,9 @@ export const useX01Game = (
 
   // Check if undo is available
   const canUndo = computed(() => {
-    if (pendingLegWin.value || pendingGoldenCamel.value) return true;
+    if (pendingLegWin.value || pendingGoldenCamel.value) {
+      return true;
+    }
 
     // Check if match has more than 1 leg/set
     if (matchGame.value.length > 1 || currentSetGame.value?.length > 1) {
@@ -240,8 +238,10 @@ export const useX01Game = (
       }),
     );
 
-    let previousPlayerLeg = getCurrentPlayerLeg.value(winner!);
-    if (!previousPlayerLeg) return;
+    const previousPlayerLeg = getCurrentPlayerLeg.value(winner!);
+    if (!previousPlayerLeg) {
+      return;
+    }
 
     await removeLastScore(previousPlayerLeg);
     currentPlayerId.value = previousPlayerLeg.playerId;
@@ -251,7 +251,9 @@ export const useX01Game = (
     currentPlayerLegs.value.some((playerLeg) => playerLeg.scores.length > 0);
 
   const undoToPreviousLeg = async (): Promise<boolean> => {
-    if (!currentLeg.value) return false;
+    if (!currentLeg.value) {
+      return false;
+    }
 
     const legIdToDelete = currentLeg.value.id;
 
@@ -277,7 +279,9 @@ export const useX01Game = (
       await loadMatchGame();
 
       const updatedSets = matchGame.value as Set[];
-      if (updatedSets.length === 0) return false;
+      if (updatedSets.length === 0) {
+        return false;
+      }
 
       const latestSet = updatedSets.at(-1)!;
       currentSet.value = latestSet;
@@ -299,7 +303,9 @@ export const useX01Game = (
     await loadMatchGame();
 
     const legs = matchGame.value as Leg[];
-    if (legs.length === 0) return false;
+    if (legs.length === 0) {
+      return false;
+    }
 
     const previousLeg = legs.at(-1)!;
     await initPreviousLeg(previousLeg);
@@ -308,25 +314,33 @@ export const useX01Game = (
   };
 
   const undoPendingLegWin = () => {
-    if (!pendingLegWin.value) return false;
+    if (!pendingLegWin.value) {
+      return false;
+    }
     pendingLegWin.value = null;
     return true;
   };
 
   const undoPendingGoldenCamel = () => {
-    if (!pendingGoldenCamel.value) return false;
+    if (!pendingGoldenCamel.value) {
+      return false;
+    }
     pendingGoldenCamel.value = null;
     return true;
   };
 
   const confirmGoldenCamel = async (isGoldenCamel: boolean) => {
     const pending = pendingGoldenCamel.value;
-    if (!pending) return;
+    if (!pending) {
+      return;
+    }
 
     pendingGoldenCamel.value = null;
 
     const playerLeg = getCurrentPlayerLeg.value(pending.score.playerId);
-    if (!playerLeg) return;
+    if (!playerLeg) {
+      return;
+    }
 
     const createdScore = await createScore({
       matchId: pending.score.matchId,
@@ -352,12 +366,16 @@ export const useX01Game = (
 
   const confirmLegFinish = async (darts: 1 | 2 | 3) => {
     const pending = pendingLegWin.value;
-    if (!pending) return;
+    if (!pending) {
+      return;
+    }
 
     pendingLegWin.value = null;
 
     const playerLeg = getCurrentPlayerLeg.value(pending.score.playerId);
-    if (!playerLeg) return;
+    if (!playerLeg) {
+      return;
+    }
 
     const checkoutScore = await createScore({
       matchId: pending.score.matchId,
@@ -373,13 +391,15 @@ export const useX01Game = (
     await savePlayerLeg(playerLeg);
 
     $event("score-submitted");
-    await handleLegWin(checkoutScore);
+    await handleLegWin();
     $event("leg-finished");
     resetScore();
   };
 
   const undoLastTurn = async () => {
-    if (!currentLeg.value || !canUndo.value) return;
+    if (!currentLeg.value || !canUndo.value) {
+      return;
+    }
 
     if (pendingLegWin.value) {
       undoPendingLegWin();
@@ -408,7 +428,9 @@ export const useX01Game = (
       await loadMatchGame();
 
       const playerLeg = getCurrentPlayerLeg.value(currentPlayerId.value);
-      if (!playerLeg) return;
+      if (!playerLeg) {
+        return;
+      }
 
       await removeLastScore(playerLeg);
       await loadMatchGame();
@@ -422,7 +444,9 @@ export const useX01Game = (
       setPreviousPlayer();
 
       const playerLeg = getCurrentPlayerLeg.value(currentPlayerId.value);
-      if (!playerLeg) return;
+      if (!playerLeg) {
+        return;
+      }
 
       const lastScoreRemoved = await removeLastScore(playerLeg);
       if (lastScoreRemoved) {
@@ -439,10 +463,9 @@ export const useX01Game = (
     }
   };
 
-  const validateScore = () => {
-    // Trigger validation by accessing the computed property
-    isValidScore.value;
-  };
+  // Reading isValidScore is what refreshes scoreValidationMessage, since that
+  // computed sets the message as a side effect. The caller ignores the result.
+  const validateScore = () => isValidScore.value;
 
   // Async initialization function
   const initializeMatch = async (startingPlayerId?: string) => {
@@ -450,7 +473,9 @@ export const useX01Game = (
     await loadMatchGame();
 
     if (matchGame.value.length === 0) {
-      if (!startingPlayerId) return;
+      if (!startingPlayerId) {
+        return;
+      }
 
       currentPlayerId.value = startingPlayerId;
 
@@ -618,8 +643,10 @@ export const useX01Game = (
     }
   };
 
-  const handleLegWin = async (createdScore: Score) => {
-    if (!currentLeg.value) return;
+  const handleLegWin = async () => {
+    if (!currentLeg.value) {
+      return;
+    }
 
     // Calculate and update averages for all playerlegs in this leg
     await calculateAndUpdatePlayerLegAverages(currentLeg.value.id);
@@ -659,7 +686,9 @@ export const useX01Game = (
   };
 
   const submitScore = async () => {
-    if (!isValidScore.value) return;
+    if (!isValidScore.value) {
+      return;
+    }
 
     const score = currentScore.value;
 
@@ -681,7 +710,9 @@ export const useX01Game = (
     }
 
     const playerLeg = getCurrentPlayerLeg.value(currentPlayerId.value);
-    if (!playerLeg) return;
+    if (!playerLeg) {
+      return;
+    }
 
     const startScore = realTimePlayerScore.value(currentPlayerId.value);
     const isCheckout = startScore - score === 0;

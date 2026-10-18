@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import type { Leg, PlayerLeg, Score } from "~/interfaces/leg";
 import type { Player } from "~/interfaces/player";
-import { formatDateTime } from "~/utils/date";
 import { createPlayerNameGetter } from "~/utils/player";
 import { useToggle } from "@vueuse/core";
 import CheckoutDouble from "./CheckoutDouble.vue";
@@ -104,9 +103,9 @@ const [showLegDetails, toggleLegDetails] = useToggle(false);
                   </span>
                 </StatsPlayersWithCenter>
                 <button
-                  @click="toggleLegDetails()"
                   class="text-xs px-2 py-1 bg-gray-700 hover:bg-gray-600 transition-colors"
                   :class="{ 'bg-gray-600': showLegDetails }"
+                  @click="toggleLegDetails()"
                 >
                   {{ showLegDetails ? "−" : "+" }}
                 </button>

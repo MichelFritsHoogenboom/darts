@@ -72,7 +72,7 @@ export const useLegs = () => {
 
   const getLegsForSet = async (
     setId: string,
-    sortOrder?: string[]
+    sortOrder?: string[],
   ): Promise<Leg[]> => {
     loading.value = true;
     error.value = null;
@@ -91,7 +91,7 @@ export const useLegs = () => {
 
   const getLegsForMatch = async (
     matchId: string,
-    sortOrder?: string[]
+    sortOrder?: string[],
   ): Promise<Leg[]> => {
     loading.value = true;
     error.value = null;

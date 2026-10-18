@@ -1,51 +1,50 @@
 import { v4 as uuid } from "uuid";
 import { toRaw } from "vue";
 import { PlayerStatsService } from "~/database/PlayerStatsService";
-import {
-  STATS_COMPARE_KIND,
-  STAT_VALUE_FORMAT,
-} from "~/constants/stats";
+import type { STATS_COMPARE_KIND, STAT_VALUE_FORMAT } from "~/constants/stats";
 import {
   createCheckoutRanges,
   createDartsThrownHit,
   createScoreRanges,
-  type CheckoutRanges,
-  type DartsThrownHit,
-  type ScoreRanges,
+} from "~/interfaces/statsRanges";
+import type {
+  CheckoutRanges,
+  DartsThrownHit,
+  ScoreRanges,
 } from "~/interfaces/statsRanges";
 
 const playerStatsService = new PlayerStatsService();
 
 /** Best averages for whatever scope is relevant (leg / set / match). Omit unused keys. */
-export type BestAverages = {
+export interface BestAverages {
   bestLegAverage?: number;
   bestSetAverage?: number;
   bestMatchAverage?: number;
-};
+}
 
 /** Ranked highlight row (checkout, match average, …). */
-export type LeaderboardEntry = {
+export interface LeaderboardEntry {
   id: string;
   playerId: string;
   value: number;
   date: Date;
   /** Match average from a lost match — muted in the UI. */
   lost?: boolean;
-};
+}
 
 /** Match-level average with win/loss for highlights leaderboard. */
-export type TopMatchAverage = {
+export interface TopMatchAverage {
   stats: PlayerStats;
   won: boolean;
-};
+}
 
 export type CompareSide = "player1" | "player2" | null;
 
-export type ComparePair<T> = {
+export interface ComparePair<T> {
   label: string;
   player1: T;
   player2: T;
-};
+}
 
 export type StatsCompareKind =
   (typeof STATS_COMPARE_KIND)[keyof typeof STATS_COMPARE_KIND];
@@ -67,14 +66,12 @@ export type StatsCompareCamelRow = ComparePair<number> & {
 };
 
 export type StatsCompareRow =
-  | StatsCompareNumberRow
-  | StatsCompareCheckoutRow
-  | StatsCompareCamelRow;
+  StatsCompareNumberRow | StatsCompareCheckoutRow | StatsCompareCamelRow;
 
-export type StatsCompareSection = {
+export interface StatsCompareSection {
   title: string;
   rows: StatsCompareRow[];
-};
+}
 
 export interface PlayerStats {
   id: string;

@@ -10,11 +10,11 @@ const { set, setIndex, players, legsWithScores } = defineProps<{
   set: Set;
   setIndex: number;
   players: Player[];
-  legsWithScores: Array<{
+  legsWithScores: {
     leg: Leg;
     playerLegs: PlayerLeg[];
     scoresByPlayer: Record<string, Score[]>;
-  }>;
+  }[];
 }>();
 
 const { getPlayerStatsInOrder } = usePlayerStats();

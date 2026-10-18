@@ -4,7 +4,7 @@ import { getPlayerFullName } from "~/utils/player";
 
 const model = defineModel<boolean>({ required: true });
 
-const props = defineProps<{
+defineProps<{
   winner: Player | undefined;
   editionNumber: number;
 }>();

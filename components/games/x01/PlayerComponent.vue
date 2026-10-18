@@ -2,10 +2,8 @@
 import type { Player } from "~/interfaces/player";
 import type { Score, Leg } from "~/interfaces/leg";
 import type { PlayerStats } from "~/interfaces/stats";
-import {
-  createCheckoutRanges,
-  type CheckoutRanges,
-} from "~/interfaces/statsRanges";
+import { createCheckoutRanges } from "~/interfaces/statsRanges";
+import type { CheckoutRanges } from "~/interfaces/statsRanges";
 import type { Set } from "~/interfaces/set";
 import { maxAverage } from "~/utils/averages";
 import { isCheckoutScore } from "~/utils/score";
@@ -84,7 +82,9 @@ const updateBestWonAverage = async <T extends { winner?: string }>(
 const getLegAverage = async (leg: Leg) => {
   const playerLegs = await getPlayerLegsForLeg(leg.id);
   const playerLeg = playerLegs.find((pl) => pl.playerId === player.id);
-  if (!playerLeg) return 0;
+  if (!playerLeg) {
+    return 0;
+  }
   const stats = await getPlayerStatsByPlayerLegId(playerLeg.id);
   return stats?.average ?? 0;
 };
@@ -96,7 +96,9 @@ const updateLegWonAverages = async (allLegs: Leg[]) => {
 };
 
 const updatePlayerAverages = async () => {
-  if (!matchId) return;
+  if (!matchId) {
+    return;
+  }
 
   await calculateAndUpdateMatchPlayerStats(matchId);
   await updateMatchPlayerStats();
@@ -231,7 +233,9 @@ const updateStats = async () => {
 };
 
 const updatePlayerCheckouts = async () => {
-  if (!matchPlayerStats.value) return;
+  if (!matchPlayerStats.value) {
+    return;
+  }
 
   const checkouts = createCheckoutRanges();
 
@@ -275,10 +279,10 @@ onBeforeUnmount(() => {
     <div class="pb-2 text-center">
       <div class="font-oswald text-4xl">
         <StatsPlayerNameWithBadge
-          :playerId="player.id"
+          :player-id="player.id"
           :players="[player]"
           :average="matchPlayerStats?.average || 0"
-          :showGoldenCamel="showGoldenCamel"
+          :show-golden-camel="showGoldenCamel"
         />
       </div>
     </div>
@@ -286,32 +290,32 @@ onBeforeUnmount(() => {
       <strong>Mogelijke uitgooi:</strong>
       <GamesX01CheckoutSuggestions :score="realTimeScore" />
     </div>
-    <div class="stat-well" v-if="matchPlayerStats">
+    <div v-if="matchPlayerStats" class="stat-well">
       <GamesX01ScoreCounts
-        :playerStats="matchPlayerStats"
-        :playerScores="playerScores"
+        :player-stats="matchPlayerStats"
+        :player-scores="playerScores"
       />
     </div>
-    <div class="stat-well" v-if="matchPlayerStats">
+    <div v-if="matchPlayerStats" class="stat-well">
       <GamesX01Averages
-        :matchAverage="matchPlayerStats.average"
-        :legAverage="legPlayerStats?.average || 0"
-        :setAverage="setPlayerStats?.average || 0"
-        :firstNineAverage="matchPlayerStats.firstNineAverage || 0"
-        :scoringDartsAverage="matchPlayerStats.scoringDartsAverage || 0"
-        :lastSetAverage="lastSetAverage"
-        :lastLegAverage="lastLegAverage"
-        :lastLegWinAverage="lastLegWinAverage"
-        :bestLegAverage="bestLegAverage"
-        :bestSetAverage="bestSetAverage"
-        :isSetMatch="isSetMatch"
+        :match-average="matchPlayerStats.average"
+        :leg-average="legPlayerStats?.average || 0"
+        :set-average="setPlayerStats?.average || 0"
+        :first-nine-average="matchPlayerStats.firstNineAverage || 0"
+        :scoring-darts-average="matchPlayerStats.scoringDartsAverage || 0"
+        :last-set-average="lastSetAverage"
+        :last-leg-average="lastLegAverage"
+        :last-leg-win-average="lastLegWinAverage"
+        :best-leg-average="bestLegAverage"
+        :best-set-average="bestSetAverage"
+        :is-set-match="isSetMatch"
       />
     </div>
-    <div class="stat-well" v-if="matchPlayerStats">
+    <div v-if="matchPlayerStats" class="stat-well">
       <GamesX01Checkouts
-        :playerStats="matchPlayerStats"
-        :playerScores="playerScores"
-        :playerCheckouts="playerCheckouts"
+        :player-stats="matchPlayerStats"
+        :player-scores="playerScores"
+        :player-checkouts="playerCheckouts"
       />
     </div>
   </div>

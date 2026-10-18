@@ -68,7 +68,9 @@ const load = async () => {
   try {
     if (matchId) {
       const match = await getMatch(matchId);
-      if (!match) return;
+      if (!match) {
+        return;
+      }
 
       const matchStats = await getPlayerStatsInOrder(match.playerStats);
       if (needsMatchStatsBackfill(matchStats)) {
@@ -94,10 +96,14 @@ const load = async () => {
       return;
     }
 
-    if (!competitionEditionId) return;
+    if (!competitionEditionId) {
+      return;
+    }
 
     const edition = await getEdition(competitionEditionId);
-    if (!edition) return;
+    if (!edition) {
+      return;
+    }
 
     const [editionStats, matches] = await Promise.all([
       getPlayerStatsInOrder(edition.playerStats),
@@ -112,7 +118,9 @@ const load = async () => {
       X01_GAME_PLAYED_IN.sets;
     seasonComplete.value = !!edition.winner;
 
-    if (!player1Id || !player2Id) return;
+    if (!player1Id || !player2Id) {
+      return;
+    }
 
     const finished = matches.filter((match) => !!match.winner);
     const [best1, best2, camelWins] = await Promise.all([
@@ -140,7 +148,9 @@ watch(
 const sections = computed((): StatsCompareSection[] => {
   const p1 = player1Stats.value;
   const p2 = player2Stats.value;
-  if (!p1 || !p2) return [];
+  if (!p1 || !p2) {
+    return [];
+  }
 
   const averageRows: StatsCompareNumberRow[] = [
     {

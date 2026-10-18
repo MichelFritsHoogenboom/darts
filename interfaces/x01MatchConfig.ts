@@ -16,15 +16,15 @@ export const GAME_WIN_DEFINITION = {
 };
 
 export const SETS_TO_WIN_OPTIONS = Object.fromEntries(
-  Array.from({ length: 6 }, (_, i) => [i + 2, i + 2])
+  Array.from({ length: 6 }, (_, i) => [i + 2, i + 2]),
 );
 
 export const LEGS_TO_WIN_SET_OPTIONS = Object.fromEntries(
-  Array.from({ length: 4 }, (_, i) => [i + 2, i + 2])
+  Array.from({ length: 4 }, (_, i) => [i + 2, i + 2]),
 );
 
 export const LEGS_TO_WIN_MATCH_OPTIONS = Object.fromEntries(
-  Array.from({ length: 20 }, (_, i) => [i + 1, i + 1])
+  Array.from({ length: 20 }, (_, i) => [i + 1, i + 1]),
 );
 
 // Clean type definitions

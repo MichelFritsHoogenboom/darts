@@ -7,13 +7,10 @@ import {
   leaderboardEntryFromMatchAverage,
 } from "~/utils/stats";
 
-const props = withDefaults(
-  defineProps<{
-    competitionEdition?: CompetitionEdition;
-    limit?: number;
-  }>(),
-  { limit: 10 },
-);
+const { competitionEdition, limit = 10 } = defineProps<{
+  competitionEdition?: CompetitionEdition;
+  limit?: number;
+}>();
 
 const { getCheckouts } = useScores();
 const { getTopMatchAverages } = useMatches();
@@ -43,19 +40,21 @@ const activeHighlight = computed(
 );
 
 const editionScopeKey = computed(() => {
-  const edition = props.competitionEdition;
-  if (!edition) return "global";
+  const edition = competitionEdition;
+  if (!edition) {
+    return "global";
+  }
   return `${edition.id}:${edition.matches.join(",")}`;
 });
 
 const loadHighlights = async () => {
   loading.value = true;
   try {
-    const edition = props.competitionEdition;
+    const edition = competitionEdition;
     const matchIds = edition ? [...edition.matches] : undefined;
     const [checkouts, matchAverages] = await Promise.all([
-      getCheckouts(props.limit, matchIds),
-      getTopMatchAverages(props.limit, edition?.id),
+      getCheckouts(limit, matchIds),
+      getTopMatchAverages(limit, edition?.id),
     ]);
     highestCheckouts.value = checkouts.map(leaderboardEntryFromCheckout);
     bestMatchAverages.value = matchAverages.map(

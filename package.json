@@ -9,12 +9,20 @@
     "generate": "nuxt generate",
     "generate:gh-pages": "NUXT_SPA=true NUXT_APP_BASE_URL=/darts/ nuxt generate && node scripts/prepare-gh-pages.mjs",
     "preview:gh-pages": "pnpm generate:gh-pages && nuxt preview",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix && prettier --write .",
+    "format": "prettier --write .",
     "postinstall": "nuxt prepare"
   },
   "devDependencies": {
     "@nuxt/devtools": "latest",
+    "@nuxt/eslint": "^1.17.0",
+    "eslint": "^10.12.0",
+    "eslint-config-prettier": "^10.1.8",
     "nuxt": "^3.8.0",
-    "sass-embedded": "^1.100.0"
+    "prettier": "^3.9.10",
+    "sass-embedded": "^1.100.0",
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^7.2.0",

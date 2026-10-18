@@ -1,3 +1,5 @@
+import type { Table, UpdateSpec } from "dexie";
+
 import { getDatabase } from "./schema";
 import { initializeDatabase } from "./init";
 
@@ -21,13 +23,13 @@ export class DatabaseService {
    * If the record exists (based on id), it updates; otherwise, it creates
    */
   static async upsert<
-    T extends { id: string; createdAt: Date; updatedAt: Date }
-  >(table: any, data: T): Promise<T> {
+    T extends { id: string; createdAt: Date; updatedAt: Date },
+  >(table: Table<T, string>, data: T): Promise<T> {
     await this.ensureDatabase();
 
     if (!data.id || typeof data.id !== "string") {
       throw new Error(
-        `Invalid ID provided: ${data.id} (type: ${typeof data.id})`
+        `Invalid ID provided: ${data.id} (type: ${typeof data.id})`,
       );
     }
 
@@ -36,7 +38,9 @@ export class DatabaseService {
     if (existingRecord) {
       // Update existing record - preserve createdAt, update updatedAt
       data.updatedAt = new Date();
-      await table.update(data.id, data);
+      // `data` is the whole entity, so every key is a valid key path of T.
+      // Dexie's UpdateSpec<T> cannot see that for an unresolved generic.
+      await table.update(data.id, data as UpdateSpec<T>);
       return data;
     } else {
       // Create new record - set both timestamps
@@ -50,7 +54,10 @@ export class DatabaseService {
   /**
    * Generic method to get a record by ID
    */
-  static async getById<T>(table: any, id: string): Promise<T | undefined> {
+  static async getById<T>(
+    table: Table<T, string>,
+    id: string,
+  ): Promise<T | undefined> {
     await this.ensureDatabase();
     return await table.get(id);
   }
@@ -58,7 +65,7 @@ export class DatabaseService {
   /**
    * Generic method to get all records
    */
-  static async getAll<T>(table: any): Promise<T[]> {
+  static async getAll<T>(table: Table<T, string>): Promise<T[]> {
     await this.ensureDatabase();
     return await table.toArray();
   }
@@ -66,7 +73,10 @@ export class DatabaseService {
   /**
    * Generic method to delete a record by ID
    */
-  static async deleteById(table: any, id: string): Promise<void> {
+  static async deleteById(
+    table: Table<unknown, string>,
+    id: string,
+  ): Promise<void> {
     await this.ensureDatabase();
     await table.delete(id);
   }
@@ -75,15 +85,15 @@ export class DatabaseService {
    * Generic method to search records
    */
   static async search<T>(
-    table: any,
+    table: Table<T, string>,
     searchTerm: string,
-    searchFields: string[]
+    searchFields: string[],
   ): Promise<T[]> {
     await this.ensureDatabase();
     return await table
-      .filter((record: any) => {
+      .filter((record) => {
         return searchFields.some((field) => {
-          const value = record[field];
+          const value = record[field as keyof T];
           return (
             value &&
             value.toString().toLowerCase().includes(searchTerm.toLowerCase())

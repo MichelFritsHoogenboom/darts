@@ -27,7 +27,7 @@ export const buildEditionPlayerStatMetrics = (input: {
 /** Per finished match: player with strictly most golden camels wins that match. */
 export const tallyCamelMatchWins = (
   playerId: string,
-  matchCamelCounts: Array<Readonly<Record<string, number>>>,
+  matchCamelCounts: Readonly<Record<string, number>>[],
 ): number => {
   let wins = 0;
   for (const counts of matchCamelCounts) {
@@ -35,14 +35,18 @@ export const tallyCamelMatchWins = (
     const others = Object.entries(counts)
       .filter(([id]) => id !== playerId)
       .map(([, count]) => count);
-    if (!others.length) continue;
-    if (own > Math.max(...others)) wins += 1;
+    if (!others.length) {
+      continue;
+    }
+    if (own > Math.max(...others)) {
+      wins += 1;
+    }
   }
   return wins;
 };
 
 export const sumCamelCountsByPlayer = (
-  matchCamelCounts: Array<Readonly<Record<string, number>>>,
+  matchCamelCounts: Readonly<Record<string, number>>[],
 ): Record<string, number> => {
   const totals: Record<string, number> = {};
   for (const counts of matchCamelCounts) {
@@ -73,7 +77,9 @@ export const camelSeasonWinnerId = (
   });
 
   const max = Math.max(0, ...smallCounts.map((entry) => entry.count));
-  if (max === 0) return undefined;
+  if (max === 0) {
+    return undefined;
+  }
 
   const winners = smallCounts.filter((entry) => entry.count === max);
   return winners.length === 1 ? winners[0].playerId : undefined;

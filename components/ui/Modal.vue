@@ -20,7 +20,7 @@ watch(
   () => props.modelValue,
   (newValue) => {
     isOpen.value = newValue;
-  }
+  },
 );
 
 // Watch for internal changes and emit
@@ -78,8 +78,8 @@ defineExpose({
                     <slot name="title" />
                   </h3>
                   <button
-                    @click="close"
                     class="text-gray-400 hover:text-gray-600"
+                    @click="close"
                   >
                     <span class="sr-only">Close</span>
                     <svg

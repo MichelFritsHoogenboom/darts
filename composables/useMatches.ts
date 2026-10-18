@@ -2,15 +2,13 @@ import { ref, readonly } from "vue";
 import { MatchService } from "../database/MatchService";
 import type { Match } from "../interfaces/match";
 import { X01_GAME_PLAYED_IN } from "../interfaces/x01MatchConfig";
-import type { PlayerStats } from "../interfaces/stats";
 
 const matchService = new MatchService();
 const { getSetsForMatch, deleteSet } = useSets();
 const { getLegsForMatch, deleteLeg } = useLegs();
-const { getScoresForMatch } = useScores();
-const { getPlayerStatsForMatch, savePlayerStats, deletePlayerStats } = usePlayerStats();
+const { getPlayerStatsForMatch, deletePlayerStats } = usePlayerStats();
 
-export function useMatches() {
+export const useMatches = () => {
   const matches = ref<Match[]>([]);
   const unfinishedMatches = ref<Match[]>([]);
   const loading = ref(false);
@@ -200,4 +198,4 @@ export function useMatches() {
     getMatchesByIds,
     getTopMatchAverages,
   };
-}
+};

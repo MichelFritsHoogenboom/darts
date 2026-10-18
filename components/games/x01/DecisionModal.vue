@@ -1,29 +1,28 @@
 <script setup lang="ts">
 type ModalOptionValue = string | number | boolean;
 
-type ModalOption = {
+interface ModalOption {
   label: string;
   value: ModalOptionValue;
-};
+}
 
-const props = withDefaults(
-  defineProps<{
-    visible: boolean;
-    title: string;
-    description: string;
-    options: ModalOption[];
-    optionButtonClass?: string;
-    showUndo?: boolean;
-    undoLabel?: string;
-    undoTitle?: string;
-  }>(),
-  {
-    optionButtonClass: "btn-gray w-full py-3",
-    showUndo: true,
-    undoLabel: "Undo",
-    undoTitle: "Undo last throw (Ctrl+Z)",
-  },
-);
+const {
+  visible,
+  options,
+  optionButtonClass = "btn-gray w-full py-3",
+  showUndo = true,
+  undoLabel = "Undo",
+  undoTitle = "Undo last throw (Ctrl+Z)",
+} = defineProps<{
+  visible: boolean;
+  title: string;
+  description: string;
+  options: ModalOption[];
+  optionButtonClass?: string;
+  showUndo?: boolean;
+  undoLabel?: string;
+  undoTitle?: string;
+}>();
 
 defineEmits<{
   select: [value: ModalOptionValue];
@@ -39,17 +38,21 @@ const setOptionRef = (el: unknown, index: number) => {
 };
 
 const focusOption = (index: number) => {
-  const count = props.options.length;
-  if (count === 0) return;
+  const count = options.length;
+  if (count === 0) {
+    return;
+  }
   const nextIndex = (index + count) % count;
   optionRefs.value[nextIndex]?.focus({ focusVisible: true });
 };
 
 watch(
-  () => [props.visible, props.options.length] as const,
-  ([visible, optionCount]) => {
-    if (!visible || optionCount === 0) {
-      if (!visible) optionRefs.value = [];
+  () => [visible, options.length] as const,
+  ([isVisible, optionCount]) => {
+    if (!isVisible || optionCount === 0) {
+      if (!isVisible) {
+        optionRefs.value = [];
+      }
       return;
     }
 

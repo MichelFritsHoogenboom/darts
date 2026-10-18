@@ -1,15 +1,19 @@
 <script setup lang="ts">
 import { ref, computed, toRaw } from "vue";
-import { createPlayer, type Player } from "../../interfaces/player";
+import { createPlayer } from "../../interfaces/player";
+import type { Player } from "../../interfaces/player";
 
-const props = defineProps({
+defineProps({
   updatePlayer: {
     type: String,
     default: null,
   },
 });
 
-const emit = defineEmits(["submit", "cancel"]);
+const emit = defineEmits<{
+  submit: [player: Player];
+  cancel: [];
+}>();
 
 // Form data
 const formData = ref<Player>(await createPlayer());
@@ -18,7 +22,9 @@ const showAllFields = ref(false);
 // Computed property for birthDate to convert between Date and string (for date input)
 const birthDateString = computed({
   get: () => {
-    if (!formData.value.birthDate) return "";
+    if (!formData.value.birthDate) {
+      return "";
+    }
     // Convert Date to YYYY-MM-DD format for date input
     return formData.value.birthDate.toISOString().split("T")[0];
   },
@@ -38,7 +44,9 @@ const isFormValid = computed(() => {
 
 // Handle form submission
 const handleSubmit = () => {
-  if (!isFormValid.value) return;
+  if (!isFormValid.value) {
+    return;
+  }
 
   emit("submit", toRaw(formData.value));
 };
@@ -49,7 +57,7 @@ const handleCancel = () => {
 };
 </script>
 <template>
-  <form @submit.prevent="handleSubmit" class="space-y-6">
+  <form class="space-y-6" @submit.prevent="handleSubmit">
     <!-- Basic Information -->
     <div
       class="grid grid-cols-1 gap-6"
@@ -83,8 +91,8 @@ const handleCancel = () => {
         v-if="!showAllFields"
         type="button"
         variant="lightOutline"
-        @click="showAllFields = true"
         size="md"
+        @click="showAllFields = true"
       >
         Add all info
       </FormButton>
@@ -163,8 +171,8 @@ const handleCancel = () => {
         v-if="updatePlayer"
         type="button"
         variant="light"
-        @click="handleCancel"
         size="lg"
+        @click="handleCancel"
       >
         Cancel
       </FormButton>

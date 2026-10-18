@@ -46,9 +46,9 @@ export interface Head2HeadOverviewItem {
   lastActiveAt: Date;
 }
 
-export function createCompetition(
-  overrides: Partial<Competition> = {}
-): Competition {
+export const createCompetition = (
+  overrides: Partial<Competition> = {},
+): Competition => {
   return {
     id: uuid(),
     createdAt: new Date(),
@@ -56,14 +56,14 @@ export function createCompetition(
     competitionType: COMPETITION_TYPES.head2head,
     ...overrides,
   };
-}
+};
 
-export function createCompetitionEdition(
+export const createCompetitionEdition = (
   overrides: Partial<CompetitionEdition> & {
     competitionId: string;
     competitionConfig: CompetitionConfig;
-  }
-): CompetitionEdition {
+  },
+): CompetitionEdition => {
   return {
     id: uuid(),
     createdAt: new Date(),
@@ -73,4 +73,4 @@ export function createCompetitionEdition(
     matches: [],
     ...overrides,
   };
-}
+};

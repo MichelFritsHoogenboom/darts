@@ -11,13 +11,13 @@ export interface Match {
   updatedAt: Date;
   gameType: GameType;
   matchConfig: x01MatchConfig;
-  playerStats: string[] | ReadonlyArray<string>; // PlayerStats IDs - accepts both mutable and readonly
-  game: string[] | ReadonlyArray<string>; // Leg or Set IDs - accepts both mutable and readonly
+  playerStats: string[] | readonly string[]; // PlayerStats IDs - accepts both mutable and readonly
+  game: string[] | readonly string[]; // Leg or Set IDs - accepts both mutable and readonly
   winner?: string;
   competitionEditionId?: string;
 }
 
-export function createMatch(overrides: Partial<Match> = {}): Match {
+export const createMatch = (overrides: Partial<Match> = {}): Match => {
   return {
     id: uuid(),
     createdAt: new Date(),
@@ -28,4 +28,4 @@ export function createMatch(overrides: Partial<Match> = {}): Match {
     game: [],
     ...overrides,
   };
-}
+};

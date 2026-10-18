@@ -13,7 +13,10 @@ export class LegService extends BaseService<Leg> {
     return sortByCreatedAt(legs);
   }
 
-  async getLegsForMatch(matchId: string, _sortOrder?: string[]): Promise<Leg[]> {
+  async getLegsForMatch(
+    matchId: string,
+    _sortOrder?: string[],
+  ): Promise<Leg[]> {
     const table = await this.getTable();
     const legs = await table.where("matchId").equals(matchId).toArray();
     return sortByCreatedAt(legs);
