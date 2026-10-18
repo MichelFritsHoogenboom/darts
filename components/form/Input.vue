@@ -12,8 +12,8 @@ const props = defineProps<{
   variant?: InputVariant;
 }>();
 
-defineEmits<{
-  "update:modelValue": [value: string];
+const emit = defineEmits<{
+  "update:modelValue": [value: string | number | undefined];
 }>();
 
 const labelClasses = computed(() => {
@@ -34,6 +34,20 @@ const inputClasses = computed(() => {
   };
   return `${baseClasses} ${variantClasses[props.variant || "dark"]}`;
 });
+
+// A number input must emit a number, or the string lands in a numeric field and
+// is persisted as one. An empty field means "no value", not 0 or NaN.
+const onInput = (event: Event) => {
+  const { value, valueAsNumber } = event.target as HTMLInputElement;
+
+  if (props.type !== "number") {
+    emit("update:modelValue", value);
+
+    return;
+  }
+
+  emit("update:modelValue", value === "" ? undefined : valueAsNumber);
+};
 </script>
 
 <template>
@@ -48,9 +62,7 @@ const inputClasses = computed(() => {
       :disabled="disabled"
       :required="required"
       :class="inputClasses"
-      @input="
-        $emit('update:modelValue', ($event.target as HTMLInputElement).value)
-      "
+      @input="onInput"
     />
   </div>
 </template>
