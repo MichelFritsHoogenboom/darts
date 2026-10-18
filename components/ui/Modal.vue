@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { useToggle } from "@vueuse/core";
-import { watch } from "vue";
+// Vendor
+import { onKeyStroke, useToggle } from "@vueuse/core";
+import { computed, watch } from "vue";
 
 interface Props {
   modelValue: boolean;
+  skin?: "light" | "dark";
 }
 
 interface Emits {
@@ -13,7 +15,31 @@ interface Emits {
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
+const titleId = useId();
+
 const [isOpen, toggle] = useToggle(props.modelValue);
+
+const isDark = computed(() => props.skin === "dark");
+
+const panelClass = computed(() =>
+  isDark.value ? "bg-gray-800 text-gray-100" : "bg-white",
+);
+
+const bodyClass = computed(() => (isDark.value ? "bg-gray-800" : "bg-white"));
+
+const titleClass = computed(() =>
+  isDark.value ? "text-white" : "text-gray-900",
+);
+
+const closeClass = computed(() =>
+  isDark.value
+    ? "text-gray-400 hover:text-gray-200"
+    : "text-gray-400 hover:text-gray-600",
+);
+
+const footerClass = computed(() =>
+  isDark.value ? "bg-gray-900/60" : "bg-gray-50",
+);
 
 // Watch for external changes to modelValue
 watch(
@@ -35,6 +61,14 @@ const close = () => {
 const open = () => {
   isOpen.value = true;
 };
+
+onKeyStroke("Escape", () => {
+  if (!isOpen.value) {
+    return;
+  }
+
+  close();
+});
 
 // Expose methods for parent components
 defineExpose({
@@ -66,21 +100,26 @@ defineExpose({
         class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0"
       >
         <div
-          class="relative transform overflow-hidden bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg"
+          class="relative transform overflow-hidden text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg"
+          :class="panelClass"
+          role="dialog"
+          aria-modal="true"
+          :aria-labelledby="$slots.title ? titleId : undefined"
           @click.stop
         >
           <!-- Modal content -->
-          <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+          <div class="px-4 pb-4 pt-5 sm:p-6 sm:pb-4" :class="bodyClass">
             <div class="sm:flex sm:items-start">
               <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left w-full">
                 <div class="flex justify-between items-center mb-4">
-                  <h3 class="text-lg font-semibold leading-6 text-gray-900">
+                  <h3
+                    :id="titleId"
+                    class="text-lg font-semibold leading-6"
+                    :class="titleClass"
+                  >
                     <slot name="title" />
                   </h3>
-                  <button
-                    class="text-gray-400 hover:text-gray-600"
-                    @click="close"
-                  >
+                  <button type="button" :class="closeClass" @click="close">
                     <span class="sr-only">Close</span>
                     <svg
                       class="h-6 w-6"
@@ -107,7 +146,8 @@ defineExpose({
           <!-- Modal footer -->
           <div
             v-if="$slots.footer"
-            class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6"
+            class="px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6"
+            :class="footerClass"
           >
             <slot name="footer" />
           </div>

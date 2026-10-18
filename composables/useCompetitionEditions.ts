@@ -4,6 +4,7 @@ import { CompetitionService } from "../database/CompetitionService";
 import { MatchService } from "../database/MatchService";
 import type {
   Competition,
+  CompetitionConfig,
   CompetitionEdition,
 } from "../interfaces/competition";
 import { createCompetitionEdition } from "../interfaces/competition";
@@ -91,6 +92,7 @@ export const useCompetitionEditions = () => {
   const startNewEdition = async (
     competitionId: string,
     previousEdition: CompetitionEdition,
+    competitionConfigOverride?: CompetitionConfig,
   ): Promise<CompetitionEdition> => {
     const editions =
       await editionService.getEditionsForCompetition(competitionId);
@@ -105,7 +107,9 @@ export const useCompetitionEditions = () => {
     const edition = createCompetitionEdition({
       competitionId,
       editionNumber: maxNumber + 1,
-      competitionConfig: { ...previousEdition.competitionConfig },
+      competitionConfig:
+        competitionConfigOverride ??
+        cloneCompetitionConfig(previousEdition.competitionConfig),
     });
 
     edition.playerStats = await createEditionPlayerStats(edition.id, playerIds);

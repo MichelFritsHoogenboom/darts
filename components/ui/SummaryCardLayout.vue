@@ -24,10 +24,12 @@ const { wrapperClass = "" } = defineProps<{
 
 <style scoped lang="postcss">
 .header {
-  @apply grid grid-cols-[20%_1fr_20%] font-bold flex justify-between items-center;
+  @apply grid grid-cols-1 gap-2 font-bold items-center;
+  @apply sm:grid-cols-[20%_1fr_20%] sm:gap-0;
 }
 
 .actions {
-  @apply flex items-center gap-2 justify-self-end;
+  @apply flex flex-wrap items-center gap-2;
+  @apply sm:justify-end sm:justify-self-end;
 }
 </style>

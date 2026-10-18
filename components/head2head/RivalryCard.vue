@@ -9,6 +9,10 @@ const props = defineProps<{
   players: Player[];
 }>();
 
+const emit = defineEmits<{
+  "new-season": [];
+}>();
+
 const playerIds = computed(() => getPlayerIdsFromStats(props.item.playerStats));
 
 const playerA = computed(() =>
@@ -35,14 +39,16 @@ const rivalryPath = computed(() =>
     props.item.edition.editionNumber,
   ),
 );
+
+const canStartNewSeason = computed(() => !!props.item.edition.winner);
+
+const startNewSeason = () => {
+  emit("new-season");
+};
 </script>
 
 <template>
-  <UiSummaryCardLayout
-    :show-average="false"
-    :to="rivalryPath"
-    wrapper-class="mb-4"
-  >
+  <UiSummaryCardLayout wrapper-class="mb-4">
     <template #left>
       <span class="text-xs font-normal">
         {{ item.edition.updatedAt.toLocaleDateString() }}
@@ -72,6 +78,15 @@ const rivalryPath = computed(() =>
       <NuxtLink :to="rivalryPath" class="btn-gray btn-gray-500">
         Show details
       </NuxtLink>
+
+      <FormButton
+        v-if="canStartNewSeason"
+        variant="secondary"
+        size="sm"
+        @click="startNewSeason"
+      >
+        New season
+      </FormButton>
     </template>
   </UiSummaryCardLayout>
 </template>

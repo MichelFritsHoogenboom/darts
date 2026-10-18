@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { CompetitionEdition } from "~/interfaces/competition";
 import type { Player } from "~/interfaces/player";
 import { getPlayerIdsFromStats } from "~/utils/player";
 import { routes } from "~/utils/routes";
@@ -12,6 +13,13 @@ const { head2HeadOverview, loading, error, loadHead2HeadOverview } =
 const { players, loadPlayers } = usePlayers();
 
 const overviewPlayers = ref<Player[]>([]);
+const newSeasonEdition = ref<CompetitionEdition>();
+const showNewSeasonChoice = ref(false);
+
+const openNewSeasonChoice = (edition: CompetitionEdition) => {
+  newSeasonEdition.value = edition;
+  showNewSeasonChoice.value = true;
+};
 
 onBeforeMount(async () => {
   await loadHead2HeadOverview();
@@ -64,6 +72,7 @@ watch(head2HeadOverview, async () => {
           :key="item.competition.id"
           :item="item"
           :players="overviewPlayers"
+          @new-season="openNewSeasonChoice(item.edition)"
         />
       </div>
       <div class="flex justify-center mb-6">
@@ -75,5 +84,12 @@ watch(head2HeadOverview, async () => {
         </NuxtLink>
       </div>
     </div>
+
+    <Head2headMoleculesNewSeasonChoice
+      v-if="newSeasonEdition"
+      v-model="showNewSeasonChoice"
+      :edition="newSeasonEdition"
+      from="overview"
+    />
   </NuxtLayout>
 </template>

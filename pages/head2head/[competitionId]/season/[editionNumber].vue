@@ -24,7 +24,6 @@ const {
   getCurrentEdition,
   getEditionsForCompetition,
   createH2HMatch,
-  startNewEdition,
   loadEditionPlayerStats,
   queryRivalryCamelSeasonWins,
   loading: editionLoading,
@@ -42,6 +41,7 @@ const rivalryPlayers = ref<Player[]>([]);
 const loadedEditionPlayerStats = ref<PlayerStats[]>([]);
 const camelSeasonWinsByPlayer = ref<Record<string, number>>({});
 const showChampionOverlay = ref(false);
+const showNewSeasonChoice = ref(false);
 const startingMatch = ref(false);
 const activeTab = ref<"matches" | "stats">("matches");
 
@@ -256,12 +256,8 @@ const startMatch = async () => {
   }
 };
 
-const beginNewEdition = async () => {
-  if (!edition.value || !isCurrentSeason.value) {
-    return;
-  }
-  const created = await startNewEdition(competitionId.value, edition.value);
-  await navigateTo(seasonPath(created.editionNumber));
+const openNewSeasonChoice = () => {
+  showNewSeasonChoice.value = true;
 };
 </script>
 
@@ -361,7 +357,7 @@ const beginNewEdition = async () => {
               >
                 New match
               </FormButton>
-              <FormButton v-if="showStartEdition" @click="beginNewEdition">
+              <FormButton v-if="showStartEdition" @click="openNewSeasonChoice">
                 New season
               </FormButton>
             </div>
@@ -453,6 +449,12 @@ const beginNewEdition = async () => {
     v-model="showChampionOverlay"
     :winner="championPlayer"
     :edition-number="edition.editionNumber"
+  />
+
+  <Head2headMoleculesNewSeasonChoice
+    v-if="currentEdition"
+    v-model="showNewSeasonChoice"
+    :edition="currentEdition"
   />
 </template>
 
@@ -561,7 +563,7 @@ const beginNewEdition = async () => {
   }
 
   .actions {
-    @apply flex justify-center gap-4 relative z-20;
+    @apply flex flex-wrap justify-center gap-3 relative z-20 sm:gap-4;
     margin-bottom: -1.25rem;
   }
 

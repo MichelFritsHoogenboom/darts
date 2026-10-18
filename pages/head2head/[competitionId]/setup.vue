@@ -2,7 +2,7 @@
 import { defaultX01MatchConfig } from "~/interfaces/x01MatchConfig";
 import type { Player } from "~/interfaces/player";
 import type { PlayerStats } from "~/interfaces/stats";
-import { getPlayerFullName, getPlayerIdsFromStats } from "~/utils/player";
+import { getPlayerIdsFromStats } from "~/utils/player";
 import { routes } from "~/utils/routes";
 
 definePageMeta({
@@ -84,20 +84,7 @@ const startMatch = async () => {
     </template>
 
     <div class="max-w-4xl mx-auto">
-      <div class="card-panel rounded-lg p-8 mb-6">
-        <h2 class="text-lg font-semibold text-white mb-4">Players</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div
-            v-for="player in editionPlayers"
-            :key="player.id"
-            class="bg-gray-700 p-4"
-          >
-            <p class="text-white font-medium">
-              {{ getPlayerFullName(player) }}
-            </p>
-          </div>
-        </div>
-      </div>
+      <SetupPlayersPanel :players="editionPlayers" />
 
       <SetupX01MatchSetup v-model="matchConfig">
         <template #footer>
