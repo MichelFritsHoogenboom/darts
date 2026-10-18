@@ -13,7 +13,9 @@ const props = defineProps<{
   fullWidth?: boolean;
 }>();
 
-defineEmits(["click"]);
+defineEmits<{
+  click: [event: MouseEvent];
+}>();
 
 const buttonClasses = computed(() => {
   const baseClasses =

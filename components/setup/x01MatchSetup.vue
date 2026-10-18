@@ -15,7 +15,11 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["update:modelValue"]);
+// The `modelValue` prop above is declared as a plain `Object`, so this payload
+// stays loosely typed to match it.
+const emit = defineEmits<{
+  "update:modelValue": [value: Record<string, unknown>];
+}>();
 
 const config = computed({
   get: () => props.modelValue,

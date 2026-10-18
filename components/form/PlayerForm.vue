@@ -10,7 +10,10 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["submit", "cancel"]);
+const emit = defineEmits<{
+  submit: [player: Player];
+  cancel: [];
+}>();
 
 // Form data
 const formData = ref<Player>(await createPlayer());

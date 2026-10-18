@@ -5,7 +5,9 @@ defineProps({
   required: Boolean,
 });
 
-defineEmits(["update:modelValue"]);
+defineEmits<{
+  "update:modelValue": [value: boolean];
+}>();
 </script>
 
 <template>

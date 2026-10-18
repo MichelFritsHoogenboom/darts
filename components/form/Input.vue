@@ -12,7 +12,9 @@ const props = defineProps<{
   variant?: InputVariant;
 }>();
 
-defineEmits(["update:modelValue"]);
+defineEmits<{
+  "update:modelValue": [value: string];
+}>();
 
 const labelClasses = computed(() => {
   const baseClasses = "block text-sm font-medium mb-2";
