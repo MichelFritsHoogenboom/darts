@@ -1,3 +1,5 @@
+import type { Table } from "dexie";
+
 import { getDatabase } from "./schema";
 import { DatabaseService } from "./DatabaseService";
 
@@ -6,10 +8,10 @@ export abstract class BaseService<
 > {
   protected abstract getTableName(): string;
 
-  protected async getTable() {
+  protected async getTable(): Promise<Table<T, string>> {
     await DatabaseService.ensureDatabase();
     const db = getDatabase();
-    return (db as any)[this.getTableName()];
+    return db.table<T, string>(this.getTableName());
   }
 
   async upsert(entity: T): Promise<T> {
@@ -35,9 +37,12 @@ export abstract class BaseService<
   async search(query: string, searchFields: string[]): Promise<T[]> {
     const table = await this.getTable();
     return await table
-      .filter((entity: any) => {
+      .filter((entity) => {
         return searchFields.some((field) =>
-          entity[field]?.toString().toLowerCase().includes(query.toLowerCase()),
+          entity[field as keyof T]
+            ?.toString()
+            .toLowerCase()
+            .includes(query.toLowerCase()),
         );
       })
       .toArray();

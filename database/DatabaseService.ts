@@ -1,3 +1,5 @@
+import type { Table } from "dexie";
+
 import { getDatabase } from "./schema";
 import { initializeDatabase } from "./init";
 
@@ -22,7 +24,7 @@ export class DatabaseService {
    */
   static async upsert<
     T extends { id: string; createdAt: Date; updatedAt: Date },
-  >(table: any, data: T): Promise<T> {
+  >(table: Table<T, string>, data: T): Promise<T> {
     await this.ensureDatabase();
 
     if (!data.id || typeof data.id !== "string") {
@@ -50,7 +52,10 @@ export class DatabaseService {
   /**
    * Generic method to get a record by ID
    */
-  static async getById<T>(table: any, id: string): Promise<T | undefined> {
+  static async getById<T>(
+    table: Table<T, string>,
+    id: string,
+  ): Promise<T | undefined> {
     await this.ensureDatabase();
     return await table.get(id);
   }
@@ -58,7 +63,7 @@ export class DatabaseService {
   /**
    * Generic method to get all records
    */
-  static async getAll<T>(table: any): Promise<T[]> {
+  static async getAll<T>(table: Table<T, string>): Promise<T[]> {
     await this.ensureDatabase();
     return await table.toArray();
   }
@@ -66,7 +71,10 @@ export class DatabaseService {
   /**
    * Generic method to delete a record by ID
    */
-  static async deleteById(table: any, id: string): Promise<void> {
+  static async deleteById(
+    table: Table<unknown, string>,
+    id: string,
+  ): Promise<void> {
     await this.ensureDatabase();
     await table.delete(id);
   }
@@ -75,15 +83,15 @@ export class DatabaseService {
    * Generic method to search records
    */
   static async search<T>(
-    table: any,
+    table: Table<T, string>,
     searchTerm: string,
     searchFields: string[],
   ): Promise<T[]> {
     await this.ensureDatabase();
     return await table
-      .filter((record: any) => {
+      .filter((record) => {
         return searchFields.some((field) => {
-          const value = record[field];
+          const value = record[field as keyof T];
           return (
             value &&
             value.toString().toLowerCase().includes(searchTerm.toLowerCase())
