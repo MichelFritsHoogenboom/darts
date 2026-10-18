@@ -463,10 +463,9 @@ export const useX01Game = (
     }
   };
 
-  const validateScore = () => {
-    // Trigger validation by accessing the computed property
-    isValidScore.value;
-  };
+  // Reading isValidScore is what refreshes scoreValidationMessage, since that
+  // computed sets the message as a side effect. The caller ignores the result.
+  const validateScore = () => isValidScore.value;
 
   // Async initialization function
   const initializeMatch = async (startingPlayerId?: string) => {
