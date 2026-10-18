@@ -8,19 +8,19 @@ export type AverageMetricKey =
   | "legFirstNineAverage";
 
 /** Line style catalog entry for one metric. */
-export type AverageMetric = {
+export interface AverageMetric {
   key: AverageMetricKey;
   label: string;
   borderDash: number[];
   borderWidth: number;
-};
+}
 
 /**
  * Per-leg averages plus the cumulative match average through that leg. `null`
  * where the player has thrown nothing yet, so the chart shows a gap instead of
  * a drop to zero.
  */
-export type AverageSeriesPoint = {
+export interface AverageSeriesPoint {
   /** 1-based leg number across the whole match, used for the x axis. */
   legIndex: number;
   /** 1-based leg number within its set, matching the scores panel. */
@@ -30,32 +30,32 @@ export type AverageSeriesPoint = {
   legScoringDartsAverage: number | null;
   legFirstNineAverage: number | null;
   setIndex?: number;
-};
+}
 
 /** Flat leg row used to build a series (scores for one player). */
-export type AverageSeriesLegInput = {
+export interface AverageSeriesLegInput {
   scores: Score[];
   setIndex?: number;
-};
+}
 
 /** One toggleable legend entry. */
-export type LegendItem = {
+export interface LegendItem {
   key: string;
   label: string;
   color: string;
   borderDash: number[];
   borderWidth: number;
   hidden: boolean;
-};
+}
 
 /** Legend entries belonging to one player. */
-export type LegendRow = {
+export interface LegendRow {
   playerLabel: string | null;
   items: LegendItem[];
-};
+}
 
 /** chart.js annotation marking the leg where a new set starts. */
-export type SetBreakAnnotation = {
+export interface SetBreakAnnotation {
   type: "line";
   xMin: number;
   xMax: number;
@@ -70,4 +70,4 @@ export type SetBreakAnnotation = {
     backgroundColor: string;
     font: { size: number };
   };
-};
+}

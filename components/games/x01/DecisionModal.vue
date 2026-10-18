@@ -1,10 +1,10 @@
 <script setup lang="ts">
 type ModalOptionValue = string | number | boolean;
 
-type ModalOption = {
+interface ModalOption {
   label: string;
   value: ModalOptionValue;
-};
+}
 
 const {
   visible,

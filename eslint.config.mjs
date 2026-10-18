@@ -10,8 +10,11 @@ export default withNuxt(
     rules: {
       // Optional props are often intentionally `undefined`, and `withDefaults` is banned.
       "vue/require-default-prop": "off",
-      // `interface` vs `type` stays a human call (.cursor/rules/typescript).
-      "@typescript-eslint/consistent-type-definitions": "off",
+      // .cursor/rules/typescript — `interface` for object shapes. Unions,
+      // intersections and computed types stay `type`; the rule only flags
+      // plain object shapes, so it does not fight that. Not in the preset, so
+      // it needs setting here rather than overriding.
+      "@typescript-eslint/consistent-type-definitions": ["error", "interface"],
       "vue/attribute-hyphenation": "error",
       "vue/block-order": "error",
       // A vue2-essential rule that @nuxt/eslint-config switches on for

@@ -20,20 +20,20 @@ const DATE_KEYS = new Set(["createdAt", "updatedAt", "birthDate"]);
 
 export type DbExportTableName = (typeof TABLE_NAMES)[number];
 
-export type SerializedBlob = {
+export interface SerializedBlob {
   __type: "Blob";
   mimeType: string;
   data: string;
-};
+}
 
-export type DbExportPayload = {
+export interface DbExportPayload {
   format: typeof DB_EXPORT_FORMAT;
   version: number;
   dbName: string;
   schemaVersion: number;
   exportedAt: string;
   tables: Partial<Record<DbExportTableName, unknown[]>>;
-};
+}
 
 const isSerializedBlob = (value: unknown): value is SerializedBlob =>
   typeof value === "object" &&

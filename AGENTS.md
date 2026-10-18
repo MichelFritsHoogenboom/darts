@@ -13,7 +13,8 @@ When the user states a preference or convention that is **not** already covered 
 ## What the linter checks
 
 `pnpm lint` enforces the lint-decidable conventions below (arrow exports, no
-`withDefaults`, typed emits, braces, `T[]`, no `any`, attribute hyphenation);
+`withDefaults`, typed emits, braces, `T[]`, no `any`, `interface` for plain
+object shapes, attribute hyphenation);
 Prettier owns formatting via `pnpm format`. `eslint.config.mjs` is the source
 of truth — every rule ID and every deliberate opt-out is commented there, so
 read it before assuming something is or is not enforced. One ceiling worth
