@@ -19,6 +19,14 @@ export default withNuxt(
       // second, different prop key, and Vue's emit() only ever calls the
       // camelCase one — so the autofix silently drops the listener.
       "vue/v-on-event-hyphenation": ["warn", "always", { autofix: false }],
+      // A vue2-essential rule that @nuxt/eslint-config switches on for
+      // pages/layouts; Vue 3 templates may have multiple roots (fragments).
+      // Turn it back on if app.pageTransition is ever enabled, since a
+      // transition needs a single root to animate.
+      "vue/no-multiple-template-root": "off",
+      // Would mean turning the static-only DatabaseService into a module,
+      // which rewrites every call site. That is an architecture decision.
+      "@typescript-eslint/no-extraneous-class": "off",
     },
   },
   {
