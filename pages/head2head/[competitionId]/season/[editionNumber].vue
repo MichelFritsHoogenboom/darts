@@ -290,27 +290,28 @@ const openNewSeasonChoice = () => {
                 emphasize
                 class="season-header"
               >
-                <span>Season</span>
-                <select
-                  v-if="seasonOptions.length > 1"
-                  class="season-number"
-                  :value="selectedSeason"
-                  aria-label="Season"
-                  @change="
-                    selectedSeason = Number(
-                      ($event.target as HTMLSelectElement).value,
-                    )
-                  "
-                >
-                  <option
-                    v-for="option in seasonOptions"
-                    :key="option.value"
-                    :value="option.value"
+                <template v-if="seasonOptions.length > 1">
+                  <span>Season</span>
+                  <select
+                    class="season-number"
+                    :value="selectedSeason"
+                    aria-label="Season"
+                    @change="
+                      selectedSeason = Number(
+                        ($event.target as HTMLSelectElement).value,
+                      )
+                    "
                   >
-                    {{ option.label }}
-                  </option>
-                </select>
-                <span v-else class="season-number">{{ selectedSeason }}</span>
+                    <option
+                      v-for="option in seasonOptions"
+                      :key="option.value"
+                      :value="option.value"
+                    >
+                      {{ option.label }}
+                    </option>
+                  </select>
+                </template>
+                <span v-else>Season {{ selectedSeason }}</span>
               </UiDisplayHeader>
               <UiDisplayHeader
                 v-if="matchConfigSummary"
@@ -449,6 +450,8 @@ const openNewSeasonChoice = () => {
     v-model="showChampionOverlay"
     :winner="championPlayer"
     :edition-number="edition.editionNumber"
+    :can-start-new-season="showStartEdition"
+    @start-new-season="openNewSeasonChoice"
   />
 
   <Head2headMoleculesNewSeasonChoice
@@ -579,21 +582,16 @@ const openNewSeasonChoice = () => {
     @apply mb-0 w-full;
   }
 
-  /* One look for the season number, whether it is a picker or a single season */
-  .season-number {
-    @apply inline-block border-0 border-b-2 border-current;
-    @apply text-inherit uppercase;
-    @apply px-1 py-0 text-center;
-    font-family: inherit;
-    font-size: inherit;
-    font-weight: inherit;
-    line-height: inherit;
-    letter-spacing: -1px;
-  }
-
+  /* Only a picker needs its own box; a single season is plain header text */
   select.season-number {
     @apply appearance-none bg-transparent cursor-pointer outline-none;
+    @apply inline-block border-0 border-b-2 border-current;
+    @apply text-inherit uppercase px-1 py-0 text-center;
+    font: inherit;
+    letter-spacing: -1px;
     background-image: none;
+    /* The inherited emphasize glow would paint over the word before it */
+    text-shadow: none;
 
     option {
       @apply text-base normal-case text-black;

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // Types
 import type { CompetitionEdition } from "~/interfaces/competition";
+import type { ModalOption, ModalOptionValue } from "~/interfaces/modal";
 // Utils
 import { routes } from "~/utils/routes";
 
@@ -10,6 +11,19 @@ const { edition, from = "season" } = defineProps<{
   edition: CompetitionEdition;
   from?: "overview" | "season";
 }>();
+
+const choices: ModalOption[] = [
+  {
+    label: "Same settings",
+    hint: "Keep matches & X01 setup",
+    value: true,
+  },
+  {
+    label: "Different settings",
+    hint: "Change matches & X01 setup",
+    value: false,
+  },
+];
 
 const { startNewEdition } = useCompetitionEditions();
 
@@ -43,61 +57,32 @@ const chooseDifferent = async () => {
     query: from === "overview" ? { from } : {},
   });
 };
+
+const choose = (keepSettings: ModalOptionValue) => {
+  if (keepSettings) {
+    chooseSame();
+
+    return;
+  }
+
+  chooseDifferent();
+};
 </script>
 
 <template>
-  <UiModal v-model="model">
-    <template #title>New season</template>
-
-    <p class="support">
-      Keep this season&rsquo;s settings, or change them for the next one.
-    </p>
-
-    <div class="choices">
-      <FormButton
-        variant="secondary"
-        size="lg"
-        full-width
-        :disabled="pending"
-        :aria-busy="pending"
-        @click="chooseSame"
-      >
-        <span class="label">Same settings</span>
-        <span class="hint">Keep matches &amp; X01 setup</span>
-      </FormButton>
-
-      <FormButton
-        variant="secondary"
-        size="lg"
-        full-width
-        :disabled="pending"
-        @click="chooseDifferent"
-      >
-        <span class="label">Different settings</span>
-        <span class="hint">Change matches &amp; X01 setup</span>
-      </FormButton>
-    </div>
-
+  <GamesX01DecisionModal
+    :visible="model"
+    title="New season"
+    description="Keep this season’s settings, or change them for the next one."
+    :options="choices"
+    :show-undo="false"
+    :busy="pending"
+    dismissible
+    @select="choose"
+    @close="model = false"
+  >
     <p role="status" class="sr-only">
       {{ pending ? "Starting new season" : "" }}
     </p>
-  </UiModal>
+  </GamesX01DecisionModal>
 </template>
-
-<style scoped lang="postcss">
-.support {
-  @apply text-gray-300 mb-5;
-}
-
-.choices {
-  @apply grid grid-cols-1 sm:grid-cols-2 gap-3;
-}
-
-.label {
-  @apply block;
-}
-
-.hint {
-  @apply block text-sm font-normal text-gray-100;
-}
-</style>
