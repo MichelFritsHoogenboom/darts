@@ -1,6 +1,10 @@
 <script setup lang="ts">
+// Types
 import type { CompetitionEdition } from "~/interfaces/competition";
 import type { Player } from "~/interfaces/player";
+// Constants
+import { NEW_SEASON_ORIGINS } from "~/constants/competition";
+// Utils
 import { getPlayerIdsFromStats } from "~/utils/player";
 import { routes } from "~/utils/routes";
 
@@ -89,7 +93,7 @@ watch(head2HeadOverview, async () => {
       v-if="newSeasonEdition"
       v-model="showNewSeasonChoice"
       :edition="newSeasonEdition"
-      from="overview"
+      :from="NEW_SEASON_ORIGINS.overview"
     />
   </NuxtLayout>
 </template>

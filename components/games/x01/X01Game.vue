@@ -52,11 +52,11 @@ const {
 
 const { getScoresForMatch } = useScores();
 const { deleteMatch } = useMatches();
-const { getEditionSetupPath } = useCompetitionEditions();
+const { getEditionBackPath } = useCompetitionEditions();
 const { $listen, $unlisten } = useNuxtApp();
 
 const pendingStartingPlayer = ref(false);
-const setupBackPath = ref(routes.setup);
+const backPath = ref(routes.setup);
 
 const camelLeaderPlayerId = ref<string | null>(null);
 
@@ -132,7 +132,7 @@ const handleStartingPlayerSelect = async (value: string | number | boolean) => {
 const handleStartingPlayerBack = async () => {
   pendingStartingPlayer.value = false;
   await deleteMatch(match.id);
-  await navigateTo(setupBackPath.value);
+  await navigateTo(backPath.value, { replace: true });
 };
 
 const handleLegFinishSelect = (value: string | number | boolean) => {
@@ -315,9 +315,9 @@ const returnToHead2Head = async () => {
 // Initialize match after players are loaded (onMounted runs after onBeforeMount)
 onBeforeMount(async () => {
   if (match.competitionEditionId) {
-    const path = await getEditionSetupPath(match.competitionEditionId);
+    const path = await getEditionBackPath(match.competitionEditionId);
     if (path) {
-      setupBackPath.value = path;
+      backPath.value = path;
     }
   }
 });

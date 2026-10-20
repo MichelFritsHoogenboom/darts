@@ -1,15 +1,20 @@
 <script setup lang="ts">
 // Types
-import type { CompetitionEdition } from "~/interfaces/competition";
+import type {
+  CompetitionEdition,
+  NewSeasonOrigin,
+} from "~/interfaces/competition";
 import type { ModalOption, ModalOptionValue } from "~/interfaces/modal";
+// Constants
+import { NEW_SEASON_ORIGINS } from "~/constants/competition";
 // Utils
 import { routes } from "~/utils/routes";
 
 const model = defineModel<boolean>({ required: true });
 
-const { edition, from = "season" } = defineProps<{
+const { edition, from = NEW_SEASON_ORIGINS.season } = defineProps<{
   edition: CompetitionEdition;
-  from?: "overview" | "season";
+  from?: NewSeasonOrigin;
 }>();
 
 const choices: ModalOption[] = [
@@ -54,7 +59,7 @@ const chooseDifferent = async () => {
   model.value = false;
   await navigateTo({
     path: routes.head2head.newSeason(edition.competitionId),
-    query: from === "overview" ? { from } : {},
+    query: from === NEW_SEASON_ORIGINS.overview ? { from } : {},
   });
 };
 

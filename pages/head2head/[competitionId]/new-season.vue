@@ -4,6 +4,7 @@ import type { CompetitionEdition } from "~/interfaces/competition";
 import type { Player } from "~/interfaces/player";
 import type { PlayerStats } from "~/interfaces/stats";
 // Constants
+import { NEW_SEASON_ORIGINS } from "~/constants/competition";
 import { AMOUNT_MATCH_OPTIONS, GAME_TYPES } from "~/constants/match";
 import { defaultX01MatchConfig } from "~/interfaces/x01MatchConfig";
 // Utils
@@ -29,7 +30,9 @@ const saving = ref(false);
 
 const competitionId = computed(() => route.params.competitionId as string);
 
-const cameFromOverview = computed(() => route.query.from === "overview");
+const cameFromOverview = computed(
+  () => route.query.from === NEW_SEASON_ORIGINS.overview,
+);
 
 const cancelPath = computed(() => {
   if (cameFromOverview.value || !currentEdition.value) {

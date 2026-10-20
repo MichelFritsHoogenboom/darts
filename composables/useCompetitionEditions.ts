@@ -104,12 +104,18 @@ export const useCompetitionEditions = () => {
     const previousStats = await loadEditionPlayerStatsRecords(previousEdition);
     const playerIds = getPlayerIdsFromStats(previousStats);
 
+    const config = cloneCompetitionConfig(
+      competitionConfigOverride ?? previousEdition.competitionConfig,
+    );
+
     const edition = createCompetitionEdition({
       competitionId,
       editionNumber: maxNumber + 1,
-      competitionConfig:
-        competitionConfigOverride ??
-        cloneCompetitionConfig(previousEdition.competitionConfig),
+      // A season always has fixed settings; a legacy config without one gets the app default
+      competitionConfig: {
+        ...config,
+        matchConfig: config.matchConfig ?? { ...defaultX01MatchConfig },
+      },
     });
 
     edition.playerStats = await createEditionPlayerStats(edition.id, playerIds);
@@ -355,13 +361,20 @@ export const useCompetitionEditions = () => {
     return await editionService.get(editionId);
   };
 
-  const getEditionSetupPath = async (editionId: string) => {
+  /**
+   * Where leaving a rivalry match drops the user: the season page, never
+   * "Set up match" — that page would edit the settings of an existing match.
+   */
+  const getEditionBackPath = async (editionId: string) => {
     const edition = await getEdition(editionId);
     if (!edition) {
       return undefined;
     }
 
-    return routes.head2head.setup(edition.competitionId);
+    return routes.head2head.season(
+      edition.competitionId,
+      edition.editionNumber,
+    );
   };
 
   const removeMatchFromEdition = async (match: Match) => {
@@ -433,7 +446,7 @@ export const useCompetitionEditions = () => {
     loading: readonly(loading),
     error: readonly(error),
     saveEdition,
-    getEditionSetupPath,
+    getEditionBackPath,
     removeMatchFromEdition,
     getEditionsForCompetition,
     getCurrentEdition,

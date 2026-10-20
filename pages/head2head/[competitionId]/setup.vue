@@ -70,7 +70,9 @@ const startMatch = async () => {
     const saved = await createH2HMatch(edition, competition, {
       ...matchConfig.value,
     });
-    await navigateTo(routes.matchDetail(saved.id));
+    // This page has done its one job; leave it out of history so going back
+    // from the match cannot return here to edit an existing match's settings
+    await navigateTo(routes.matchDetail(saved.id), { replace: true });
   } finally {
     saving.value = false;
   }
