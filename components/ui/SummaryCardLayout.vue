@@ -7,7 +7,7 @@ const { wrapperClass = "" } = defineProps<{
 
 <template>
   <UiSummaryCard :to="to" :wrapper-class="wrapperClass">
-    <h3 class="header">
+    <div class="header">
       <div>
         <slot name="left" />
       </div>
@@ -17,7 +17,7 @@ const { wrapperClass = "" } = defineProps<{
       <div class="actions">
         <slot name="actions" />
       </div>
-    </h3>
+    </div>
     <slot />
   </UiSummaryCard>
 </template>
