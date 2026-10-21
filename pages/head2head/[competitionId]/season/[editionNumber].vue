@@ -24,7 +24,6 @@ const {
   getCurrentEdition,
   getEditionsForCompetition,
   createH2HMatch,
-  startNewEdition,
   loadEditionPlayerStats,
   queryRivalryCamelSeasonWins,
   loading: editionLoading,
@@ -42,6 +41,7 @@ const rivalryPlayers = ref<Player[]>([]);
 const loadedEditionPlayerStats = ref<PlayerStats[]>([]);
 const camelSeasonWinsByPlayer = ref<Record<string, number>>({});
 const showChampionOverlay = ref(false);
+const showNewSeasonChoice = ref(false);
 const startingMatch = ref(false);
 const activeTab = ref<"matches" | "stats">("matches");
 
@@ -256,12 +256,8 @@ const startMatch = async () => {
   }
 };
 
-const beginNewEdition = async () => {
-  if (!edition.value || !isCurrentSeason.value) {
-    return;
-  }
-  const created = await startNewEdition(competitionId.value, edition.value);
-  await navigateTo(seasonPath(created.editionNumber));
+const openNewSeasonChoice = () => {
+  showNewSeasonChoice.value = true;
 };
 </script>
 
@@ -294,27 +290,28 @@ const beginNewEdition = async () => {
                 emphasize
                 class="season-header"
               >
-                <span>Season</span>
-                <select
-                  v-if="seasonOptions.length > 1"
-                  class="season-select"
-                  :value="selectedSeason"
-                  aria-label="Season"
-                  @change="
-                    selectedSeason = Number(
-                      ($event.target as HTMLSelectElement).value,
-                    )
-                  "
-                >
-                  <option
-                    v-for="option in seasonOptions"
-                    :key="option.value"
-                    :value="option.value"
+                <template v-if="seasonOptions.length > 1">
+                  <span>Season</span>
+                  <select
+                    class="season-number"
+                    :value="selectedSeason"
+                    aria-label="Season"
+                    @change="
+                      selectedSeason = Number(
+                        ($event.target as HTMLSelectElement).value,
+                      )
+                    "
                   >
-                    {{ option.label }}
-                  </option>
-                </select>
-                <span v-else>{{ edition.editionNumber }}</span>
+                    <option
+                      v-for="option in seasonOptions"
+                      :key="option.value"
+                      :value="option.value"
+                    >
+                      {{ option.label }}
+                    </option>
+                  </select>
+                </template>
+                <span v-else>Season {{ selectedSeason }}</span>
               </UiDisplayHeader>
               <UiDisplayHeader
                 v-if="matchConfigSummary"
@@ -361,7 +358,7 @@ const beginNewEdition = async () => {
               >
                 New match
               </FormButton>
-              <FormButton v-if="showStartEdition" @click="beginNewEdition">
+              <FormButton v-if="showStartEdition" @click="openNewSeasonChoice">
                 New season
               </FormButton>
             </div>
@@ -453,6 +450,14 @@ const beginNewEdition = async () => {
     v-model="showChampionOverlay"
     :winner="championPlayer"
     :edition-number="edition.editionNumber"
+    :can-start-new-season="showStartEdition"
+    @start-new-season="openNewSeasonChoice"
+  />
+
+  <Head2headMoleculesNewSeasonChoice
+    v-if="currentEdition"
+    v-model="showNewSeasonChoice"
+    :edition="currentEdition"
   />
 </template>
 
@@ -561,7 +566,7 @@ const beginNewEdition = async () => {
   }
 
   .actions {
-    @apply flex justify-center gap-4 relative z-20;
+    @apply flex flex-wrap justify-center gap-3 relative z-20 sm:gap-4;
     margin-bottom: -1.25rem;
   }
 
@@ -577,15 +582,16 @@ const beginNewEdition = async () => {
     @apply mb-0 w-full;
   }
 
-  .season-select {
-    @apply appearance-none bg-transparent border-0 border-b-2 border-current;
-    @apply text-inherit uppercase cursor-pointer;
-    @apply px-1 py-0 text-center outline-none;
-    font-family: inherit;
-    font-size: inherit;
-    font-weight: inherit;
+  /* Only a picker needs its own box; a single season is plain header text */
+  select.season-number {
+    @apply appearance-none bg-transparent cursor-pointer outline-none;
+    @apply inline-block border-0 border-b-2 border-current;
+    @apply text-inherit uppercase px-1 py-0 text-center;
+    font: inherit;
     letter-spacing: -1px;
     background-image: none;
+    /* The inherited emphasize glow would paint over the word before it */
+    text-shadow: none;
 
     option {
       @apply text-base normal-case text-black;

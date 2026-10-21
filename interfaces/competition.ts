@@ -1,4 +1,5 @@
 import { v4 as uuid } from "uuid";
+import type { NEW_SEASON_ORIGINS } from "~/constants/competition";
 import type { GameType, Match } from "./match";
 import type { x01MatchConfig } from "./x01MatchConfig";
 import type { PlayerStats } from "./stats";
@@ -9,6 +10,9 @@ export const COMPETITION_TYPES = {
 
 export type CompetitionType =
   (typeof COMPETITION_TYPES)[keyof typeof COMPETITION_TYPES];
+
+export type NewSeasonOrigin =
+  (typeof NEW_SEASON_ORIGINS)[keyof typeof NEW_SEASON_ORIGINS];
 
 export interface CompetitionConfig {
   matchConfig?: x01MatchConfig;

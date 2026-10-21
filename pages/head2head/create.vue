@@ -8,16 +8,11 @@ import type { Player } from "~/interfaces/player";
 import { sortPlayerIds } from "~/utils/rivalry";
 import { routes } from "~/utils/routes";
 import { createEditionPlayerStats } from "~/interfaces/stats";
-import { GAME_TYPES } from "~/constants/match";
+import { AMOUNT_MATCH_OPTIONS, GAME_TYPES } from "~/constants/match";
 
 definePageMeta({
   layout: false,
 });
-
-const AMOUNT_MATCH_OPTIONS = [3, 7, 9, 11, 13, 15, 17, 19, 21].map((n) => ({
-  value: n,
-  label: `${n} matches`,
-}));
 
 const { players, loading, error, savePlayer, loadPlayers } = usePlayers();
 const { saveCompetition } = useCompetitions();
@@ -26,7 +21,6 @@ const { saveEdition, findHead2HeadCompetitionForPair, getCurrentEdition } =
 
 const selectedPlayers = ref<string[]>([]);
 const amountMatches = ref(7);
-const useFixedConfig = ref(true);
 const matchConfig = ref({ ...defaultX01MatchConfig });
 const showPlayerForm = ref(false);
 const playerSelectorRef = ref<{ resetDropdown: () => void } | null>(null);
@@ -112,9 +106,7 @@ const createRivalry = async () => {
       editionNumber: 1,
       competitionConfig: {
         amountMatches: amountMatches.value,
-        matchConfig: useFixedConfig.value
-          ? { ...matchConfig.value }
-          : undefined,
+        matchConfig: { ...matchConfig.value },
         gameType: GAME_TYPES.x01,
       },
     });
@@ -154,17 +146,7 @@ const createRivalry = async () => {
         </FormSelect>
       </div>
 
-      <div class="card-panel rounded-lg p-8 mb-6">
-        <FormCheckbox v-model="useFixedConfig" disabled>
-          <template #label>Fixed match settings for this season</template>
-        </FormCheckbox>
-      </div>
-
-      <SetupX01MatchSetup
-        v-if="useFixedConfig"
-        v-model="matchConfig"
-        class="mb-6"
-      />
+      <SetupX01MatchSetup v-model="matchConfig" class="mb-6" />
 
       <div
         v-if="duplicateCompetition"
