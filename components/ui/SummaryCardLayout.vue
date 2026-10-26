@@ -25,9 +25,9 @@ const { wrapperClass = "" } = defineProps<{
 <style scoped lang="postcss">
 .header {
   @apply grid grid-cols-1 gap-2 font-bold items-center;
-  /* From sm up the action column takes what its controls need, so an icon row
-     never wraps; only the narrow single-column layout is allowed to wrap. */
-  @apply sm:grid-cols-[20%_minmax(0,1fr)_auto] sm:gap-x-3 sm:gap-y-0;
+  /* Side columns stay equal so the centre column is centred on the card: the
+     detail rows below (SetSummary, LegSummary) align to that same centre. */
+  @apply sm:grid-cols-[20%_1fr_20%] sm:gap-x-3 sm:gap-y-0;
 }
 
 .actions {
