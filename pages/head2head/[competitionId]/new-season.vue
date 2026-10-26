@@ -2,7 +2,6 @@
 // Types
 import type { CompetitionEdition } from "~/interfaces/competition";
 import type { Player } from "~/interfaces/player";
-import type { PlayerStats } from "~/interfaces/stats";
 // Constants
 import { NEW_SEASON_ORIGINS } from "~/constants/competition";
 import { AMOUNT_MATCH_OPTIONS, GAME_TYPES } from "~/constants/match";
@@ -23,7 +22,6 @@ const { getPlayerStatsForCompetitionEdition } = usePlayerStats();
 const { loadPlayers, players } = usePlayers();
 
 const currentEdition = ref<CompetitionEdition>();
-const editionPlayerStats = ref<PlayerStats[]>([]);
 const amountMatches = ref(7);
 const matchConfig = ref({ ...defaultX01MatchConfig });
 const saving = ref(false);
@@ -47,12 +45,6 @@ const cancelPath = computed(() => {
 
 const nextSeasonNumber = computed(() =>
   currentEdition.value ? currentEdition.value.editionNumber + 1 : 0,
-);
-
-const editionPlayers = computed(() =>
-  getPlayerIdsFromStats(editionPlayerStats.value)
-    .map((id) => (players.value as Player[]).find((p) => p.id === id))
-    .filter((p): p is Player => p !== undefined),
 );
 
 const startSeason = async () => {
@@ -104,10 +96,9 @@ onBeforeMount(async () => {
     ...edition.competitionConfig.matchConfig,
   };
 
-  editionPlayerStats.value = await getPlayerStatsForCompetitionEdition(
-    edition.id,
-  );
-  await loadPlayers(getPlayerIdsFromStats(editionPlayerStats.value));
+  // loadPlayers resolves these ids in order and drops the ones it cannot find
+  const stats = await getPlayerStatsForCompetitionEdition(edition.id);
+  await loadPlayers(getPlayerIdsFromStats(stats));
 });
 </script>
 
@@ -125,7 +116,10 @@ onBeforeMount(async () => {
           Season {{ nextSeasonNumber }} — same players, new settings.
         </p>
 
-        <SetupPlayerSelector :available-players="editionPlayers" readonly />
+        <SetupPlayerSelector
+          :available-players="players as Player[]"
+          readonly
+        />
 
         <div class="card-panel rounded-lg p-8 mb-6">
           <FormSelect v-model="amountMatches" :options="AMOUNT_MATCH_OPTIONS">

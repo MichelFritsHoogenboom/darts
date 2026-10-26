@@ -112,10 +112,9 @@ const loadDetail = async () => {
   loadedEditionPlayerStats.value = loaded;
 
   const playerIds = getPlayerIdsFromStats(loaded);
+  // loadPlayers resolves these ids in order and drops the ones it cannot find
   await loadPlayers([...playerIds]);
-  rivalryPlayers.value = playerIds
-    .map((id) => (players.value as Player[]).find((p) => p.id === id))
-    .filter((player): player is Player => player !== undefined);
+  rivalryPlayers.value = players.value as Player[];
 
   camelSeasonWinsByPlayer.value = await queryRivalryCamelSeasonWins(
     playerIds,
@@ -243,16 +242,13 @@ const startMatch = async () => {
   if (!edition.value || !competition.value || !isCurrentSeason.value) {
     return;
   }
-  if (edition.value.competitionConfig.matchConfig) {
-    startingMatch.value = true;
-    try {
-      const saved = await createH2HMatch(edition.value, competition.value);
-      await navigateTo(routes.matchDetail(saved.id));
-    } finally {
-      startingMatch.value = false;
-    }
-  } else {
-    await navigateTo(routes.head2head.setup(competitionId.value));
+
+  startingMatch.value = true;
+  try {
+    const saved = await createH2HMatch(edition.value, competition.value);
+    await navigateTo(routes.matchDetail(saved.id));
+  } finally {
+    startingMatch.value = false;
   }
 };
 
