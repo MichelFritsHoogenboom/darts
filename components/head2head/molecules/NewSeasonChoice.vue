@@ -8,6 +8,7 @@ import type { ModalOption, ModalOptionValue } from "~/interfaces/modal";
 // Constants
 import { NEW_SEASON_ORIGINS } from "~/constants/competition";
 // Utils
+import { formatX01MatchConfigSummary } from "~/utils/match";
 import { routes } from "~/utils/routes";
 
 const model = defineModel<boolean>({ required: true });
@@ -17,22 +18,36 @@ const { edition, from = NEW_SEASON_ORIGINS.season } = defineProps<{
   from?: NewSeasonOrigin;
 }>();
 
-const choices: ModalOption[] = [
-  {
-    label: "Same settings",
-    hint: "Keep matches & X01 setup",
-    value: true,
-  },
-  {
-    label: "Different settings",
-    hint: "Change matches & X01 setup",
-    value: false,
-  },
-];
-
 const { startNewEdition } = useCompetitionEditions();
 
 const pending = ref(false);
+
+const nextSeasonNumber = computed(() => edition.editionNumber + 1);
+
+// Spell out what "keep" means, so the choice does not rely on memory
+const currentSetup = computed(() => {
+  const { amountMatches, matchConfig } = edition.competitionConfig;
+  const matches = `${amountMatches} matches`;
+
+  if (!matchConfig) {
+    return matches;
+  }
+
+  return `${matches} · ${formatX01MatchConfigSummary(matchConfig, true)}`;
+});
+
+const choices = computed<ModalOption[]>(() => [
+  {
+    label: "Keep these settings",
+    hint: currentSetup.value,
+    value: true,
+  },
+  {
+    label: "Change settings",
+    hint: "Pick the number of matches and the X01 format",
+    value: false,
+  },
+]);
 
 const chooseSame = async () => {
   if (pending.value) {
@@ -77,8 +92,8 @@ const choose = (keepSettings: ModalOptionValue) => {
 <template>
   <GamesX01DecisionModal
     :visible="model"
-    title="New season"
-    description="Keep this season’s settings, or change them for the next one."
+    :title="`Start season ${nextSeasonNumber}`"
+    description="Keep this season’s match settings, or change them?"
     :options="choices"
     :show-undo="false"
     :busy="pending"

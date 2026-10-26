@@ -92,7 +92,7 @@ watch(
     @click="dismiss"
   >
     <div
-      class="relative bg-gray-800 p-8 max-w-md w-full mx-auto text-center"
+      class="relative bg-gray-800 text-white p-8 max-w-md w-full mx-auto text-center"
       role="dialog"
       aria-modal="true"
       :aria-labelledby="titleId"

@@ -450,8 +450,6 @@ const openNewSeasonChoice = () => {
     v-model="showChampionOverlay"
     :winner="championPlayer"
     :edition-number="edition.editionNumber"
-    :can-start-new-season="showStartEdition"
-    @start-new-season="openNewSeasonChoice"
   />
 
   <Head2headMoleculesNewSeasonChoice
