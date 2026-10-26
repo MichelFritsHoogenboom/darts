@@ -1,28 +1,40 @@
 <script setup lang="ts">
+// Types
 import type { Player } from "~/interfaces/player";
+// Utils
 import { getPlayerFullName } from "~/utils/player";
 
 const model = defineModel<boolean>({ required: true });
 
-defineProps<{
+const { winner } = defineProps<{
   winner: Player | undefined;
   editionNumber: number;
 }>();
+
+// The winner's player record can be missing; say so without naming "Unknown"
+const description = computed(() => {
+  if (!winner) {
+    return "This season has a champion!";
+  }
+
+  return `Congratulations ${getPlayerFullName(winner)} — champion!`;
+});
+
+const close = () => {
+  model.value = false;
+};
 </script>
 
 <template>
-  <UiModal v-model="model">
-    <template #title>Season finished</template>
-    <div class="text-center py-4">
-      <p class="text-lg text-white mb-2">
-        Season {{ editionNumber }} — champion
-      </p>
-      <p v-if="winner" class="text-2xl font-bold text-yellow-400">
-        {{ getPlayerFullName(winner) }}
-      </p>
-    </div>
-    <div class="flex justify-end mt-6">
-      <FormButton @click="model = false">Close</FormButton>
-    </div>
-  </UiModal>
+  <GamesX01DecisionModal
+    :visible="model"
+    :title="`Season ${editionNumber} finished`"
+    :description="description"
+    :options="[]"
+    undo-label="Close"
+    undo-title="Close"
+    dismissible
+    @undo="close"
+    @close="close"
+  />
 </template>

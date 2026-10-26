@@ -70,7 +70,6 @@ const handleCancel = () => {
         v-model="formData.firstName"
         placeholder="Enter first name"
         :required="true"
-        variant="light"
       >
         <template #label>First Name</template>
       </FormInput>
@@ -79,7 +78,6 @@ const handleCancel = () => {
         v-if="showAllFields"
         v-model="formData.lastName"
         placeholder="Enter last name"
-        variant="light"
       >
         <template #label>Last Name</template>
       </FormInput>
@@ -90,7 +88,7 @@ const handleCancel = () => {
       <FormButton
         v-if="!showAllFields"
         type="button"
-        variant="lightOutline"
+        variant="secondary"
         size="md"
         @click="showAllFields = true"
       >
@@ -100,35 +98,23 @@ const handleCancel = () => {
 
     <!-- Optional fields - shown when showAllFields is true -->
     <div v-if="showAllFields" class="space-y-6">
-      <FormInput
-        v-model="formData.alias"
-        placeholder="Enter player alias"
-        variant="light"
-      >
+      <FormInput v-model="formData.alias" placeholder="Enter player alias">
         <template #label>Alias/Nickname</template>
       </FormInput>
 
       <!-- Location -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <FormInput
-          v-model="formData.city"
-          placeholder="Enter city"
-          variant="light"
-        >
+        <FormInput v-model="formData.city" placeholder="Enter city">
           <template #label>City</template>
         </FormInput>
 
-        <FormInput
-          v-model="formData.country"
-          placeholder="Enter country"
-          variant="light"
-        >
+        <FormInput v-model="formData.country" placeholder="Enter country">
           <template #label>Country</template>
         </FormInput>
       </div>
 
       <!-- Birth Date -->
-      <FormInput v-model="birthDateString" type="date" variant="light">
+      <FormInput v-model="birthDateString" type="date">
         <template #label>Birth Date</template>
       </FormInput>
 
@@ -137,7 +123,6 @@ const handleCancel = () => {
         <FormInput
           v-model="formData.typeOfDarts"
           placeholder="e.g., Steel tip, Soft tip"
-          variant="light"
         >
           <template #label>Type of Darts</template>
         </FormInput>
@@ -146,7 +131,6 @@ const handleCancel = () => {
           v-model="formData.dartsWeightInGrams"
           type="number"
           placeholder="e.g., 22"
-          variant="light"
         >
           <template #label>Dart Weight (grams)</template>
         </FormInput>
@@ -155,7 +139,6 @@ const handleCancel = () => {
       <FormInput
         v-model="formData.flightColor"
         placeholder="e.g., Red, Blue, Green"
-        variant="light"
       >
         <template #label>Flight Color</template>
       </FormInput>
@@ -170,7 +153,7 @@ const handleCancel = () => {
       <FormButton
         v-if="updatePlayer"
         type="button"
-        variant="light"
+        variant="secondary"
         size="lg"
         @click="handleCancel"
       >

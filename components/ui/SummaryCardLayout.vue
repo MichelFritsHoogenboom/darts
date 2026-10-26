@@ -7,7 +7,7 @@ const { wrapperClass = "" } = defineProps<{
 
 <template>
   <UiSummaryCard :to="to" :wrapper-class="wrapperClass">
-    <h3 class="header">
+    <div class="header">
       <div>
         <slot name="left" />
       </div>
@@ -17,17 +17,21 @@ const { wrapperClass = "" } = defineProps<{
       <div class="actions">
         <slot name="actions" />
       </div>
-    </h3>
+    </div>
     <slot />
   </UiSummaryCard>
 </template>
 
 <style scoped lang="postcss">
 .header {
-  @apply grid grid-cols-[20%_1fr_20%] font-bold flex justify-between items-center;
+  @apply grid grid-cols-1 gap-2 font-bold items-center;
+  /* Side columns stay equal so the centre column is centred on the card: the
+     detail rows below (SetSummary, LegSummary) align to that same centre. */
+  @apply sm:grid-cols-[20%_1fr_20%] sm:gap-x-3 sm:gap-y-0;
 }
 
 .actions {
-  @apply flex items-center gap-2 justify-self-end;
+  @apply flex flex-wrap items-center gap-2;
+  @apply sm:flex-nowrap sm:justify-end sm:justify-self-end;
 }
 </style>

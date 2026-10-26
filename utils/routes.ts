@@ -7,6 +7,7 @@ export const routes = {
     create: "/head2head/create",
     season: (competitionId: string, editionNumber: number) =>
       `/head2head/${competitionId}/season/${editionNumber}`,
-    setup: (competitionId: string) => `/head2head/${competitionId}/setup`,
+    newSeason: (competitionId: string) =>
+      `/head2head/${competitionId}/new-season`,
   },
 } as const;

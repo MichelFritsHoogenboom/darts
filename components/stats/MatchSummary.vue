@@ -245,38 +245,44 @@ onBeforeMount(async () => {
     </template>
 
     <template #actions>
-      <button
-        type="button"
-        class="btn-gray px-1"
-        :class="{ 'bg-gray-500': isPanel(MATCH_PANEL.scores) }"
-        :title="isPanel(MATCH_PANEL.scores) ? 'Hide scores' : 'Show scores'"
-        :aria-label="
-          isPanel(MATCH_PANEL.scores) ? 'Hide scores' : 'Show scores'
-        "
-        @click="togglePanel(MATCH_PANEL.scores)"
-      >
-        <FontAwesomeIcon :icon="faClipboard" class="w-4 h-4" />
-      </button>
-      <button
-        type="button"
-        class="btn-gray px-1"
-        :class="{ 'bg-gray-500': isPanel(MATCH_PANEL.stats) }"
-        :title="isPanel(MATCH_PANEL.stats) ? 'Hide stats' : 'Show stats'"
-        :aria-label="isPanel(MATCH_PANEL.stats) ? 'Hide stats' : 'Show stats'"
-        @click="togglePanel(MATCH_PANEL.stats)"
-      >
-        <FontAwesomeIcon :icon="faMagnifyingGlassChart" class="w-4 h-4" />
-      </button>
-      <button
-        type="button"
-        class="btn-gray px-1"
-        :class="{ 'bg-gray-500': isPanel(MATCH_PANEL.chart) }"
-        :title="isPanel(MATCH_PANEL.chart) ? 'Hide chart' : 'Show chart'"
-        :aria-label="isPanel(MATCH_PANEL.chart) ? 'Hide chart' : 'Show chart'"
-        @click="togglePanel(MATCH_PANEL.chart)"
-      >
-        <FontAwesomeIcon :icon="faChartLine" class="w-4 h-4" />
-      </button>
+      <!-- Scores, stats and chart only make sense once the match is played -->
+      <template v-if="match.winner">
+        <button
+          type="button"
+          class="btn-gray px-1"
+          :class="{ 'bg-gray-500': isPanel(MATCH_PANEL.scores) }"
+          :title="isPanel(MATCH_PANEL.scores) ? 'Hide scores' : 'Show scores'"
+          :aria-label="
+            isPanel(MATCH_PANEL.scores) ? 'Hide scores' : 'Show scores'
+          "
+          @click="togglePanel(MATCH_PANEL.scores)"
+        >
+          <FontAwesomeIcon :icon="faClipboard" class="w-4 h-4" />
+        </button>
+
+        <button
+          type="button"
+          class="btn-gray px-1"
+          :class="{ 'bg-gray-500': isPanel(MATCH_PANEL.stats) }"
+          :title="isPanel(MATCH_PANEL.stats) ? 'Hide stats' : 'Show stats'"
+          :aria-label="isPanel(MATCH_PANEL.stats) ? 'Hide stats' : 'Show stats'"
+          @click="togglePanel(MATCH_PANEL.stats)"
+        >
+          <FontAwesomeIcon :icon="faMagnifyingGlassChart" class="w-4 h-4" />
+        </button>
+
+        <button
+          type="button"
+          class="btn-gray px-1"
+          :class="{ 'bg-gray-500': isPanel(MATCH_PANEL.chart) }"
+          :title="isPanel(MATCH_PANEL.chart) ? 'Hide chart' : 'Show chart'"
+          :aria-label="isPanel(MATCH_PANEL.chart) ? 'Hide chart' : 'Show chart'"
+          @click="togglePanel(MATCH_PANEL.chart)"
+        >
+          <FontAwesomeIcon :icon="faChartLine" class="w-4 h-4" />
+        </button>
+      </template>
+
       <NuxtLink
         v-if="!match.winner"
         :to="routes.matchDetail(match.id)"

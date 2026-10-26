@@ -1,19 +1,20 @@
 <script setup lang="ts">
+// Vendor
 import { ref, computed } from "vue";
-import type { Player } from "../../interfaces/player";
+// Types
+import type { Player } from "~/interfaces/player";
+// Utils
+import { getPlayerFullName } from "~/utils/player";
 
+// `selectedPlayers` is the editable selection. Read-only callers already hold
+// the resolved pair, so they pass it as `availablePlayers` and omit the rest.
 const props = defineProps<{
   availablePlayers: Player[];
-  selectedPlayers: string[];
-  loading: boolean;
-  error: string | null;
+  selectedPlayers?: string[];
+  loading?: boolean;
+  error?: string | null;
+  readonly?: boolean;
 }>();
-
-const selectedPlayersFullData = computed(() => {
-  return props.selectedPlayers
-    .map((id) => props.availablePlayers.find((player) => player.id === id))
-    .filter((player): player is Player => player !== undefined);
-});
 
 const emit = defineEmits<{
   "add-player": [];
@@ -23,11 +24,22 @@ const emit = defineEmits<{
 
 const selectedPlayerId = ref<string>("");
 
-// Computed property for available players (excluding already selected ones)
-const availablePlayers = computed(() => {
-  const selectedIds = props.selectedPlayers.map((id) => id);
+const selectedPlayerIds = computed(
+  () => props.selectedPlayers ?? props.availablePlayers.map(({ id }) => id),
+);
+
+const selectedPlayersFullData = computed(() =>
+  selectedPlayerIds.value
+    .map((id) => props.availablePlayers.find((player) => player.id === id))
+    .filter((player): player is Player => player !== undefined),
+);
+
+const heading = computed(() => (props.readonly ? "Players" : "Player setup"));
+
+// Available players for the dropdown (excluding already selected ones)
+const selectableOptions = computed(() => {
   const players = props.availablePlayers
-    .filter((player) => !selectedIds.includes(player.id))
+    .filter((player) => !selectedPlayerIds.value.includes(player.id))
     .map((player) => ({
       value: player.id,
       label: `${player.firstName} ${player.lastName || ""}${
@@ -70,7 +82,7 @@ defineExpose({
 <template>
   <div class="card-panel rounded-lg p-8 mb-6">
     <UiDisplayHeader tag-size="h2" display-size="h3">
-      Player setup
+      {{ heading }}
     </UiDisplayHeader>
 
     <!-- Loading State -->
@@ -86,13 +98,12 @@ defineExpose({
     <!-- Player Selection -->
     <div v-if="!loading && !error" class="space-y-6">
       <!-- Available Players Selection -->
-      <div class="flex gap-4 items-stretch">
+      <div v-if="!readonly" class="flex gap-4 items-stretch">
         <div class="flex-1">
           <FormSelect
             v-model="selectedPlayerId"
-            :options="availablePlayers"
-            :disabled="selectedPlayers.length >= 2"
-            variant="dark"
+            :options="selectableOptions"
+            :disabled="selectedPlayerIds.length >= 2"
             @update:model-value="addPlayerToMatch"
           >
             <template #label>Selected players</template>
@@ -101,25 +112,26 @@ defineExpose({
       </div>
 
       <!-- Selected Players List -->
-      <div v-if="selectedPlayers.length > 0">
-        <h3 class="text-lg font-semibold text-white mb-4">Selected Players</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div v-if="selectedPlayersFullData.length > 0">
+        <h3 v-if="!readonly" class="subheading">Selected Players</h3>
+
+        <div class="players">
           <div
             v-for="player in selectedPlayersFullData"
-            :key="player?.id"
-            class="bg-gray-700 p-4 flex justify-between items-center"
+            :key="player.id"
+            class="player"
           >
             <div>
-              <h4 class="text-white font-medium">
-                {{ getPlayerFullName(player) }}
-              </h4>
-              <p v-if="player.alias" class="text-gray-400 text-sm">
-                "{{ player.alias }}"
-              </p>
+              <h4 class="name">{{ getPlayerFullName(player) }}</h4>
+              <p v-if="player.alias" class="alias">"{{ player.alias }}"</p>
             </div>
+
             <button
-              class="text-red-400 hover:text-red-300 text-xl font-bold"
+              v-if="!readonly"
+              type="button"
+              class="remove"
               title="Remove player"
+              :aria-label="`Remove ${getPlayerFullName(player)}`"
               @click="removePlayerFromMatch(player.id)"
             >
               ×
@@ -130,3 +142,29 @@ defineExpose({
     </div>
   </div>
 </template>
+
+<style scoped lang="postcss">
+.subheading {
+  @apply text-lg font-semibold text-white mb-4;
+}
+
+.players {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+}
+
+.player {
+  @apply bg-gray-700 p-4 flex justify-between items-center gap-2;
+}
+
+.name {
+  @apply text-white font-medium;
+}
+
+.alias {
+  @apply text-gray-400 text-sm;
+}
+
+.remove {
+  @apply text-red-400 hover:text-red-300 text-xl font-bold;
+}
+</style>

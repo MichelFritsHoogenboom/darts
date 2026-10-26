@@ -9,6 +9,7 @@ import type {
   Competition,
   CompetitionEdition,
 } from "../interfaces/competition";
+import { defaultX01MatchConfig } from "../interfaces/x01MatchConfig";
 
 export class DartsDatabase extends Dexie {
   // Define tables
@@ -233,6 +234,29 @@ export class DartsDatabase extends Dexie {
           }
         }
       });
+
+    // Version 7: a season always has fixed match settings. Editions stored
+    // before that (when "configure each match separately" existed) get the
+    // app default. No table or index changes, so no stores() — Dexie keeps
+    // the version 6 schema.
+    this.version(7).upgrade(async (tx) => {
+      console.log(
+        "Migrating database to version 7: default matchConfig on legacy competitionEditions",
+      );
+
+      await tx
+        .table("competitionEditions")
+        .toCollection()
+        .modify((edition) => {
+          const config = edition.competitionConfig;
+          if (!config || config.matchConfig) {
+            // false tells Dexie to leave this row untouched
+            return false;
+          }
+
+          config.matchConfig = { ...defaultX01MatchConfig };
+        });
+    });
   }
 }
 
