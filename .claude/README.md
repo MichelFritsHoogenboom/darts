@@ -98,7 +98,7 @@ Not copied from that repo: `formatting` (needs oxfmt/oxlint, not used here), `ta
 
 ## Not symlinked
 
-Product docs stay at [`.cursor/product/`](../.cursor/product/) (`VISION.md`, `BOARD.md`) and agent
+Product docs stay at [`.cursor/product/`](../.cursor/product/) (`VISION.md`, `BOARD.md`, `FACTORY.md`) and agent
 GitHub auth at [`.cursor/AGENT-GITHUB-AUTH.md`](../.cursor/AGENT-GITHUB-AUTH.md). The agents
 reference those by repo-root-relative path, which both tools can read, so a second path to them
 would only create ambiguity about where to write.
