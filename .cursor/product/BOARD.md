@@ -65,7 +65,13 @@ Optional prio labels: `prio:now` / `prio:next` / `prio:later`.
 2. Stage change → swap `status:*` + short comment.
 3. Do not call Projects GraphQL from the agent.
 4. You kick agents per column; they do not watch the board.
-5. **Ready bar:** PO must sharpen AC beyond the intake (concrete screens/controls). Involve specialists **when relevant**: **designer** (UX choices), **accessibility-expert** (new/changed interaction), **seo-expert** (public/share pages), **db** / **security** as needed. Once AC are usable → kick **qa** for early Given/When/Expect on the Issue.
-6. **QA review:** **qa** checks the Issue AC + project rules/docs (incl. basic a11y from `vue-accessibility`). Kick **accessibility-expert** / **seo-expert** only if AC require specialist sign-off or QA hits something beyond the docs — not on every ticket.
-7. **Prioritize:** PO keeps milestones + `prio:*` and the Project **roadmap** view aligned with `VISION.md`. Project API: `GH_TOKEN="$PROJECT_TOKEN"` (local classic file — `.cursor/AGENT-GITHUB-AUTH.md`). Issues stay on fine-grained `GH_TOKEN`.
-8. **No duplicate product markdown:** when findings/work are already GitHub Issues (or Issue comments), do **not** also write an index/summary under `.cursor/product/`. Issues are enough. Keep `.cursor/product/` for lasting process docs (e.g. this board, `VISION.md`), not ticket dumps.
+5. **Refine → Ready:** use `/refine <issue-number>` (skill: `.cursor/skills/ticket-refine/SKILL.MD`). First pass = Discover only (≤3 decision questions, then stop). After answers = lean Issue brief. See Ready bar below.
+6. **Ready bar:** PO must clear all of:
+   - Sharper problem / entry points / MVP AC / out-of-scope than the intake (concrete screens/controls) — lean body only (no VISION/roadmap dump). Template: Problem · Entry points · MVP AC · Out of scope · Open questions · Next agent — see product-owner + ticket-refine skill.
+   - **No open Discover questions** left on the Issue (empty Open questions, or only explicitly deferred items the user accepted).
+   - Specialists **when relevant**: **designer** (UX choices), **accessibility-expert** (new/changed interaction), **seo-expert** (public/share pages), **db** / **security** as needed — one next-agent proposal, not a parade.
+   - Once AC are usable → kick **qa** for early Given/When/Expect on the Issue.
+   - On Ready: short comment (1–3 sentences why Ready + pointer to decisions) — not a second essay.
+7. **QA review:** **qa** checks the Issue AC + project rules/docs (incl. basic a11y from `vue-accessibility`). Kick **accessibility-expert** / **seo-expert** only if AC require specialist sign-off or QA hits something beyond the docs — not on every ticket.
+8. **Prioritize:** PO keeps milestones + `prio:*` and the Project **roadmap** view aligned with `VISION.md`. Project API: `GH_TOKEN="$PROJECT_TOKEN"` (local classic file — `.cursor/AGENT-GITHUB-AUTH.md`). Issues stay on fine-grained `GH_TOKEN`.
+9. **No duplicate product markdown:** when findings/work are already GitHub Issues (or Issue comments), do **not** also write an index/summary under `.cursor/product/`. Issues are enough. Keep `.cursor/product/` for lasting process docs (e.g. this board, `VISION.md`, `FACTORY.md`), not ticket dumps.

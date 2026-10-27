@@ -35,6 +35,7 @@ Also see root `AGENTS.md` for domain layout (`interfaces/`, `constants/`, `utils
 
 | Command | Role |
 | --- | --- |
+| `/refine` | Refine Issue toward Ready — **requires** number (`/refine 42`). Discover ≤3 questions then stop; lean brief after answers. |
 | `/commit` | Commit **staged only** — never `git add`. Stop if nothing staged. Refuse mixed app + test/scenario staging. |
 | `/commit-and-push` | `/commit` then `git push` (not on `main`; no force-push unless asked). |
 | `/branch-review` | Review branch/diff against all project rules (Must fix / Should fix / Consider). |
@@ -44,6 +45,7 @@ Also see root `AGENTS.md` for domain layout (`interfaces/`, `constants/`, `utils
 
 | Skill | Role |
 | --- | --- |
+| `ticket-refine` | Orchestrate backlog → Ready: Discover-first PO, then lean Issue brief; used by `/refine`. |
 | `branch-review` | Load `AGENTS.md` + rules, review the chosen diff, cite rule files in the report. |
 | `pr-create-or-update` | Build PR title/body (template or English Summary + Test plan) and create/update with `gh`. |
 
@@ -51,7 +53,7 @@ Also see root `AGENTS.md` for domain layout (`interfaces/`, `constants/`, `utils
 
 Role subagents — invoke with `/name` or ask the parent agent to delegate.
 
-Board workflow (labels → Project Status): `.cursor/product/BOARD.md`. Product vision: `.cursor/product/VISION.md`. Sequencing: GitHub Project roadmap view + Issues. Agent GitHub auth (fine-grained, this repo only): `.cursor/AGENT-GITHUB-AUTH.md`.
+Board workflow (labels → Project Status): `.cursor/product/BOARD.md`. Product vision: `.cursor/product/VISION.md`. Factory direction (MVP refine + next): `.cursor/product/FACTORY.md`. Sequencing: GitHub Project roadmap view + Issues. Agent GitHub auth (fine-grained, this repo only): `.cursor/AGENT-GITHUB-AUTH.md`.
 
 | Agent | Role |
 | --- | --- |
@@ -59,7 +61,7 @@ Board workflow (labels → Project Status): `.cursor/product/BOARD.md`. Product 
 | `front-end-developer` | Vue/TS implement & harden; lint/standards; Ready for development → In progress → QA review. |
 | `qa` | Verify; scenarios (incl. early Ready drafts); story gaps; QA review → User review. |
 | `database-engineer` | Dexie schema/indexes/services/export; same board flow as FE when ticketed. |
-| `product-owner` | Concrete questions + sharper AC than intake; Backlog → Ready; pull designer/QA early. |
+| `product-owner` | Default Discover (≤3 questions, stop); then lean brief; Backlog → Ready via `/refine`. |
 | `security-officer` | Threat review; flag Backlog issues; readonly fixes. |
 | `accessibility-expert` | Deep a11y audits vs `vue-accessibility`; backlog Issues; hand off fixes to FE/designer. |
 | `seo-expert` | Pragmatic SEO/meta for GH Pages SPA; public vs app chrome; backlog Issues. |
