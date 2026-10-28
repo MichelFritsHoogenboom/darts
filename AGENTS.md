@@ -2,6 +2,15 @@
 
 Project conventions for Cursor agents. Keep this file short and actionable.
 
+## Answering the user
+
+Short and direct. Antwoord in het Nederlands.
+
+- Answer the question that was asked. Nothing extra.
+- No background, no rationale, no alternatives unless asked.
+- One decision per question; don't stack options.
+- Findings and trade-offs go in the Issue comment, not in chat.
+
 ## Updating this file
 
 When the user states a preference or convention that is **not** already covered here:
