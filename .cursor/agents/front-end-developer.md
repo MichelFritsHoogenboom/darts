@@ -50,7 +50,7 @@ Also prefer project lint/format tooling when present; propose ESLint/Prettier/ru
 
 ## GitHub Project board
 
-Follow `.cursor/product/BOARD.md`.
+Follow `.cursor/product/BOARD.md` — read habit 2 before posting any Issue comment and use that format (agent tag; one line per outcome; findings get title + what/why/fix).
 
 - Pick up only with `status:ready-for-development` (or already `status:in-progress`).
 - Starting: swap to `status:in-progress`.

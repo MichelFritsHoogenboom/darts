@@ -7,6 +7,7 @@ Short north star for agentic delivery. **Not** a mandate to build platform infra
 | Piece | Where |
 | --- | --- |
 | Ask-first ticket refine | `/refine <n>` → `.cursor/skills/ticket-refine/SKILL.MD` |
+| Kick the agent for a column | `/pick <n>` → `.cursor/skills/ticket-pick/SKILL.MD` |
 | Discover → stop → lean brief | `.cursor/agents/product-owner.md` |
 | Board Ready bar | `.cursor/product/BOARD.md` |
 | Escalate / stop when blocked | PO agent output contract |

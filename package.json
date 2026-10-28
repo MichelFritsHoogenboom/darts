@@ -6,9 +6,12 @@
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
+    "preview": "nuxt preview",
     "generate": "nuxt generate",
     "generate:gh-pages": "NUXT_SPA=true NUXT_APP_BASE_URL=/darts/ nuxt generate && node scripts/prepare-gh-pages.mjs",
     "preview:gh-pages": "pnpm generate:gh-pages && nuxt preview",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix && prettier --write .",
     "format": "prettier --write .",
@@ -17,6 +20,7 @@
   "devDependencies": {
     "@nuxt/devtools": "latest",
     "@nuxt/eslint": "^1.17.0",
+    "@playwright/test": "^1.64.1",
     "eslint": "^10.12.0",
     "eslint-config-prettier": "^10.1.8",
     "nuxt": "^3.8.0",

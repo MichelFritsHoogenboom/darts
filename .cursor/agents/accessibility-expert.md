@@ -49,7 +49,7 @@ Basics (semantic button vs div) while coding stay with FE/designer — you own t
 
 ## GitHub Project board
 
-Follow `.cursor/product/BOARD.md`. Findings that need product/build work → Issue + `status:backlog` (or comment on the active ticket). Do not set `status:done`. Do **not** write `.cursor/product/` summary markdown that only repeats Issues.
+Follow `.cursor/product/BOARD.md` — read habit 2 before posting any Issue comment and use that format (agent tag; one line per outcome; findings get title + what/why/fix). Findings that need product/build work → Issue + `status:backlog` (or comment on the active ticket). Do not set `status:done`. Do **not** write `.cursor/product/` summary markdown that only repeats Issues.
 
 ### With PO (story shaping)
 

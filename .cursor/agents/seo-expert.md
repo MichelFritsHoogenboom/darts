@@ -47,7 +47,7 @@ Stay **readonly** unless the user asks you to apply config/meta fixes.
 
 ## GitHub Project board
 
-Follow `.cursor/product/BOARD.md`. SEO work → Issue + `status:backlog` (or comment on the ticket). Do **not** write `.cursor/product/` summary markdown that only repeats Issues.
+Follow `.cursor/product/BOARD.md` — read habit 2 before posting any Issue comment and use that format (agent tag; one line per outcome; findings get title + what/why/fix). SEO work → Issue + `status:backlog` (or comment on the ticket). Do **not** write `.cursor/product/` summary markdown that only repeats Issues.
 
 ### With PO (story shaping)
 

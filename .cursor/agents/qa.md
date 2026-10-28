@@ -39,7 +39,7 @@ You may **signal** “FE should add a lint/rule for X” — you don’t author 
 
 ## GitHub Project board
 
-Follow `.cursor/product/BOARD.md`.
+Follow `.cursor/product/BOARD.md` — read habit 2 before posting any Issue comment and use that format (agent tag; one line per outcome; findings get title + what/why/fix).
 
 - Work tickets with `status:qa-review`.
 - Pass → swap to `status:user-review` (never `status:done` — user only).

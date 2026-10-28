@@ -62,9 +62,27 @@ Optional prio labels: `prio:now` / `prio:next` / `prio:later`.
 ## Agent habits
 
 1. New work → Issue + `status:backlog`.
-2. Stage change → swap `status:*` + short comment.
+2. Stage change → swap `status:*` + short comment. All agents post as the same GitHub account, so every comment uses this format:
+
+   ```text
+   **[qa]** QA review → User review
+
+   ✅ All 6 AC met · `pnpm test:e2e` 1 passed
+
+   ⚠️ **Smoke can pass on the wrong base**
+   `webServer` never clears `NUXT_APP_BASE_URL`. With `/darts/` set in the shell, the build bakes
+   that base in and Nitro 302-redirects `/` → `/darts/`, so the test goes green against the Pages
+   base instead of `/` (AC 2).
+   Fix: pin the env in `webServer.env`, or assert the final URL.
+   ```
+
+   - Line 1: `**[agent]**` + column move (or what the comment is about).
+   - **Outcomes** (✅ done · ❌ failed · ❓ need from user) get **one line each** — result plus evidence, nothing more.
+   - **Findings** (⚠️) get a bold one-line title, then 1–3 lines: what happens, why, and the fix. Someone who wasn't there must be able to act on it without re-deriving it. Never a bare `⚠️ passes on wrong base` — a follow-up nobody can act on is noise.
+   - Don't restate the AC, the Issue body, or what the label history already shows.
+   - More than ~2 findings, or one that needs its own AC → separate Issue, linked from the comment.
 3. Do not call Projects GraphQL from the agent.
-4. You kick agents per column; they do not watch the board.
+4. You kick agents per column; they do not watch the board. Kick with `/pick <issue-number>` (skill: `.cursor/skills/ticket-pick/SKILL.MD`).
 5. **Refine → Ready:** use `/refine <issue-number>` (skill: `.cursor/skills/ticket-refine/SKILL.MD`). First pass = Discover only (≤3 decision questions, then stop). After answers = lean Issue brief. See Ready bar below.
 6. **Ready bar:** PO must clear all of:
    - Sharper problem / entry points / MVP AC / out-of-scope than the intake (concrete screens/controls) — lean body only (no VISION/roadmap dump). Template: Problem · Entry points · MVP AC · Out of scope · Open questions · Next agent — see product-owner + ticket-refine skill.
