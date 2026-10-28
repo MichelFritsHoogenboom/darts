@@ -36,6 +36,7 @@ Also see root `AGENTS.md` for domain layout (`interfaces/`, `constants/`, `utils
 | Command | Role |
 | --- | --- |
 | `/refine` | Refine Issue toward Ready — **requires** number (`/refine 42`). Discover ≤3 questions then stop; lean brief after answers. |
+| `/pick` | Kick the agent for an Issue's current column — **requires** number (`/pick 33`). Routes by `status:*` + Next agent; one column move; agents never commit. |
 | `/commit` | Commit **staged only** — never `git add`. Stop if nothing staged. Refuse mixed app + test/scenario staging. |
 | `/commit-and-push` | `/commit` then `git push` (not on `main`; no force-push unless asked). |
 | `/branch-review` | Review branch/diff against all project rules (Must fix / Should fix / Consider). |
@@ -46,6 +47,7 @@ Also see root `AGENTS.md` for domain layout (`interfaces/`, `constants/`, `utils
 | Skill | Role |
 | --- | --- |
 | `ticket-refine` | Orchestrate backlog → Ready: Discover-first PO, then lean Issue brief; used by `/refine`. |
+| `ticket-pick` | Route one Issue to the agent owning its column and spawn it; used by `/pick`. |
 | `branch-review` | Load `AGENTS.md` + rules, review the chosen diff, cite rule files in the report. |
 | `pr-create-or-update` | Build PR title/body (template or English Summary + Test plan) and create/update with `gh`. |
 

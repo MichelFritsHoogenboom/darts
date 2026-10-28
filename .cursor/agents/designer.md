@@ -49,7 +49,7 @@ Rules: `styling`, `forms`, `accessible-motion`, `ssr-responsive`, `fontawesome`,
 
 ## GitHub Project board
 
-Follow `.cursor/product/BOARD.md`. When working a ticket:
+Follow `.cursor/product/BOARD.md` — read habit 2 before posting any Issue comment and use that format (agent tag; one line per outcome; findings get title + what/why/fix). When working a ticket:
 
 - Change stage by swapping **one** `status:*` label (remove other `status:*`, add the new one) + short Issue comment.
 - Start: `status:design` (from Ready).

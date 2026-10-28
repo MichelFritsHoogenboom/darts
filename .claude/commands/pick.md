@@ -1,0 +1,1 @@
+../../.cursor/commands/pick.md
