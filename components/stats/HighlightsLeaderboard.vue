@@ -68,7 +68,11 @@ const loadHighlights = async () => {
   }
 };
 
-watch(editionScopeKey, () => loadHighlights(), { immediate: true });
+watch(editionScopeKey, () => loadHighlights());
+
+onMounted(() => {
+  loadHighlights();
+});
 </script>
 
 <template>
